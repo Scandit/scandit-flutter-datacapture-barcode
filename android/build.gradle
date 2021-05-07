@@ -34,7 +34,7 @@ android {
 
 dependencies {
     api project(path: ':scandit_flutter_datacapture_core')
-    api "com.scandit.datacapture:barcode:6.7.2"
+    api "com.scandit.datacapture:barcode:6.7.3"
     
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.10'
 }
