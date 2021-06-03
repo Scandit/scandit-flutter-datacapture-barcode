@@ -13,7 +13,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
   static final _noViewfinder = {'type': 'none'};
 
   @override
-  DataCaptureView view;
+  DataCaptureView? view;
 
   BarcodeCapture _barcodeCapture;
 
@@ -35,24 +35,22 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
     _barcodeCapture.didChange();
   }
 
-  Viewfinder _viewfinder;
+  Viewfinder? _viewfinder;
 
-  Viewfinder get viewfinder => _viewfinder;
+  Viewfinder? get viewfinder => _viewfinder;
 
-  set viewfinder(Viewfinder newValue) {
+  set viewfinder(Viewfinder? newValue) {
     _viewfinder = newValue;
     _barcodeCapture.didChange();
   }
 
   BarcodeCaptureOverlay._(this._barcodeCapture, this.view) : super('barcodeCapture') {
-    if (view != null) {
-      view.addOverlay(this);
-    }
+    view?.addOverlay(this);
   }
 
   BarcodeCaptureOverlay.withBarcodeCapture(BarcodeCapture barcodeCapture) : this._(barcodeCapture, null);
 
-  BarcodeCaptureOverlay.withBarcodeCaptureForView(BarcodeCapture barcodeCapture, DataCaptureView view)
+  BarcodeCaptureOverlay.withBarcodeCaptureForView(BarcodeCapture barcodeCapture, DataCaptureView? view)
       : this._(barcodeCapture, view);
 
   static Brush get defaultBrush => Brush(
@@ -66,7 +64,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
     json.addAll({
       'brush': _brush.toMap(),
       'shouldShowScanAreaGuides': _shouldShowScanAreaGuides,
-      'viewfinder': _viewfinder == null ? _noViewfinder : _viewfinder.toMap()
+      'viewfinder': _viewfinder == null ? _noViewfinder : _viewfinder?.toMap()
     });
     return json;
   }

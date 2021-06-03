@@ -4,7 +4,6 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
-import 'package:flutter/material.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'symbology.dart';
@@ -71,8 +70,8 @@ extension ChecksumDeserializer on Checksum {
 }
 
 class SymbologySettings implements Serializable {
-  Symbology symbology;
-  Set<String> _extensions;
+  final Symbology _symbology;
+  final Set<String> _extensions;
   bool isEnabled;
   bool isColorInvertedEnabled;
   Set<Checksum> checksums;
@@ -80,13 +79,14 @@ class SymbologySettings implements Serializable {
 
   Set<String> get enabledExtensions => _extensions;
 
-  SymbologySettings._(Set<String> extensions, this.checksums, this.activeSymbolCounts,
-      {@required this.isEnabled, @required this.isColorInvertedEnabled}) {
-    _extensions = extensions;
-  }
+  Symbology get symbology => _symbology;
 
-  SymbologySettings.fromJSON(Map<String, dynamic> json)
+  SymbologySettings._(this._symbology, this._extensions, this.checksums, this.activeSymbolCounts,
+      {required this.isEnabled, required this.isColorInvertedEnabled});
+
+  SymbologySettings.fromJSON(Symbology symbology, Map<String, dynamic> json)
       : this._(
+            symbology,
             (json['extensions'] as List).toSet().cast<String>(),
             // ignore: unnecessary_lambdas
             (json['checksums'] as List).map((e) => ChecksumDeserializer.fromJSON(e)).toSet().cast<Checksum>(),
@@ -94,11 +94,11 @@ class SymbologySettings implements Serializable {
             isEnabled: json['enabled'] as bool,
             isColorInvertedEnabled: json['colorInvertedEnabled'] as bool);
 
-  void setExtensionEnabled(String extension, {@required bool enabled}) {
+  void setExtensionEnabled(String extension, {required bool enabled}) {
     var included = _extensions.contains(extension);
-    if (enabled && !included) {
+    if (enabled && included == false) {
       _extensions.add(extension);
-    } else if (!enabled && included) {
+    } else if (!enabled && included == true) {
       _extensions.remove(extension);
     }
   }
@@ -106,11 +106,11 @@ class SymbologySettings implements Serializable {
   @override
   Map<String, dynamic> toMap() {
     return {
-      'extensions': _extensions == null ? [] : _extensions.toList(),
+      'extensions': _extensions.toList(),
       'enabled': isEnabled,
       'colorInvertedEnabled': isColorInvertedEnabled,
-      'checksums': checksums == null ? [] : checksums.map((e) => e.jsonValue).toList(),
-      'activeSymbolCounts': activeSymbolCounts == null ? [] : activeSymbolCounts.toList()
+      'checksums': checksums.map((e) => e.jsonValue).toList(),
+      'activeSymbolCounts': activeSymbolCounts.toList()
     };
   }
 }

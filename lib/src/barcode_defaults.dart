@@ -7,6 +7,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 
+import 'symbology.dart';
 import 'symbology_description.dart';
 import 'symbology_settings.dart';
 import 'barcode_function_names.dart';
@@ -14,9 +15,9 @@ import 'composite_type_description.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeDefaults {
-  static List<SymbologyDescription> _symbologyDescriptionsDefaults;
-  static Map<String, SymbologySettings> _symbologySettingsDefaults;
-  static List<CompositeTypeDescription> _compositeTypeDescriptionsDefaults;
+  static late List<SymbologyDescription> _symbologyDescriptionsDefaults;
+  static late Map<String, SymbologySettings> _symbologySettingsDefaults;
+  static late List<CompositeTypeDescription> _compositeTypeDescriptionsDefaults;
 
   static MethodChannel channel = MethodChannel('com.scandit.datacapture.barcode.method/barcode_defaults');
 
@@ -31,8 +32,8 @@ class BarcodeDefaults {
         .map((e) => SymbologyDescription.fromJSON(jsonDecode(e)))
         .toList()
         .cast<SymbologyDescription>();
-    _symbologySettingsDefaults = (defaults['SymbologySettings'] as Map<String, dynamic>)
-        .map((key, value) => MapEntry(key, SymbologySettings.fromJSON(jsonDecode(value))));
+    _symbologySettingsDefaults = (defaults['SymbologySettings'] as Map<String, dynamic>).map((key, value) =>
+        MapEntry(key, SymbologySettings.fromJSON(SymbologySerializer.fromJSON(key), jsonDecode(value))));
     _compositeTypeDescriptionsDefaults = (defaults['CompositeTypeDescriptions'] as List<dynamic>)
         .map((e) => CompositeTypeDescription.fromJSON(jsonDecode(e)))
         .toList()

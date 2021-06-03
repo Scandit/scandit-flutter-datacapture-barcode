@@ -16,10 +16,10 @@ class BarcodeTrackingDefaults {
   static final MethodChannel channel =
       MethodChannel('com.scandit.datacapture.barcode.tracking.method/barcode_tracking_defaults');
 
-  static CameraSettingsDefaults _recommendedCameraSettings;
+  static late CameraSettingsDefaults _recommendedCameraSettings;
   static CameraSettingsDefaults get recommendedCameraSettings => _recommendedCameraSettings;
 
-  static BarcodeTrackingBasicOverlayDefaults _barcodeTrackingBasicOverlayDefaults;
+  static late BarcodeTrackingBasicOverlayDefaults _barcodeTrackingBasicOverlayDefaults;
   static BarcodeTrackingBasicOverlayDefaults get barcodeTrackingBasicOverlayDefaults =>
       _barcodeTrackingBasicOverlayDefaults;
 

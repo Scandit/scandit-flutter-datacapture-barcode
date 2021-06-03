@@ -4,65 +4,64 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
-import 'package:flutter/material.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'symbology.dart';
 
 class Barcode {
-  Symbology _symbology;
+  late Symbology _symbology;
   Symbology get symbology => _symbology;
 
-  String _data;
-  String get data => _data;
+  String? _data;
+  String? get data => _data;
 
-  String _rawData;
+  late String _rawData;
   String get rawData => _rawData;
 
-  String _addOnData;
-  String get addOnData => _addOnData;
+  String? _addOnData;
+  String? get addOnData => _addOnData;
 
-  List<EncodingRange> _encodingRanges;
+  late List<EncodingRange> _encodingRanges;
   List<EncodingRange> get encodingRanges => _encodingRanges;
 
-  Quadrilateral _location;
+  late Quadrilateral _location;
   Quadrilateral get location => _location;
 
-  bool _isGS1DataCarrier;
+  late bool _isGS1DataCarrier;
   bool get isGS1DataCarrier => _isGS1DataCarrier;
 
-  CompositeFlag _compositeFlag;
+  late CompositeFlag _compositeFlag;
   CompositeFlag get compositeFlag => _compositeFlag;
 
-  bool _isColorInverted;
+  late bool _isColorInverted;
   bool get isColorInverted => _isColorInverted;
 
-  int _symbolCount;
+  late int _symbolCount;
   int get symbolCount => _symbolCount;
 
-  int _frameID;
+  late int _frameID;
   int get frameID => _frameID;
 
-  String _compositeData;
-  String get compositeData => _compositeData;
+  String? _compositeData;
+  String? get compositeData => _compositeData;
 
-  String _compositeRawData;
-  String get compositeRawData => _compositeRawData;
+  String? _compositeRawData;
+  String? get compositeRawData => _compositeRawData;
 
   Barcode._(
-      {@required Symbology symbology,
-      @required String data,
-      @required String rawData,
-      @required String addOnData,
-      @required List<EncodingRange> encodingRanges,
-      @required Quadrilateral location,
-      @required bool isGS1DataCarrier,
-      @required CompositeFlag compositeFlag,
-      @required bool isColorInverted,
-      @required int symbolCount,
-      @required int frameID,
-      String compositeData,
-      @required String compositeRawData}) {
+      {required Symbology symbology,
+      String? data,
+      required String rawData,
+      String? addOnData,
+      required List<EncodingRange> encodingRanges,
+      required Quadrilateral location,
+      required bool isGS1DataCarrier,
+      required CompositeFlag compositeFlag,
+      required bool isColorInverted,
+      required int symbolCount,
+      required int frameID,
+      String? compositeData,
+      String? compositeRawData}) {
     _symbology = symbology;
     _data = data;
     _rawData = rawData;
@@ -80,9 +79,9 @@ class Barcode {
 
   factory Barcode.fromJSON(Map<String, dynamic> json) {
     var symbology = SymbologySerializer.fromJSON(json['symbology'] as String);
-    var data = json['data'] as String;
+    var data = json['data'] as String?;
     var rawData = json['rawData'] as String;
-    var addonData = json['addOnData'] as String;
+    var addonData = json['addOnData'] as String?;
     var encodingRanges =
         (json['encodingRanges'] as List).map((e) => EncodingRange.fromJSON(e)).toList().cast<EncodingRange>();
     var location = Quadrilateral.fromJSON(json['location']);
@@ -91,8 +90,8 @@ class Barcode {
     var isColorInverted = json['isColorInverted'] as bool;
     var symbolCount = (json['symbolCount'] as num).toInt();
     var frameID = (json['frameId'] as num).toInt();
-    var compositeData = json['compositeData'] as String;
-    var compositeRawData = json['compositeRawData'] as String;
+    var compositeData = json['compositeData'] as String?;
+    var compositeRawData = json['compositeRawData'] as String?;
     return Barcode._(
         symbology: symbology,
         data: data,

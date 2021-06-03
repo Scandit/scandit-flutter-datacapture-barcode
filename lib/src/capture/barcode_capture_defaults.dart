@@ -16,11 +16,11 @@ class BarcodeCaptureDefaults {
   static MethodChannel channel =
       MethodChannel('com.scandit.datacapture.barcode.capture.method/barcode_capture_defaults');
 
-  static CameraSettingsDefaults _cameraSettingsDefaults;
+  static late CameraSettingsDefaults _cameraSettingsDefaults;
 
-  static BarcodeCaptureSettingsDefaults _barcodeCaptureSettingsDefaults;
+  static late BarcodeCaptureSettingsDefaults _barcodeCaptureSettingsDefaults;
 
-  static BarcodeCaptureOverlayDefaults _barcodeCaptureOverlayDefaults;
+  static late BarcodeCaptureOverlayDefaults _barcodeCaptureOverlayDefaults;
 
   static CameraSettingsDefaults get cameraSettingsDefaults => _cameraSettingsDefaults;
 

@@ -16,13 +16,13 @@ import 'barcode_tracking_function_names.dart';
 import 'tracked_barcode.dart';
 
 class BarcodeTrackingBasicOverlay extends DataCaptureOverlay {
-  DataCaptureView _view;
+  DataCaptureView? _view;
 
   @override
-  DataCaptureView get view => _view;
+  DataCaptureView? get view => _view;
 
   @override
-  set view(DataCaptureView newValue) {
+  set view(DataCaptureView? newValue) {
     if (newValue != null) {
       newValue.addOverlay(this);
     }
@@ -31,7 +31,7 @@ class BarcodeTrackingBasicOverlay extends DataCaptureOverlay {
 
   final BarcodeTracking _barcodeTracking;
 
-  _BarcodeTrackingBasicOverlayController _controller;
+  late _BarcodeTrackingBasicOverlayController _controller;
 
   BarcodeTrackingBasicOverlay._(this._barcodeTracking) : super('barcodeTrackingBasic') {
     _controller = _BarcodeTrackingBasicOverlayController(this);
@@ -40,7 +40,7 @@ class BarcodeTrackingBasicOverlay extends DataCaptureOverlay {
   BarcodeTrackingBasicOverlay.withBarcodeTracking(BarcodeTracking barcodeTracking) : this._(barcodeTracking);
 
   factory BarcodeTrackingBasicOverlay.withBarcodeTrackingForView(
-      BarcodeTracking barcodeTracking, DataCaptureView view) {
+      BarcodeTracking barcodeTracking, DataCaptureView? view) {
     var overlay = BarcodeTrackingBasicOverlay._(barcodeTracking);
     overlay.view = view;
     return overlay;
@@ -68,11 +68,11 @@ class BarcodeTrackingBasicOverlay extends DataCaptureOverlay {
     return _controller.clearTrackedBarcodeBrushes();
   }
 
-  BarcodeTrackingBasicOverlayListener _listener;
+  BarcodeTrackingBasicOverlayListener? _listener;
 
-  BarcodeTrackingBasicOverlayListener get listener => _listener;
+  BarcodeTrackingBasicOverlayListener? get listener => _listener;
 
-  set listener(BarcodeTrackingBasicOverlayListener newValue) {
+  set listener(BarcodeTrackingBasicOverlayListener? newValue) {
     _controller.unsubscribeListener(); // cleanup first
     if (newValue != null) {
       _controller.subscribeListener();
@@ -110,7 +110,7 @@ class _BarcodeTrackingBasicOverlayController {
       EventChannel('com.scandit.datacapture.barcode.tracking.event/barcode_tracking_basic_overlay');
   final MethodChannel _methodChannel =
       MethodChannel("com.scandit.datacapture.barcode.tracking.method/barcode_tracking_basic_overlay");
-  StreamSubscription<dynamic> _overlaySubscription;
+  StreamSubscription<dynamic>? _overlaySubscription;
 
   _BarcodeTrackingBasicOverlayController(this._overlay);
 
@@ -128,9 +128,7 @@ class _BarcodeTrackingBasicOverlayController {
   }
 
   void unsubscribeListener() {
-    if (_overlaySubscription != null) {
-      _overlaySubscription.cancel();
-    }
+    _overlaySubscription?.cancel();
     _methodChannel
         .invokeMethod(BarcodeTrackingFunctionNames.unsubscribeBTBasicOverlayListener)
         .then((value) => null, onError: (error, stacktrace) => null);
@@ -150,13 +148,16 @@ class _BarcodeTrackingBasicOverlayController {
       switch (json['event'] as String) {
         case BarcodeTrackingBasicOverlayListener._brushForTrackedBarcodeEventName:
           var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
-          var brush = _overlay._listener.brushForTrackedBarcode(_overlay, trackedBarcode);
+          var brush = _overlay._listener?.brushForTrackedBarcode(_overlay, trackedBarcode);
+          if (brush == null) {
+            break;
+          }
           await _methodChannel.invokeMethod(
               BarcodeTrackingFunctionNames.finishBrushForTrackedBarcodeCallback, jsonEncode(brush.toMap()));
           break;
         case BarcodeTrackingBasicOverlayListener._didTapTrackedBarcodeEventName:
           _overlay._listener
-              .didTapTrackedBarcode(_overlay, TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode'])));
+              ?.didTapTrackedBarcode(_overlay, TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode'])));
           break;
       }
     });

@@ -4,24 +4,23 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
-import 'package:flutter/material.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'symbology.dart';
 import 'barcode_defaults.dart';
 
 class SymbologyDescription {
-  Symbology _symbology;
-  String _readableName;
-  bool _isAvailable;
-  bool _isColorInvertible;
-  Range _activeSymbolCountRange;
-  Range _defaultSymbolCountRange;
-  Set<String> _supportedExtensions;
+  late Symbology _symbology;
+  late String _readableName;
+  late bool _isAvailable;
+  late bool _isColorInvertible;
+  late Range _activeSymbolCountRange;
+  late Range _defaultSymbolCountRange;
+  late Set<String> _supportedExtensions;
 
   SymbologyDescription._(Symbology symbology, String readableName, Range activeSymbolCountRange,
       Range defaultSymbolCountRange, Set<String> supportedExtensions,
-      {@required bool isAvailable, @required bool isColorInvertible}) {
+      {required bool isAvailable, required bool isColorInvertible}) {
     _symbology = symbology;
     _readableName = readableName;
     _activeSymbolCountRange = activeSymbolCountRange;
@@ -49,14 +48,21 @@ class SymbologyDescription {
       isAvailable: json['isAvailable'] as bool,
       isColorInvertible: json['isColorInvertible'] as bool);
 
-  factory SymbologyDescription.forIdentifier(String identifier) =>
-      SymbologyDescription.forSymbology(SymbologySerializer.fromJSON(identifier));
-
-  factory SymbologyDescription.forSymbology(Symbology symbology) {
+  static SymbologyDescription? forIdentifier(String identifier) {
+    Symbology? symbology;
+    try {
+      symbology = SymbologySerializer.fromJSON(identifier);
+    } on Exception {
+      symbology = null;
+    }
     if (symbology == null) {
       return null;
     }
 
+    return SymbologyDescription.forSymbology(symbology);
+  }
+
+  factory SymbologyDescription.forSymbology(Symbology symbology) {
     return BarcodeDefaults.symbologyDescriptionsDefaults
         .firstWhere((element) => element.identifier == symbology.jsonValue);
   }

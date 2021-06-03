@@ -18,7 +18,7 @@ class BarcodeCaptureSettings implements Serializable {
   Duration codeDuplicateFilter =
       Duration(milliseconds: BarcodeCaptureDefaults.barcodeCaptureSettingsDefaults.codeDuplicateFilter);
 
-  LocationSelection locationSelection;
+  LocationSelection? locationSelection;
 
   final Map<String, dynamic> _properties = {};
 
@@ -32,7 +32,7 @@ class BarcodeCaptureSettings implements Serializable {
   Map<String, dynamic> toMap() {
     return {
       'codeDuplicateFilter': codeDuplicateFilter.inMilliseconds,
-      'locationSelection': locationSelection == null ? {'type': 'none'} : locationSelection.toMap(),
+      'locationSelection': locationSelection == null ? {'type': 'none'} : locationSelection?.toMap(),
       'properties': _properties,
       'symbologies': _symbologies.map<String, Map<String, dynamic>>((key, value) => MapEntry(key, value.toMap())),
       'enabledCompositeTypes': enabledCompositeTypes.map((e) => e.jsonValue).toList()
@@ -46,11 +46,10 @@ class BarcodeCaptureSettings implements Serializable {
   SymbologySettings settingsForSymbology(Symbology symbology) {
     var identifier = symbology.jsonValue;
     if (!_symbologies.containsKey(identifier)) {
-      var symbologySettings = BarcodeDefaults.symbologySettingsDefaults[identifier];
-      symbologySettings.symbology = symbology;
+      var symbologySettings = BarcodeDefaults.symbologySettingsDefaults[identifier]!;
       _symbologies[identifier] = symbologySettings;
     }
-    return _symbologies[identifier];
+    return _symbologies[identifier]!;
   }
 
   void setProperty<T>(String name, T value) {

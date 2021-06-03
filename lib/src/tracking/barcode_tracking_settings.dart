@@ -38,7 +38,7 @@ extension BarcodeTrackingScenarioSerializer on BarcodeTrackingScenario {
 }
 
 class BarcodeTrackingSettings implements Serializable {
-  BarcodeTrackingScenario _scenario;
+  final BarcodeTrackingScenario? _scenario;
   final Map<String, dynamic> _properties = {};
   final Map<String, SymbologySettings> _symbologies = {};
 
@@ -46,16 +46,15 @@ class BarcodeTrackingSettings implements Serializable {
 
   BarcodeTrackingSettings() : this.forScenario(null);
   BarcodeTrackingSettings._(this._scenario);
-  BarcodeTrackingSettings.forScenario(BarcodeTrackingScenario scenario) : this._(scenario);
+  BarcodeTrackingSettings.forScenario(BarcodeTrackingScenario? scenario) : this._(scenario);
 
   SymbologySettings settingsForSymbology(Symbology symbology) {
     var identifier = symbology.jsonValue;
     if (!_symbologies.containsKey(identifier)) {
-      var symbologySettings = BarcodeDefaults.symbologySettingsDefaults[identifier];
-      symbologySettings.symbology = symbology;
+      var symbologySettings = BarcodeDefaults.symbologySettingsDefaults[identifier]!;
       _symbologies[identifier] = symbologySettings;
     }
-    return _symbologies[identifier];
+    return _symbologies[identifier]!;
   }
 
   void setProperty<T>(String name, T value) {
@@ -92,7 +91,7 @@ class BarcodeTrackingSettings implements Serializable {
       'symbologies': _symbologies.map((key, value) => MapEntry(key, value.toMap()))
     };
     if (_scenario != null) {
-      json['scenario'] = _scenario.jsonValue;
+      json['scenario'] = _scenario?.jsonValue;
     }
     return json;
   }

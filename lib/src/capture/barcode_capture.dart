@@ -21,11 +21,11 @@ class BarcodeCapture extends DataCaptureMode {
   bool _enabled = true;
   BarcodeCaptureSettings _settings;
   final List<BarcodeCaptureListener> _listeners = [];
-  _BarcodeCaptureListenerController _controller;
+  late _BarcodeCaptureListenerController _controller;
   bool _isInCallback = false;
 
   @override
-  DataCaptureContext get context => super.context;
+  DataCaptureContext? get context => super.context;
 
   @override
   bool get isEnabled => _enabled;
@@ -51,14 +51,14 @@ class BarcodeCapture extends DataCaptureMode {
   static CameraSettings _recommendedCameraSettings() {
     var defaults = BarcodeCaptureDefaults.cameraSettingsDefaults;
     return CameraSettings(defaults.preferredResolution, defaults.zoomFactor, defaults.focusRange,
-        defaults.focusGestureStrategy, defaults.zoomGestureZoomFactor);
+        defaults.focusGestureStrategy, defaults.zoomGestureZoomFactor,
+        shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus);
   }
 
-  BarcodeCapture._(DataCaptureContext context, this._settings) {
+  BarcodeCapture._(DataCaptureContext? context, this._settings) {
     _controller = _BarcodeCaptureListenerController.forBarcodeCapture(this);
-    if (context != null) {
-      context.addMode(this);
-    }
+
+    context?.addMode(this);
   }
 
   BarcodeCapture.forContext(DataCaptureContext context, BarcodeCaptureSettings settings) : this._(context, settings);
@@ -72,7 +72,7 @@ class BarcodeCapture extends DataCaptureMode {
     if (_listeners.isEmpty) {
       _controller.subscribeListeners();
     }
-    if (_listeners.contains(listener) || listener == null) {
+    if (_listeners.contains(listener)) {
       return;
     }
     _listeners.add(listener);
@@ -87,7 +87,7 @@ class BarcodeCapture extends DataCaptureMode {
 
   Future<void> didChange() {
     if (context != null) {
-      return context.update();
+      return context!.update();
     }
     return Future.value();
   }
@@ -97,8 +97,8 @@ class BarcodeCapture extends DataCaptureMode {
     return {
       'type': 'barcodeCapture',
       'enabled': _enabled,
-      'feedback': feedback == null ? {} : _feedback.toMap(),
-      'settings': _settings == null ? {} : _settings.toMap()
+      'feedback': _feedback.toMap(),
+      'settings': _settings.toMap()
     };
   }
 }
@@ -117,7 +117,7 @@ class _BarcodeCaptureListenerController {
   final MethodChannel _methodChannel =
       MethodChannel('com.scandit.datacapture.barcode.capture.method/barcode_capture_listener');
   final BarcodeCapture _barcodeCapture;
-  StreamSubscription<dynamic> _barcodeCaptureSubscription;
+  StreamSubscription<dynamic>? _barcodeCaptureSubscription;
 
   _BarcodeCaptureListenerController.forBarcodeCapture(this._barcodeCapture);
 
@@ -151,9 +151,7 @@ class _BarcodeCaptureListenerController {
   }
 
   void unsubscribeListeners() {
-    if (_barcodeCaptureSubscription != null) {
-      _barcodeCaptureSubscription.cancel();
-    }
+    _barcodeCaptureSubscription?.cancel();
     _methodChannel
         .invokeMethod(BarcodeCaptureFunctionNames.removeBarcodeCaptureListener)
         .then((value) => null, onError: _onError);
@@ -175,7 +173,7 @@ class _BarcodeCaptureListenerController {
     _barcodeCapture._isInCallback = false;
   }
 
-  void _onError(Object error, StackTrace stackTrace) {
+  void _onError(Object? error, StackTrace? stackTrace) {
     if (error == null) return;
     print(error);
 
