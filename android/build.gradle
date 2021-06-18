@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        sdk_version = "6.8.0"
+        sdk_version = "6.8.1"
     }
     repositories {
         mavenCentral()
