@@ -11,12 +11,12 @@ Pod::Spec.new do |s|
   s.homepage                = pubspec['homepage']
   s.license                 = { :file => '../LICENSE' }
   s.author                  = { 'Scandit' => 'support@scandit.com' }
-  s.platforms               = { :ios => "10.0" }
+  s.platforms               = { :ios => "11.0" }
   s.source                  = { :path => '.' }
   s.swift_version           = '4.0'
   s.source_files            = 'Classes/**/*.{h,m,swift}'
   s.requires_arc            = true
-  s.dependency 'ScanditBarcodeCapture', '= 6.8.1'
+  s.dependency 'ScanditBarcodeCapture', '= 6.9.0-beta.1'
 
   s.dependency 'Flutter'
   s.dependency 'scandit_flutter_datacapture_core'

@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        sdk_version = "6.8.1"
+        sdk_version = "6.9.0-beta.1"
     }
     repositories {
         mavenCentral()
@@ -24,7 +24,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
