@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.swift_version           = '4.0'
   s.source_files            = 'Classes/**/*.{h,m,swift}'
   s.requires_arc            = true
-  s.dependency 'ScanditBarcodeCapture', '= 6.9.0'
+  s.dependency 'ScanditBarcodeCapture', '= 6.9.1'
 
   s.dependency 'Flutter'
   s.dependency 'scandit_flutter_datacapture_core'
