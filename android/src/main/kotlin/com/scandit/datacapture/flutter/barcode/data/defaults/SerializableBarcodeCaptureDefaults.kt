@@ -5,6 +5,11 @@
  */
 package com.scandit.datacapture.flutter.barcode.data.defaults
 
+import com.scandit.datacapture.barcode.capture.BarcodeCapture
+import com.scandit.datacapture.barcode.capture.BarcodeCaptureSettings
+import com.scandit.datacapture.barcode.ui.overlay.BarcodeCaptureOverlay
+import com.scandit.datacapture.barcode.ui.overlay.BarcodeCaptureOverlayStyle
+import com.scandit.datacapture.barcode.ui.overlay.toJson
 import com.scandit.datacapture.flutter.core.data.SerializableData
 import com.scandit.datacapture.flutter.core.data.defaults.SerializableBrushDefaults
 import com.scandit.datacapture.flutter.core.data.defaults.SerializableCameraSettingsDefaults
@@ -47,16 +52,30 @@ internal data class SerializableBarcodeCaptureSettingsDefaults(
 }
 
 internal data class SerializableBarcodeCaptureOverlayDefaults(
-    private val defaultBrush: SerializableBrushDefaults
+    private val defaultStyle: BarcodeCaptureOverlayStyle
 ) : SerializableData {
 
     override fun toJson(): JSONObject = JSONObject(
         mapOf(
-            FIELD_BRUSH to defaultBrush.toJson()
+            FIELD_DEFAULT_STYLE to defaultStyle.toJson(),
+            FIELD_BRUSHES to mapOf(
+                BarcodeCaptureOverlayStyle.FRAME.toJson() to
+                        createOverlayStyleBrush(BarcodeCaptureOverlayStyle.FRAME),
+                BarcodeCaptureOverlayStyle.LEGACY.toJson() to
+                        createOverlayStyleBrush(BarcodeCaptureOverlayStyle.LEGACY)
+            )
         )
     )
 
     companion object {
-        private const val FIELD_BRUSH = "DefaultBrush"
+        private const val FIELD_BRUSHES = "Brushes"
+        private const val FIELD_DEFAULT_STYLE = "defaultStyle"
+
+        private fun createOverlayStyleBrush(style: BarcodeCaptureOverlayStyle): Map<String, Any?> {
+            val barcodeCapture = BarcodeCapture
+                    .forDataCaptureContext(null, BarcodeCaptureSettings())
+            val brush = BarcodeCaptureOverlay.newInstance(barcodeCapture, null, style).brush
+            return SerializableBrushDefaults(brush).toMap()
+        }
     }
 }

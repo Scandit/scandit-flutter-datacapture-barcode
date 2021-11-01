@@ -13,4 +13,4 @@ export 'src/tracking/barcode_tracking_session.dart' show BarcodeTrackingSession;
 export 'src/tracking/barcode_tracking_advanced_overlay.dart'
     show BarcodeTrackingAdvancedOverlay, BarcodeTrackingAdvancedOverlayListener;
 export 'src/tracking/barcode_tracking_basic_overlay.dart'
-    show BarcodeTrackingBasicOverlay, BarcodeTrackingBasicOverlayListener;
+    show BarcodeTrackingBasicOverlay, BarcodeTrackingBasicOverlayListener, BarcodeTrackingBasicOverlayStyle;

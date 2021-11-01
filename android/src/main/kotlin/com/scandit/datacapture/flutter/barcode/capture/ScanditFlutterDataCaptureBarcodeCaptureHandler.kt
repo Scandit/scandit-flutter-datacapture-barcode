@@ -15,7 +15,6 @@ import com.scandit.datacapture.flutter.barcode.capture.listeners.ScanditFlutterB
 import com.scandit.datacapture.flutter.barcode.data.defaults.SerializableBarcodeCaptureDefaults
 import com.scandit.datacapture.flutter.barcode.data.defaults.SerializableBarcodeCaptureOverlayDefaults
 import com.scandit.datacapture.flutter.barcode.data.defaults.SerializableBarcodeCaptureSettingsDefaults
-import com.scandit.datacapture.flutter.core.data.defaults.SerializableBrushDefaults
 import com.scandit.datacapture.flutter.core.data.defaults.SerializableCameraSettingsDefaults
 import com.scandit.datacapture.flutter.core.deserializers.Deserializers
 import io.flutter.plugin.common.MethodChannel.Result
@@ -29,6 +28,8 @@ class ScanditFlutterDataCaptureBarcodeCaptureHandler(
     private val defaults: SerializableBarcodeCaptureDefaults by lazy {
         val settings = BarcodeCaptureSettings()
         val cameraSettings = BarcodeCapture.createRecommendedCameraSettings()
+        val captureMode = BarcodeCapture.forDataCaptureContext(null, BarcodeCaptureSettings())
+        val overlay = BarcodeCaptureOverlay.newInstance(captureMode, null)
 
         SerializableBarcodeCaptureDefaults(
             recommendedCameraSettings = SerializableCameraSettingsDefaults(
@@ -38,9 +39,7 @@ class ScanditFlutterDataCaptureBarcodeCaptureHandler(
                 duplicateFilter = settings.codeDuplicateFilter.asMillis()
             ),
             barcodeCaptureOverlay = SerializableBarcodeCaptureOverlayDefaults(
-                defaultBrush = SerializableBrushDefaults(
-                    brush = BarcodeCaptureOverlay.DEFAULT_BRUSH
-                )
+                defaultStyle = overlay.style
             )
         )
     }

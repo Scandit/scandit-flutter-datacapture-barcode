@@ -9,6 +9,7 @@ package com.scandit.datacapture.flutter.barcode.tracking
 import com.scandit.datacapture.barcode.tracking.capture.BarcodeTracking
 import com.scandit.datacapture.barcode.tracking.capture.BarcodeTrackingDeserializer
 import com.scandit.datacapture.barcode.tracking.capture.BarcodeTrackingDeserializerListener
+import com.scandit.datacapture.barcode.tracking.capture.BarcodeTrackingSettings
 import com.scandit.datacapture.barcode.tracking.ui.overlay.BarcodeTrackingAdvancedOverlay
 import com.scandit.datacapture.barcode.tracking.ui.overlay.BarcodeTrackingBasicOverlay
 import com.scandit.datacapture.core.capture.DataCaptureContextListener
@@ -16,7 +17,6 @@ import com.scandit.datacapture.core.json.JsonValue
 import com.scandit.datacapture.flutter.barcode.data.defaults.SerializableBarcodeTrackingDefaults
 import com.scandit.datacapture.flutter.barcode.data.defaults.SerializableTrackingBasicOverlayDefaults
 import com.scandit.datacapture.flutter.barcode.tracking.listeners.ScanditFlutterBarcodeTrackingListener
-import com.scandit.datacapture.flutter.core.data.defaults.SerializableBrushDefaults
 import com.scandit.datacapture.flutter.core.data.defaults.SerializableCameraSettingsDefaults
 import com.scandit.datacapture.flutter.core.deserializers.Deserializers
 
@@ -34,15 +34,18 @@ class ScanditFlutterDataCaptureBarcodeTrackingHandler(
     companion object {
         private val defaults: SerializableBarcodeTrackingDefaults by lazy {
             val cameraSettings = BarcodeTracking.createRecommendedCameraSettings()
+            val barcodeTracking = BarcodeTracking.forDataCaptureContext(
+                null,
+                BarcodeTrackingSettings()
+            )
+            val basicOverlay = BarcodeTrackingBasicOverlay.newInstance(barcodeTracking, null)
 
             SerializableBarcodeTrackingDefaults(
                 recommendedCameraSettings = SerializableCameraSettingsDefaults(
                     settings = cameraSettings
                 ),
                 trackingBasicOverlayDefaults = SerializableTrackingBasicOverlayDefaults(
-                    defaultBrush = SerializableBrushDefaults(
-                        brush = BarcodeTrackingBasicOverlay.DEFAULT_BRUSH
-                    )
+                    defaultStyle = basicOverlay.style
                 )
             )
         }

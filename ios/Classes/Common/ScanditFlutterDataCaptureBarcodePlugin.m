@@ -16,12 +16,16 @@
 @property (nonatomic, strong) ScanditFlutterDataCaptureBarcodeCaptureModule *barcodeCaptureInstance;
 @property (nonatomic, strong)
     ScanditFlutterDataCaptureBarcodeTrackingModule *barcodeTrackingInstance;
+@property (nonatomic, strong)
+    ScanditFlutterDataCaptureBarcodeSelectionModule *barcodeSelectionModule;
 
 - (instancetype)initWithBarcodeInstance:(ScanditFlutterDataCaptureBarcodeModule *)coreInstance
                  barcodeCaptureInstance:
                      (ScanditFlutterDataCaptureBarcodeCaptureModule *)barcodeCaptureInstance
                 barcodeTrackingInstance:
-                    (ScanditFlutterDataCaptureBarcodeTrackingModule *)barcodeTrackingInstance;
+                    (ScanditFlutterDataCaptureBarcodeTrackingModule *)barcodeTrackingInstance
+                 barcodeSelectionModule:
+                     (ScanditFlutterDataCaptureBarcodeSelectionModule *)barcodeSelectionModule;
 
 @end
 
@@ -46,11 +50,19 @@ static ScanditFlutterDataCaptureBarcodePlugin *_instance;
     ScanditFlutterDataCaptureBarcodeTrackingModule *barcodeTrackingInstance =
         [[ScanditFlutterDataCaptureBarcodeTrackingModule alloc] initWith:[registrar messenger]
                                                          barcodeTracking:barcodeTracking];
+    ScanditFlutterDataCaptureBarcodeSelection *selection =
+        [[ScanditFlutterDataCaptureBarcodeSelection alloc]
+            initWithBinaryMessenger:registrar.messenger];
+    ScanditFlutterDataCaptureBarcodeSelectionModule *selectionModule =
+        [[ScanditFlutterDataCaptureBarcodeSelectionModule alloc]
+            initWithMessenger:registrar.messenger
+             barcodeSelection:selection];
     ScanditFlutterDataCaptureBarcodePlugin *instance =
         [[ScanditFlutterDataCaptureBarcodePlugin alloc]
             initWithBarcodeInstance:coreInstance
              barcodeCaptureInstance:barcodeCaptureInstance
-            barcodeTrackingInstance:barcodeTrackingInstance];
+            barcodeTrackingInstance:barcodeTrackingInstance
+             barcodeSelectionModule:selectionModule];
     self.instance = instance;
 }
 
@@ -70,11 +82,14 @@ static ScanditFlutterDataCaptureBarcodePlugin *_instance;
                  barcodeCaptureInstance:
                      (ScanditFlutterDataCaptureBarcodeCaptureModule *)barcodeCaptureInstance
                 barcodeTrackingInstance:
-                    (ScanditFlutterDataCaptureBarcodeTrackingModule *)barcodeTrackingInstance {
+                    (ScanditFlutterDataCaptureBarcodeTrackingModule *)barcodeTrackingInstance
+                 barcodeSelectionModule:
+                     (ScanditFlutterDataCaptureBarcodeSelectionModule *)barcodeSelectionModule {
     if (self = [super init]) {
         _coreInstance = coreInstance;
         _barcodeCaptureInstance = barcodeCaptureInstance;
         _barcodeTrackingInstance = barcodeTrackingInstance;
+        _barcodeSelectionModule = barcodeSelectionModule;
     }
     return self;
 }
@@ -83,6 +98,7 @@ static ScanditFlutterDataCaptureBarcodePlugin *_instance;
     [self.coreInstance dispose];
     [self.barcodeCaptureInstance dispose];
     [self.barcodeTrackingInstance dispose];
+    [self.barcodeSelectionModule dispose];
     [ScanditFlutterDataCaptureBarcodePlugin setInstance:nil];
 }
 

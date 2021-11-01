@@ -9,6 +9,32 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 import '../capture/barcode_capture_defaults.dart';
 import '../capture/barcode_capture.dart';
 
+enum BarcodeCaptureOverlayStyle { legacy, frame }
+
+extension BarcodeCaptureOverlayStyleSerializer on BarcodeCaptureOverlayStyle {
+  static BarcodeCaptureOverlayStyle fromJSON(String jsonValue) {
+    switch (jsonValue) {
+      case 'legacy':
+        return BarcodeCaptureOverlayStyle.legacy;
+      case 'frame':
+        return BarcodeCaptureOverlayStyle.frame;
+      default:
+        throw Exception('Missing BarcodeCaptureOverlayStyle for name "$jsonValue"');
+    }
+  }
+
+  String get jsonValue => _jsonValue();
+
+  String _jsonValue() {
+    switch (this) {
+      case BarcodeCaptureOverlayStyle.legacy:
+        return 'legacy';
+      case BarcodeCaptureOverlayStyle.frame:
+        return 'frame';
+    }
+  }
+}
+
 class BarcodeCaptureOverlay extends DataCaptureOverlay {
   static final _noViewfinder = {'type': 'none'};
 
@@ -17,7 +43,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
 
   BarcodeCapture _barcodeCapture;
 
-  Brush _brush = defaultBrush;
+  late Brush _brush;
 
   Brush get brush => _brush;
 
@@ -44,19 +70,29 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
     _barcodeCapture.didChange();
   }
 
-  BarcodeCaptureOverlay._(this._barcodeCapture, this.view) : super('barcodeCapture') {
+  final BarcodeCaptureOverlayStyle style;
+
+  BarcodeCaptureOverlay._(this._barcodeCapture, this.view, this.style) : super('barcodeCapture') {
+    _brush = BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.brushes[style]!;
     view?.addOverlay(this);
   }
 
-  BarcodeCaptureOverlay.withBarcodeCapture(BarcodeCapture barcodeCapture) : this._(barcodeCapture, null);
+  BarcodeCaptureOverlay.withBarcodeCapture(BarcodeCapture barcodeCapture)
+      : this.withBarcodeCaptureForView(barcodeCapture, null);
 
   BarcodeCaptureOverlay.withBarcodeCaptureForView(BarcodeCapture barcodeCapture, DataCaptureView? view)
-      : this._(barcodeCapture, view);
+      : this.withBarcodeCaptureForViewWithStyle(
+            barcodeCapture, view, BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.defaultStyle);
 
-  static Brush get defaultBrush => Brush(
-      BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.defaultBrush.fillColor,
-      BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.defaultBrush.strokeColor,
-      BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.defaultBrush.strokeWidth);
+  BarcodeCaptureOverlay.withBarcodeCaptureForViewWithStyle(
+      BarcodeCapture barcodeCapture, DataCaptureView? view, BarcodeCaptureOverlayStyle style)
+      : this._(barcodeCapture, view, style);
+
+  @Deprecated('Use the brush instance property instead.')
+  static Brush get defaultBrush {
+    return BarcodeCaptureDefaults
+        .barcodeCaptureOverlayDefaults.brushes[BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.defaultStyle]!;
+  }
 
   @override
   Map<String, dynamic> toMap() {
@@ -64,7 +100,8 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
     json.addAll({
       'brush': _brush.toMap(),
       'shouldShowScanAreaGuides': _shouldShowScanAreaGuides,
-      'viewfinder': _viewfinder == null ? _noViewfinder : _viewfinder?.toMap()
+      'viewfinder': _viewfinder == null ? _noViewfinder : _viewfinder?.toMap(),
+      'style': style.jsonValue
     });
     return json;
   }

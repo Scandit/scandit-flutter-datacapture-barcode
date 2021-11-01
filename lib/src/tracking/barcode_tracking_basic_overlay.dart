@@ -15,6 +15,36 @@ import 'barcode_tracking_defaults.dart';
 import 'barcode_tracking_function_names.dart';
 import 'tracked_barcode.dart';
 
+enum BarcodeTrackingBasicOverlayStyle { legacy, frame, dot }
+
+extension BarcodeTrackingBasicOverlayStyleSerializer on BarcodeTrackingBasicOverlayStyle {
+  static BarcodeTrackingBasicOverlayStyle fromJSON(String jsonValue) {
+    switch (jsonValue) {
+      case 'legacy':
+        return BarcodeTrackingBasicOverlayStyle.legacy;
+      case 'frame':
+        return BarcodeTrackingBasicOverlayStyle.frame;
+      case 'dot':
+        return BarcodeTrackingBasicOverlayStyle.dot;
+      default:
+        throw Exception('Missing BarcodeTrackingBasicOverlayStyle for name "$jsonValue"');
+    }
+  }
+
+  String get jsonValue => _jsonValue();
+
+  String _jsonValue() {
+    switch (this) {
+      case BarcodeTrackingBasicOverlayStyle.legacy:
+        return 'legacy';
+      case BarcodeTrackingBasicOverlayStyle.frame:
+        return 'frame';
+      case BarcodeTrackingBasicOverlayStyle.dot:
+        return 'dot';
+    }
+  }
+}
+
 class BarcodeTrackingBasicOverlay extends DataCaptureOverlay {
   DataCaptureView? _view;
 
@@ -33,25 +63,34 @@ class BarcodeTrackingBasicOverlay extends DataCaptureOverlay {
 
   late _BarcodeTrackingBasicOverlayController _controller;
 
-  BarcodeTrackingBasicOverlay._(this._barcodeTracking) : super('barcodeTrackingBasic') {
+  BarcodeTrackingBasicOverlay._(this._barcodeTracking, this.style) : super('barcodeTrackingBasic') {
+    _brush = BarcodeTrackingDefaults.barcodeTrackingBasicOverlayDefaults.brushes[style]!;
     _controller = _BarcodeTrackingBasicOverlayController(this);
   }
 
-  BarcodeTrackingBasicOverlay.withBarcodeTracking(BarcodeTracking barcodeTracking) : this._(barcodeTracking);
+  BarcodeTrackingBasicOverlay.withBarcodeTracking(BarcodeTracking barcodeTracking)
+      : this._(barcodeTracking, BarcodeTrackingDefaults.barcodeTrackingBasicOverlayDefaults.defaultStyle);
 
   factory BarcodeTrackingBasicOverlay.withBarcodeTrackingForView(
       BarcodeTracking barcodeTracking, DataCaptureView? view) {
-    var overlay = BarcodeTrackingBasicOverlay._(barcodeTracking);
+    return BarcodeTrackingBasicOverlay.withBarcodeTrackingForViewWithStyle(
+        barcodeTracking, view, BarcodeTrackingDefaults.barcodeTrackingBasicOverlayDefaults.defaultStyle);
+  }
+
+  factory BarcodeTrackingBasicOverlay.withBarcodeTrackingForViewWithStyle(
+      BarcodeTracking barcodeTracking, DataCaptureView? view, BarcodeTrackingBasicOverlayStyle style) {
+    var overlay = BarcodeTrackingBasicOverlay._(barcodeTracking, style);
     overlay.view = view;
     return overlay;
   }
 
-  static Brush get defaultBrush => Brush(
-      BarcodeTrackingDefaults.barcodeTrackingBasicOverlayDefaults.defaultBrush.fillColor,
-      BarcodeTrackingDefaults.barcodeTrackingBasicOverlayDefaults.defaultBrush.strokeColor,
-      BarcodeTrackingDefaults.barcodeTrackingBasicOverlayDefaults.defaultBrush.strokeWidth);
+  @Deprecated('Use the brush instance property instead.')
+  static Brush get defaultBrush {
+    return BarcodeTrackingDefaults.barcodeTrackingBasicOverlayDefaults
+        .brushes[BarcodeTrackingDefaults.barcodeTrackingBasicOverlayDefaults.defaultStyle]!;
+  }
 
-  Brush _brush = defaultBrush;
+  late Brush _brush;
 
   Brush get brush => _brush;
 
@@ -59,6 +98,8 @@ class BarcodeTrackingBasicOverlay extends DataCaptureOverlay {
     _brush = newValue;
     _barcodeTracking.didChange();
   }
+
+  final BarcodeTrackingBasicOverlayStyle style;
 
   Future<void> setBrushForTrackedBarcode(Brush brush, TrackedBarcode trackedBarcode) {
     return _controller.setBrushForTrackedBarcode(brush, trackedBarcode);
@@ -91,7 +132,11 @@ class BarcodeTrackingBasicOverlay extends DataCaptureOverlay {
 
   Map<String, dynamic> toMap() {
     var json = super.toMap();
-    json.addAll({'defaultBrush': _brush.toMap(), 'shouldShowScanAreaGuides': _shouldShowScanAreaGuides});
+    json.addAll({
+      'defaultBrush': _brush.toMap(),
+      'shouldShowScanAreaGuides': _shouldShowScanAreaGuides,
+      'style': style.jsonValue
+    });
     return json;
   }
 }
