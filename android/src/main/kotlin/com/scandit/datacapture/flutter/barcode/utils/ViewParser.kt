@@ -16,7 +16,7 @@ object ViewParser {
                 BitmapFactory.decodeByteArray(it, 0, it.size)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            println(e)
             null
         }
     }

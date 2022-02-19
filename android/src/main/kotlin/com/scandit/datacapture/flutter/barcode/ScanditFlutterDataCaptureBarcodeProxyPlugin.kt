@@ -30,13 +30,13 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
         ScanditFlutterDataCaptureBarcodePlugin()
 
     private var scanditFlutterDataCaptureBarcodeCapturePlugin:
-            ScanditFlutterDataCaptureBarcodeCapturePlugin? = null
+        ScanditFlutterDataCaptureBarcodeCapturePlugin? = null
 
     private var scanditFlutterDataCaptureBarcodeTrackingPlugin:
-            ScanditFlutterDataCaptureBarcodeTrackingPlugin? = null
+        ScanditFlutterDataCaptureBarcodeTrackingPlugin? = null
 
     private var scanditFlutterDataCaptureBarcodeSelectionPlugin:
-            ScanditFlutterDataCaptureBarcodeSelectionPlugin? = null
+        ScanditFlutterDataCaptureBarcodeSelectionPlugin? = null
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         scanditFlutterDataCaptureBarcodeCorePlugin.onAttachedToEngine(binding)
@@ -128,7 +128,7 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
         @JvmStatic
         private fun provideScanditFlutterDataCaptureBarcodeTracking(
             binaryMessenger: BinaryMessenger,
-            applicationContext: Context,
+            applicationContext: Context
         ): ScanditFlutterDataCaptureBarcodeTrackingHandler {
             val sessionHolder = ScanditFlutterBarcodeTrackingSessionHolder()
 
@@ -266,7 +266,7 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
                 EventHandler(
                     EventChannel(
                         binaryMessenger,
-                        ScanditFlutterBarcodeSelectionListener.CHANNEL_NAME,
+                        ScanditFlutterBarcodeSelectionListener.CHANNEL_NAME
                     )
                 ),
                 sessionHolder

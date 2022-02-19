@@ -50,8 +50,8 @@ internal class SerializableBarcodeSelectionDefaults(
         @JvmStatic
         fun create(): String {
             val barcodeSelection = BarcodeSelection.forDataCaptureContext(
-                    null,
-                    BarcodeSelectionSettings()
+                null,
+                BarcodeSelectionSettings()
             )
             val basicOverlay = BarcodeSelectionBasicOverlay.newInstance(barcodeSelection, null)
             return SerializableBarcodeSelectionDefaults(
@@ -103,9 +103,9 @@ internal class SerializableBarcodeSelectionBasicOverlayDefaults(
             FIELD_DEFAULT_STYLE to overlay.style.toJson(),
             FIELD_BRUSHES to mapOf(
                 BarcodeSelectionBasicOverlayStyle.DOT.toJson() to
-                        createBrushDefaultsForStyle(BarcodeSelectionBasicOverlayStyle.DOT),
+                    createBrushDefaultsForStyle(BarcodeSelectionBasicOverlayStyle.DOT),
                 BarcodeSelectionBasicOverlayStyle.FRAME.toJson() to
-                        createBrushDefaultsForStyle(BarcodeSelectionBasicOverlayStyle.FRAME),
+                    createBrushDefaultsForStyle(BarcodeSelectionBasicOverlayStyle.FRAME)
             ),
             FIELD_SHOULD_SHOW_HINTS to overlay.shouldShowHints
         )

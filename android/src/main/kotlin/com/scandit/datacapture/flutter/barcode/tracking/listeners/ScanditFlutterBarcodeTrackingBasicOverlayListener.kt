@@ -16,7 +16,7 @@ import org.json.JSONObject
 class ScanditFlutterBarcodeTrackingBasicOverlayListener(
     private val eventHandler: EventHandler,
     private val onSetBrushForTrackedBarcode: EventSinkWithResult<Brush?> =
-        EventSinkWithResult(EVENT_SET_BRUSH_FOR_TRACKED_BARCODE),
+        EventSinkWithResult(EVENT_SET_BRUSH_FOR_TRACKED_BARCODE)
 ) : BarcodeTrackingBasicOverlayListener {
 
     override fun brushForTrackedBarcode(

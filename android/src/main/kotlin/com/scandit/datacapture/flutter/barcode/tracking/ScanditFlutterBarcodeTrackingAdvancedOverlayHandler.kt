@@ -21,7 +21,7 @@ class ScanditFlutterBarcodeTrackingAdvancedOverlayHandler(
     private val binaryMessenger: BinaryMessenger,
     private val advancedOverlayListener: ScanditFlutterBarcodeTrackingAdvancedOverlayListener,
     private val sessionHolder: ScanditFlutterBarcodeTrackingSessionHolder,
-    private val advancedOverlayViewPool: AdvancedOverlayViewPool,
+    private val advancedOverlayViewPool: AdvancedOverlayViewPool
 ) : MethodChannel.MethodCallHandler {
     private var methodChannel: MethodChannel? = null
 

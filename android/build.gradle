@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        sdk_version = "6.10.1"
+        sdk_version = "6.11.0"
     }
     repositories {
         mavenCentral()
@@ -12,20 +12,13 @@ buildscript {
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'maven'
 
 android {
-    compileSdkVersion 30
-
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-        test.java.srcDirs += 'src/test/kotlin'
-        androidTest.java.srcDirs += 'src/androidTest/kotlin'
-    }
+    compileSdk 30
 
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 29
+        minSdk 21
+        targetSdk 29
         versionCode 1
         versionName "1.0"
     }
@@ -39,6 +32,4 @@ dependencies {
     api project(path: ':scandit_flutter_datacapture_core')
 
     api "com.scandit.datacapture:barcode:$sdk_version"
-
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.10'
 }

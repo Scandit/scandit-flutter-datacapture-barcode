@@ -11,7 +11,7 @@ import io.flutter.plugin.common.MethodChannel
 
 /** ScanditFlutterDataCaptureBarcodeTrackingPlugin */
 class ScanditFlutterDataCaptureBarcodeTrackingPlugin(
-    private val flutterBarcodeTrackingHandler: ScanditFlutterDataCaptureBarcodeTrackingHandler,
+    private val flutterBarcodeTrackingHandler: ScanditFlutterDataCaptureBarcodeTrackingHandler
 ) : FlutterPlugin, MethodChannel.MethodCallHandler {
     private var methodChannelDefaults: MethodChannel? = null
     private var methodChannelTrackingListener: MethodChannel? = null

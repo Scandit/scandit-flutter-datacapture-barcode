@@ -10,6 +10,7 @@ import 'tracking/barcode_tracking_defaults.dart';
 import 'selection/barcode_selection_defaults.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
+// ignore: avoid_classes_with_only_static_members
 class ScanditFlutterDataCaptureBarcode {
   static Future<void> initialize() async {
     await ScanditFlutterDataCaptureCore.initialize();

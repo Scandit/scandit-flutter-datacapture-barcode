@@ -60,9 +60,9 @@ internal data class SerializableBarcodeCaptureOverlayDefaults(
             FIELD_DEFAULT_STYLE to defaultStyle.toJson(),
             FIELD_BRUSHES to mapOf(
                 BarcodeCaptureOverlayStyle.FRAME.toJson() to
-                        createOverlayStyleBrush(BarcodeCaptureOverlayStyle.FRAME),
+                    createOverlayStyleBrush(BarcodeCaptureOverlayStyle.FRAME),
                 BarcodeCaptureOverlayStyle.LEGACY.toJson() to
-                        createOverlayStyleBrush(BarcodeCaptureOverlayStyle.LEGACY)
+                    createOverlayStyleBrush(BarcodeCaptureOverlayStyle.LEGACY)
             )
         )
     )
@@ -73,7 +73,7 @@ internal data class SerializableBarcodeCaptureOverlayDefaults(
 
         private fun createOverlayStyleBrush(style: BarcodeCaptureOverlayStyle): Map<String, Any?> {
             val barcodeCapture = BarcodeCapture
-                    .forDataCaptureContext(null, BarcodeCaptureSettings())
+                .forDataCaptureContext(null, BarcodeCaptureSettings())
             val brush = BarcodeCaptureOverlay.newInstance(barcodeCapture, null, style).brush
             return SerializableBrushDefaults(brush).toMap()
         }

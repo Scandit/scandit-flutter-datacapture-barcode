@@ -25,11 +25,11 @@ internal data class SerializableTrackingBasicOverlayDefaults(
             FIELD_DEFAULT_STYLE to defaultStyle.toJson(),
             FIELD_BRUSHES to mapOf(
                 BarcodeTrackingBasicOverlayStyle.DOT.toJson() to
-                        createOverlayForStyle(BarcodeTrackingBasicOverlayStyle.DOT),
+                    createOverlayForStyle(BarcodeTrackingBasicOverlayStyle.DOT),
                 BarcodeTrackingBasicOverlayStyle.FRAME.toJson() to
-                        createOverlayForStyle(BarcodeTrackingBasicOverlayStyle.FRAME),
+                    createOverlayForStyle(BarcodeTrackingBasicOverlayStyle.FRAME),
                 BarcodeTrackingBasicOverlayStyle.LEGACY.toJson() to
-                        createOverlayForStyle(BarcodeTrackingBasicOverlayStyle.LEGACY),
+                    createOverlayForStyle(BarcodeTrackingBasicOverlayStyle.LEGACY)
             )
         )
     )
@@ -41,8 +41,10 @@ internal data class SerializableTrackingBasicOverlayDefaults(
         private fun createOverlayForStyle(
             style: BarcodeTrackingBasicOverlayStyle
         ): Map<String, Any?> {
-            val tracking = BarcodeTracking.forDataCaptureContext(null,
-                    BarcodeTrackingSettings())
+            val tracking = BarcodeTracking.forDataCaptureContext(
+                null,
+                BarcodeTrackingSettings()
+            )
             val overlay = BarcodeTrackingBasicOverlay.newInstance(tracking, null, style)
             val brush = if (overlay.brush != null) overlay.brush else Brush.transparent()
             return SerializableBrushDefaults(brush).toMap()
