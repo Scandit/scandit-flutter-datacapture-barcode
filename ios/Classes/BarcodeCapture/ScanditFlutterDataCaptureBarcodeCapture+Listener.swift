@@ -11,6 +11,7 @@ extension ScanditFlutterDataCaptureBarcodeCapture: BarcodeCaptureListener, Flutt
     func barcodeCapture(_ barcodeCapture: BarcodeCapture,
                         didScanIn session: BarcodeCaptureSession,
                         frameData: FrameData) {
+        sessionHolder.latestSession = session
         guard let value = didScanLock.wait(afterDoing: { () -> Bool in
             return sendEvent(event: .didScan, body: ["session": session.jsonString])
         }) else { return }

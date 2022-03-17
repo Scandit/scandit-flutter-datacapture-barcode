@@ -62,6 +62,10 @@ class ScanditFlutterDataCaptureBarcodeCapturePlugin(
                 flutterBarcodeCaptureHandler.removeListener()
                 result.success(null)
             }
+            METHOD_RESET_BC_SESSION -> {
+                flutterBarcodeCaptureHandler.resetSession(call.arguments as? Long)
+                result.success(null)
+            }
             else -> result.notImplemented()
         }
     }
@@ -72,5 +76,6 @@ class ScanditFlutterDataCaptureBarcodeCapturePlugin(
         private const val METHOD_FINISH_DID_UPDATE_SESSION = "finishDidUpdateSession"
         private const val METHOD_ADD_BC_LISTENER = "addBarcodeCaptureListener"
         private const val METHOD_REMOVE_BC_LISTENER = "removeBarcodeCaptureListener"
+        private const val METHOD_RESET_BC_SESSION = "resetBarcodeCaptureSession"
     }
 }

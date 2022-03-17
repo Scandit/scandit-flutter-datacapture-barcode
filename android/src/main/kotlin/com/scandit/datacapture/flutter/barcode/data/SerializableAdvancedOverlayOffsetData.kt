@@ -7,7 +7,6 @@ package com.scandit.datacapture.flutter.barcode.data
 
 import com.scandit.datacapture.core.common.geometry.PointWithUnit
 import com.scandit.datacapture.core.common.geometry.PointWithUnitDeserializer
-import org.json.JSONObject
 
 class SerializableAdvancedOverlayOffsetData(
     val offset: PointWithUnit,
@@ -15,11 +14,11 @@ class SerializableAdvancedOverlayOffsetData(
     val sessionFrameSequenceId: Long?
 ) {
 
-    constructor(json: JSONObject) : this(
-        offset = PointWithUnitDeserializer.fromJson(json.getString(FIELD_OFFSET)),
-        trackedBarcodeId = json.getInt(FIELD_TRACKED_BARCODE_ID),
-        sessionFrameSequenceId = if (json.has(FIELD_FRAME_SEQUENCE_ID)) {
-            json.getLong(FIELD_FRAME_SEQUENCE_ID)
+    constructor(data: HashMap<String, Any?>) : this(
+        offset = PointWithUnitDeserializer.fromJson(data[FIELD_OFFSET] as String),
+        trackedBarcodeId = data[FIELD_TRACKED_BARCODE_ID] as Int,
+        sessionFrameSequenceId = if (data.containsKey(FIELD_FRAME_SEQUENCE_ID)) {
+            data[FIELD_FRAME_SEQUENCE_ID].toString().toLongOrNull()
         } else null
     )
 

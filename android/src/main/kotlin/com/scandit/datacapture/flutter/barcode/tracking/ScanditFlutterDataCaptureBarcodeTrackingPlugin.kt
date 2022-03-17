@@ -58,6 +58,10 @@ class ScanditFlutterDataCaptureBarcodeTrackingPlugin(
                 )
                 result.success(true)
             }
+            METHOD_RESET_TRACKING_SESSION -> {
+                flutterBarcodeTrackingHandler.resetSession(call.arguments as? Long)
+                result.success(null)
+            }
             else -> result.notImplemented()
         }
     }
@@ -68,5 +72,6 @@ class ScanditFlutterDataCaptureBarcodeTrackingPlugin(
         private const val METHOD_REMOVE_BARCODE_TRACKING_LISTENER = "removeBarcodeTrackingListener"
         private const val METHOD_TRACKING_FINISH_DID_UPDATE_SESSION =
             "barcodeTrackingFinishDidUpdateSession"
+        private const val METHOD_RESET_TRACKING_SESSION = "resetBarcodeTrackingSession"
     }
 }

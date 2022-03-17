@@ -16,13 +16,13 @@ extension ScanditFlutterDataCaptureBarcodeTracking {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
             return
         }
-        guard let sequenceId = lastFrameSequenceId,
+        guard let sequenceId = sessionHolder.latestSession?.frameSequenceId,
               let frameSequenceId = parsedArgs["sessionFrameSequenceID"] as? Int,
               sequenceId == frameSequenceId else {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .invalidSequenceId))
             return
         }
-        guard let lastTrackedBarcodes = lastTrackedBarcodes,
+        guard let lastTrackedBarcodes = sessionHolder.latestSession?.trackedBarcodes,
               let trackedBarcodeId = parsedArgs["identifier"] as? Int,
               let trackedCode = lastTrackedBarcodes[NSNumber(value: trackedBarcodeId)] else {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .trackedBarcodeNotFound))

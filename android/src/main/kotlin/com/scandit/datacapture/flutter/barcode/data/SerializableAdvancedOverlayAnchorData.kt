@@ -7,7 +7,6 @@ package com.scandit.datacapture.flutter.barcode.data
 
 import com.scandit.datacapture.core.common.geometry.Anchor
 import com.scandit.datacapture.core.common.geometry.AnchorDeserializer
-import org.json.JSONObject
 
 class SerializableAdvancedOverlayAnchorData(
     val anchor: Anchor,
@@ -15,11 +14,11 @@ class SerializableAdvancedOverlayAnchorData(
     val sessionFrameSequenceId: Long?
 ) {
 
-    constructor(json: JSONObject) : this(
-        anchor = AnchorDeserializer.fromJson(json.getString(FIELD_ANCHOR)),
-        trackedBarcodeId = json.getInt(FIELD_TRACKED_BARCODE_ID),
-        sessionFrameSequenceId = if (json.has(FIELD_FRAME_SEQUENCE_ID)) {
-            json.getLong(FIELD_FRAME_SEQUENCE_ID)
+    constructor(data: HashMap<String, Any?>) : this(
+        anchor = AnchorDeserializer.fromJson(data[FIELD_ANCHOR] as String),
+        trackedBarcodeId = data[FIELD_TRACKED_BARCODE_ID] as Int,
+        sessionFrameSequenceId = if (data.containsKey(FIELD_FRAME_SEQUENCE_ID)) {
+            data[FIELD_FRAME_SEQUENCE_ID].toString().toLongOrNull()
         } else null
     )
 

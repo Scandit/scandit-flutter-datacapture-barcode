@@ -9,21 +9,19 @@ import ScanditBarcodeCapture
 import scandit_flutter_datacapture_core
 
 extension ScanditFlutterDataCaptureBarcodeTracking {
-    func setWidgetForTrackedBarcode(arguments: String, result: FlutterResult) {
-        guard let jsonData = arguments.data(using: .utf8),
-              let untypedArgs = try? JSONSerialization.jsonObject(with: jsonData, options: []),
-              let parsedArgs = untypedArgs as? [String: Any] else {
+    func setWidgetForTrackedBarcode(arguments: Any?, result: FlutterResult) {
+        guard let parsedArgs = arguments as? [String: Any?] else {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
             return
         }
         if let frameSequenceId = parsedArgs["sessionFrameSequenceID"] as? Int,
-           let sequenceId = lastFrameSequenceId {
+           let sequenceId = sessionHolder.latestSession?.frameSequenceId {
             if sequenceId != frameSequenceId {
                 result(ScanditDataCaptureBarcodeErrorWrapper(error: .invalidSequenceId))
                 return
             }
         }
-        guard let lastTrackedBarcodes = lastTrackedBarcodes,
+        guard let lastTrackedBarcodes = sessionHolder.latestSession?.trackedBarcodes,
               let trackedBarcodeId = parsedArgs["identifier"] as? Int,
               let trackedCode = lastTrackedBarcodes[NSNumber(value: trackedBarcodeId)] else {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .trackedBarcodeNotFound))
@@ -33,13 +31,12 @@ extension ScanditFlutterDataCaptureBarcodeTracking {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .nilOverlay))
             return
         }
-        guard let base64EncodedWidget = parsedArgs["widget"] as? String else {
+        guard let widgetData = parsedArgs["widget"] as? FlutterStandardTypedData else {
             overlay.setView(nil, for: trackedCode)
             result(nil)
             return
         }
-        guard let data = Data(base64Encoded: base64EncodedWidget),
-              let image = UIImage(data: data) else {
+        guard let image = UIImage(data: widgetData.data) else {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .viewInvalid))
             return
         }
@@ -53,24 +50,27 @@ extension ScanditFlutterDataCaptureBarcodeTracking {
         result(nil)
     }
 
-    func setAnchorForTrackedBarcode(arguments: String, result: FlutterResult) {
+    func setAnchorForTrackedBarcode(arguments: Any?, result: FlutterResult) {
         var anchor = Anchor.center
-        guard let jsonData = arguments.data(using: .utf8),
-              let untypedArgs = try? JSONSerialization.jsonObject(with: jsonData, options: []),
-              let parsedArgs = untypedArgs as? [String: Any],
-              let anchorJSON = parsedArgs["anchor"] as? String,
-              SDCAnchorFromJSONString(anchorJSON, &anchor) else {
+        guard let parsedArgs = arguments as? [String: Any?] else {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
             return
         }
+        
+        guard let anchorJSON = parsedArgs["anchor"] as? String else {
+            result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
+            return
+        }
+        SDCAnchorFromJSONString(anchorJSON, &anchor)
+        
         if let frameSequenceId = parsedArgs["sessionFrameSequenceID"] as? Int,
-           let sequenceId = lastFrameSequenceId {
+           let sequenceId = sessionHolder.latestSession?.frameSequenceId {
             if sequenceId != frameSequenceId {
                 result(ScanditDataCaptureBarcodeErrorWrapper(error: .invalidSequenceId))
                 return
             }
         }
-        guard let lastTrackedBarcodes = lastTrackedBarcodes,
+        guard let lastTrackedBarcodes = sessionHolder.latestSession?.trackedBarcodes,
               let trackedBarcodeId = parsedArgs["identifier"] as? Int,
               let trackedCode = lastTrackedBarcodes[NSNumber(value: trackedBarcodeId)] else {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .trackedBarcodeNotFound))
@@ -84,27 +84,27 @@ extension ScanditFlutterDataCaptureBarcodeTracking {
         result(nil)
     }
 
-    func setOffsetForTrackedBarcode(arguments: String, result: FlutterResult) {
+    func setOffsetForTrackedBarcode(arguments: Any?, result: FlutterResult) {
         var offset = PointWithUnit.zero
-        guard let jsonData = arguments.data(using: .utf8),
-              let untypedArgs = try? JSONSerialization.jsonObject(with: jsonData, options: []),
-              let parsedArgs = untypedArgs as? [String: Any],
-              let offsetDict = parsedArgs["offset"] as? [String: Any],
-              let offsetJSON = String(data: try! JSONSerialization.data(withJSONObject: offsetDict,
-                                                                   options: []),
-                                      encoding: .utf8),
-              SDCPointWithUnitFromJSONString(offsetJSON, &offset) else {
+        guard let parsedArgs = arguments as? [String: Any?] else {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
             return
         }
+        guard let offsetDict = parsedArgs["offset"] as? [String: Any],
+            let offsetJSON = String(data: try! JSONSerialization.data(withJSONObject: offsetDict, options: []), encoding: .utf8) else {
+            result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
+            return
+        }
+        SDCPointWithUnitFromJSONString(offsetJSON, &offset)
+        
         if let frameSequenceId = parsedArgs["sessionFrameSequenceID"] as? Int,
-           let sequenceId = lastFrameSequenceId {
+           let sequenceId = sessionHolder.latestSession?.frameSequenceId {
             if sequenceId != frameSequenceId {
                 result(ScanditDataCaptureBarcodeErrorWrapper(error: .invalidSequenceId))
                 return
             }
         }
-        guard let lastTrackedBarcodes = lastTrackedBarcodes,
+        guard let lastTrackedBarcodes = sessionHolder.latestSession?.trackedBarcodes,
               let trackedBarcodeId = parsedArgs["identifier"] as? Int,
               let trackedCode = lastTrackedBarcodes[NSNumber(value: trackedBarcodeId)] else {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .trackedBarcodeNotFound))

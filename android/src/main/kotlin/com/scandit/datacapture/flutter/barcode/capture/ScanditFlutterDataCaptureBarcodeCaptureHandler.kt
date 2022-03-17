@@ -21,6 +21,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 
 class ScanditFlutterDataCaptureBarcodeCaptureHandler(
     private val barcodeCaptureListener: ScanditFlutterBarcodeCaptureListener,
+    private val sessionHolder: ScanditFlutterBarcodeCaptureSessionHolder,
     private val barcodeCaptureDeserializer: BarcodeCaptureDeserializer =
         BarcodeCaptureDeserializer()
 ) : BarcodeCaptureDeserializerListener {
@@ -81,15 +82,15 @@ class ScanditFlutterDataCaptureBarcodeCaptureHandler(
         barcodeCaptureListener.finishDidUpdateSession(enabled)
     }
 
+    fun resetSession(frameSequenceId: Long?) {
+        sessionHolder.reset(frameSequenceId)
+    }
+
     override fun onModeDeserializationFinished(
         deserializer: BarcodeCaptureDeserializer,
         mode: BarcodeCapture,
         json: JsonValue
     ) {
-        barcodeCapture = mode.also {
-            if (json.contains("enabled")) {
-                it.isEnabled = json.requireByKeyAsBoolean("enabled")
-            }
-        }
+        barcodeCapture = mode
     }
 }

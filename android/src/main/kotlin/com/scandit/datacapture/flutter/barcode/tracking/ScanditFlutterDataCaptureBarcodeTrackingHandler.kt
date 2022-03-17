@@ -26,6 +26,7 @@ class ScanditFlutterDataCaptureBarcodeTrackingHandler(
         ScanditFlutterBarcodeTrackingBasicOverlayHandler,
     private val flutterBarcodeTrackingAdvancedOverlayHandler:
         ScanditFlutterBarcodeTrackingAdvancedOverlayHandler,
+    private val sessionHolder: ScanditFlutterBarcodeTrackingSessionHolder,
     private val barcodeTrackingDeserializer: BarcodeTrackingDeserializer =
         BarcodeTrackingDeserializer()
 ) : BarcodeTrackingDeserializerListener,
@@ -110,5 +111,9 @@ class ScanditFlutterDataCaptureBarcodeTrackingHandler(
 
     fun finishDidUpdateSession(enabled: Boolean) {
         barcodeTrackingListener.finishDidUpdateSession(enabled)
+    }
+
+    fun resetSession(frameSequenceId: Long?) {
+        sessionHolder.reset(frameSequenceId)
     }
 }

@@ -124,8 +124,7 @@ class _BarcodeTrackingAdvancedOverlayController {
     var arguments = <String, dynamic>{'identifier': trackedBarcode.identifier};
 
     if (widget != null) {
-      var base64EncodedWidget = await widget.base64String;
-      arguments['widget'] = base64EncodedWidget;
+      arguments['widget'] = await widget.toImage;
     } else {
       arguments['widget'] = null;
     }
@@ -134,7 +133,7 @@ class _BarcodeTrackingAdvancedOverlayController {
     }
 
     return _methodChannel
-        .invokeMethod(BarcodeTrackingFunctionNames.setWidgetForTrackedBarcode, jsonEncode(arguments))
+        .invokeMethod(BarcodeTrackingFunctionNames.setWidgetForTrackedBarcode, arguments)
         // once the widget is sent we do remove the request from the cache
         .then((value) => _widgetRequestsCache.remove(trackedBarcode.identifier));
   }
@@ -144,15 +143,15 @@ class _BarcodeTrackingAdvancedOverlayController {
     if (trackedBarcode.sessionFrameSequenceId != null) {
       arguments['sessionFrameSequenceID'] = trackedBarcode.sessionFrameSequenceId!;
     }
-    return _methodChannel.invokeMethod(BarcodeTrackingFunctionNames.setAnchorForTrackedBarcode, jsonEncode(arguments));
+    return _methodChannel.invokeMethod(BarcodeTrackingFunctionNames.setAnchorForTrackedBarcode, arguments);
   }
 
   Future<void> setOffsetForTrackedBarcode(PointWithUnit offset, TrackedBarcode trackedBarcode) {
-    var arguments = {'offset': offset.toMap(), 'identifier': trackedBarcode.identifier};
+    var arguments = {'offset': jsonEncode(offset.toMap()), 'identifier': trackedBarcode.identifier};
     if (trackedBarcode.sessionFrameSequenceId != null) {
       arguments['sessionFrameSequenceID'] = trackedBarcode.sessionFrameSequenceId!;
     }
-    return _methodChannel.invokeMethod(BarcodeTrackingFunctionNames.setOffsetForTrackedBarcode, jsonEncode(arguments));
+    return _methodChannel.invokeMethod(BarcodeTrackingFunctionNames.setOffsetForTrackedBarcode, arguments);
   }
 
   Future<void> clearTrackedBarcodeWidgets() {

@@ -5,19 +5,17 @@
  */
 package com.scandit.datacapture.flutter.barcode.data
 
-import org.json.JSONObject
-
 class SerializableAdvancedOverlayViewData(
-    val base64EncodedWidget: String?,
+    val widgetBytes: ByteArray?,
     val trackedBarcodeId: Int,
     val sessionFrameSequenceId: Long?
 ) {
 
-    constructor(json: JSONObject) : this(
-        base64EncodedWidget = if (json.isNull(FIELD_WIDGET)) null else json.getString(FIELD_WIDGET),
-        trackedBarcodeId = json.getInt(FIELD_TRACKED_BARCODE_ID),
-        sessionFrameSequenceId = if (json.has(FIELD_FRAME_SEQUENCE_ID)) {
-            json.getLong(FIELD_FRAME_SEQUENCE_ID)
+    constructor(data: HashMap<String, Any?>) : this(
+        widgetBytes = if (data.containsKey(FIELD_WIDGET)) data[FIELD_WIDGET] as ByteArray else null,
+        trackedBarcodeId = data[FIELD_TRACKED_BARCODE_ID] as Int,
+        sessionFrameSequenceId = if (data.containsKey(FIELD_FRAME_SEQUENCE_ID)) {
+            data[FIELD_FRAME_SEQUENCE_ID].toString().toLongOrNull()
         } else null
     )
 

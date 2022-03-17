@@ -15,13 +15,13 @@ import com.scandit.datacapture.flutter.barcode.utils.ViewParser
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import org.json.JSONObject
 
 class ScanditFlutterBarcodeTrackingAdvancedOverlayHandler(
     private val binaryMessenger: BinaryMessenger,
     private val advancedOverlayListener: ScanditFlutterBarcodeTrackingAdvancedOverlayListener,
     private val sessionHolder: ScanditFlutterBarcodeTrackingSessionHolder,
-    private val advancedOverlayViewPool: AdvancedOverlayViewPool
+    private val advancedOverlayViewPool: AdvancedOverlayViewPool,
+    private val viewParser: ViewParser = ViewParser()
 ) : MethodChannel.MethodCallHandler {
     private var methodChannel: MethodChannel? = null
 
@@ -79,18 +79,21 @@ class ScanditFlutterBarcodeTrackingAdvancedOverlayHandler(
     }
 
     private fun setWidgetForTrackedBarcode(arguments: Any) {
-        val data = SerializableAdvancedOverlayViewData(JSONObject(arguments as String))
+        @Suppress("UNCHECKED_CAST")
+        val inputParams = arguments as? HashMap<String, Any?> ?: return
+
+        val data = SerializableAdvancedOverlayViewData(inputParams)
         sessionHolder.getTrackedBarcodeFromLatestSession(
             data.trackedBarcodeId,
             data.sessionFrameSequenceId
         )?.let { trackedBarcode ->
-            if (data.base64EncodedWidget == null) {
+            if (data.widgetBytes == null) {
                 advancedOverlayViewPool.removeView(trackedBarcode)
                 overlay?.setViewForTrackedBarcode(trackedBarcode, null)
                 return
             }
 
-            val view = ViewParser.parse(data.base64EncodedWidget)?.let {
+            val view = viewParser.parse(data.widgetBytes)?.let {
                 advancedOverlayViewPool.getOrCreateView(trackedBarcode, it)
             } ?: return
 
@@ -106,7 +109,10 @@ class ScanditFlutterBarcodeTrackingAdvancedOverlayHandler(
     }
 
     private fun setAnchorForTrackedBarcode(arguments: Any) {
-        val data = SerializableAdvancedOverlayAnchorData(JSONObject(arguments as String))
+        @Suppress("UNCHECKED_CAST")
+        val inputParams = arguments as? HashMap<String, Any?> ?: return
+
+        val data = SerializableAdvancedOverlayAnchorData(inputParams)
         sessionHolder.getTrackedBarcodeFromLatestSession(
             data.trackedBarcodeId,
             data.sessionFrameSequenceId
@@ -119,7 +125,10 @@ class ScanditFlutterBarcodeTrackingAdvancedOverlayHandler(
     }
 
     private fun setOffsetForTrackedBarcode(arguments: Any) {
-        val data = SerializableAdvancedOverlayOffsetData(JSONObject(arguments as String))
+        @Suppress("UNCHECKED_CAST")
+        val inputParams = arguments as? HashMap<String, Any?> ?: return
+
+        val data = SerializableAdvancedOverlayOffsetData(inputParams)
         sessionHolder.getTrackedBarcodeFromLatestSession(
             data.trackedBarcodeId,
             data.sessionFrameSequenceId

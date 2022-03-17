@@ -4,11 +4,15 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
+import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
+import 'barcode_capture_function_names.dart';
 import '../../scandit_flutter_datacapture_barcode.dart';
 
 @immutable
 class BarcodeCaptureSession {
+  final _BarcodeCaptureSessionController _controller = _BarcodeCaptureSessionController();
+
   final List<Barcode> _newlyRecognizedBarcodes;
   List<Barcode> get newlyRecognizedBarcodes => _newlyRecognizedBarcodes;
 
@@ -33,4 +37,20 @@ class BarcodeCaptureSession {
                 .toList()
                 .cast<LocalizedOnlyBarcode>(),
             (json['frameSequenceId'] as num).toInt());
+
+  Future<void> reset() {
+    return _controller.reset(_frameSequenceId);
+  }
+}
+
+class _BarcodeCaptureSessionController {
+  late final MethodChannel _methodChannel = _getChannel();
+
+  Future<void> reset(int frameSequenceId) {
+    return _methodChannel.invokeMethod(BarcodeCaptureFunctionNames.resetBarcodeCaptureSession, frameSequenceId);
+  }
+
+  MethodChannel _getChannel() {
+    return MethodChannel('com.scandit.datacapture.barcode.capture.method/barcode_capture_listener');
+  }
 }

@@ -10,4 +10,5 @@ abstract class BarcodeCaptureFunctionNames {
   static const String addBarcodeCaptureListener = 'addBarcodeCaptureListener';
   static const String removeBarcodeCaptureListener = 'removeBarcodeCaptureListener';
   static const String getBarcodeCaptureDefaults = 'getBarcodeCaptureDefaults';
+  static const String resetBarcodeCaptureSession = 'resetBarcodeCaptureSession';
 }

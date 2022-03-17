@@ -11,6 +11,7 @@ extension ScanditFlutterDataCaptureBarcodeTracking: BarcodeTrackingListener, Flu
     public func barcodeTracking(_ barcodeTracking: BarcodeTracking,
                                 didUpdate session: BarcodeTrackingSession,
                                 frameData: FrameData) {
+       
         DispatchQueue.main.async {
             let removedCodes = session.removedTrackedBarcodes
             for removed in removedCodes {
@@ -20,9 +21,7 @@ extension ScanditFlutterDataCaptureBarcodeTracking: BarcodeTrackingListener, Flu
                 self.trackedBarcodeViewCache.removeValue(forKey: pair.key)
             }
         }
-        lastFrameSequenceId = session.frameSequenceId
-        lastTrackedBarcodes = session.trackedBarcodes
-
+        sessionHolder.latestSession = session
         guard let value = didUpdateSessionLock.wait(afterDoing: { () -> Bool in
             return sendEvent(event: .didUpdateSession, body: ["session": session.jsonString])
         }) else { return }

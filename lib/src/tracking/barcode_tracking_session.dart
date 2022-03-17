@@ -4,12 +4,16 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
+import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
+import 'barcode_tracking_function_names.dart';
 
 import 'tracked_barcode.dart';
 
 @immutable
 class BarcodeTrackingSession {
+  final _BarcodeTrackingSessionController _controller = _BarcodeTrackingSessionController();
+
   final List<TrackedBarcode> _addedTrackedBarcodes;
   List<TrackedBarcode> get addedTrackedBarcodes => _addedTrackedBarcodes;
 
@@ -45,5 +49,21 @@ class BarcodeTrackingSession {
             MapEntry(int.parse(key), TrackedBarcode.fromJSON(value, sessionFrameSequenceId: frameSequenceId)));
     return BarcodeTrackingSession._(
         addedTrackedCodes, removedTrackedCodes, updatedTrackedCodes, trackedCodes, frameSequenceId);
+  }
+
+  Future<void> reset() {
+    return _controller.reset(_frameSequenceId);
+  }
+}
+
+class _BarcodeTrackingSessionController {
+  late final MethodChannel _methodChannel = _getChannel();
+
+  Future<void> reset(int frameSequenceId) {
+    return _methodChannel.invokeMethod(BarcodeTrackingFunctionNames.resetBarcodeTrackingSession, frameSequenceId);
+  }
+
+  MethodChannel _getChannel() {
+    return MethodChannel('com.scandit.datacapture.barcode.tracking.method/barcode_tracking_listener');
   }
 }

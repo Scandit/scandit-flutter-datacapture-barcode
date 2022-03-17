@@ -29,6 +29,7 @@ class ScanditFlutterBarcodeSelectionListener(
         session: BarcodeSelectionSession,
         frameData: FrameData?
     ) {
+        sessionHolder.setLatestSession(session)
         eventHandler.getCurrentEventSink()?.let {
             val params = JSONObject(
                 mapOf(
@@ -38,7 +39,6 @@ class ScanditFlutterBarcodeSelectionListener(
             ).toString()
             barcodeSelection.isEnabled =
                 onBarcodeSelection.emitForResult(it, params, barcodeSelection.isEnabled)
-            sessionHolder.setLatestSession(session)
         }
     }
 

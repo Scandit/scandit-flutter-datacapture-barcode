@@ -25,4 +25,11 @@ class ScanditFlutterBarcodeTrackingSessionHolder {
             session.trackedBarcodes[barcodeId]
         } else null
     }
+
+    fun reset(frameSequenceId: Long?) {
+        val session = latestSession.get() ?: return
+        if (frameSequenceId == null || session.frameSequenceId == frameSequenceId) {
+            session.reset()
+        }
+    }
 }

@@ -82,8 +82,9 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
     internal let didUpdateSessionLock: CallbackLock<Bool> = {
         return CallbackLock<Bool>(name: ScanditFlutterDataCaptureBarcodeTrackingEvent.didUpdateSession.rawValue)
     }()
-    internal var lastFrameSequenceId: Int?
-    internal var lastTrackedBarcodes: [NSNumber: TrackedBarcode]?
+
+    internal var sessionHolder = ScanditFlutterDataCaptureBarcodeTrackingSessionHolder()
+    
     internal var trackedBarcodeViewCache: [UIImageView: TrackedBarcode] = [:]
 
     // BarcodeTrackingBasicOverlay
@@ -163,6 +164,11 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
         barcodeTrackingBasicOverlay?.delegate = nil
         result(nil)
     }
+    
+    public func resetSession(call: FlutterMethodCall, result: FlutterResult) {
+        sessionHolder.reset(frameSequenceId: call.arguments as? Int)
+        result(nil)
+    }
 
     func invalidate() {
         unlockLocks()
@@ -189,6 +195,7 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
             static let barcodeTrackingFinishDidUpdateSession = "barcodeTrackingFinishDidUpdateSession"
             static let addBarcodeTrackingListener = "addBarcodeTrackingListener"
             static let removeBarcodeTrackingListener = "removeBarcodeTrackingListener"
+            static let resetBarcodeTrackingSession = "resetBarcodeTrackingSession"
         }
         switch methodCall.method {
         case FunctionNames.barcodeTrackingFinishDidUpdateSession:
@@ -198,6 +205,8 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
             addBarcodeTrackingListener(result: result)
         case FunctionNames.removeBarcodeTrackingListener:
             removeBarcodeTrackingListener(result: result)
+        case FunctionNames.resetBarcodeTrackingSession:
+            resetSession(call: methodCall, result: result)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -240,11 +249,11 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
         }
         switch methodCall.method {
         case FunctionNames.setWidgetForTrackedBarcode:
-            setWidgetForTrackedBarcode(arguments: methodCall.arguments as! String, result: result)
+            setWidgetForTrackedBarcode(arguments: methodCall.arguments, result: result)
         case FunctionNames.setAnchorForTrackedBarcode:
-            setAnchorForTrackedBarcode(arguments: methodCall.arguments as! String, result: result)
+            setAnchorForTrackedBarcode(arguments: methodCall.arguments, result: result)
         case FunctionNames.setOffsetForTrackedBarcode:
-            setOffsetForTrackedBarcode(arguments: methodCall.arguments as! String, result: result)
+            setOffsetForTrackedBarcode(arguments: methodCall.arguments, result: result)
         case FunctionNames.clearTrackedBarcodeWidgets:
             clearTrackedBarcodeWidgets(result: result)
         case FunctionNames.addBarcodeTrackingAdvancedOverlayDelegate:
