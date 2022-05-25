@@ -17,14 +17,11 @@ extension ScanditFlutterDataCaptureBarcodeTrackingModule {
 
     private var barcodeTrackingBasicOverlayDefaults: [String: Any] {
         func createBrushOfOverlayWithStyle(style: BarcodeTrackingBasicOverlayStyle) -> [String: Any] {
-            let tracking = BarcodeTracking(context: nil, settings: BarcodeTrackingSettings())
-            let overlay = BarcodeTrackingBasicOverlay(barcodeTracking: tracking, view: nil, style: style)
-            return overlay.brush?.defaults ?? Brush.transparent.defaults
+            return BarcodeTrackingBasicOverlay.defaultBrush(forStyle: style).defaults
         }
 
-        let tracking = BarcodeTracking(context: nil, settings: BarcodeTrackingSettings())
         return [
-            "defaultStyle": BarcodeTrackingBasicOverlay(barcodeTracking: tracking).style.jsonString,
+            "defaultStyle": BarcodeTrackingBasicOverlayStyle.legacy.jsonString,
             "Brushes": [
                 BarcodeTrackingBasicOverlayStyle.dot.jsonString: createBrushOfOverlayWithStyle(style: .dot),
                 BarcodeTrackingBasicOverlayStyle.frame.jsonString: createBrushOfOverlayWithStyle(style: .frame),

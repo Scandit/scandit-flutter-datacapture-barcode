@@ -18,6 +18,7 @@ import com.scandit.datacapture.barcode.selection.ui.overlay.toJson
 import com.scandit.datacapture.flutter.core.data.SerializableData
 import com.scandit.datacapture.flutter.core.data.defaults.SerializableBrushDefaults
 import com.scandit.datacapture.flutter.core.data.defaults.SerializableCameraSettingsDefaults
+import com.scandit.datacapture.flutter.core.utils.hexString
 import org.json.JSONObject
 
 internal class SerializableBarcodeSelectionDefaults(
@@ -107,7 +108,8 @@ internal class SerializableBarcodeSelectionBasicOverlayDefaults(
                 BarcodeSelectionBasicOverlayStyle.FRAME.toJson() to
                     createBrushDefaultsForStyle(BarcodeSelectionBasicOverlayStyle.FRAME)
             ),
-            FIELD_SHOULD_SHOW_HINTS to overlay.shouldShowHints
+            FIELD_SHOULD_SHOW_HINTS to overlay.shouldShowHints,
+            FIELD_FROZEN_BACKGROUND_COLOR to overlay.frozenBackgroundColor.hexString
         )
     )
 
@@ -119,6 +121,7 @@ internal class SerializableBarcodeSelectionBasicOverlayDefaults(
         private const val FIELD_DEFAULT_STYLE = "defaultStyle"
         private const val FIELD_BRUSHES = "Brushes"
         private const val FIELD_SHOULD_SHOW_HINTS = "shouldShowHints"
+        private const val FIELD_FROZEN_BACKGROUND_COLOR = "frozenBackgroundColor"
     }
 
     private fun createBrushDefaultsForStyle(

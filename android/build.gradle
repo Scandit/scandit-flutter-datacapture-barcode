@@ -1,13 +1,18 @@
 buildscript {
     ext {
-        sdk_version = "6.12.1"
+        sdk_version = "6.13.0"
         kotlin_version = "1.5.31"
+        agp_version = "7.0.3"
     }
+
     repositories {
+        google()
         mavenCentral()
     }
+
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.android.tools.build:gradle:$agp_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"        
     }
 }
 

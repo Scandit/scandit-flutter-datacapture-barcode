@@ -22,25 +22,22 @@ extension ScanditFlutterDataCaptureBarcodeSelectionModule {
 
     private var overlayDefaults: [String: Any] {
         func createBrushDefaultsForStyle(style: BarcodeSelectionBasicOverlayStyle) -> [String: Any] {
-            let selection = BarcodeSelection(context: nil, settings: BarcodeSelectionSettings())
-            let overlay = BarcodeSelectionBasicOverlay(barcodeSelection: selection, style: style)
             return [
-                "aimedBrush": overlay.aimedBrush.defaults,
-                "selectingBrush": overlay.selectingBrush.defaults,
-                "selectedBrush": overlay.selectedBrush.defaults,
-                "trackedBrush": overlay.trackedBrush.defaults
+                "aimedBrush": BarcodeSelectionBasicOverlay.defaultAimedBrush(forStyle: style).defaults,
+                "selectingBrush": BarcodeSelectionBasicOverlay.defaultSelectingBrush(forStyle: style).defaults,
+                "selectedBrush": BarcodeSelectionBasicOverlay.defaultSelectedBrush(forStyle: style).defaults,
+                "trackedBrush": BarcodeSelectionBasicOverlay.defaultTrackedBrush(forStyle: style).defaults
             ]
         }
 
-        let selection = BarcodeSelection(context: nil, settings: BarcodeSelectionSettings())
-        let overlay = BarcodeSelectionBasicOverlay(barcodeSelection: selection)
         return [
-            "defaultStyle": overlay.style.jsonString,
+            "defaultStyle": BarcodeSelectionBasicOverlayStyle.frame.jsonString,
             "Brushes": [
                 BarcodeSelectionBasicOverlayStyle.dot.jsonString: createBrushDefaultsForStyle(style: .dot),
                 BarcodeSelectionBasicOverlayStyle.frame.jsonString: createBrushDefaultsForStyle(style: .frame)
             ],
-            "shouldShowHints": overlay.shouldShowHints
+            "shouldShowHints": true,
+            "frozenBackgroundColor": "00000080"
         ]
     }
 

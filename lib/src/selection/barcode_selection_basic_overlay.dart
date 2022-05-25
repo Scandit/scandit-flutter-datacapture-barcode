@@ -4,6 +4,8 @@
  * Copyright (C) 2021- Scandit AG. All rights reserved.
  */
 
+import 'dart:ui';
+
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 import 'barcode_selection_defaults.dart';
 import 'barcode_selection.dart';
@@ -109,6 +111,15 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
     view?.addOverlay(this);
   }
 
+  Color _frozenBackgroundColor = BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.frozenBackgroundColor;
+
+  Color get frozenBackgroundColor => _frozenBackgroundColor;
+
+  set frozenBackgroundColor(Color newValue) {
+    _frozenBackgroundColor = newValue;
+    _barcodeSelection.didChange();
+  }
+
   BarcodeSelectionBasicOverlay.withBarcodeSelection(BarcodeSelection barcodeSelection)
       : this.withBarcodeSelectionForView(barcodeSelection, null);
 
@@ -131,7 +142,8 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
       'shouldShowHints': _shouldShowHints,
       'shouldShowScanAreaGuides': _shouldShowScanAreaGuides,
       'viewfinder': _viewfinder.toMap(),
-      'style': style.jsonValue
+      'style': style.jsonValue,
+      'frozenBackgroundColor': _frozenBackgroundColor.jsonValue,
     });
     return json;
   }

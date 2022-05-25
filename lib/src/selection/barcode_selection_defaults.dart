@@ -5,6 +5,7 @@
  */
 
 import 'dart:convert';
+import 'dart:ui';
 import 'package:meta/meta.dart';
 import 'package:flutter/services.dart';
 import '../../scandit_flutter_datacapture_barcode_selection.dart';
@@ -164,15 +165,20 @@ class BarcodeSelectionBasicOverlayDefaults {
   final BarcodeSelectionBasicOverlayStyle defaultStyle;
   final Map<BarcodeSelectionBasicOverlayStyle, BarcodeSelectionBasicOverlayBrushDefaults> brushes;
   final bool shouldShowHints;
+  final Color frozenBackgroundColor;
 
-  BarcodeSelectionBasicOverlayDefaults(this.defaultStyle, this.brushes, this.shouldShowHints);
+  BarcodeSelectionBasicOverlayDefaults(
+      this.defaultStyle, this.brushes, this.shouldShowHints, this.frozenBackgroundColor);
 
   factory BarcodeSelectionBasicOverlayDefaults.fromJSON(Map<String, dynamic> json) {
     var defaultStyle = BarcodeSelectionBasicOverlayStyleSerializer.fromJSON(json['defaultStyle'] as String);
     var brushes = (json['Brushes'] as Map<String, dynamic>).map((key, value) => MapEntry(
         BarcodeSelectionBasicOverlayStyleSerializer.fromJSON(key),
         BarcodeSelectionBasicOverlayBrushDefaults.fromJSON(value as Map<String, dynamic>)));
-    return BarcodeSelectionBasicOverlayDefaults(defaultStyle, brushes, json['shouldShowHints'] as bool);
+    var frozenBackgroundColor = ColorDeserializer.fromRgbaHex(json['frozenBackgroundColor'] as String);
+
+    return BarcodeSelectionBasicOverlayDefaults(
+        defaultStyle, brushes, json['shouldShowHints'] as bool, frozenBackgroundColor);
   }
 }
 
