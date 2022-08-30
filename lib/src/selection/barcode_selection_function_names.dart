@@ -14,4 +14,5 @@ abstract class BarcodeSelectionFunctionNames {
   static const String resetMode = 'resetMode';
   static const String barcodeSelectionFinishDidUpdateSelection = 'finishDidUpdateSelection';
   static const String barcodeSelectionFinishDidUpdateSession = 'finishDidUpdateSession';
+  static const String getLastFrameData = 'getLastFrameData';
 }

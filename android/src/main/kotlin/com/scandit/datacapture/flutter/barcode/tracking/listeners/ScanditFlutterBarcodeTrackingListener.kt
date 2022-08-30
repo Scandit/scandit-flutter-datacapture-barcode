@@ -10,6 +10,7 @@ import com.scandit.datacapture.barcode.tracking.capture.BarcodeTrackingListener
 import com.scandit.datacapture.barcode.tracking.capture.BarcodeTrackingSession
 import com.scandit.datacapture.core.data.FrameData
 import com.scandit.datacapture.flutter.barcode.tracking.ScanditFlutterBarcodeTrackingSessionHolder
+import com.scandit.datacapture.flutter.core.common.LastFrameDataHolder
 import com.scandit.datacapture.flutter.core.utils.EventHandler
 import com.scandit.datacapture.flutter.core.utils.EventSinkWithResult
 import org.json.JSONObject
@@ -25,6 +26,7 @@ class ScanditFlutterBarcodeTrackingListener(
         session: BarcodeTrackingSession,
         data: FrameData
     ) {
+        LastFrameDataHolder.frameData = data
         eventHandler.getCurrentEventSink()?.let {
             val dataToSend = JSONObject(
                 mapOf(
@@ -35,6 +37,7 @@ class ScanditFlutterBarcodeTrackingListener(
             mode.isEnabled = onSessionUpdated.emitForResult(it, dataToSend, mode.isEnabled)
             sessionHolder.setLatestTrackedSession(session)
         }
+        LastFrameDataHolder.frameData = null
     }
 
     fun enableListener() {

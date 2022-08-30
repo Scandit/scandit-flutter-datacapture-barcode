@@ -19,6 +19,7 @@ class BarcodeTracking extends DataCaptureMode {
   bool _enabled = true;
   BarcodeTrackingSettings _settings;
   final List<BarcodeTrackingListener> _listeners = [];
+  final List<BarcodeTrackingAdvancedListener> _advancedListeners = [];
   late _BarcodeTrackingListenerController _controller;
   bool _isInCallback = false;
 
@@ -59,9 +60,7 @@ class BarcodeTracking extends DataCaptureMode {
   }
 
   void addListener(BarcodeTrackingListener listener) {
-    if (_listeners.isEmpty) {
-      _controller.subscribeListeners();
-    }
+    _checkAndSubscribeListeners();
 
     if (_listeners.contains(listener)) {
       return;
@@ -69,10 +68,35 @@ class BarcodeTracking extends DataCaptureMode {
     _listeners.add(listener);
   }
 
+  void addAdvancedListener(BarcodeTrackingAdvancedListener listener) {
+    _checkAndSubscribeListeners();
+
+    if (_advancedListeners.contains(listener)) {
+      return;
+    }
+    _advancedListeners.add(listener);
+  }
+
+  void _checkAndSubscribeListeners() {
+    if (_listeners.isEmpty && _advancedListeners.isEmpty) {
+      _controller.subscribeListeners();
+    }
+  }
+
   void removeListener(BarcodeTrackingListener listener) {
     _listeners.remove(listener);
 
-    if (_listeners.isEmpty) {
+    _checkAndUnsubscribeListeners();
+  }
+
+  void removeAdvancedListener(BarcodeTrackingAdvancedListener listener) {
+    _advancedListeners.remove(listener);
+
+    _checkAndUnsubscribeListeners();
+  }
+
+  void _checkAndUnsubscribeListeners() {
+    if (_listeners.isEmpty && _advancedListeners.isEmpty) {
       _controller.unsubscribeListeners();
     }
   }
@@ -90,6 +114,11 @@ class BarcodeTracking extends DataCaptureMode {
 abstract class BarcodeTrackingListener {
   static const String _barcodeTrackingListenerDidUpdateSession = 'barcodeTrackingListener-didUpdateSession';
   void didUpdateSession(BarcodeTracking barcodeTracking, BarcodeTrackingSession session);
+}
+
+abstract class BarcodeTrackingAdvancedListener {
+  void didUpdateSession(
+      BarcodeTracking barcodeTracking, BarcodeTrackingSession session, Future<FrameData> getFrameData());
 }
 
 class _BarcodeTrackingListenerController {
@@ -112,7 +141,7 @@ class _BarcodeTrackingListenerController {
 
   StreamSubscription _listenForEvents() {
     return _barcodeTrackingSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
-      if (_barcodeTracking._listeners.isEmpty) return;
+      if (_barcodeTracking._listeners.isEmpty && _barcodeTracking._advancedListeners.isEmpty) return;
 
       var payload = jsonDecode(event as String);
       if (payload['event'] as String == BarcodeTrackingListener._barcodeTrackingListenerDidUpdateSession) {
@@ -142,7 +171,21 @@ class _BarcodeTrackingListenerController {
     for (var listener in _barcodeTracking._listeners) {
       listener.didUpdateSession(_barcodeTracking, session);
     }
+    for (var listener in _barcodeTracking._advancedListeners) {
+      listener.didUpdateSession(_barcodeTracking, session, _getLastFrameData);
+    }
     _barcodeTracking._isInCallback = false;
+  }
+
+  Future<FrameData> _getLastFrameData() {
+    return _methodChannel
+        .invokeMethod(BarcodeTrackingFunctionNames.getLastFrameData)
+        .then((value) => getFrom(value as String), onError: _onError);
+  }
+
+  DefaultFrameData getFrom(String response) {
+    final decoded = jsonDecode(response);
+    return DefaultFrameData.fromJSON(decoded);
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {

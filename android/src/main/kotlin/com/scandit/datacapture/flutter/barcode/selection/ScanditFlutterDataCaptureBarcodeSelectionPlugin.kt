@@ -7,6 +7,7 @@
 package com.scandit.datacapture.flutter.barcode.selection
 
 import com.scandit.datacapture.flutter.barcode.data.SerializableBarcodeSelectionSessionData
+import com.scandit.datacapture.flutter.core.common.LastFrameDataHolder
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -93,6 +94,7 @@ class ScanditFlutterDataCaptureBarcodeSelectionPlugin(
                 flutterBarcodeSelectionHandler.finishDidUpdateSession(enabled)
                 result.success(null)
             }
+            METHOD_GET_LAST_FRAME_DATA -> LastFrameDataHolder.handleGetRequest(result)
         }
     }
 
@@ -106,5 +108,6 @@ class ScanditFlutterDataCaptureBarcodeSelectionPlugin(
         private const val METHOD_UNFREEZE_CAMERA = "unfreezeCamera"
         private const val METHOD_BARCODE_SELECTION_DID_SELECT = "finishDidUpdateSelection"
         private const val METHOD_BARCODE_SELECTION_DID_UPDATE_SESSION = "finishDidUpdateSession"
+        private const val METHOD_GET_LAST_FRAME_DATA = "getLastFrameData"
     }
 }

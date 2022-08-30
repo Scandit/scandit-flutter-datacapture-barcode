@@ -5,6 +5,7 @@
  */
 package com.scandit.datacapture.flutter.barcode.capture
 
+import com.scandit.datacapture.flutter.core.common.LastFrameDataHolder
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -66,6 +67,7 @@ class ScanditFlutterDataCaptureBarcodeCapturePlugin(
                 flutterBarcodeCaptureHandler.resetSession(call.arguments as? Long)
                 result.success(null)
             }
+            METHOD_GET_LAST_FRAME_DATA -> LastFrameDataHolder.handleGetRequest(result)
             else -> result.notImplemented()
         }
     }
@@ -77,5 +79,6 @@ class ScanditFlutterDataCaptureBarcodeCapturePlugin(
         private const val METHOD_ADD_BC_LISTENER = "addBarcodeCaptureListener"
         private const val METHOD_REMOVE_BC_LISTENER = "removeBarcodeCaptureListener"
         private const val METHOD_RESET_BC_SESSION = "resetBarcodeCaptureSession"
+        private const val METHOD_GET_LAST_FRAME_DATA = "getLastFrameData"
     }
 }

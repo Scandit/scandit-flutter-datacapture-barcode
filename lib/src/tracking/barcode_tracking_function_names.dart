@@ -21,4 +21,5 @@ abstract class BarcodeTrackingFunctionNames {
   static const String unsubscribeBTBasicOverlayListener = 'unsubscribeBarcodeTrackingBasicOverlayListener';
   static const String finishBrushForTrackedBarcodeCallback = 'finishBrushForTrackedBarcodeCallback';
   static const String resetBarcodeTrackingSession = 'resetBarcodeTrackingSession';
+  static const String getLastFrameData = 'getLastFrameData';
 }

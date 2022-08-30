@@ -21,6 +21,7 @@ class BarcodeCapture extends DataCaptureMode {
   bool _enabled = true;
   BarcodeCaptureSettings _settings;
   final List<BarcodeCaptureListener> _listeners = [];
+  final List<BarcodeCaptureAdvancedListener> _advancedListeners = [];
   late _BarcodeCaptureListenerController _controller;
   bool _isInCallback = false;
 
@@ -69,18 +70,39 @@ class BarcodeCapture extends DataCaptureMode {
   }
 
   void addListener(BarcodeCaptureListener listener) {
-    if (_listeners.isEmpty) {
-      _controller.subscribeListeners();
-    }
+    _checkAndSubscribeListeners();
     if (_listeners.contains(listener)) {
       return;
     }
     _listeners.add(listener);
   }
 
+  void addAdvancedListener(BarcodeCaptureAdvancedListener listener) {
+    _checkAndSubscribeListeners();
+    if (_advancedListeners.contains(listener)) {
+      return;
+    }
+    _advancedListeners.add(listener);
+  }
+
+  void _checkAndSubscribeListeners() {
+    if (_listeners.isEmpty && _advancedListeners.isEmpty) {
+      _controller.subscribeListeners();
+    }
+  }
+
   void removeListener(BarcodeCaptureListener listener) {
     _listeners.remove(listener);
-    if (_listeners.isEmpty) {
+    _checkAndUnsubscribeListeners();
+  }
+
+  void removeAdvancedListener(BarcodeCaptureAdvancedListener listener) {
+    _advancedListeners.remove(listener);
+    _checkAndUnsubscribeListeners();
+  }
+
+  void _checkAndUnsubscribeListeners() {
+    if (_listeners.isEmpty && _advancedListeners.isEmpty) {
       _controller.unsubscribeListeners();
     }
   }
@@ -111,6 +133,11 @@ abstract class BarcodeCaptureListener {
   void didScan(BarcodeCapture barcodeCapture, BarcodeCaptureSession session);
 }
 
+abstract class BarcodeCaptureAdvancedListener {
+  void didUpdateSession(BarcodeCapture barcodeCapture, BarcodeCaptureSession session, Future<FrameData> getFrameData());
+  void didScan(BarcodeCapture barcodeCapture, BarcodeCaptureSession session, Future<FrameData> getFrameData());
+}
+
 class _BarcodeCaptureListenerController {
   final EventChannel _eventChannel =
       const EventChannel('com.scandit.datacapture.barcode.capture.event/barcode_capture_listener');
@@ -129,7 +156,7 @@ class _BarcodeCaptureListenerController {
 
   void _setupBarcodeCaptureSubscription() {
     _barcodeCaptureSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
-      if (_barcodeCapture._listeners.isEmpty) return;
+      if (_barcodeCapture._listeners.isEmpty && _barcodeCapture._advancedListeners.isEmpty) return;
 
       var eventJSON = jsonDecode(event);
       var session = BarcodeCaptureSession.fromJSON(jsonDecode(eventJSON['session']));
@@ -162,13 +189,30 @@ class _BarcodeCaptureListenerController {
     for (var listener in _barcodeCapture._listeners) {
       listener.didUpdateSession(_barcodeCapture, session);
     }
+    for (var listener in _barcodeCapture._advancedListeners) {
+      listener.didUpdateSession(_barcodeCapture, session, _getLastFrameData);
+    }
     _barcodeCapture._isInCallback = false;
+  }
+
+  Future<FrameData> _getLastFrameData() {
+    return _methodChannel
+        .invokeMethod(BarcodeCaptureFunctionNames.getLastFrameData)
+        .then((value) => getFrom(value as String), onError: _onError);
+  }
+
+  DefaultFrameData getFrom(String response) {
+    final decoded = jsonDecode(response);
+    return DefaultFrameData.fromJSON(decoded);
   }
 
   void _notifyListenersOfDidScan(BarcodeCaptureSession session) {
     _barcodeCapture._isInCallback = true;
     for (var listener in _barcodeCapture._listeners) {
       listener.didScan(_barcodeCapture, session);
+    }
+    for (var listener in _barcodeCapture._advancedListeners) {
+      listener.didScan(_barcodeCapture, session, _getLastFrameData);
     }
     _barcodeCapture._isInCallback = false;
   }

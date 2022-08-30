@@ -6,12 +6,13 @@
 
 import Foundation
 import ScanditBarcodeCapture
+import scandit_flutter_datacapture_core
 
 extension ScanditFlutterDataCaptureBarcodeTracking: BarcodeTrackingListener, FlutterStreamHandler {
     public func barcodeTracking(_ barcodeTracking: BarcodeTracking,
                                 didUpdate session: BarcodeTrackingSession,
                                 frameData: FrameData) {
-       
+        ScanditFlutterDataCaptureCore.lastFrame = frameData
         DispatchQueue.main.async {
             let removedCodes = session.removedTrackedBarcodes
             for removed in removedCodes {
@@ -26,6 +27,7 @@ extension ScanditFlutterDataCaptureBarcodeTracking: BarcodeTrackingListener, Flu
             return sendEvent(event: .didUpdateSession, body: ["session": session.jsonString])
         }) else { return }
         barcodeTracking.isEnabled = value
+        ScanditFlutterDataCaptureCore.lastFrame = nil
     }
 
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {

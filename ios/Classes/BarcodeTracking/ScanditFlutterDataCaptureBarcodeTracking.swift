@@ -196,6 +196,7 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
             static let addBarcodeTrackingListener = "addBarcodeTrackingListener"
             static let removeBarcodeTrackingListener = "removeBarcodeTrackingListener"
             static let resetBarcodeTrackingSession = "resetBarcodeTrackingSession"
+            static let getLastFrameData = "getLastFrameData"
         }
         switch methodCall.method {
         case FunctionNames.barcodeTrackingFinishDidUpdateSession:
@@ -207,6 +208,8 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
             removeBarcodeTrackingListener(result: result)
         case FunctionNames.resetBarcodeTrackingSession:
             resetSession(call: methodCall, result: result)
+        case FunctionNames.getLastFrameData:
+            ScanditFlutterDataCaptureCore.getLastFrameData(reply: result)
         default:
             result(FlutterMethodNotImplemented)
         }

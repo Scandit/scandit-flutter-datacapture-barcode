@@ -6,25 +6,30 @@
 
 import Foundation
 import ScanditBarcodeCapture
+import scandit_flutter_datacapture_core
 
 extension ScanditFlutterDataCaptureBarcodeSelection: BarcodeSelectionListener {
     public func barcodeSelection(_ barcodeSelection: BarcodeSelection,
                                  didUpdateSelection session: BarcodeSelectionSession,
                                  frameData: FrameData?) {
+        ScanditFlutterDataCaptureCore.lastFrame = frameData
         sessionHolder.latestSession = session
         guard let value = didUpdateSelectionLock.wait(afterDoing: {
             return sendEvent(event: .selectionDidUpdate, body: ["session": session.jsonString])
         }) else { return }
         barcodeSelection.isEnabled = value
+        ScanditFlutterDataCaptureCore.lastFrame = nil
     }
 
     public func barcodeSelection(_ barcodeSelection: BarcodeSelection,
                                  didUpdate session: BarcodeSelectionSession,
                                  frameData: FrameData?) {
+        ScanditFlutterDataCaptureCore.lastFrame = frameData
         guard let value = didUpdateSessionLock.wait(afterDoing: {
             return sendEvent(event: .sessionDidUpate, body: ["session": session.jsonString])
         }) else { return }
         barcodeSelection.isEnabled = value
+        ScanditFlutterDataCaptureCore.lastFrame = nil
     }
 }
 

@@ -12,6 +12,7 @@ import 'barcode_selection_session.dart';
 
 class BarcodeSelection extends DataCaptureMode {
   final List<BarcodeSelectionListener> _listeners = [];
+  final List<BarcodeSelectionAdvancedListener> _advancedListeners = [];
   late _BarcodeSelectionListenerController _controller;
   BarcodeSelectionSettings _settings;
   BarcodeSelectionFeedback _feedback = BarcodeSelectionFeedback.defaultFeedback;
@@ -78,9 +79,32 @@ class BarcodeSelection extends DataCaptureMode {
     _listeners.add(listener);
   }
 
+  void addAdvancedListener(BarcodeSelectionAdvancedListener listener) {
+    _checkAndSubscribeListeners();
+    if (_advancedListeners.contains(listener)) {
+      return;
+    }
+    _advancedListeners.add(listener);
+  }
+
+  void _checkAndSubscribeListeners() {
+    if (_listeners.isEmpty && _advancedListeners.isEmpty) {
+      _controller.subscribeListeners();
+    }
+  }
+
   void removeListener(BarcodeSelectionListener listener) {
     _listeners.remove(listener);
-    if (_listeners.isEmpty) {
+    _checkAndUnsubscribeListeners();
+  }
+
+  void removeAdvancedListener(BarcodeSelectionAdvancedListener listener) {
+    _advancedListeners.remove(listener);
+    _checkAndUnsubscribeListeners();
+  }
+
+  void _checkAndUnsubscribeListeners() {
+    if (_listeners.isEmpty && _advancedListeners.isEmpty) {
       _controller.unsubscribeListeners();
     }
   }
@@ -128,6 +152,13 @@ abstract class BarcodeSelectionListener {
   void didUpdateSession(BarcodeSelection barcodeSelection, BarcodeSelectionSession session);
 }
 
+abstract class BarcodeSelectionAdvancedListener {
+  void didUpdateSelection(
+      BarcodeSelection barcodeSelection, BarcodeSelectionSession session, Future<FrameData> getFrameData());
+  void didUpdateSession(
+      BarcodeSelection barcodeSelection, BarcodeSelectionSession session, Future<FrameData> getFrameData());
+}
+
 class _BarcodeSelectionListenerController {
   final EventChannel _eventChannel =
       const EventChannel('com.scandit.datacapture.barcode.selection.event/barcode_selection_listener');
@@ -151,7 +182,7 @@ class _BarcodeSelectionListenerController {
 
   void _setupBarcodeSelectionSubscription() {
     _barcodeSelectionSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
-      if (_barcodeSelection._listeners.isEmpty) return;
+      if (_barcodeSelection._listeners.isEmpty && _barcodeSelection._advancedListeners.isEmpty) return;
 
       var eventJSON = jsonDecode(event);
       var session = BarcodeSelectionSession.fromJSON(jsonDecode(eventJSON['session']));
@@ -189,6 +220,9 @@ class _BarcodeSelectionListenerController {
     for (var listener in _barcodeSelection._listeners) {
       listener.didUpdateSession(_barcodeSelection, session);
     }
+    for (var listener in _barcodeSelection._advancedListeners) {
+      listener.didUpdateSession(_barcodeSelection, session, _getLastFrameData);
+    }
     _barcodeSelection._isInCallback = false;
   }
 
@@ -197,7 +231,21 @@ class _BarcodeSelectionListenerController {
     for (var listener in _barcodeSelection._listeners) {
       listener.didUpdateSelection(_barcodeSelection, session);
     }
+    for (var listener in _barcodeSelection._advancedListeners) {
+      listener.didUpdateSelection(_barcodeSelection, session, _getLastFrameData);
+    }
     _barcodeSelection._isInCallback = false;
+  }
+
+  Future<FrameData> _getLastFrameData() {
+    return _methodChannel
+        .invokeMethod(BarcodeSelectionFunctionNames.getLastFrameData)
+        .then((value) => getFrom(value as String), onError: _onError);
+  }
+
+  DefaultFrameData getFrom(String response) {
+    final decoded = jsonDecode(response);
+    return DefaultFrameData.fromJSON(decoded);
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {

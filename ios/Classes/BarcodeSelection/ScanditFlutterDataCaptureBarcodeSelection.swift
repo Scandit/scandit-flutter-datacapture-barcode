@@ -32,6 +32,7 @@ public class ScanditFlutterDataCaptureBarcodeSelection: NSObject, ScanditFlutter
         static let finishDidUpdateSession = "finishDidUpdateSession"
         static let getBarcodeSelectionSessionCount = "getBarcodeSelectionSessionCount"
         static let resetBarcodeSelectionSession = "resetBarcodeSelectionSession"
+        static let getLastFrameData = "getLastFrameData"
     }
 
     let listenerMethodChannel: FlutterMethodChannel
@@ -88,6 +89,8 @@ public class ScanditFlutterDataCaptureBarcodeSelection: NSObject, ScanditFlutter
             countOfBarcodes(jsonString: jsonString, result: result)
         case FunctionNames.resetBarcodeSelectionSession:
             resetSession(call: call, result: result)
+        case FunctionNames.getLastFrameData:
+            ScanditFlutterDataCaptureCore.getLastFrameData(reply: result)
         default:
             result(FlutterMethodNotImplemented)
         }

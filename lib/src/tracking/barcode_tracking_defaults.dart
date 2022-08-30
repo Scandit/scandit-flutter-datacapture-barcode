@@ -5,7 +5,6 @@
  */
 
 import 'dart:convert';
-import '../../scandit_flutter_datacapture_barcode_tracking.dart';
 import 'barcode_tracking_basic_overlay.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 import 'package:flutter/services.dart';

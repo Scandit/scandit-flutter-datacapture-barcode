@@ -11,6 +11,7 @@ import com.scandit.datacapture.barcode.selection.capture.BarcodeSelectionListene
 import com.scandit.datacapture.barcode.selection.capture.BarcodeSelectionSession
 import com.scandit.datacapture.core.data.FrameData
 import com.scandit.datacapture.flutter.barcode.selection.ScanditFlutterBarcodeSelectionSessionHolder
+import com.scandit.datacapture.flutter.core.common.LastFrameDataHolder
 import com.scandit.datacapture.flutter.core.utils.EventHandler
 import com.scandit.datacapture.flutter.core.utils.EventSinkWithResult
 import org.json.JSONObject
@@ -30,6 +31,7 @@ class ScanditFlutterBarcodeSelectionListener(
         frameData: FrameData?
     ) {
         sessionHolder.setLatestSession(session)
+        LastFrameDataHolder.frameData = frameData
         eventHandler.getCurrentEventSink()?.let {
             val params = JSONObject(
                 mapOf(
@@ -40,6 +42,7 @@ class ScanditFlutterBarcodeSelectionListener(
             barcodeSelection.isEnabled =
                 onBarcodeSelection.emitForResult(it, params, barcodeSelection.isEnabled)
         }
+        LastFrameDataHolder.frameData = null
     }
 
     override fun onSessionUpdated(
@@ -47,6 +50,7 @@ class ScanditFlutterBarcodeSelectionListener(
         session: BarcodeSelectionSession,
         frameData: FrameData?
     ) {
+        LastFrameDataHolder.frameData = frameData
         eventHandler.getCurrentEventSink()?.let {
             val params = JSONObject(
                 mapOf(
@@ -57,6 +61,7 @@ class ScanditFlutterBarcodeSelectionListener(
             barcodeSelection.isEnabled =
                 onSessionUpdated.emitForResult(it, params, barcodeSelection.isEnabled)
         }
+        LastFrameDataHolder.frameData = null
     }
 
     fun enableListener() {

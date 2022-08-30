@@ -15,6 +15,7 @@ class ScanditFlutterDataCaptureBarcodeCapture: NSObject {
         static let addBarcodeCaptureListener = "addBarcodeCaptureListener"
         static let removeBarcodeCaptureListener = "removeBarcodeCaptureListener"
         static let resetBarcodeCaptureSession = "resetBarcodeCaptureSession"
+        static let getLastFrameData = "getLastFrameData"
     }
 
     let eventChannel: FlutterEventChannel
@@ -58,6 +59,8 @@ class ScanditFlutterDataCaptureBarcodeCapture: NSObject {
             finishDidUpdate(enabled: methodCall.arguments as? Bool ?? false, result: result)
         case FunctionNames.resetBarcodeCaptureSession:
             resetSession(call: methodCall, result: result)
+        case FunctionNames.getLastFrameData:
+            ScanditFlutterDataCaptureCore.getLastFrameData(reply: result)
         default:
             result(FlutterMethodNotImplemented)
         }
