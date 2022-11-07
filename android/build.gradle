@@ -1,8 +1,8 @@
 buildscript {
     ext {
-        sdk_version = "6.14.1"
+        sdk_version = "6.15.0"
         kotlin_version = "1.5.31"
-        agp_version = "7.0.3"
+        agp_version = "7.2.1"
     }
 
     repositories {
@@ -20,11 +20,11 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 32
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 32
         versionCode 1
         versionName "1.0"
     }
