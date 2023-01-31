@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        sdk_version = "6.16.0"
+        sdk_version = "6.15.2"
         kotlin_version = "1.5.31"
         agp_version = "7.2.1"
     }
@@ -23,7 +23,7 @@ android {
     compileSdkVersion 32
 
     defaultConfig {
-        minSdkVersion 24
+        minSdkVersion 21
         targetSdkVersion 32
         versionCode 1
         versionName "1.0"
