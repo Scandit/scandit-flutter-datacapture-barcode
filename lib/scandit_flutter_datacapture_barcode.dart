@@ -8,7 +8,7 @@ library scandit_flutter_datacapture_barcode;
 
 export 'src/scandit_flutter_datacapture_barcode.dart' show ScanditFlutterDataCaptureBarcode;
 export 'src/barcode.dart' show Barcode, LocalizedOnlyBarcode;
-export 'src/symbology.dart' show Symbology, SymbologySerializer, EncodingRange;
+export 'src/symbology.dart' show Symbology, SymbologySerializer, EncodingRange, Ean13UpcaClassification;
 export 'src/symbology_description.dart' show SymbologyDescription, Range;
 export 'src/symbology_settings.dart' show SymbologySettings, Checksum;
 export 'src/composite_type.dart' show CompositeType, CompositeTypeSerializer;

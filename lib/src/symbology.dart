@@ -4,6 +4,8 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
+import '../scandit_flutter_datacapture_barcode.dart';
+
 enum Symbology {
   ean13Upca,
   upce,
@@ -184,4 +186,23 @@ class EncodingRange {
 
   EncodingRange.fromJSON(Map<String, dynamic> json)
       : this(json['ianaName'] as String, (json['startIndex'] as num).toInt(), (json['endIndex'] as num).toInt());
+}
+
+// ignore: avoid_classes_with_only_static_members
+class Ean13UpcaClassification {
+  static bool isUpca(Barcode barcode) {
+    if (barcode.symbology != Symbology.ean13Upca) {
+      return false;
+    }
+
+    return barcode.data?.length == 12 || (barcode.data?.length == 13 && barcode.data?[0] == '0');
+  }
+
+  static bool isEan13(Barcode barcode) {
+    if (barcode.symbology != Symbology.ean13Upca) {
+      return false;
+    }
+
+    return barcode.data?.length == 13 && barcode.data?[0] != '0';
+  }
 }
