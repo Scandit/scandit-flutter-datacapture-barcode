@@ -5,6 +5,7 @@
  */
 
 import 'dart:convert';
+// ignore: unnecessary_import
 import 'dart:ui';
 import 'package:meta/meta.dart';
 import 'package:flutter/services.dart';

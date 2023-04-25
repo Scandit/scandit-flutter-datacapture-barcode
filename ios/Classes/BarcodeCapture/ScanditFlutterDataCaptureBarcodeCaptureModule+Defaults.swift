@@ -24,7 +24,7 @@ extension ScanditFlutterDataCaptureBarcodeCaptureModule {
         func createOverlayWithStyle(style: BarcodeCaptureOverlayStyle) -> [String: Any] {
             return BarcodeCaptureOverlay.defaultBrush(forStyle: style).defaults
         }
-        
+
         return [
             "defaultStyle": BarcodeCaptureOverlayStyle.legacy.jsonString,
             "Brushes": [

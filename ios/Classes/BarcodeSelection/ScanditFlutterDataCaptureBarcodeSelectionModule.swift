@@ -29,9 +29,13 @@ public class ScanditFlutterDataCaptureBarcodeSelectionModule: NSObject {
     public func methodCallHandler(methodCall: FlutterMethodCall, result: FlutterResult) {
         switch methodCall.method {
         case FunctionNames.getDefaults:
-            let defaultsJSONString = String(data: try! JSONSerialization.data(withJSONObject: defaults, options: []),
-                                            encoding: .utf8)
-            result(defaultsJSONString)
+            do {
+                let defaultsJSONString = String(data: try JSONSerialization.data(withJSONObject: defaults, options: []),
+                                                encoding: .utf8)
+                result(defaultsJSONString)
+            } catch {
+                result(FlutterError(code: "-1", message: "Unable to load the defaults. \(error)", details: nil))
+            }
         default:
             result(FlutterMethodNotImplemented)
         }

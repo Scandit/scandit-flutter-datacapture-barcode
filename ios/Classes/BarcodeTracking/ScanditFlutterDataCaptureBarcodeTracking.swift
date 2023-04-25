@@ -84,7 +84,7 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
     }()
 
     internal var sessionHolder = ScanditFlutterDataCaptureBarcodeTrackingSessionHolder()
-    
+
     internal var trackedBarcodeViewCache: [UIImageView: TrackedBarcode] = [:]
 
     // BarcodeTrackingBasicOverlay
@@ -164,7 +164,7 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
         barcodeTrackingBasicOverlay?.delegate = nil
         result(nil)
     }
-    
+
     public func resetSession(call: FlutterMethodCall, result: FlutterResult) {
         sessionHolder.reset(frameSequenceId: call.arguments as? Int)
         result(nil)

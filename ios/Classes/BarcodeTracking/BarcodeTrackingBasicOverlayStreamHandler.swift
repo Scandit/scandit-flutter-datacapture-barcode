@@ -52,9 +52,14 @@ public class BarcodeTrackingBasicOverlayStreamHandler: NSObject, FlutterStreamHa
     private func send(event: BarcodeTrackingBasicOverlayEvent, body: [String: Any]) -> Bool {
         guard let sink = sink, hasListeners else { return false }
         let payload = ["event": event.rawValue].merging(body) { (_, new) in new }
-        let jsonString = String(data: try! JSONSerialization.data(withJSONObject: payload, options: []),
-                                encoding: .utf8)
-        sink(jsonString)
-        return true
+        do {
+            let jsonString = String(data: try JSONSerialization.data(withJSONObject: payload, options: []),
+                                    encoding: .utf8)
+            sink(jsonString)
+            return true
+        } catch {
+            print(error)
+            return false
+        }
     }
 }

@@ -11,18 +11,18 @@ import ScanditBarcodeCapture
 class ScanditFlutterDataCaptureBarcodeCaptureSessionHolder {
     private var lock = os_unfair_lock_s()
 
-    private var _latestSession: BarcodeCaptureSession?
+    private var holdedSession: BarcodeCaptureSession?
 
     var latestSession: BarcodeCaptureSession? {
         get {
             os_unfair_lock_lock(&lock)
             defer { os_unfair_lock_unlock(&lock) }
-            return _latestSession
+            return holdedSession
         }
         set {
             os_unfair_lock_lock(&lock)
             defer { os_unfair_lock_unlock(&lock) }
-            _latestSession = newValue
+            holdedSession = newValue
         }
     }
 

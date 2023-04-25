@@ -11,7 +11,6 @@ class ScanditFlutterDataCaptureBarcodeCapture: NSObject {
     private enum FunctionNames {
         static let finishDidScan = "finishDidScan"
         static let finishDidUpdateSession = "finishDidUpdateSession"
-        static let getBarcodeCaptureDefaults = "getBarcodeCaptureDefaults"
         static let addBarcodeCaptureListener = "addBarcodeCaptureListener"
         static let removeBarcodeCaptureListener = "removeBarcodeCaptureListener"
         static let resetBarcodeCaptureSession = "resetBarcodeCaptureSession"
@@ -24,7 +23,7 @@ class ScanditFlutterDataCaptureBarcodeCapture: NSObject {
     internal var sink: FlutterEventSink?
 
     internal var hasListeners = false
-    
+
     var sessionHolder = ScanditFlutterDataCaptureBarcodeCaptureSessionHolder()
 
     internal let didUpdateSessionLock: CallbackLock<Bool> = {
@@ -91,7 +90,7 @@ class ScanditFlutterDataCaptureBarcodeCapture: NSObject {
         finishDidUpdateSessionCallback(enabled: enabled)
         result(nil)
     }
-    
+
     public func resetSession(call: FlutterMethodCall, result: FlutterResult) {
         sessionHolder.reset(frameSequenceId: call.arguments as? Int)
         result(nil)

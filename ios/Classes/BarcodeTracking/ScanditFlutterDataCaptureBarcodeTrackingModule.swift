@@ -36,9 +36,13 @@ public class ScanditFlutterDataCaptureBarcodeTrackingModule: NSObject {
     }
 
     func defaults(result: FlutterResult) {
-        let defaultsJSON = String(data: try! JSONSerialization.data(withJSONObject: defaults, options: []),
-                                  encoding: .utf8)
-        result(defaultsJSON)
+        do {
+            let defaultsJSON = String(data: try JSONSerialization.data(withJSONObject: defaults, options: []),
+                                      encoding: .utf8)
+            result(defaultsJSON)
+        } catch {
+            result(FlutterError(code: "-1", message: "Unable to load the defaults. \(error)", details: nil))
+        }
     }
 
     @objc

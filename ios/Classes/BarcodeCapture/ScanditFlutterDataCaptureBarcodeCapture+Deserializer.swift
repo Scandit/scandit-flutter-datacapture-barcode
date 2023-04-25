@@ -19,30 +19,40 @@ extension ScanditFlutterDataCaptureBarcodeCapture {
 extension ScanditFlutterDataCaptureBarcodeCapture: BarcodeCaptureDeserializerDelegate {
     func barcodeCaptureDeserializer(_ deserializer: BarcodeCaptureDeserializer,
                                     didStartDeserializingMode mode: BarcodeCapture,
-                                    from JSONValue: JSONValue) {}
+                                    from jsonValue: JSONValue) {
+        // not used in frameworks
+    }
 
     func barcodeCaptureDeserializer(_ deserializer: BarcodeCaptureDeserializer,
                                     didFinishDeserializingMode mode: BarcodeCapture,
-                                    from JSONValue: JSONValue) {
+                                    from jsonValue: JSONValue) {
         mode.addListener(self)
-        if JSONValue.containsKey("enabled") {
-            mode.isEnabled = JSONValue.bool(forKey: "enabled")
+        if jsonValue.containsKey("enabled") {
+            mode.isEnabled = jsonValue.bool(forKey: "enabled")
         }
     }
 
     func barcodeCaptureDeserializer(_ deserializer: BarcodeCaptureDeserializer,
                                     didStartDeserializingSettings settings: BarcodeCaptureSettings,
-                                    from JSONValue: JSONValue) {}
+                                    from jsonValue: JSONValue) {
+        // not used in frameworks
+    }
 
     func barcodeCaptureDeserializer(_ deserializer: BarcodeCaptureDeserializer,
                                     didFinishDeserializingSettings settings: BarcodeCaptureSettings,
-                                    from JSONValue: JSONValue) {}
+                                    from jsonValue: JSONValue) {
+        // not used in frameworks
+    }
 
     func barcodeCaptureDeserializer(_ deserializer: BarcodeCaptureDeserializer,
                                     didStartDeserializingOverlay overlay: BarcodeCaptureOverlay,
-                                    from JSONValue: JSONValue) {}
+                                    from jsonValue: JSONValue) {
+        // not used in frameworks
+    }
 
     func barcodeCaptureDeserializer(_ deserializer: BarcodeCaptureDeserializer,
                                     didFinishDeserializingOverlay overlay: BarcodeCaptureOverlay,
-                                    from JSONValue: JSONValue) {}
+                                    from jsonValue: JSONValue) {
+        // not used in frameworks
+    }
 }

@@ -129,13 +129,18 @@ public class ScanditFlutterDataCaptureBarcodeSelection: NSObject, ScanditFlutter
     }
 
     public func countOfBarcodes(jsonString: String, result: FlutterResult) {
-        let arguments = try! JSONSerialization.jsonObject(with: jsonString.data(using: .utf8)!,
-                                                          options: []) as! [String: Any]
-        let frameSequenceId = arguments["frameSequenceId"] as? Int
-        let barcodeData = arguments["data"] as? String
-        let symbology = SymbologyDescription(identifier: arguments["symbology"] as? String ?? "")?.symbology
-        let count = sessionHolder.barcodeCountOfFrame(with: frameSequenceId, and: symbology, and: barcodeData)
-        result(count)
+        do {
+            let arguments = try JSONSerialization.jsonObject(with: jsonString.data(using: .utf8)!,
+                                                             options: []) as! [String: Any]
+
+            let frameSequenceId = arguments["frameSequenceId"] as? Int
+            let barcodeData = arguments["data"] as? String
+            let symbology = SymbologyDescription(identifier: arguments["symbology"] as? String ?? "")?.symbology
+            let count = sessionHolder.barcodeCountOfFrame(with: frameSequenceId, and: symbology, and: barcodeData)
+            result(count)
+        } catch {
+            result(FlutterError(code: "-1", message: "Unable to parse json string. \(error)", details: nil))
+        }
     }
 
     public func resetSession(call: FlutterMethodCall, result: FlutterResult) {

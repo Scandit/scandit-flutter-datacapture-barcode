@@ -19,34 +19,42 @@ extension ScanditFlutterDataCaptureBarcodeTracking {
 extension ScanditFlutterDataCaptureBarcodeTracking: BarcodeTrackingDeserializerDelegate {
     public func barcodeTrackingDeserializer(_ deserializer: BarcodeTrackingDeserializer,
                                             didStartDeserializingMode mode: BarcodeTracking,
-                                            from JSONValue: JSONValue) {}
+                                            from jsonValue: JSONValue) {
+        // not used in frameworks
+    }
 
     public func barcodeTrackingDeserializer(_ deserializer: BarcodeTrackingDeserializer,
                                             didFinishDeserializingMode mode: BarcodeTracking,
-                                            from JSONValue: JSONValue) {
-        if JSONValue.containsKey("enabled") {
-            mode.isEnabled = JSONValue.bool(forKey: "enabled")
+                                            from jsonValue: JSONValue) {
+        if jsonValue.containsKey("enabled") {
+            mode.isEnabled = jsonValue.bool(forKey: "enabled")
         }
         mode.addListener(self)
     }
 
     public func barcodeTrackingDeserializer(_ deserializer: BarcodeTrackingDeserializer,
                                             didStartDeserializingSettings settings: BarcodeTrackingSettings,
-                                            from JSONValue: JSONValue) {}
+                                            from jsonValue: JSONValue) {
+        // not used in frameworks
+    }
 
     public func barcodeTrackingDeserializer(_ deserializer: BarcodeTrackingDeserializer,
                                             didFinishDeserializingSettings settings: BarcodeTrackingSettings,
-                                            from JSONValue: JSONValue) {}
+                                            from jsonValue: JSONValue) {
+        // not used in frameworks
+    }
 
     public func barcodeTrackingDeserializer(_ deserializer: BarcodeTrackingDeserializer,
                                             didStartDeserializingBasicOverlay overlay: BarcodeTrackingBasicOverlay,
-                                            from JSONValue: JSONValue) {}
+                                            from jsonValue: JSONValue) {
+        // not used in frameworks
+    }
 
     public func barcodeTrackingDeserializer(_ deserializer: BarcodeTrackingDeserializer,
                                             didFinishDeserializingBasicOverlay overlay: BarcodeTrackingBasicOverlay,
-                                            from JSONValue: JSONValue) {
+                                            from jsonValue: JSONValue) {
         barcodeTrackingBasicOverlay = overlay
-        if (basicOverlayStreamHandler.hasListeners) {
+        if basicOverlayStreamHandler.hasListeners {
             barcodeTrackingBasicOverlay?.delegate = self
         }
     }
@@ -54,12 +62,14 @@ extension ScanditFlutterDataCaptureBarcodeTracking: BarcodeTrackingDeserializerD
     public func barcodeTrackingDeserializer(
         _ deserializer: BarcodeTrackingDeserializer,
         didStartDeserializingAdvancedOverlay overlay: BarcodeTrackingAdvancedOverlay,
-        from JSONValue: JSONValue) {}
+        from jsonValue: JSONValue) {
+            // not used in frameworks
+        }
 
     public func barcodeTrackingDeserializer(
         _ deserializer: BarcodeTrackingDeserializer,
         didFinishDeserializingAdvancedOverlay overlay: BarcodeTrackingAdvancedOverlay,
-        from JSONValue: JSONValue) {
+        from jsonValue: JSONValue) {
         barcodeTrackingAdvancedOverlay = overlay
         barcodeTrackingAdvancedOverlay?.delegate = self
     }

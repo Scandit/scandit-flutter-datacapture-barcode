@@ -25,10 +25,10 @@ extension ScanditFlutterDataCaptureBarcodeModule {
 
     var symbologySettings: [String: String] {
         let barcodeCaptureSettings = BarcodeCaptureSettings()
-        var symbologySettings: [String: String] = [:]
+        var settings: [String: String] = [:]
         SymbologyDescription.all.forEach {
-            symbologySettings[$0.identifier] = barcodeCaptureSettings.settings(for: $0.symbology).jsonString
+            settings[$0.identifier] = barcodeCaptureSettings.settings(for: $0.symbology).jsonString
         }
-        return symbologySettings
+        return settings
     }
 }

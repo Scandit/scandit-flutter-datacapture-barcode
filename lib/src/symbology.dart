@@ -4,6 +4,8 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
+import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+
 import '../scandit_flutter_datacapture_barcode.dart';
 
 enum Symbology {
@@ -172,7 +174,7 @@ extension SymbologySerializer on Symbology {
   }
 }
 
-class EncodingRange {
+class EncodingRange implements Serializable {
   String _ianaName;
   String get ianaName => _ianaName;
 
@@ -186,6 +188,11 @@ class EncodingRange {
 
   EncodingRange.fromJSON(Map<String, dynamic> json)
       : this(json['ianaName'] as String, (json['startIndex'] as num).toInt(), (json['endIndex'] as num).toInt());
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {'ianaName': _ianaName, 'startIndex': _startIndex, 'endIndex': _endIndex};
+  }
 }
 
 // ignore: avoid_classes_with_only_static_members

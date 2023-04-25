@@ -10,6 +10,14 @@ import com.scandit.datacapture.flutter.barcode.capture.ScanditFlutterBarcodeCapt
 import com.scandit.datacapture.flutter.barcode.capture.ScanditFlutterDataCaptureBarcodeCaptureHandler
 import com.scandit.datacapture.flutter.barcode.capture.ScanditFlutterDataCaptureBarcodeCapturePlugin
 import com.scandit.datacapture.flutter.barcode.capture.listeners.ScanditFlutterBarcodeCaptureListener
+import com.scandit.datacapture.flutter.barcode.count.FrameworksBarcodeCount
+import com.scandit.datacapture.flutter.barcode.count.ScanditFlutterBarcodeCountSessionHolder
+import com.scandit.datacapture.flutter.barcode.count.ScanditFlutterDataCaptureBarcodeCountMethodCallHandler
+import com.scandit.datacapture.flutter.barcode.count.ScanditFlutterDataCaptureBarcodeCountPlugin
+import com.scandit.datacapture.flutter.barcode.count.listeners.ScanditFlutterBarcodeCountCaptureListListener
+import com.scandit.datacapture.flutter.barcode.count.listeners.ScanditFlutterBarcodeCountListener
+import com.scandit.datacapture.flutter.barcode.count.listeners.ScanditFlutterBarcodeCountViewListener
+import com.scandit.datacapture.flutter.barcode.count.listeners.ScanditFlutterBarcodeCountViewUiListener
 import com.scandit.datacapture.flutter.barcode.selection.ScanditFlutterBarcodeSelectionSessionHolder
 import com.scandit.datacapture.flutter.barcode.selection.ScanditFlutterDataCaptureBarcodeSelectionHandler
 import com.scandit.datacapture.flutter.barcode.selection.ScanditFlutterDataCaptureBarcodeSelectionPlugin
@@ -25,6 +33,7 @@ import com.scandit.datacapture.flutter.barcode.tracking.listeners.ScanditFlutter
 import com.scandit.datacapture.flutter.barcode.utils.AdvancedOverlayViewPool
 import com.scandit.datacapture.flutter.core.utils.EventHandler
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
@@ -47,7 +56,10 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
     private var scanditFlutterDataCaptureBarcodeSelectionPlugin:
         ScanditFlutterDataCaptureBarcodeSelectionPlugin? = null
 
-    override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    private var scanditFlutterDataCaptureBarcodeCountPlugin:
+        ScanditFlutterDataCaptureBarcodeCountPlugin? = null
+
+    override fun onAttachedToEngine(binding: FlutterPluginBinding) {
         lock.withLock {
             if (isPluginAttached) return
 
@@ -75,16 +87,34 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
                     it.onAttachedToEngine(binding)
                 }
 
+            val frameworksBarcodeCount = provideFrameworksBarcodeCount(binding)
+
+            scanditFlutterDataCaptureBarcodeCountPlugin =
+                ScanditFlutterDataCaptureBarcodeCountPlugin(
+                    frameworksBarcodeCount,
+                    provideScanditFlutterDataCaptureBarcodeCountMethodCallHandler(
+                        frameworksBarcodeCount
+                    )
+                ).also {
+                    it.onAttachedToEngine(binding)
+                }
+
+            binding.platformViewRegistry.registerViewFactory(
+                "com.scandit.BarcodeCountView",
+                ScanditBarcodeCountPlatformViewFactory(frameworksBarcodeCount)
+            )
+
             isPluginAttached = true
         }
     }
 
-    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    override fun onDetachedFromEngine(binding: FlutterPluginBinding) {
         lock.withLock {
             scanditFlutterDataCaptureBarcodeCorePlugin.onDetachedFromEngine(binding)
             scanditFlutterDataCaptureBarcodeCapturePlugin?.onDetachedFromEngine(binding)
             scanditFlutterDataCaptureBarcodeTrackingPlugin?.onDetachedFromEngine(binding)
             scanditFlutterDataCaptureBarcodeSelectionPlugin?.onDetachedFromEngine(binding)
+            scanditFlutterDataCaptureBarcodeCountPlugin?.onDetachedFromEngine(binding)
             isPluginAttached = false
         }
     }
@@ -256,5 +286,90 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
             )
 
         //endregion BARCODE SELECTION
+
+        //region BARCODE COUNT
+
+        @JvmStatic
+        private fun provideScanditFlutterBarcodeCountListener(
+            channel: EventChannel,
+            sessionHolder: ScanditFlutterBarcodeCountSessionHolder
+        ): ScanditFlutterBarcodeCountListener {
+            return ScanditFlutterBarcodeCountListener(
+                EventHandler(channel),
+                sessionHolder
+            )
+        }
+
+        @JvmStatic
+        private fun provideScanditFlutterBarcodeCountCaptureListListener(
+            channel: EventChannel
+        ): ScanditFlutterBarcodeCountCaptureListListener {
+            return ScanditFlutterBarcodeCountCaptureListListener(
+                EventHandler(
+                    channel
+                )
+            )
+        }
+
+        @JvmStatic
+        private fun provideFrameworksBarcodeCount(
+            binding: FlutterPluginBinding
+        ): FrameworksBarcodeCount {
+            val sessionHolder = ScanditFlutterBarcodeCountSessionHolder()
+
+            val barcodeCountEventsChannel = EventChannel(
+                binding.binaryMessenger,
+                ScanditFlutterBarcodeCountListener.CHANNEL_NAME
+            )
+
+            return FrameworksBarcodeCount(
+                binding.applicationContext,
+                provideScanditFlutterBarcodeCountCaptureListListener(barcodeCountEventsChannel),
+                provideScanditFlutterBarcodeCountListener(barcodeCountEventsChannel, sessionHolder),
+                provideScanditFlutterBarcodeCountViewListener(binding),
+                provideScanditFlutterBarcodeCountViewUiListener(binding),
+                sessionHolder
+            )
+        }
+
+        @JvmStatic
+        private fun provideScanditFlutterDataCaptureBarcodeCountMethodCallHandler(
+            frameworksBarcodeCount: FrameworksBarcodeCount
+        ): ScanditFlutterDataCaptureBarcodeCountMethodCallHandler {
+            return ScanditFlutterDataCaptureBarcodeCountMethodCallHandler(
+                frameworksBarcodeCount
+            )
+        }
+
+        @JvmStatic
+        private fun provideScanditFlutterBarcodeCountViewListener(
+            binding: FlutterPluginBinding
+        ): ScanditFlutterBarcodeCountViewListener {
+            val viewListenerChannel = EventChannel(
+                binding.binaryMessenger,
+                ScanditFlutterBarcodeCountViewListener.CHANNEL_NAME
+            )
+            return ScanditFlutterBarcodeCountViewListener(
+                EventHandler(
+                    viewListenerChannel
+                )
+            )
+        }
+
+        @JvmStatic
+        private fun provideScanditFlutterBarcodeCountViewUiListener(
+            binding: FlutterPluginBinding
+        ): ScanditFlutterBarcodeCountViewUiListener {
+            return ScanditFlutterBarcodeCountViewUiListener(
+                EventHandler(
+                    EventChannel(
+                        binding.binaryMessenger,
+                        ScanditFlutterBarcodeCountViewUiListener.CHANNEL_NAME
+                    )
+                )
+            )
+        }
+
+        //endregion BARCODE COUNT
     }
 }

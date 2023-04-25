@@ -16,9 +16,14 @@ extension ScanditFlutterDataCaptureBarcodeSelection {
                    body: [String: Any]) -> Bool {
         guard let sink = eventSink, hasListeners else { return false }
         let payload = ["event": event.rawValue].merging(body) { (_, new) in new }
-        let jsonString = String(data: try! JSONSerialization.data(withJSONObject: payload, options: []),
-                                encoding: .utf8)
-        sink(jsonString)
-        return true
+        do {
+            let jsonString = String(data: try JSONSerialization.data(withJSONObject: payload, options: []),
+                                    encoding: .utf8)
+            sink(jsonString)
+            return true
+        } catch {
+            print(error)
+            return false
+        }
     }
 }

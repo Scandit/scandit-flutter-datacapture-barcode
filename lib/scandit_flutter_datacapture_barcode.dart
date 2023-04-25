@@ -13,3 +13,6 @@ export 'src/symbology_description.dart' show SymbologyDescription, Range;
 export 'src/symbology_settings.dart' show SymbologySettings, Checksum;
 export 'src/composite_type.dart' show CompositeType, CompositeTypeSerializer;
 export 'src/composite_type_description.dart' show CompositeTypeDescription;
+export 'src/barcode_filter_settings.dart' show BarcodeFilterSettings;
+export 'src/barcode_filter_highlight_settings.dart'
+    show BarcodeFilterHighlightSettings, BarcodeFilterHighlightSettingsBrush, BarcodeFilterHighlightType;

@@ -8,7 +8,7 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 
 import 'symbology.dart';
 
-class Barcode {
+class Barcode implements Serializable {
   late Symbology _symbology;
   Symbology get symbology => _symbology;
 
@@ -106,6 +106,25 @@ class Barcode {
         frameID: frameID,
         compositeData: compositeData,
         compositeRawData: compositeRawData);
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'symbology': symbology.jsonValue,
+      'data': data,
+      'rawData': rawData,
+      'addOnData': addOnData,
+      'encodingRanges': encodingRanges.map((e) => e.toMap()).toList(),
+      'location': location.toMap(),
+      'isGS1DataCarrier': isGS1DataCarrier,
+      'compositeFlag': compositeFlag.jsonValue,
+      'isColorInverted': isColorInverted,
+      'symbolCount': symbolCount,
+      'frameId': frameID,
+      'compositeData': compositeData,
+      'compositeRawData': compositeRawData
+    };
   }
 }
 

@@ -15,12 +15,12 @@ extension ScanditFlutterDataCaptureBarcodeTracking {
             return
         }
         if let frameSequenceId = parsedArgs["sessionFrameSequenceID"] as? Int,
-           let sequenceId = sessionHolder.latestSession?.frameSequenceId {
-            if sequenceId != frameSequenceId {
-                result(ScanditDataCaptureBarcodeErrorWrapper(error: .invalidSequenceId))
-                return
-            }
+           let sequenceId = sessionHolder.latestSession?.frameSequenceId,
+           sequenceId != frameSequenceId {
+            result(ScanditDataCaptureBarcodeErrorWrapper(error: .invalidSequenceId))
+            return
         }
+
         guard let lastTrackedBarcodes = sessionHolder.latestSession?.trackedBarcodes,
               let trackedBarcodeId = parsedArgs["identifier"] as? Int,
               let trackedCode = lastTrackedBarcodes[NSNumber(value: trackedBarcodeId)] else {
@@ -56,19 +56,18 @@ extension ScanditFlutterDataCaptureBarcodeTracking {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
             return
         }
-        
+
         guard let anchorJSON = parsedArgs["anchor"] as? String else {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
             return
         }
         SDCAnchorFromJSONString(anchorJSON, &anchor)
-        
+
         if let frameSequenceId = parsedArgs["sessionFrameSequenceID"] as? Int,
-           let sequenceId = sessionHolder.latestSession?.frameSequenceId {
-            if sequenceId != frameSequenceId {
-                result(ScanditDataCaptureBarcodeErrorWrapper(error: .invalidSequenceId))
-                return
-            }
+           let sequenceId = sessionHolder.latestSession?.frameSequenceId,
+           sequenceId != frameSequenceId {
+            result(ScanditDataCaptureBarcodeErrorWrapper(error: .invalidSequenceId))
+            return
         }
         guard let lastTrackedBarcodes = sessionHolder.latestSession?.trackedBarcodes,
               let trackedBarcodeId = parsedArgs["identifier"] as? Int,
@@ -90,19 +89,19 @@ extension ScanditFlutterDataCaptureBarcodeTracking {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
             return
         }
-        guard let offsetDict = parsedArgs["offset"] as? [String: Any],
-            let offsetJSON = String(data: try! JSONSerialization.data(withJSONObject: offsetDict, options: []), encoding: .utf8) else {
+        
+        guard let offsetJSON = parsedArgs["offset"] as? String else {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
             return
         }
+        
         SDCPointWithUnitFromJSONString(offsetJSON, &offset)
         
         if let frameSequenceId = parsedArgs["sessionFrameSequenceID"] as? Int,
-           let sequenceId = sessionHolder.latestSession?.frameSequenceId {
-            if sequenceId != frameSequenceId {
-                result(ScanditDataCaptureBarcodeErrorWrapper(error: .invalidSequenceId))
-                return
-            }
+           let sequenceId = sessionHolder.latestSession?.frameSequenceId,
+           sequenceId != frameSequenceId {
+            result(ScanditDataCaptureBarcodeErrorWrapper(error: .invalidSequenceId))
+            return
         }
         guard let lastTrackedBarcodes = sessionHolder.latestSession?.trackedBarcodes,
               let trackedBarcodeId = parsedArgs["identifier"] as? Int,

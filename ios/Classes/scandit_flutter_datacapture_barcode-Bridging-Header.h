@@ -3,3 +3,5 @@
  *
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
+
+#import "SDCBarcodeCountViewDefaults.h"
