@@ -54,7 +54,7 @@ extension ScanditFlutterDataCaptureBarcodeTracking: BarcodeTrackingDeserializerD
                                             didFinishDeserializingBasicOverlay overlay: BarcodeTrackingBasicOverlay,
                                             from jsonValue: JSONValue) {
         barcodeTrackingBasicOverlay = overlay
-        if basicOverlayStreamHandler.hasListeners {
+        if hasBasicOverlayListeners {
             barcodeTrackingBasicOverlay?.delegate = self
         }
     }

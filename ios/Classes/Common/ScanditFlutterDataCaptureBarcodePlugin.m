@@ -41,14 +41,8 @@ static ScanditFlutterDataCaptureBarcodePlugin *_instance;
     ScanditFlutterDataCaptureBarcodeCaptureModule *barcodeCaptureInstance =
         [[ScanditFlutterDataCaptureBarcodeCaptureModule alloc] initWith:[registrar messenger]];
 
-    BarcodeTrackingBasicOverlayStreamHandler *basicStreamHandler =
-        [[BarcodeTrackingBasicOverlayStreamHandler alloc] init];
-    BarcodeTrackingAdvancedOverlayStreamHandler *advancedStreamHandler =
-        [[BarcodeTrackingAdvancedOverlayStreamHandler alloc] init];
     ScanditFlutterDataCaptureBarcodeTracking *barcodeTracking =
-        [[ScanditFlutterDataCaptureBarcodeTracking alloc] initWith:[registrar messenger]
-                                        simpleOverlayStreamHandler:basicStreamHandler
-                                      advancedOverlayStreamHandler:advancedStreamHandler];
+        [[ScanditFlutterDataCaptureBarcodeTracking alloc] initWith:[registrar messenger]];
     ScanditFlutterDataCaptureBarcodeTrackingModule *barcodeTrackingInstance =
         [[ScanditFlutterDataCaptureBarcodeTrackingModule alloc] initWith:[registrar messenger]
                                                          barcodeTracking:barcodeTracking];

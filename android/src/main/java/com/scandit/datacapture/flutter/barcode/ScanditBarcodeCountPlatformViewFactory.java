@@ -5,8 +5,8 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.scandit.datacapture.flutter.barcode.count.FrameworksBarcodeCount;
 import com.scandit.datacapture.flutter.barcode.count.ui.FlutterBarcodeCountView;
+import com.scandit.datacapture.frameworks.barcode.count.BarcodeCountModule;
 
 import java.util.HashMap;
 
@@ -16,16 +16,17 @@ import io.flutter.plugin.platform.PlatformViewFactory;
 
 public class ScanditBarcodeCountPlatformViewFactory extends PlatformViewFactory {
 
-    FrameworksBarcodeCount barcodeCountPlugin;
+    BarcodeCountModule barcodeCountModule;
 
-    public ScanditBarcodeCountPlatformViewFactory(FrameworksBarcodeCount barcodeCountPlugin) {
+    public ScanditBarcodeCountPlatformViewFactory(BarcodeCountModule barcodeCountModule) {
         super(StandardMessageCodec.INSTANCE);
-        this.barcodeCountPlugin = barcodeCountPlugin;
+        this.barcodeCountModule = barcodeCountModule;
     }
 
     @NonNull
     @Override
     public PlatformView create(Context context, int viewId, @Nullable Object args) {
+        //noinspection unchecked
         HashMap<String, String> creationArgs = (HashMap<String, String>) args;
 
         if (creationArgs == null) {
@@ -38,6 +39,6 @@ public class ScanditBarcodeCountPlatformViewFactory extends PlatformViewFactory 
             throw new IllegalArgumentException("Unable to create the BarcodeCountView without the json.");
         }
 
-        return new FlutterBarcodeCountView(context, creationJson, barcodeCountPlugin);
+        return new FlutterBarcodeCountView(context, creationJson, barcodeCountModule);
     }
 }

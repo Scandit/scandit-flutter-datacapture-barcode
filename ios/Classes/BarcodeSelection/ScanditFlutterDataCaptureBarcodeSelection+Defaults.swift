@@ -8,31 +8,31 @@ import Foundation
 import scandit_flutter_datacapture_core
 import ScanditBarcodeCapture
 
-extension ScanditFlutterDataCaptureBarcodeSelectionModule {
+extension ScanditFlutterDataCaptureBarcodeSelection {
     var defaults: [String: Any] {
         return [
-            "overlay": overlayDefaults,
-            "settings": settingsDefaults,
-            "feedback": BarcodeSelectionFeedback.default.jsonString,
-            "cameraSettings": BarcodeSelection.recommendedCameraSettings.defaults,
-            "tapSelection": tapSelectionDefaults,
-            "aimerSelection": aimerSelectionDefaults
+            "BarcodeSelectionBasicOverlay": overlayDefaults,
+            "BarcodeSelectionSettings": settingsDefaults,
+            "Feedback": BarcodeSelectionFeedback.default.jsonString,
+            "RecommendedCameraSettings": BarcodeSelection.recommendedCameraSettings.defaults,
+            "BarcodeSelectionTapSelection": tapSelectionDefaults,
+            "BarcodeSelectionAimerSelection": aimerSelectionDefaults
         ]
     }
 
     private var overlayDefaults: [String: Any] {
         func createBrushDefaultsForStyle(style: BarcodeSelectionBasicOverlayStyle) -> [String: Any] {
             return [
-                "aimedBrush": BarcodeSelectionBasicOverlay.defaultAimedBrush(forStyle: style).defaults,
-                "selectingBrush": BarcodeSelectionBasicOverlay.defaultSelectingBrush(forStyle: style).defaults,
-                "selectedBrush": BarcodeSelectionBasicOverlay.defaultSelectedBrush(forStyle: style).defaults,
-                "trackedBrush": BarcodeSelectionBasicOverlay.defaultTrackedBrush(forStyle: style).defaults
+                "DefaultAimedBrush": BarcodeSelectionBasicOverlay.defaultAimedBrush(forStyle: style).defaults,
+                "DefaultSelectingBrush": BarcodeSelectionBasicOverlay.defaultSelectingBrush(forStyle: style).defaults,
+                "DefaultSelectedBrush": BarcodeSelectionBasicOverlay.defaultSelectedBrush(forStyle: style).defaults,
+                "DefaultTrackedBrush": BarcodeSelectionBasicOverlay.defaultTrackedBrush(forStyle: style).defaults
             ]
         }
 
         return [
             "defaultStyle": BarcodeSelectionBasicOverlayStyle.frame.jsonString,
-            "Brushes": [
+            "styles": [
                 BarcodeSelectionBasicOverlayStyle.dot.jsonString: createBrushDefaultsForStyle(style: .dot),
                 BarcodeSelectionBasicOverlayStyle.frame.jsonString: createBrushDefaultsForStyle(style: .frame)
             ],

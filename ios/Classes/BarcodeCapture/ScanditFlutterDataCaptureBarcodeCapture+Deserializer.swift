@@ -30,6 +30,7 @@ extension ScanditFlutterDataCaptureBarcodeCapture: BarcodeCaptureDeserializerDel
         if jsonValue.containsKey("enabled") {
             mode.isEnabled = jsonValue.bool(forKey: "enabled")
         }
+        barcodeCapture = mode
     }
 
     func barcodeCaptureDeserializer(_ deserializer: BarcodeCaptureDeserializer,

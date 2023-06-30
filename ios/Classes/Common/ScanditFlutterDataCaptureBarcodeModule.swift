@@ -16,7 +16,7 @@ public class ScanditFlutterDataCaptureBarcodeModule: NSObject {
 
     @objc
     public init(with messenger: FlutterBinaryMessenger) {
-        methodChannel = FlutterMethodChannel(name: "com.scandit.datacapture.barcode.method/barcode_defaults",
+        methodChannel = FlutterMethodChannel(name: "com.scandit.datacapture.barcode/method_channel",
                                              binaryMessenger: messenger)
         super.init()
         methodChannel.setMethodCallHandler(self.methodCallHandler)

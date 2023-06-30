@@ -7,8 +7,8 @@
 import Foundation
 
 enum ScanditFlutterDataCaptureBarcodeCaptureEvent: String, CaseIterable {
-    case didUpdateSession = "barcodeCaptureListener-didUpdateSession"
-    case didScan = "barcodeCaptureListener-didScan"
+    case didUpdateSession = "BarcodeCaptureListener.didUpdateSession"
+    case didScan = "BarcodeCaptureListener.didScan"
 }
 
 extension ScanditFlutterDataCaptureBarcodeCapture {

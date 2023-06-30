@@ -7,21 +7,12 @@
 import scandit_flutter_datacapture_core
 
 class FlutterBarcodeCountViewListener: NSObject {
-    let eventChannel: FlutterEventChannel
-
-    init(eventChannel: FlutterEventChannel) {
-        self.eventChannel = eventChannel
-        super.init()
-        self.eventChannel.setStreamHandler(self)
-    }
+    private var brushRequests: [String: TrackedBarcode] = [:]
 
     var sink: FlutterEventSink?
 
     var hasListeners = false
-
-    var brushForRecognizedBarcodeLock = CallbackLock<Brush>(name: FlutterBarcodeCountEvent.brushForRecognizedBarcode.rawValue)
-    var brushForUnrecognizedBarcodeLock = CallbackLock<Brush>(name: FlutterBarcodeCountEvent.brushForUnrecognizedBarcode.rawValue)
-    var brushForRecognizedBarcodeNotInListLock = CallbackLock<Brush>(name: FlutterBarcodeCountEvent.brushForRecgonizedBarcodeNotInList.rawValue)
+    
 
     func addBarcodeCountViewListener(_ result: FlutterResult) {
         hasListeners = true
@@ -30,23 +21,12 @@ class FlutterBarcodeCountViewListener: NSObject {
 
     func removeBarcodeCountViewListener(_ result: FlutterResult) {
         hasListeners = false
-        unlockLocks()
+        brushRequests.removeAll()
         result(nil)
     }
 
     func dispose() {
-        unlockLocks()
-        eventChannel.setStreamHandler(nil)
-    }
-
-    private func unlockLocks() {
-        brushForRecognizedBarcodeLock.reset()
-        brushForUnrecognizedBarcodeLock.reset()
-        brushForRecognizedBarcodeNotInListLock.reset()
-    }
-
-    deinit {
-        unlockLocks()
+        brushRequests.removeAll()
     }
 
     @discardableResult
@@ -65,74 +45,58 @@ class FlutterBarcodeCountViewListener: NSObject {
     }
 }
 
-extension FlutterBarcodeCountViewListener: FlutterStreamHandler {
-    func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        sink = events
-        return nil
-    }
-
-    func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        sink = nil
-        return nil
-    }
-}
-
 extension FlutterBarcodeCountViewListener: BarcodeCountViewDelegate {
+
+    
     func barcodeCountView(_ view: BarcodeCountView,
                           brushForRecognizedBarcode trackedBarcode: TrackedBarcode) -> Brush? {
-        // TODO: https://scandit.atlassian.net/browse/SDC-16601
-        return view.recognizedBrush
-//        brushForRecognizedBarcodeLock.wait {
-//            sendEvent(event: .brushForRecognizedBarcode, body: trackedBarcode.asDictionary)
-//        }
+        sendEvent(event: .brushForRecognizedBarcode, body: trackedBarcode.asDictionary)
+        brushRequests[trackedBarcode.identifier.keyFor(prefix: FlutterBarcodeCountEvent.brushForRecognizedBarcode.rawValue)] = trackedBarcode
+        return nil
     }
-
-    func finishBrushForRecognizedBarcodeCallback(brushJson: String?, result: FlutterResult) {
-        guard let brushJson = brushJson, let brush = Brush(jsonString: brushJson) else {
-            brushForRecognizedBarcodeLock.unlock(value: nil)
-            result(nil)
-            return
+    
+    func getTrackedBarcodeForBrushForRecognizedEvent(trackedBarcodeId: Int) -> TrackedBarcode? {
+        let key = trackedBarcodeId.keyFor(prefix: FlutterBarcodeCountEvent.brushForRecognizedBarcode.rawValue)
+        let trackedBarcode = brushRequests[key]
+        
+        if (trackedBarcode != nil) {
+            brushRequests.removeValue(forKey: key)
         }
-        brushForRecognizedBarcodeLock.unlock(value: brush)
-        result(nil)
+        return trackedBarcode
     }
 
     func barcodeCountView(_ view: BarcodeCountView,
                           brushForUnrecognizedBarcode trackedBarcode: TrackedBarcode) -> Brush? {
-        // TODO: https://scandit.atlassian.net/browse/SDC-16601
-        return view.unrecognizedBrush
-//        brushForUnrecognizedBarcodeLock.wait {
-//            sendEvent(event: .brushForUnrecognizedBarcode, body: trackedBarcode.asDictionary)
-//        }
+        sendEvent(event: .brushForUnrecognizedBarcode, body: trackedBarcode.asDictionary)
+        brushRequests[trackedBarcode.identifier.keyFor(prefix: FlutterBarcodeCountEvent.brushForUnrecognizedBarcode.rawValue)] = trackedBarcode
+        return nil
     }
-
-    func finishBrushForUnrecognizedBarcodeCallback(brushJson: String?, result: FlutterResult) {
-        guard let brushJson = brushJson, let brush = Brush(jsonString: brushJson) else {
-            brushForUnrecognizedBarcodeLock.unlock(value: nil)
-            result(nil)
-            return
+    
+    func getTrackedBarcodeForBrushForUnrecognizedEvent(trackedBarcodeId: Int) -> TrackedBarcode? {
+        let key = trackedBarcodeId.keyFor(prefix: FlutterBarcodeCountEvent.brushForUnrecognizedBarcode.rawValue)
+        let trackedBarcode = brushRequests[key]
+        
+        if (trackedBarcode != nil) {
+            brushRequests.removeValue(forKey: key)
         }
-        brushForUnrecognizedBarcodeLock.unlock(value: brush)
-        result(nil)
+        return trackedBarcode
     }
 
     func barcodeCountView(_ view: BarcodeCountView,
                           brushForRecognizedBarcodeNotInList trackedBarcode: TrackedBarcode) -> Brush? {
-        // TODO: https://scandit.atlassian.net/browse/SDC-16601
-        return view.notInListBrush
-//        brushForRecognizedBarcodeNotInListLock.wait {
-//            sendEvent(event: .brushForRecgonizedBarcodeNotInList, body: trackedBarcode.asDictionary)
-//        }
+        sendEvent(event: .brushForRecgonizedBarcodeNotInList, body: trackedBarcode.asDictionary)
+        brushRequests[trackedBarcode.identifier.keyFor(prefix: FlutterBarcodeCountEvent.brushForRecgonizedBarcodeNotInList.rawValue)] = trackedBarcode
+        return nil
     }
-
-    func finishBrushForRecognizedBarcodeNotInListCallback(brushJson: String?, result: FlutterResult) {
-        guard let brushJson = brushJson, let brush = Brush(jsonString: brushJson) else {
-            brushForRecognizedBarcodeNotInListLock.unlock(value: nil)
-            result(nil)
-            return
+    
+    func getTrackedBarcodeForBrushForBarcodeNotInListEvent(trackedBarcodeId: Int) -> TrackedBarcode? {
+        let key = trackedBarcodeId.keyFor(prefix: FlutterBarcodeCountEvent.brushForRecgonizedBarcodeNotInList.rawValue)
+        let trackedBarcode = brushRequests[key]
+        
+        if (trackedBarcode != nil) {
+            brushRequests.removeValue(forKey: key)
         }
-        brushForRecognizedBarcodeNotInListLock.unlock(value: brush)
-        result(nil)
+        return trackedBarcode
     }
 
     func barcodeCountView(_ view: BarcodeCountView,
@@ -161,5 +125,11 @@ fileprivate extension TrackedBarcode {
         [
             "trackedBarcode": jsonString
         ]
+    }
+}
+
+fileprivate extension Int {
+    func keyFor(prefix: String) -> String {
+        return  "\(prefix)-\(self)"
     }
 }

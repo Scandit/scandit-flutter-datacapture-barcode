@@ -41,7 +41,7 @@ extension ScanditFlutterDataCaptureBarcodeTracking {
             return
         }
         let view = TrackedBarcodeView(image: image, trackedBarcode: trackedCode) { [weak self] (barcode) in
-            self?.advancedOverlayStreamHandler.didTapViewForTrackedBarcode(barcode)
+            self?.didTapViewForTrackedBarcode(barcode)
         }
         let scale = UIScreen.main.scale
         view.frame.size = CGSize(width: view.frame.size.width / scale, height: view.frame.size.height / scale)

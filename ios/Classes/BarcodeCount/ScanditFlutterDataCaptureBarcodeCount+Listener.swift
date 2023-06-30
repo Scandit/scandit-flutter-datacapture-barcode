@@ -35,11 +35,15 @@ extension ScanditFlutterDataCaptureBarcodeCount: BarcodeCountCaptureListListener
 extension ScanditFlutterDataCaptureBarcodeCount: FlutterStreamHandler {
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
         sink = events
+        barcodeCountViewListener.sink = events
+        barcodeCountViewUIListener.sink = events
         return nil
     }
 
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
         sink = nil
+        barcodeCountViewListener.sink = nil
+        barcodeCountViewUIListener.sink = nil
         return nil
     }
 }

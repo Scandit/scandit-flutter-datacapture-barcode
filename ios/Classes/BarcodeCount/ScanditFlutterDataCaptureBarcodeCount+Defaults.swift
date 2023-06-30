@@ -8,7 +8,7 @@ import Foundation
 import ScanditBarcodeCapture
 import scandit_flutter_datacapture_core
 
-extension ScanditFlutterDataCaptureBarcodeCountModule {
+extension ScanditFlutterDataCaptureBarcodeCount {
     var defaults: [String: Any] {
         let barcodeFilterSettings = BarcodeFilterSettings()
         return [

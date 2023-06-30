@@ -33,14 +33,11 @@ public class ScanditFlutterDataCaptureBarcodeCount: NSObject, FLTDataCaptureCont
         static let finishBrushForRecognizedBarcode = "finishBrushForRecognizedBarcodeEvent"
         static let finishBrushForUnrecognizedBarcode = "finishBrushForUnrecognizedBarcodeEvent"
         static let finishBrushForRecognizedBarcodeNotInListEvent = "finishBrushForRecognizedBarcodeNotInListEvent"
+        
+        static let getBarcodeCaptureDefaults = "getBarcodeCountDefaults"
     }
 
-    private static let barcodeCountViewEventChannelPrefix = "com.scandit.datacapture.barcode.count.event"
-    private static let barcodeCountViewListenerEventChannelName = "\(barcodeCountViewEventChannelPrefix)/barcode_count_view_events"
-    private static let barcodeCountViewUIListenerEventChannelName = "\(barcodeCountViewEventChannelPrefix)/barcode_count_view_ui_events"
-
     let barcodeCountMethodChannel: FlutterMethodChannel
-    let barcodeCountViewMethodChannel: FlutterMethodChannel
     let barcodeCountEventChannel: FlutterEventChannel
 
     var sink: FlutterEventSink?
@@ -64,30 +61,28 @@ public class ScanditFlutterDataCaptureBarcodeCount: NSObject, FLTDataCaptureCont
         }
         didSet {
             barcodeCount?.add(self)
+            barcodeCount?.setCaptureList(barcodeCountCaptureList)
         }
     }
     var barcodeCountView: BarcodeCountView?
+    var barcodeCountCaptureList: BarcodeCountCaptureList?
 
     init(with binaryMessenger: FlutterBinaryMessenger) {
-        let prefix = "com.scandit.datacapture.barcode.capture"
-        let eventChannelName = "com.scandit.datacapture.barcode.count.event/barcode_count_events"
+        let eventChannelName = "com.scandit.datacapture.barcode.count/event_channel"
         barcodeCountEventChannel = FlutterEventChannel(name: eventChannelName,
                                            binaryMessenger: binaryMessenger)
-        let methodChannelName = "\(prefix).method/barcode_count_methods"
+        let methodChannelName = "com.scandit.datacapture.barcode.count/method_channel"
         barcodeCountMethodChannel = FlutterMethodChannel(name: methodChannelName,
                                              binaryMessenger: binaryMessenger)
-        let viewUIListenerEventChannel = FlutterEventChannel(name: Self.barcodeCountViewUIListenerEventChannelName,
-                                                             binaryMessenger: binaryMessenger)
-        barcodeCountViewUIListener = FlutterBarcodeCountViewUIListener(eventChannel: viewUIListenerEventChannel)
-        let viewListenerEventChannel = FlutterEventChannel(name: Self.barcodeCountViewListenerEventChannelName,
-                                                           binaryMessenger: binaryMessenger)
-        barcodeCountViewListener = FlutterBarcodeCountViewListener(eventChannel: viewListenerEventChannel)
-        barcodeCountViewMethodChannel = FlutterMethodChannel(name: "\(prefix).method/barcode_count_view_methods",
-                                                             binaryMessenger: binaryMessenger)
+       
+        barcodeCountViewUIListener = FlutterBarcodeCountViewUIListener()
+       
+        barcodeCountViewListener = FlutterBarcodeCountViewListener()
+       
         super.init()
         barcodeCountEventChannel.setStreamHandler(self)
         barcodeCountMethodChannel.setMethodCallHandler(methodCallHandler)
-        barcodeCountViewMethodChannel.setMethodCallHandler(methodCallHandler)
+        
         ScanditFlutterDataCaptureCore.addFLTContextListener(self)
     }
 
@@ -108,14 +103,11 @@ public class ScanditFlutterDataCaptureBarcodeCount: NSObject, FLTDataCaptureCont
         case FunctionNames.clearHighlights:
             clearHighlights(result)
         case FunctionNames.finishBrushForRecognizedBarcode:
-            barcodeCountViewListener.finishBrushForRecognizedBarcodeCallback(brushJson: methodCall.arguments as? String,
-                                                                             result: result)
+            setBrushForRecognizedBarcode(arguments: methodCall.arguments, result: result)
         case FunctionNames.finishBrushForUnrecognizedBarcode:
-            barcodeCountViewListener.finishBrushForUnrecognizedBarcodeCallback(brushJson: methodCall.arguments as? String,
-                                                                               result: result)
+            setBrushForUnrecognizedBarcode(arguments: methodCall.arguments, result: result)
         case FunctionNames.finishBrushForRecognizedBarcodeNotInListEvent:
-            barcodeCountViewListener.finishBrushForRecognizedBarcodeNotInListCallback(brushJson: methodCall.arguments as? String,
-                                                                                      result: result)
+            setBrushForRecognizedBarcodeNoInList(arguments: methodCall.arguments, result: result)
         case FunctionNames.finishDidScan:
             finishDidScanCallback(enabled: methodCall.arguments as? Bool ?? false, result: result)
         case FunctionNames.updateBarcodeCount:
@@ -134,6 +126,8 @@ public class ScanditFlutterDataCaptureBarcodeCount: NSObject, FLTDataCaptureCont
             endScanningPhase(result: result)
         case FunctionNames.setBarcodeCountCaptureList:
             setCaptureList(jsonString: methodCall.arguments as? String, result: result)
+        case FunctionNames.getBarcodeCaptureDefaults:
+            defaults(result: result)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -203,6 +197,9 @@ public class ScanditFlutterDataCaptureBarcodeCount: NSObject, FLTDataCaptureCont
     }
 
     func updateBarcodeCountView(jsonString: String?, result: FlutterResult) {
+        guard let context = context else {
+            return
+        }
         guard let jsonString = jsonString else {
             result(FlutterError(code: "-2", message: "JSON is needed to update the barcode count view", details: nil))
             return
@@ -212,7 +209,8 @@ public class ScanditFlutterDataCaptureBarcodeCount: NSObject, FLTDataCaptureCont
             return
         }
         do {
-            view = try barcodeCountViewDeserializer.update(view, fromJSONString: jsonString)
+            view = try barcodeCountViewDeserializer.update(view, fromJSONString: jsonString,
+                                                           context: context)
         } catch let error as NSError {
             result(FlutterError(code: error.domain, message: error.localizedDescription, details: error))
         }
@@ -244,15 +242,18 @@ public class ScanditFlutterDataCaptureBarcodeCount: NSObject, FLTDataCaptureCont
             result(FlutterError(code: "-2", message: "JSON is needed to set the capture list", details: nil))
             return
         }
-        guard let mode = barcodeCount else {
-            result(FlutterError(code: "-3", message: "The barcode count mode is not set", details: nil))
-            return
-        }
+      
         let jsonArray = JSONValue(string: jsonString).asArray()
         let targetBarcodes = Set((0...jsonArray.count() - 1).map { jsonArray.atIndex($0).asObject() }.map {
             TargetBarcode(data: $0.string(forKey: "data"), quantity: $0.integer(forKey: "quantity"))
         })
-        mode.setCaptureList(BarcodeCountCaptureList(listener: self, targetBarcodes: targetBarcodes))
+        
+        barcodeCountCaptureList = BarcodeCountCaptureList(listener: self, targetBarcodes: targetBarcodes)
+        
+        guard let mode = barcodeCount else {
+            return
+        }
+        mode.setCaptureList(barcodeCountCaptureList)
         result(nil)
     }
 
@@ -268,7 +269,8 @@ public class ScanditFlutterDataCaptureBarcodeCount: NSObject, FLTDataCaptureCont
         if var barcodeCount = barcodeCount {
             do {
                 barcodeCount = try barcodeCountDeserializer.updateMode(barcodeCount,
-                                                                       fromJSONString: barcodeCountModeJson)
+                                                                       fromJSONString: barcodeCountModeJson,
+                                                                       context: context)
             } catch {
                 return
             }
@@ -307,7 +309,6 @@ public class ScanditFlutterDataCaptureBarcodeCount: NSObject, FLTDataCaptureCont
         disposeBarcodeCountView()
         barcodeCountEventChannel.setStreamHandler(nil)
         barcodeCountMethodChannel.setMethodCallHandler(nil)
-        barcodeCountViewMethodChannel.setMethodCallHandler(nil)
         unlockLocks()
         barcodeCountViewListener.dispose()
         barcodeCountViewUIListener.dispose()
@@ -321,8 +322,76 @@ public class ScanditFlutterDataCaptureBarcodeCount: NSObject, FLTDataCaptureCont
         self.barcodeCountView = nil
         barcodeCount = nil
     }
+    
+    func defaults(result: FlutterResult) {
+        do {
+            let jsonString = String(data: try JSONSerialization.data(withJSONObject: defaults,
+                                                                     options: []),
+                                    encoding: .utf8)
+            result(jsonString)
+        } catch {
+            result(FlutterError(code: "-1", message: "Unable to load the defaults. \(error)", details: nil))
+        }
+    }
 
     public func didUpdate(dataCaptureContext: DataCaptureContext?) {
         context = dataCaptureContext
+    }
+    
+    private func setBrushForRecognizedBarcode(arguments: Any?, result: FlutterResult) {
+        guard let parsedArgs = arguments as? [String: Any?] else {
+            result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
+            return
+        }
+        let trackedBarcodeId = parsedArgs["identifier"] as? Int ?? 0
+        guard let brushJson = parsedArgs["brush"] as? String else {
+            result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
+            return
+        }
+        let brush =  Brush(jsonString: brushJson)
+        guard let trackedBarcode = barcodeCountViewListener.getTrackedBarcodeForBrushForRecognizedEvent(trackedBarcodeId: trackedBarcodeId) else {
+            result(nil)
+            return
+        }
+        barcodeCountView?.setBrush(brush, forRecognizedBarcode: trackedBarcode)
+        result(nil)
+    }
+    
+    private func setBrushForUnrecognizedBarcode(arguments: Any?, result: FlutterResult) {
+        guard let parsedArgs = arguments as? [String: Any?] else {
+            result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
+            return
+        }
+        let trackedBarcodeId = parsedArgs["identifier"] as? Int ?? 0
+        guard let brushJson = parsedArgs["brush"] as? String else {
+            result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
+            return
+        }
+        let brush =  Brush(jsonString: brushJson)
+        guard let trackedBarcode = barcodeCountViewListener.getTrackedBarcodeForBrushForUnrecognizedEvent(trackedBarcodeId: trackedBarcodeId) else {
+            result(nil)
+            return
+        }
+        barcodeCountView?.setBrush(brush, forUnrecognizedBarcode: trackedBarcode)
+        result(nil)
+    }
+    
+    private func setBrushForRecognizedBarcodeNoInList(arguments: Any?, result: FlutterResult) {
+        guard let parsedArgs = arguments as? [String: Any?] else {
+            result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
+            return
+        }
+        let trackedBarcodeId = parsedArgs["identifier"] as? Int ?? 0
+        guard let brushJson = parsedArgs["brush"] as? String else {
+            result(ScanditDataCaptureBarcodeErrorWrapper(error: .deserializationError))
+            return
+        }
+        let brush =  Brush(jsonString: brushJson)
+        guard let trackedBarcode = barcodeCountViewListener.getTrackedBarcodeForBrushForBarcodeNotInListEvent(trackedBarcodeId: trackedBarcodeId) else {
+            result(nil)
+            return
+        }
+        barcodeCountView?.setBrush(brush, forRecognizedBarcodeNotInList: trackedBarcode)
+        result(nil)
     }
 }

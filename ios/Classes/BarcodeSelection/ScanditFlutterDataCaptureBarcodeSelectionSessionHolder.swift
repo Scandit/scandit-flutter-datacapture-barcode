@@ -26,14 +26,10 @@ class ScanditFlutterDataCaptureBarcodeSelectionSessionHolder {
         }
     }
 
-    func barcodeCountOfFrame(with frameSequenceId: Int?,
-                             and symbology: Symbology?,
-                             and barcodeData: String?) -> Int {
-        guard let session = latestSession,
-              let sequenceId = frameSequenceId,
-              sequenceId == session.frameSequenceId else { return 0 }
+    func barcodeCountOfFrame(with selectionIdentifier: String) -> Int {
+        guard let session = latestSession else { return 0 }
         let barcodePredicate: (Barcode) -> Bool = {
-            $0.data == barcodeData && $0.symbology == symbology
+            $0.selectionIdentifier == selectionIdentifier
         }
         if let firstMatchingBarcode = session.selectedBarcodes.first(where: barcodePredicate) {
             return session.count(for: firstMatchingBarcode)
@@ -50,3 +46,10 @@ class ScanditFlutterDataCaptureBarcodeSelectionSessionHolder {
         }
     }
 }
+
+extension Barcode {
+    var selectionIdentifier: String {
+        return (data ?? "") + SymbologyDescription(symbology: symbology).identifier
+    }
+}
+

@@ -5,21 +5,21 @@
  */
 
 enum FlutterBarcodeCountEvent: String {
-    case didScan = "barcodeCountListener-onScan"
+    case didScan = "BarcodeCountListener.onScan"
 
-    case didUpdateCaptureList = "barcodeCountCaptureListListener-didUpdateSession"
+    case didUpdateCaptureList = "BarcodeCountCaptureListListener.didUpdateSession"
 
-    case brushForRecognizedBarcode = "barcodeCountViewListener-brushForRecognizedBarcode"
-    case brushForUnrecognizedBarcode = "barcodeCountViewListener-brushForUnrecognizedBarcode"
-    case brushForRecgonizedBarcodeNotInList = "barcodeCountViewListener-brushForRecognizedBarcodeNotInList"
-    case didTapRecognizedBarcode = "barcodeCountViewListener-didTapRecognizedBarcode"
-    case didTapUnrecognizedBarcode = "barcodeCountViewListener-didTapUnrecognizedBarcode"
-    case didTapFilteredBarcode = "barcodeCountViewListener-didTapFilteredBarcode"
-    case didTapRecognizedBarcodeNotInList = "barcodeCountViewListener-didTapRecognizedBarcodeNotInList"
+    case brushForRecognizedBarcode = "BarcodeCountViewListener.brushForRecognizedBarcode"
+    case brushForUnrecognizedBarcode = "BarcodeCountViewListener.brushForUnrecognizedBarcode"
+    case brushForRecgonizedBarcodeNotInList = "BarcodeCountViewListener.brushForRecognizedBarcodeNotInList"
+    case didTapRecognizedBarcode = "BarcodeCountViewListener.didTapRecognizedBarcode"
+    case didTapUnrecognizedBarcode = "BarcodeCountViewListener.didTapUnrecognizedBarcode"
+    case didTapFilteredBarcode = "BarcodeCountViewListener.didTapFilteredBarcode"
+    case didTapRecognizedBarcodeNotInList = "BarcodeCountViewListener.didTapRecognizedBarcodeNotInList"
 
-    case onExitButtonTapped = "barcodeCountViewUiListener-onExitButtonTapped"
-    case onListButtonTapped = "barcodeCountViewUiListener-onListButtonTapped"
-    case onSingleScanButtonTapped = "barcodeCountViewUiListener-onSingleScanButtonTapped"
+    case onExitButtonTapped = "BarcodeCountViewUiListener.onExitButtonTapped"
+    case onListButtonTapped = "BarcodeCountViewUiListener.onListButtonTapped"
+    case onSingleScanButtonTapped = "BarcodeCountViewUiListener.onSingleScanButtonTapped"
 }
 
 extension ScanditFlutterDataCaptureBarcodeCount {

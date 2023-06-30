@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'barcode_capture_defaults.dart';
@@ -126,8 +127,8 @@ class BarcodeCapture extends DataCaptureMode {
 }
 
 abstract class BarcodeCaptureListener {
-  static const String _didUpdateSessionEventName = 'barcodeCaptureListener-didUpdateSession';
-  static const String _didScanEventName = 'barcodeCaptureListener-didScan';
+  static const String _didUpdateSessionEventName = 'BarcodeCaptureListener.didUpdateSession';
+  static const String _didScanEventName = 'BarcodeCaptureListener.didScan';
 
   void didUpdateSession(BarcodeCapture barcodeCapture, BarcodeCaptureSession session);
   void didScan(BarcodeCapture barcodeCapture, BarcodeCaptureSession session);
@@ -139,10 +140,7 @@ abstract class BarcodeCaptureAdvancedListener {
 }
 
 class _BarcodeCaptureListenerController {
-  final EventChannel _eventChannel =
-      const EventChannel('com.scandit.datacapture.barcode.capture.event/barcode_capture_listener');
-  final MethodChannel _methodChannel =
-      MethodChannel('com.scandit.datacapture.barcode.capture.method/barcode_capture_listener');
+  final MethodChannel _methodChannel = MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
   final BarcodeCapture _barcodeCapture;
   StreamSubscription<dynamic>? _barcodeCaptureSubscription;
 
@@ -155,7 +153,7 @@ class _BarcodeCaptureListenerController {
   }
 
   void _setupBarcodeCaptureSubscription() {
-    _barcodeCaptureSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
+    _barcodeCaptureSubscription = BarcodePluginEvents.barcodeCaptureEventStream.listen((event) {
       if (_barcodeCapture._listeners.isEmpty && _barcodeCapture._advancedListeners.isEmpty) return;
 
       var eventJSON = jsonDecode(event);

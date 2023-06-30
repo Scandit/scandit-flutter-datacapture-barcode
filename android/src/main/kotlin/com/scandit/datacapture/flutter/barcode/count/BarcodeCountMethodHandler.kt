@@ -1,100 +1,136 @@
 package com.scandit.datacapture.flutter.barcode.count
 
 import com.scandit.datacapture.core.ui.style.BrushDeserializer
-import com.scandit.datacapture.flutter.core.common.LastFrameDataHolder
+import com.scandit.datacapture.frameworks.barcode.count.BarcodeCountModule
+import com.scandit.datacapture.frameworks.core.utils.LastFrameData
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import org.json.JSONArray
+import org.json.JSONObject
 
-class ScanditFlutterDataCaptureBarcodeCountMethodCallHandler(
-    private val frameworksBarcodeCount: FrameworksBarcodeCount
+class BarcodeCountMethodHandler(
+    private val barcodeCountModule: BarcodeCountModule
 ) : MethodChannel.MethodCallHandler {
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             METHOD_ADD_BARCODE_COUNT_VIEW_LISTENER -> {
-                frameworksBarcodeCount.addBarcodeCountViewListener()
+                barcodeCountModule.addBarcodeCountViewListener()
                 result.success(null)
             }
             METHOD_REMOVE_BARCODE_COUNT_VIEW_LISTENER -> {
-                frameworksBarcodeCount.removeBarcodeCountViewListener()
+                barcodeCountModule.removeBarcodeCountViewListener()
                 result.success(null)
             }
             METHOD_ADD_BARCODE_COUNT_VIEW_UI_LISTENER -> {
-                frameworksBarcodeCount.addBarcodeCountViewUiListener()
+                barcodeCountModule.addBarcodeCountViewUiListener()
                 result.success(null)
             }
             METHOD_REMOVE_BARCODE_COUNT_VIEW_UI_LISTENER -> {
-                frameworksBarcodeCount.removeBarcodeCountViewUiListener()
+                barcodeCountModule.removeBarcodeCountViewUiListener()
                 result.success(null)
             }
             METHOD_CLEAR_HIGHLIGHTS -> {
-                frameworksBarcodeCount.clearHighlights()
+                barcodeCountModule.clearHighlights()
                 result.success(null)
             }
             METHOD_FINISH_BRUSH_FOR_RECOGNIZED_BARCODE_EVENT -> {
-                frameworksBarcodeCount.finishBrushForRecognizedBarcodeEvent(
-                    BrushDeserializer.fromJson(call.arguments as String)
+                val arguments = call.arguments as? HashMap<*, *> ?: run {
+                    result.error(
+                        "-1",
+                        "Invalid argument for " +
+                                METHOD_FINISH_BRUSH_FOR_RECOGNIZED_BARCODE_EVENT,
+                        ""
+                    )
+                    return
+                }
+
+                barcodeCountModule.finishBrushForRecognizedBarcodeEvent(
+                    BrushDeserializer.fromJson(arguments["brush"] as String),
+                    arguments["identifier"] as Int
                 )
                 result.success(null)
             }
             METHOD_FINISH_BRUSH_FOR_RECOGNIZED_BARCODE_NOT_IN_LIST_EVENT -> {
-                frameworksBarcodeCount.finishBrushForRecognizedBarcodeNotInListEvent(
-                    BrushDeserializer.fromJson(call.arguments as String)
+                val arguments = call.arguments as? HashMap<*, *> ?: run {
+                    result.error(
+                        "-1",
+                        "Invalid argument for " +
+                                METHOD_FINISH_BRUSH_FOR_RECOGNIZED_BARCODE_NOT_IN_LIST_EVENT,
+                        ""
+                    )
+                    return
+                }
+
+                barcodeCountModule.finishBrushForRecognizedBarcodeNotInListEvent(
+                    BrushDeserializer.fromJson(arguments["brush"] as String),
+                    arguments["identifier"] as Int
                 )
                 result.success(null)
             }
             METHOD_FINISH_BRUSH_FOR_UNRECOGNIZED_BARCODE_EVENT -> {
-                frameworksBarcodeCount.finishBrushForUnrecognizedBarcodeEvent(
-                    BrushDeserializer.fromJson(call.arguments as String)
+                val arguments = call.arguments as? HashMap<*, *> ?: run {
+                    result.error(
+                        "-1",
+                        "Invalid argument for " +
+                                METHOD_FINISH_BRUSH_FOR_UNRECOGNIZED_BARCODE_EVENT,
+                        ""
+                    )
+                    return
+                }
+                barcodeCountModule.finishBrushForUnrecognizedBarcodeEvent(
+                    BrushDeserializer.fromJson(arguments["brush"] as String),
+                    arguments["identifier"] as Int
                 )
                 result.success(null)
             }
             METHOD_GET_BC_DEFAULTS -> {
-                val defaults = frameworksBarcodeCount.getDefaults()
-                result.success(defaults)
+                val defaults = barcodeCountModule.getDefaults()
+                result.success(JSONObject(defaults).toString())
             }
             METHOD_SET_BC_CAPTURE_LIST -> {
-                frameworksBarcodeCount.setBarcodeCountCaptureList(
+                barcodeCountModule.setBarcodeCountCaptureList(
                     JSONArray(call.arguments as String)
                 )
                 result.success(null)
             }
             METHOD_RESET_BC_SESSION -> {
-                frameworksBarcodeCount.resetBarcodeCountSession(call.arguments as? Long)
+                barcodeCountModule.resetBarcodeCountSession(call.arguments as? Long)
                 result.success(null)
             }
             METHOD_FINISH_ON_SCAN -> {
                 val enabled = call.arguments as? Boolean ?: false
-                frameworksBarcodeCount.finishOnScan(enabled)
+                barcodeCountModule.finishOnScan(enabled)
                 result.success(true)
             }
             METHOD_ADD_BC_LISTENER -> {
-                frameworksBarcodeCount.enableBarcodeCountListener()
+                barcodeCountModule.addBarcodeCountListener()
                 result.success(null)
             }
             METHOD_REMOVE_BC_LISTENER -> {
-                frameworksBarcodeCount.removeBarcodeCountListener()
+                barcodeCountModule.removeBarcodeCountListener()
                 result.success(null)
             }
-            METHOD_GET_LAST_FRAME -> LastFrameDataHolder.handleGetRequest(result)
+            METHOD_GET_LAST_FRAME -> LastFrameData.getLastFrameDataJson {
+                result.success(it)
+            }
             METHOD_RESET_BC -> {
-                frameworksBarcodeCount.resetBarcodeCount()
+                barcodeCountModule.resetBarcodeCount()
                 result.success(null)
             }
             METHOD_START_SCANNING_PHASE -> {
-                frameworksBarcodeCount.startScanningPhase()
+                barcodeCountModule.startScanningPhase()
                 result.success(null)
             }
             METHOD_END_SCANNING_PHASE -> {
-                frameworksBarcodeCount.endScanningPhase()
+                barcodeCountModule.endScanningPhase()
                 result.success(null)
             }
             METHOD_UPDATE_BARCODE_COUNT_VIEW -> {
-                frameworksBarcodeCount.updateBarcodeCountView(call.arguments as String)
+                barcodeCountModule.updateBarcodeCountView(call.arguments as String)
                 result.success(null)
             }
             METHOD_UPDATE_BARCODE_COUNT -> {
-                frameworksBarcodeCount.updateBarcodeCount(call.arguments as String)
+                barcodeCountModule.updateBarcodeCount(call.arguments as String)
                 result.success(null)
             }
             else -> throw IllegalArgumentException("Nothing implemented for ${call.method}")
@@ -130,5 +166,11 @@ class ScanditFlutterDataCaptureBarcodeCountMethodCallHandler(
         private const val METHOD_END_SCANNING_PHASE = "endScanningPhase"
         private const val METHOD_SET_BC_CAPTURE_LIST = "setBarcodeCountCaptureList"
         private const val METHOD_UPDATE_BARCODE_COUNT = "updateBarcodeCountMode"
+
+        const val EVENT_CHANNEL_NAME =
+            "com.scandit.datacapture.barcode.count/event_channel"
+
+        const val METHOD_CHANNEL_NAME =
+            "com.scandit.datacapture.barcode.count/method_channel"
     }
 }

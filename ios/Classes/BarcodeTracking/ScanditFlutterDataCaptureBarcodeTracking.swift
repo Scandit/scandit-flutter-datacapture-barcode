@@ -65,19 +65,14 @@ protocol ScanditFlutterDataCaptureBarcodeTrackingProtocol: class {
 @objc
 public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterDataCaptureBarcodeTrackingProtocol {
     internal let barcodeTrackingEventChannel: FlutterEventChannel
-    internal let basicOverlayEventChannel: FlutterEventChannel
-    internal let advancedOverlayEventChannel: FlutterEventChannel
 
     internal let barcodeTrackingMethodChannel: FlutterMethodChannel
-    internal let basicOverlayMethodChannel: FlutterMethodChannel
-    internal let advancedOverlayMethodChannel: FlutterMethodChannel
 
     internal var barcodeTrackingSink: FlutterEventSink?
 
-    internal let basicOverlayStreamHandler: BarcodeTrackingBasicOverlayStreamHandler
-    internal let advancedOverlayStreamHandler: BarcodeTrackingAdvancedOverlayStreamHandler
-
     internal var hasListeners = false
+    internal var hasAdvancedOverlayListeners = false
+    internal var hasBasicOverlayListeners = false
 
     internal let didUpdateSessionLock: CallbackLock<Bool> = {
         return CallbackLock<Bool>(name: ScanditFlutterDataCaptureBarcodeTrackingEvent.didUpdateSession.rawValue)
@@ -98,38 +93,15 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
     internal var barcodeTrackingAdvancedOverlay: BarcodeTrackingAdvancedOverlay?
 
     @objc
-    public init(with messenger: FlutterBinaryMessenger,
-                simpleOverlayStreamHandler: BarcodeTrackingBasicOverlayStreamHandler,
-                advancedOverlayStreamHandler: BarcodeTrackingAdvancedOverlayStreamHandler) {
-        self.basicOverlayStreamHandler = simpleOverlayStreamHandler
-        self.advancedOverlayStreamHandler = advancedOverlayStreamHandler
-        let pluginPrefix = "com.scandit.datacapture.barcode.tracking"
-        let trackingChannelName = "\(pluginPrefix).event/barcode_tracking_listener"
-        barcodeTrackingEventChannel = FlutterEventChannel(name: trackingChannelName,
+    public init(with messenger: FlutterBinaryMessenger) {
+        barcodeTrackingEventChannel = FlutterEventChannel(name: "com.scandit.datacapture.barcode.tracking/event_channel",
                                                           binaryMessenger: messenger)
-        let advancedOverlayChannelName = "\(pluginPrefix).event/barcode_tracking_advanced_overlay"
-        advancedOverlayEventChannel = FlutterEventChannel(name: advancedOverlayChannelName,
-                                                                         binaryMessenger: messenger)
-        let basicOverlayChannelName = "\(pluginPrefix).event/barcode_tracking_basic_overlay"
-        basicOverlayEventChannel = FlutterEventChannel(name: basicOverlayChannelName,
-                                                       binaryMessenger: messenger)
-        let barcodeTrackingListenerChannelName = "\(pluginPrefix).method/barcode_tracking_listener"
-        barcodeTrackingMethodChannel = FlutterMethodChannel(name: barcodeTrackingListenerChannelName,
-                                                            binaryMessenger: messenger)
-        let basicOverlayMethodChannelName = "\(pluginPrefix).method/barcode_tracking_basic_overlay"
-        basicOverlayMethodChannel = FlutterMethodChannel(name: basicOverlayMethodChannelName,
-                                                         binaryMessenger: messenger)
-        let advancedOverlayMethodChannelName = "\(pluginPrefix).method/barcode_tracking_advanced_overlay"
-        advancedOverlayMethodChannel = FlutterMethodChannel(name: advancedOverlayMethodChannelName,
+        barcodeTrackingMethodChannel = FlutterMethodChannel(name: "com.scandit.datacapture.barcode.tracking/method_channel",
                                                             binaryMessenger: messenger)
 
         super.init()
         barcodeTrackingEventChannel.setStreamHandler(self)
         barcodeTrackingMethodChannel.setMethodCallHandler(barcodeTrackingMethodCallHandler)
-        advancedOverlayEventChannel.setStreamHandler(advancedOverlayStreamHandler)
-        basicOverlayEventChannel.setStreamHandler(basicOverlayStreamHandler)
-        basicOverlayMethodChannel.setMethodCallHandler(basicOverlayMethodCallHandler)
-        advancedOverlayMethodChannel.setMethodCallHandler(advancedOverlayMethodCallHandler)
         registerDeserializer()
     }
 
@@ -144,23 +116,23 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
     }
 
     public func addAdvancedOverlayDelegate(result: FlutterResult) {
-        advancedOverlayStreamHandler.hasListeners = true
+        hasAdvancedOverlayListeners = true
         result(nil)
     }
 
     public func removeAdvancedOverlayDelegate(result: FlutterResult) {
-        advancedOverlayStreamHandler.hasListeners = false
+        hasAdvancedOverlayListeners = false
         result(nil)
     }
 
     public func addBasicOverlayDelegate(result: FlutterResult) {
-        basicOverlayStreamHandler.hasListeners = true
+        hasBasicOverlayListeners = true
         barcodeTrackingBasicOverlay?.delegate = self
         result(nil)
     }
 
     public func removeBasicOverlayDelegate(result: FlutterResult) {
-        basicOverlayStreamHandler.hasListeners = false
+        hasBasicOverlayListeners = false
         barcodeTrackingBasicOverlay?.delegate = nil
         result(nil)
     }
@@ -168,6 +140,16 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
     public func resetSession(call: FlutterMethodCall, result: FlutterResult) {
         sessionHolder.reset(frameSequenceId: call.arguments as? Int)
         result(nil)
+    }
+    
+    public func defaults(result: FlutterResult) {
+        do {
+            let defaultsJSON = String(data: try JSONSerialization.data(withJSONObject: defaults, options: []),
+                                      encoding: .utf8)
+            result(defaultsJSON)
+        } catch {
+            result(FlutterError(code: "-1", message: "Unable to load the defaults. \(error)", details: nil))
+        }
     }
 
     func invalidate() {
@@ -182,11 +164,7 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
     @objc
     public func dispose() {
         barcodeTrackingEventChannel.setStreamHandler(nil)
-        advancedOverlayEventChannel.setStreamHandler(nil)
-        basicOverlayEventChannel.setStreamHandler(nil)
         barcodeTrackingMethodChannel.setMethodCallHandler(nil)
-        basicOverlayMethodChannel.setMethodCallHandler(nil)
-        advancedOverlayMethodChannel.setMethodCallHandler(nil)
         unlockLocks()
     }
 
@@ -197,6 +175,18 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
             static let removeBarcodeTrackingListener = "removeBarcodeTrackingListener"
             static let resetBarcodeTrackingSession = "resetBarcodeTrackingSession"
             static let getLastFrameData = "getLastFrameData"
+            static let setBrushForTrackedBarcode = "setBrushForTrackedBarcode"
+            static let clearTrackedBarcodeBrushes = "clearTrackedBarcodeBrushes"
+            static let addBasicOverlayDelegate = "subscribeBarcodeTrackingBasicOverlayListener"
+            static let removeBasicOverlayDelegate = "unsubscribeBarcodeTrackingBasicOverlayListener"
+            static let finishBrushForTrackedBarcodeCallback = "finishBrushForTrackedBarcodeCallback"
+            static let setWidgetForTrackedBarcode = "setWidgetForTrackedBarcode"
+            static let setAnchorForTrackedBarcode = "setAnchorForTrackedBarcode"
+            static let setOffsetForTrackedBarcode = "setOffsetForTrackedBarcode"
+            static let clearTrackedBarcodeWidgets = "clearTrackedBarcodeWidgets"
+            static let addBarcodeTrackingAdvancedOverlayDelegate = "addBarcodeTrackingAdvancedOverlayDelegate"
+            static let removeBarcodeTrackingAdvancedOverlayDelegate = "removeBarcodeTrackingAdvancedOverlayDelegate"
+            static let getBarcodeTrackingDefaults = "getBarcodeTrackingDefaults"
         }
         switch methodCall.method {
         case FunctionNames.barcodeTrackingFinishDidUpdateSession:
@@ -210,20 +200,6 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
             resetSession(call: methodCall, result: result)
         case FunctionNames.getLastFrameData:
             ScanditFlutterDataCaptureCore.getLastFrameData(reply: result)
-        default:
-            result(FlutterMethodNotImplemented)
-        }
-    }
-
-    func basicOverlayMethodCallHandler(methodCall: FlutterMethodCall, result: FlutterResult) {
-        enum FunctionNames {
-            static let setBrushForTrackedBarcode = "setBrushForTrackedBarcode"
-            static let clearTrackedBarcodeBrushes = "clearTrackedBarcodeBrushes"
-            static let addBasicOverlayDelegate = "subscribeBarcodeTrackingBasicOverlayListener"
-            static let removeBasicOverlayDelegate = "unsubscribeBarcodeTrackingBasicOverlayListener"
-            static let finishBrushForTrackedBarcodeCallback = "finishBrushForTrackedBarcodeCallback"
-        }
-        switch methodCall.method {
         case FunctionNames.addBasicOverlayDelegate:
             addBasicOverlayDelegate(result: result)
         case FunctionNames.removeBasicOverlayDelegate:
@@ -233,24 +209,9 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
         case FunctionNames.clearTrackedBarcodeBrushes:
             clearTrackedBarcodeBrushes(result: result)
         case FunctionNames.finishBrushForTrackedBarcodeCallback:
-            basicOverlayStreamHandler.finishBrushForTrackedBarcodeCallback(arguments: methodCall.arguments as? String,
+            finishBrushForTrackedBarcodeCallback(arguments: methodCall.arguments as? String,
                                                                            result: result,
                                                                            lock: brushForTrackedBarcodeLock)
-        default:
-            result(FlutterMethodNotImplemented)
-        }
-    }
-
-    func advancedOverlayMethodCallHandler(methodCall: FlutterMethodCall, result: FlutterResult) {
-        enum FunctionNames {
-            static let setWidgetForTrackedBarcode = "setWidgetForTrackedBarcode"
-            static let setAnchorForTrackedBarcode = "setAnchorForTrackedBarcode"
-            static let setOffsetForTrackedBarcode = "setOffsetForTrackedBarcode"
-            static let clearTrackedBarcodeWidgets = "clearTrackedBarcodeWidgets"
-            static let addBarcodeTrackingAdvancedOverlayDelegate = "addBarcodeTrackingAdvancedOverlayDelegate"
-            static let removeBarcodeTrackingAdvancedOverlayDelegate = "removeBarcodeTrackingAdvancedOverlayDelegate"
-        }
-        switch methodCall.method {
         case FunctionNames.setWidgetForTrackedBarcode:
             setWidgetForTrackedBarcode(arguments: methodCall.arguments, result: result)
         case FunctionNames.setAnchorForTrackedBarcode:
@@ -260,11 +221,13 @@ public class ScanditFlutterDataCaptureBarcodeTracking: NSObject, ScanditFlutterD
         case FunctionNames.clearTrackedBarcodeWidgets:
             clearTrackedBarcodeWidgets(result: result)
         case FunctionNames.addBarcodeTrackingAdvancedOverlayDelegate:
-            advancedOverlayStreamHandler.hasListeners = true
+            hasAdvancedOverlayListeners = true
             result(nil)
         case FunctionNames.removeBarcodeTrackingAdvancedOverlayDelegate:
-            advancedOverlayStreamHandler.hasListeners = false
+            hasAdvancedOverlayListeners = false
             result(nil)
+        case FunctionNames.getBarcodeTrackingDefaults:
+            defaults(result: result)
         default:
             result(FlutterMethodNotImplemented)
         }

@@ -7,15 +7,7 @@
 class FlutterBarcodeCountViewUIListener: NSObject {
     var sink: FlutterEventSink?
 
-    let eventChannel: FlutterEventChannel
-
     var hasListeners = false
-
-    init(eventChannel: FlutterEventChannel) {
-        self.eventChannel = eventChannel
-        super.init()
-        self.eventChannel.setStreamHandler(self)
-    }
 
     func addBarcodeCountViewUIListener(_ result: FlutterResult) {
         hasListeners = true
@@ -28,7 +20,7 @@ class FlutterBarcodeCountViewUIListener: NSObject {
     }
 
     func dispose() {
-        eventChannel.setStreamHandler(nil)
+        // dispose 
     }
 
     @discardableResult
@@ -44,18 +36,6 @@ class FlutterBarcodeCountViewUIListener: NSObject {
             print(error)
             return false
         }
-    }
-}
-
-extension FlutterBarcodeCountViewUIListener: FlutterStreamHandler {
-    func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        sink = events
-        return nil
-    }
-
-    func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        sink = nil
-        return nil
     }
 }
 

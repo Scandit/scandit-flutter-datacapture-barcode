@@ -57,6 +57,6 @@ class _BarcodeCountSessionController {
   }
 
   MethodChannel _getChannel() {
-    return MethodChannel('com.scandit.datacapture.barcode.count.method/barcode_count_listener');
+    return MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
   }
 }

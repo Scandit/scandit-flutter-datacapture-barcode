@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'barcode_tracking.dart';
@@ -142,8 +143,8 @@ class BarcodeTrackingBasicOverlay extends DataCaptureOverlay {
 }
 
 abstract class BarcodeTrackingBasicOverlayListener {
-  static const String _brushForTrackedBarcodeEventName = 'barcodeTrackingBasicOverlayListener-brushForTrackedBarcode';
-  static const String _didTapTrackedBarcodeEventName = 'barcodeTrackingBasicOverlayListener-didTapTrackedBarcode';
+  static const String _brushForTrackedBarcodeEventName = 'BarcodeTrackingBasicOverlayListener.brushForTrackedBarcode';
+  static const String _didTapTrackedBarcodeEventName = 'BarcodeTrackingBasicOverlayListener.didTapTrackedBarcode';
 
   Brush brushForTrackedBarcode(BarcodeTrackingBasicOverlay overlay, TrackedBarcode trackedBarcode);
   void didTapTrackedBarcode(BarcodeTrackingBasicOverlay overlay, TrackedBarcode trackedBarcode);
@@ -151,17 +152,14 @@ abstract class BarcodeTrackingBasicOverlayListener {
 
 class _BarcodeTrackingBasicOverlayController {
   final BarcodeTrackingBasicOverlay _overlay;
-  final EventChannel _eventChannel =
-      EventChannel('com.scandit.datacapture.barcode.tracking.event/barcode_tracking_basic_overlay');
-  final MethodChannel _methodChannel =
-      MethodChannel("com.scandit.datacapture.barcode.tracking.method/barcode_tracking_basic_overlay");
+  final MethodChannel _methodChannel = MethodChannel(BarcodeTrackingFunctionNames.methodsChannelName);
   StreamSubscription<dynamic>? _overlaySubscription;
 
   _BarcodeTrackingBasicOverlayController(this._overlay);
 
   Future<void> setBrushForTrackedBarcode(Brush brush, TrackedBarcode trackedBarcode) {
     var arguments = {
-      'brush': brush.toMap(),
+      'brush': jsonEncode(brush.toMap()),
       'sessionFrameSequenceID': trackedBarcode.sessionFrameSequenceId,
       'trackedBarcodeID': trackedBarcode.identifier
     };
@@ -186,7 +184,7 @@ class _BarcodeTrackingBasicOverlayController {
   }
 
   void _registerEventChannelStreamListener() {
-    _overlaySubscription = _eventChannel.receiveBroadcastStream().listen((event) async {
+    _overlaySubscription = BarcodePluginEvents.barcodeTrackingEventStream.listen((event) async {
       if (_overlay._listener == null) return;
 
       var json = jsonDecode(event as String);

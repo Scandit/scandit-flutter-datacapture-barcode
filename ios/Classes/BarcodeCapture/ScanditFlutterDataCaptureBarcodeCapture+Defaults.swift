@@ -7,7 +7,7 @@
 import ScanditBarcodeCapture
 import scandit_flutter_datacapture_core
 
-extension ScanditFlutterDataCaptureBarcodeCaptureModule {
+extension ScanditFlutterDataCaptureBarcodeCapture {
     var defaults: [String: Any] {
         return [
             "RecommendedCameraSettings": recommendedCameraSettings,

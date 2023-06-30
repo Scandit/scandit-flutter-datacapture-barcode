@@ -23,7 +23,7 @@ extension ScanditFlutterDataCaptureBarcodeTracking {
             return
         }
         guard let lastTrackedBarcodes = sessionHolder.latestSession?.trackedBarcodes,
-              let trackedBarcodeId = parsedArgs["identifier"] as? Int,
+              let trackedBarcodeId = parsedArgs["trackedBarcodeID"] as? Int,
               let trackedCode = lastTrackedBarcodes[NSNumber(value: trackedBarcodeId)] else {
             result(ScanditDataCaptureBarcodeErrorWrapper(error: .trackedBarcodeNotFound))
             return
