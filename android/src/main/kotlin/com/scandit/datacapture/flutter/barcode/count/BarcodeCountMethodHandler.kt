@@ -1,6 +1,8 @@
 package com.scandit.datacapture.flutter.barcode.count
 
 import com.scandit.datacapture.core.ui.style.BrushDeserializer
+import com.scandit.datacapture.flutter.core.utils.Error
+import com.scandit.datacapture.flutter.core.utils.reject
 import com.scandit.datacapture.frameworks.barcode.count.BarcodeCountModule
 import com.scandit.datacapture.frameworks.core.utils.LastFrameData
 import io.flutter.plugin.common.MethodCall
@@ -111,6 +113,10 @@ class BarcodeCountMethodHandler(
                 result.success(null)
             }
             METHOD_GET_LAST_FRAME -> LastFrameData.getLastFrameDataJson {
+                if (it.isNullOrBlank()) {
+                    result.reject(Error(-1, "Frame is null, it might've been reused already."))
+                    return@getLastFrameDataJson
+                }
                 result.success(it)
             }
             METHOD_RESET_BC -> {

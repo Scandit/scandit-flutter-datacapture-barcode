@@ -5,6 +5,8 @@
  */
 package com.scandit.datacapture.flutter.barcode.tracking
 
+import com.scandit.datacapture.flutter.core.utils.Error
+import com.scandit.datacapture.flutter.core.utils.reject
 import com.scandit.datacapture.frameworks.barcode.tracking.BarcodeTrackingModule
 import com.scandit.datacapture.frameworks.core.utils.LastFrameData
 import io.flutter.plugin.common.MethodCall
@@ -39,6 +41,10 @@ class BarcodeTrackingMethodHandler(
                 result.success(null)
             }
             METHOD_GET_LAST_FRAME_DATA -> LastFrameData.getLastFrameDataJson {
+                if (it.isNullOrBlank()) {
+                    result.reject(Error(-1, "Frame is null, it might've been reused already."))
+                    return@getLastFrameDataJson
+                }
                 result.success(it)
             }
             METHOD_ADD_BARCODE_TRACKING_ADVANCED_OVERLAY_LISTENER -> {
