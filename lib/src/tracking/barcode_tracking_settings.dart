@@ -9,31 +9,21 @@ import '../symbology.dart';
 import '../symbology_settings.dart';
 import '../barcode_defaults.dart';
 
-enum BarcodeTrackingScenario { a, b }
+enum BarcodeTrackingScenario {
+  a('A'),
+  b('B');
+
+  const BarcodeTrackingScenario(this._name);
+
+  @override
+  String toString() => _name;
+
+  final String _name;
+}
 
 extension BarcodeTrackingScenarioSerializer on BarcodeTrackingScenario {
   static BarcodeTrackingScenario fromJSON(String jsonValue) {
-    switch (jsonValue) {
-      case 'A':
-        return BarcodeTrackingScenario.a;
-      case 'B':
-        return BarcodeTrackingScenario.b;
-      default:
-        throw Exception("Missing Scenario for name '$jsonValue'");
-    }
-  }
-
-  String get jsonValue => _jsonValue();
-
-  String _jsonValue() {
-    switch (this) {
-      case BarcodeTrackingScenario.a:
-        return 'A';
-      case BarcodeTrackingScenario.b:
-        return 'B';
-      default:
-        throw Exception("Missing name for value '$this'");
-    }
+    return BarcodeTrackingScenario.values.firstWhere((element) => element.toString() == jsonValue);
   }
 }
 
@@ -49,7 +39,7 @@ class BarcodeTrackingSettings implements Serializable {
   BarcodeTrackingSettings.forScenario(BarcodeTrackingScenario? scenario) : this._(scenario);
 
   SymbologySettings settingsForSymbology(Symbology symbology) {
-    var identifier = symbology.jsonValue;
+    var identifier = symbology.toString();
     if (!_symbologies.containsKey(identifier)) {
       var symbologySettings = BarcodeDefaults.symbologySettingsDefaults[identifier]!;
       _symbologies[identifier] = symbologySettings;
@@ -91,7 +81,7 @@ class BarcodeTrackingSettings implements Serializable {
       'symbologies': _symbologies.map((key, value) => MapEntry(key, value.toMap()))
     };
     if (_scenario != null) {
-      json['scenario'] = _scenario?.jsonValue;
+      json['scenario'] = _scenario?.toString();
     }
     return json;
   }

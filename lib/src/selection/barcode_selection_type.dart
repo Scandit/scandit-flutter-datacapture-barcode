@@ -41,8 +41,8 @@ class BarcodeSelectionTapSelection extends BarcodeSelectionType {
   Map<String, dynamic> toMap() {
     var json = super.toMap();
     json.addAll({
-      'tapBehavior': tapBehavior.jsonValue,
-      'freezeBehavior': freezeBehavior.jsonValue,
+      'tapBehavior': tapBehavior.toString(),
+      'freezeBehavior': freezeBehavior.toString(),
     });
     return json;
   }

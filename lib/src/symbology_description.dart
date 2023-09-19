@@ -30,7 +30,7 @@ class SymbologyDescription {
     _isColorInvertible = isColorInvertible;
   }
 
-  String get identifier => symbology.jsonValue;
+  String get identifier => symbology.toString();
   Symbology get symbology => _symbology;
   String get readableName => _readableName;
   bool get isAvailable => _isAvailable;
@@ -52,7 +52,7 @@ class SymbologyDescription {
     Symbology? symbology;
     try {
       symbology = SymbologySerializer.fromJSON(identifier);
-    } on Exception {
+    } on StateError {
       symbology = null;
     }
     if (symbology == null) {
@@ -64,7 +64,7 @@ class SymbologyDescription {
 
   factory SymbologyDescription.forSymbology(Symbology symbology) {
     return BarcodeDefaults.symbologyDescriptionsDefaults
-        .firstWhere((element) => element.identifier == symbology.jsonValue);
+        .firstWhere((element) => element.identifier == symbology.toString());
   }
 }
 
