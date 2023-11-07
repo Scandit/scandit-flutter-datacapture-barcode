@@ -4,6 +4,8 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
+import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_defaults.dart';
+
 import 'capture/barcode_capture_defaults.dart';
 import 'barcode_defaults.dart';
 import 'count/barcode_count_defaults.dart';
@@ -20,5 +22,6 @@ class ScanditFlutterDataCaptureBarcode {
     await BarcodeTrackingDefaults.getDefaults();
     await BarcodeSelectionDefaults.initializeDefaults();
     await BarcodeCountDefaults.initializeDefaults();
+    await SparkScanDefaults.initializeDefaults();
   }
 }

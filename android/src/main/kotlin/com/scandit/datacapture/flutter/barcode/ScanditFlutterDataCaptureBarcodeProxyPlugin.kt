@@ -8,6 +8,7 @@ package com.scandit.datacapture.flutter.barcode
 import com.scandit.datacapture.flutter.barcode.capture.BarcodeCaptureMethodHandler
 import com.scandit.datacapture.flutter.barcode.count.BarcodeCountMethodHandler
 import com.scandit.datacapture.flutter.barcode.selection.BarcodeSelectionMethodHandler
+import com.scandit.datacapture.flutter.barcode.spark.SparkScanMethodHandler
 import com.scandit.datacapture.flutter.barcode.tracking.BarcodeTrackingMethodHandler
 import com.scandit.datacapture.flutter.core.extensions.getMethodChannel
 import com.scandit.datacapture.flutter.core.utils.FlutterEmitter
@@ -23,6 +24,9 @@ import com.scandit.datacapture.frameworks.barcode.selection.BarcodeSelectionModu
 import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionAimedBrushProvider
 import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionListener
 import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionTrackedBrushProvider
+import com.scandit.datacapture.frameworks.barcode.spark.SparkScanModule
+import com.scandit.datacapture.frameworks.barcode.spark.listeners.FrameworksSparkScanListener
+import com.scandit.datacapture.frameworks.barcode.spark.listeners.FrameworksSparkScanViewUiListener
 import com.scandit.datacapture.frameworks.barcode.tracking.BarcodeTrackingModule
 import com.scandit.datacapture.frameworks.barcode.tracking.listeners.FrameworksBarcodeTrackingAdvancedOverlayListener
 import com.scandit.datacapture.frameworks.barcode.tracking.listeners.FrameworksBarcodeTrackingBasicOverlayListener
@@ -60,6 +64,10 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
 
     private var barcodeTrackingMethodChannel: MethodChannel? = null
 
+    private var sparkScanModule: SparkScanModule? = null
+
+    private var sparkScanMethodChannel: MethodChannel? = null
+
     override fun onAttachedToEngine(binding: FlutterPluginBinding) {
         lock.withLock {
             if (isPluginAttached) return
@@ -78,6 +86,9 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
 
             // Barcode Tracking
             setupBarcodeTracking(binding)
+
+            // Spark Scan
+            setupSparkScan(binding)
 
             isPluginAttached = true
         }
@@ -102,6 +113,33 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
             ).also {
                 it.setMethodCallHandler(BarcodeTrackingMethodHandler(module))
             }
+        }
+    }
+
+    private fun setupSparkScan(binding: FlutterPluginBinding) {
+        val eventEmitter = FlutterEmitter(
+            EventChannel(
+                binding.binaryMessenger,
+                SparkScanMethodHandler.EVENT_CHANNEL_NAME
+            )
+        )
+
+        sparkScanModule = SparkScanModule(
+            FrameworksSparkScanListener(eventEmitter),
+            FrameworksSparkScanViewUiListener(eventEmitter)
+        ).also { module ->
+            module.onCreate(binding.applicationContext)
+
+            sparkScanMethodChannel = binding.getMethodChannel(
+                SparkScanMethodHandler.METHOD_CHANNEL_NAME
+            ).also {
+                it.setMethodCallHandler(SparkScanMethodHandler(module))
+            }
+
+            binding.platformViewRegistry.registerViewFactory(
+                "com.scandit.SparkScanView",
+                SparkScanPlatformViewFactory(module)
+            )
         }
     }
 
@@ -211,6 +249,11 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
             barcodeTrackingModule?.onDestroy()
             barcodeTrackingModule = null
             barcodeTrackingMethodChannel?.setMethodCallHandler(null)
+
+            // Spark Scan Module
+            sparkScanModule?.onDestroy()
+            sparkScanModule = null
+            sparkScanMethodChannel?.setMethodCallHandler(null)
 
             isPluginAttached = false
         }
