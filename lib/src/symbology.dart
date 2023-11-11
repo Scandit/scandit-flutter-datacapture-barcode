@@ -38,8 +38,7 @@ enum Symbology {
   iataTwoOfFive('iata2of5'),
   matrixTwoOfFive('matrix2of5'),
   uspsIntelligentMail('uspsIntelligentMail'),
-  arUco('aruco'),
-  upu4State('upu-4state');
+  arUco('aruco');
 
   const Symbology(this._name);
 

@@ -38,7 +38,7 @@ android {
 }
 
 dependencies {
-    def sdk_version = "6.20.0"
+    def sdk_version = "6.19.6"
 
     println("Version of the native sdk used in this build: ${safeExtGet('global_sdk_version', sdk_version)}")
     if (findProject(':scandit-datacapture-frameworks-barcode') != null) {
