@@ -23,21 +23,29 @@ import 'barcode_count_defaults.dart';
 import 'barcode_count_function_names.dart';
 import 'barcode_count_toolbar_settings.dart';
 
-enum BarcodeCountViewStyle {
-  icon('icon'),
-  dot('dot');
-
-  const BarcodeCountViewStyle(this._name);
-
-  @override
-  String toString() => _name;
-
-  final String _name;
-}
+enum BarcodeCountViewStyle { icon, dot }
 
 extension BarcodeCountViewStyleSerializer on BarcodeCountViewStyle {
   static BarcodeCountViewStyle fromJSON(String jsonValue) {
-    return BarcodeCountViewStyle.values.firstWhere((element) => element.toString() == jsonValue);
+    switch (jsonValue) {
+      case 'dot':
+        return BarcodeCountViewStyle.dot;
+      case 'icon':
+        return BarcodeCountViewStyle.icon;
+      default:
+        throw Exception('Missing BarcodeCountViewStyle for name "$jsonValue"');
+    }
+  }
+
+  String get jsonValue => _jsonValue();
+
+  String _jsonValue() {
+    switch (this) {
+      case BarcodeCountViewStyle.dot:
+        return 'dot';
+      case BarcodeCountViewStyle.icon:
+        return 'icon';
+    }
   }
 }
 
@@ -514,7 +522,7 @@ class BarcodeCountView extends StatefulWidget implements Serializable {
   Map<String, dynamic> toMap() {
     var json = <String, dynamic>{
       'View': {
-        'style': _style.toString(),
+        'style': _style.jsonValue,
         'shouldShowUserGuidanceView': shouldShowUserGuidanceView,
         'shouldShowListButton': shouldShowListButton,
         'shouldShowExitButton': shouldShowExitButton,
@@ -726,7 +734,7 @@ class _BarcodeCountViewController {
     var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
 
     var brush = _listener?.brushForRecognizedBarcode(_barcodeCountView, trackedBarcode);
-    var argument = <String, dynamic>{'trackedBarcodeId': trackedBarcode.identifier};
+    var argument = <String, dynamic>{'identifier': trackedBarcode.identifier};
     if (brush != null) {
       argument['brush'] = jsonEncode(brush.toMap());
     }
@@ -738,7 +746,7 @@ class _BarcodeCountViewController {
     var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
 
     var brush = _listener?.brushForRecognizedBarcodeNotInList(_barcodeCountView, trackedBarcode);
-    var argument = <String, dynamic>{'trackedBarcodeId': trackedBarcode.identifier};
+    var argument = <String, dynamic>{'identifier': trackedBarcode.identifier};
     if (brush != null) {
       argument['brush'] = jsonEncode(brush.toMap());
     }
@@ -750,7 +758,7 @@ class _BarcodeCountViewController {
     var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
 
     var brush = _listener?.brushForUnrecognizedBarcode(_barcodeCountView, trackedBarcode);
-    var argument = <String, dynamic>{'trackedBarcodeId': trackedBarcode.identifier};
+    var argument = <String, dynamic>{'identifier': trackedBarcode.identifier};
     if (brush != null) {
       argument['brush'] = jsonEncode(brush.toMap());
     }

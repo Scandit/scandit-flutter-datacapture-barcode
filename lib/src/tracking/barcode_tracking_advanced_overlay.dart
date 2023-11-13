@@ -18,7 +18,7 @@ import 'barcode_tracking_function_names.dart';
 
 abstract class BarcodeTrackingAdvancedOverlayListener {
   static const String _widgetForTrackedBarcodeEventName =
-      'BarcodeTrackingAdvancedOverlayListener.viewForTrackedBarcode';
+      'BarcodeTrackingAdvancedOverlayListener.widgetForTrackedBarcode';
   static const String _anchorForTrackedBarcodeEventName =
       'BarcodeTrackingAdvancedOverlayListener.anchorForTrackedBarcode';
   static const String _offsetForTrackedBarcodeEventName =
@@ -135,7 +135,7 @@ class _BarcodeTrackingAdvancedOverlayController {
   }
 
   Future<void> setAnchorForTrackedBarcode(Anchor anchor, TrackedBarcode trackedBarcode) {
-    var arguments = {'anchor': anchor.toString(), 'identifier': trackedBarcode.identifier};
+    var arguments = {'anchor': anchor.jsonValue, 'identifier': trackedBarcode.identifier};
     if (trackedBarcode.sessionFrameSequenceId != null) {
       arguments['sessionFrameSequenceID'] = trackedBarcode.sessionFrameSequenceId!;
     }
@@ -168,14 +168,12 @@ class _BarcodeTrackingAdvancedOverlayController {
       switch (json['event'] as String) {
         case BarcodeTrackingAdvancedOverlayListener._widgetForTrackedBarcodeEventName:
           var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
-          print(trackedBarcode);
           // this is to avoid processing multiple requests for the same
           // barcode at the same time.
           if (_widgetRequestsCache.contains(trackedBarcode.identifier)) return;
           _widgetRequestsCache.add(trackedBarcode.identifier);
 
           var widget = _overlay._listener?.widgetForTrackedBarcode(_overlay, trackedBarcode);
-          print(widget);
           if (widget == null) return;
           // ignore: unnecessary_lambdas
           setWidgetForTrackedBarcode(widget, trackedBarcode).catchError((error) => print(error));

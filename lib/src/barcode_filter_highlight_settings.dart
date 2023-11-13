@@ -6,20 +6,25 @@
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
-enum BarcodeFilterHighlightType {
-  brush('brush');
-
-  const BarcodeFilterHighlightType(this._name);
-
-  @override
-  String toString() => _name;
-
-  final String _name;
-}
+enum BarcodeFilterHighlightType { brush }
 
 extension BarcodeFilterHighlightTypeSerializer on BarcodeFilterHighlightType {
   static BarcodeFilterHighlightType fromJSON(String jsonValue) {
-    return BarcodeFilterHighlightType.values.firstWhere((element) => element.toString() == jsonValue);
+    switch (jsonValue) {
+      case 'brush':
+        return BarcodeFilterHighlightType.brush;
+      default:
+        throw Exception('Missing BarcodeFilterHighlightType for name "$jsonValue"');
+    }
+  }
+
+  String get jsonValue => _jsonValue();
+
+  String _jsonValue() {
+    switch (this) {
+      case BarcodeFilterHighlightType.brush:
+        return 'brush';
+    }
   }
 }
 

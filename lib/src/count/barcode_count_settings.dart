@@ -18,7 +18,7 @@ class BarcodeCountSettings implements Serializable {
   BarcodeCountSettings();
 
   SymbologySettings settingsForSymbology(Symbology symbology) {
-    var identifier = symbology.toString();
+    var identifier = symbology.jsonValue;
     if (!_symbologies.containsKey(identifier)) {
       var symbologySettings = BarcodeDefaults.symbologySettingsDefaults[identifier]!;
       _symbologies[identifier] = symbologySettings;

@@ -59,7 +59,7 @@ class _BarcodeSelectionSessionController {
   late final MethodChannel _methodChannel = _getChannel();
 
   Future<int> getCount(Barcode barcode) {
-    var selectionIdentifier = (barcode.data ?? '') + barcode.symbology.toString();
+    var selectionIdentifier = (barcode.data ?? '') + barcode.symbology.jsonValue;
     return _methodChannel
         .invokeMethod<int>(BarcodeSelectionFunctionNames.getBarcodeSelectionSessionCount, selectionIdentifier)
         .then((value) => value ?? 0);

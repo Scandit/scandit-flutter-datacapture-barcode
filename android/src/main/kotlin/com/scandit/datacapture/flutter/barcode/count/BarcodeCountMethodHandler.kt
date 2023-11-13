@@ -1,9 +1,9 @@
 package com.scandit.datacapture.flutter.barcode.count
 
 import com.scandit.datacapture.core.ui.style.BrushDeserializer
-import com.scandit.datacapture.flutter.core.utils.rejectKotlinError
+import com.scandit.datacapture.flutter.core.utils.Error
+import com.scandit.datacapture.flutter.core.utils.reject
 import com.scandit.datacapture.frameworks.barcode.count.BarcodeCountModule
-import com.scandit.datacapture.frameworks.core.errors.FrameDataNullError
 import com.scandit.datacapture.frameworks.core.utils.LastFrameData
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -40,17 +40,15 @@ class BarcodeCountMethodHandler(
                     result.error(
                         "-1",
                         "Invalid argument for " +
-                            METHOD_FINISH_BRUSH_FOR_RECOGNIZED_BARCODE_EVENT,
+                                METHOD_FINISH_BRUSH_FOR_RECOGNIZED_BARCODE_EVENT,
                         ""
                     )
                     return
                 }
-                val brushJson = arguments["brush"] as String
-                val trackedBarcodeId = arguments["trackedBarcodeId"] as Int
 
                 barcodeCountModule.finishBrushForRecognizedBarcodeEvent(
-                    BrushDeserializer.fromJson(brushJson),
-                    trackedBarcodeId
+                    BrushDeserializer.fromJson(arguments["brush"] as String),
+                    arguments["identifier"] as Int
                 )
                 result.success(null)
             }
@@ -59,17 +57,15 @@ class BarcodeCountMethodHandler(
                     result.error(
                         "-1",
                         "Invalid argument for " +
-                            METHOD_FINISH_BRUSH_FOR_RECOGNIZED_BARCODE_NOT_IN_LIST_EVENT,
+                                METHOD_FINISH_BRUSH_FOR_RECOGNIZED_BARCODE_NOT_IN_LIST_EVENT,
                         ""
                     )
                     return
                 }
-                val brushJson = arguments["brush"] as String
-                val trackedBarcodeId = arguments["trackedBarcodeId"] as Int
 
                 barcodeCountModule.finishBrushForRecognizedBarcodeNotInListEvent(
-                    BrushDeserializer.fromJson(brushJson),
-                    trackedBarcodeId
+                    BrushDeserializer.fromJson(arguments["brush"] as String),
+                    arguments["identifier"] as Int
                 )
                 result.success(null)
             }
@@ -78,17 +74,14 @@ class BarcodeCountMethodHandler(
                     result.error(
                         "-1",
                         "Invalid argument for " +
-                            METHOD_FINISH_BRUSH_FOR_UNRECOGNIZED_BARCODE_EVENT,
+                                METHOD_FINISH_BRUSH_FOR_UNRECOGNIZED_BARCODE_EVENT,
                         ""
                     )
                     return
                 }
-                val brushJson = arguments["brush"] as String
-                val trackedBarcodeId = arguments["trackedBarcodeId"] as Int
-
                 barcodeCountModule.finishBrushForUnrecognizedBarcodeEvent(
-                    BrushDeserializer.fromJson(brushJson),
-                    trackedBarcodeId
+                    BrushDeserializer.fromJson(arguments["brush"] as String),
+                    arguments["identifier"] as Int
                 )
                 result.success(null)
             }
@@ -121,7 +114,7 @@ class BarcodeCountMethodHandler(
             }
             METHOD_GET_LAST_FRAME -> LastFrameData.getLastFrameDataJson {
                 if (it.isNullOrBlank()) {
-                    result.rejectKotlinError(FrameDataNullError())
+                    result.reject(Error(-1, "Frame is null, it might've been reused already."))
                     return@getLastFrameDataJson
                 }
                 result.success(it)

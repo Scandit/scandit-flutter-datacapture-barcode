@@ -5,9 +5,9 @@
  */
 package com.scandit.datacapture.flutter.barcode.capture
 
-import com.scandit.datacapture.flutter.core.utils.rejectKotlinError
+import com.scandit.datacapture.flutter.core.utils.Error
+import com.scandit.datacapture.flutter.core.utils.reject
 import com.scandit.datacapture.frameworks.barcode.capture.BarcodeCaptureModule
-import com.scandit.datacapture.frameworks.core.errors.FrameDataNullError
 import com.scandit.datacapture.frameworks.core.utils.LastFrameData
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -45,7 +45,7 @@ class BarcodeCaptureMethodHandler(
             }
             METHOD_GET_LAST_FRAME_DATA -> LastFrameData.getLastFrameDataJson {
                 if (it.isNullOrBlank()) {
-                    result.rejectKotlinError(FrameDataNullError())
+                    result.reject(Error(-1, "Frame is null, it might've been reused already."))
                     return@getLastFrameDataJson
                 }
                 result.success(it)

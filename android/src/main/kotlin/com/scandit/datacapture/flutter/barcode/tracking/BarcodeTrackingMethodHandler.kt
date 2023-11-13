@@ -5,9 +5,9 @@
  */
 package com.scandit.datacapture.flutter.barcode.tracking
 
-import com.scandit.datacapture.flutter.core.utils.rejectKotlinError
+import com.scandit.datacapture.flutter.core.utils.Error
+import com.scandit.datacapture.flutter.core.utils.reject
 import com.scandit.datacapture.frameworks.barcode.tracking.BarcodeTrackingModule
-import com.scandit.datacapture.frameworks.core.errors.FrameDataNullError
 import com.scandit.datacapture.frameworks.core.utils.LastFrameData
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -42,7 +42,7 @@ class BarcodeTrackingMethodHandler(
             }
             METHOD_GET_LAST_FRAME_DATA -> LastFrameData.getLastFrameDataJson {
                 if (it.isNullOrBlank()) {
-                    result.rejectKotlinError(FrameDataNullError())
+                    result.reject(Error(-1, "Frame is null, it might've been reused already."))
                     return@getLastFrameDataJson
                 }
                 result.success(it)
@@ -106,6 +106,12 @@ class BarcodeTrackingMethodHandler(
                 barcodeTrackingModule.removeBasicOverlayListener()
                 result.success(null)
             }
+            METHOD_FINISH_BRUSH_FOR_TRACKED_BARCODE_CALLBACK -> {
+                barcodeTrackingModule.finishBasicOverlayBrushForTrackedBarcode(
+                    call.arguments as String
+                )
+                result.success(null)
+            }
             METHOD_SET_BRUSH_FOR_TRACKED_BARCODE -> {
                 barcodeTrackingModule.setBasicOverlayBrushForTrackedBarcode(
                     call.arguments as String
@@ -143,6 +149,8 @@ class BarcodeTrackingMethodHandler(
             "subscribeBarcodeTrackingBasicOverlayListener"
         private const val METHOD_UNSUBSCRIBE_BASIC_OVERLAY_LISTENER =
             "unsubscribeBarcodeTrackingBasicOverlayListener"
+        private const val METHOD_FINISH_BRUSH_FOR_TRACKED_BARCODE_CALLBACK =
+            "finishBrushForTrackedBarcodeCallback"
 
         const val EVENT_CHANNEL_NAME =
             "com.scandit.datacapture.barcode.tracking/event_channel"

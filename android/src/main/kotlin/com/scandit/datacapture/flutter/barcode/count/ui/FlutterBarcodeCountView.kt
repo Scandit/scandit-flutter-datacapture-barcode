@@ -3,7 +3,6 @@ package com.scandit.datacapture.flutter.barcode.count.ui
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
-import android.view.ViewGroup
 import android.widget.FrameLayout
 import com.scandit.datacapture.frameworks.barcode.count.BarcodeCountModule
 import io.flutter.plugin.platform.PlatformView
@@ -16,9 +15,7 @@ class FlutterBarcodeCountView(
 ) : FrameLayout(context), PlatformView {
 
     init {
-        barcodeModule.getViewFromJson(jsonString)?.let {
-            addView(it, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        }
+        barcodeModule.addViewFromJson(this, jsonString)
     }
 
     override fun getView(): View = this
