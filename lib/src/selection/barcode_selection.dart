@@ -51,7 +51,7 @@ class BarcodeSelection extends DataCaptureMode {
     var defaults = BarcodeSelectionDefaults.cameraSettingsDefaults;
     return CameraSettings(defaults.preferredResolution, defaults.zoomFactor, defaults.focusRange,
         defaults.focusGestureStrategy, defaults.zoomGestureZoomFactor,
-        shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus);
+        properties: defaults.properties, shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus);
   }
 
   BarcodeSelectionFeedback get feedback => _feedback;

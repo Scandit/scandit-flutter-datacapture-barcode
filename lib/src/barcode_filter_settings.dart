@@ -42,7 +42,7 @@ class BarcodeFilterSettings implements Serializable {
       "excludeUpca": excludeUpca,
       "excludedCodesRegex": excludedCodesRegex,
       "excludedSymbolCounts": excludedSymbolCounts,
-      "excludedSymbologies": excludedSymbologies.map((e) => e.jsonValue).toList()
+      "excludedSymbologies": excludedSymbologies.map((e) => e.toString()).toList()
     };
   }
 }

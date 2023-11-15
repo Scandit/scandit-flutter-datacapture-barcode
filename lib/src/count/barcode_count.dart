@@ -56,7 +56,7 @@ class BarcodeCount extends DataCaptureMode {
     var defaults = BarcodeCountDefaults.cameraSettingsDefaults;
     return CameraSettings(defaults.preferredResolution, defaults.zoomFactor, defaults.focusRange,
         defaults.focusGestureStrategy, defaults.zoomGestureZoomFactor,
-        shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus);
+        shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus, properties: defaults.properties);
   }
 
   BarcodeCount._(DataCaptureContext context, this._settings) {

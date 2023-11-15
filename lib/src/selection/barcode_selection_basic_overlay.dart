@@ -10,29 +10,21 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 import 'barcode_selection_defaults.dart';
 import 'barcode_selection.dart';
 
-enum BarcodeSelectionBasicOverlayStyle { frame, dot }
+enum BarcodeSelectionBasicOverlayStyle {
+  frame('frame'),
+  dot('dot');
+
+  const BarcodeSelectionBasicOverlayStyle(this._name);
+
+  @override
+  String toString() => _name;
+
+  final String _name;
+}
 
 extension BarcodeSelectionBasicOverlayStyleSerializer on BarcodeSelectionBasicOverlayStyle {
   static BarcodeSelectionBasicOverlayStyle fromJSON(String jsonValue) {
-    switch (jsonValue) {
-      case 'frame':
-        return BarcodeSelectionBasicOverlayStyle.frame;
-      case 'dot':
-        return BarcodeSelectionBasicOverlayStyle.dot;
-      default:
-        throw Exception('Missing BarcodeSelectionBasicOverlayStyle for name "$jsonValue"');
-    }
-  }
-
-  String get jsonValue => _jsonValue();
-
-  String _jsonValue() {
-    switch (this) {
-      case BarcodeSelectionBasicOverlayStyle.frame:
-        return 'frame';
-      case BarcodeSelectionBasicOverlayStyle.dot:
-        return 'dot';
-    }
+    return BarcodeSelectionBasicOverlayStyle.values.firstWhere((element) => element.toString() == jsonValue);
   }
 }
 
@@ -142,7 +134,7 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
       'shouldShowHints': _shouldShowHints,
       'shouldShowScanAreaGuides': _shouldShowScanAreaGuides,
       'viewfinder': _viewfinder.toMap(),
-      'style': style.jsonValue,
+      'style': style.toString(),
       'frozenBackgroundColor': _frozenBackgroundColor.jsonValue,
     });
     return json;

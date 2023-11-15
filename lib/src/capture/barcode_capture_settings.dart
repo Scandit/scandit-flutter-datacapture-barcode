@@ -35,7 +35,7 @@ class BarcodeCaptureSettings implements Serializable {
       'locationSelection': locationSelection == null ? {'type': 'none'} : locationSelection?.toMap(),
       'properties': _properties,
       'symbologies': _symbologies.map<String, Map<String, dynamic>>((key, value) => MapEntry(key, value.toMap())),
-      'enabledCompositeTypes': enabledCompositeTypes.map((e) => e.jsonValue).toList()
+      'enabledCompositeTypes': enabledCompositeTypes.map((e) => e.toString()).toList()
     };
   }
 
@@ -44,7 +44,7 @@ class BarcodeCaptureSettings implements Serializable {
   }
 
   SymbologySettings settingsForSymbology(Symbology symbology) {
-    var identifier = symbology.jsonValue;
+    var identifier = symbology.toString();
     if (!_symbologies.containsKey(identifier)) {
       var symbologySettings = BarcodeDefaults.symbologySettingsDefaults[identifier]!;
       _symbologies[identifier] = symbologySettings;

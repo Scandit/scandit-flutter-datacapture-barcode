@@ -4,34 +4,21 @@
  * Copyright (C) 2021- Scandit AG. All rights reserved.
  */
 
-enum CompositeType { a, b, c }
+enum CompositeType {
+  a('A'),
+  b('B'),
+  c('C');
+
+  const CompositeType(this._name);
+
+  @override
+  String toString() => _name;
+
+  final String _name;
+}
 
 extension CompositeTypeSerializer on CompositeType {
   static CompositeType fromJSON(String jsonValue) {
-    switch (jsonValue) {
-      case 'A':
-        return CompositeType.a;
-      case 'B':
-        return CompositeType.b;
-      case 'C':
-        return CompositeType.c;
-      default:
-        throw Exception("Missing CompositeType for name '$jsonValue'");
-    }
-  }
-
-  String get jsonValue => _jsonValue();
-
-  String _jsonValue() {
-    switch (this) {
-      case CompositeType.a:
-        return 'A';
-      case CompositeType.b:
-        return 'B';
-      case CompositeType.c:
-        return 'C';
-      default:
-        throw Exception("Missing name for enum '$this'");
-    }
+    return CompositeType.values.firstWhere((element) => element.toString() == jsonValue);
   }
 }

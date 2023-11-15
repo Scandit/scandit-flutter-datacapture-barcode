@@ -95,7 +95,7 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
             FrameworksBarcodeTrackingBasicOverlayListener(eventEmitter),
             FrameworksBarcodeTrackingAdvancedOverlayListener(eventEmitter)
         ).also { module ->
-            module.onStart(binding.applicationContext)
+            module.onCreate(binding.applicationContext)
 
             barcodeTrackingMethodChannel = binding.getMethodChannel(
                 BarcodeTrackingMethodHandler.METHOD_CHANNEL_NAME
@@ -117,7 +117,7 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
             FrameworksBarcodeSelectionAimedBrushProvider(eventEmitter),
             FrameworksBarcodeSelectionTrackedBrushProvider(eventEmitter)
         ).also { module ->
-            module.onStart(binding.applicationContext)
+            module.onCreate(binding.applicationContext)
 
             barcodeSelectionMethodChannel = binding.getMethodChannel(
                 BarcodeSelectionMethodHandler.METHOD_CHANNEL_NAME
@@ -140,7 +140,7 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
             FrameworksBarcodeCountViewListener(eventEmitter),
             FrameworksBarcodeCountViewUiListener(eventEmitter)
         ).also { module ->
-            module.onStart(binding.applicationContext)
+            module.onCreate(binding.applicationContext)
 
             barcodeCountMethodChannel = binding.getMethodChannel(
                 BarcodeCountMethodHandler.METHOD_CHANNEL_NAME
@@ -166,7 +166,7 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
                 )
             )
         ).also { module ->
-            module.onStart(binding.applicationContext)
+            module.onCreate(binding.applicationContext)
 
             barcodeCaptureMethodChannel = binding.getMethodChannel(
                 BarcodeCaptureMethodHandler.METHOD_CHANNEL_NAME
@@ -177,7 +177,7 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
     }
 
     private fun setupBarcodeModule(binding: FlutterPluginBinding) {
-        barcodeModule.onStart(binding.applicationContext)
+        barcodeModule.onCreate(binding.applicationContext)
 
         barcodeMethodChannel = binding.getMethodChannel(
             BarcodeMethodHandler.METHOD_CHANNEL
@@ -190,25 +190,25 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
     override fun onDetachedFromEngine(binding: FlutterPluginBinding) {
         lock.withLock {
             // Barcode Module
-            barcodeModule.onStop()
+            barcodeModule.onDestroy()
             barcodeMethodChannel?.setMethodCallHandler(null)
             // Barcode Capture Module
-            barcodeCaptureModule?.onStop()
+            barcodeCaptureModule?.onDestroy()
             barcodeCaptureModule = null
             barcodeCaptureMethodChannel?.setMethodCallHandler(null)
 
             // Barcode Count Module
-            barcodeCountModule?.onStop()
+            barcodeCountModule?.onDestroy()
             barcodeCountModule = null
             barcodeCountMethodChannel?.setMethodCallHandler(null)
 
             // Barcode Selection Module
-            barcodeSelectionModule?.onStop()
+            barcodeSelectionModule?.onDestroy()
             barcodeSelectionModule = null
             barcodeSelectionMethodChannel?.setMethodCallHandler(null)
 
             // Barcode Tracking Module
-            barcodeTrackingModule?.onStop()
+            barcodeTrackingModule?.onDestroy()
             barcodeTrackingModule = null
             barcodeTrackingMethodChannel?.setMethodCallHandler(null)
 

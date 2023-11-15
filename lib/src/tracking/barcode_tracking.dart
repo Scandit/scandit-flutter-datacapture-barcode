@@ -43,6 +43,7 @@ class BarcodeTracking extends DataCaptureMode {
         BarcodeTrackingDefaults.recommendedCameraSettings.focusRange,
         BarcodeTrackingDefaults.recommendedCameraSettings.focusGestureStrategy,
         BarcodeTrackingDefaults.recommendedCameraSettings.zoomGestureZoomFactor,
+        properties: BarcodeTrackingDefaults.recommendedCameraSettings.properties,
         shouldPreferSmoothAutoFocus: BarcodeTrackingDefaults.recommendedCameraSettings.shouldPreferSmoothAutoFocus,
       );
 

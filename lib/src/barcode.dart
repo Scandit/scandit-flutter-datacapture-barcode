@@ -111,14 +111,14 @@ class Barcode implements Serializable {
   @override
   Map<String, dynamic> toMap() {
     return {
-      'symbology': symbology.jsonValue,
+      'symbology': symbology.toString(),
       'data': data,
       'rawData': rawData,
       'addOnData': addOnData,
       'encodingRanges': encodingRanges.map((e) => e.toMap()).toList(),
       'location': location.toMap(),
       'isGS1DataCarrier': isGS1DataCarrier,
-      'compositeFlag': compositeFlag.jsonValue,
+      'compositeFlag': compositeFlag.toString(),
       'isColorInverted': isColorInverted,
       'symbolCount': symbolCount,
       'frameId': frameID,
