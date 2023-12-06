@@ -14,7 +14,8 @@ import 'barcode_capture_function_names.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeCaptureDefaults {
-  static MethodChannel channel = MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
+  static MethodChannel channel =
+      MethodChannel('com.scandit.datacapture.barcode.capture.method/barcode_capture_defaults');
 
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 

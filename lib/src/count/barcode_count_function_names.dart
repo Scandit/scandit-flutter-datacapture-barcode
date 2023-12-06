@@ -27,6 +27,4 @@ abstract class BarcodeCountFunctionNames {
   static const String finishBrushForRecognizedBarcodeEvent = 'finishBrushForRecognizedBarcodeEvent';
   static const String finishBrushForRecognizedBarcodeNotInListEvent = 'finishBrushForRecognizedBarcodeNotInListEvent';
   static const String finishBrushForUnrecognizedBarcodeEvent = 'finishBrushForUnrecognizedBarcodeEvent';
-
-  static const String methodsChannelName = 'com.scandit.datacapture.barcode.count/method_channel';
 }

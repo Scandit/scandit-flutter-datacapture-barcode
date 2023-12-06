@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'barcode_tracking.dart';
@@ -16,22 +15,33 @@ import 'barcode_tracking_defaults.dart';
 import 'barcode_tracking_function_names.dart';
 import 'tracked_barcode.dart';
 
-enum BarcodeTrackingBasicOverlayStyle {
-  legacy('legacy'),
-  frame('frame'),
-  dot('dot');
-
-  const BarcodeTrackingBasicOverlayStyle(this._name);
-
-  @override
-  String toString() => _name;
-
-  final String _name;
-}
+enum BarcodeTrackingBasicOverlayStyle { legacy, frame, dot }
 
 extension BarcodeTrackingBasicOverlayStyleSerializer on BarcodeTrackingBasicOverlayStyle {
   static BarcodeTrackingBasicOverlayStyle fromJSON(String jsonValue) {
-    return BarcodeTrackingBasicOverlayStyle.values.firstWhere((element) => element.toString() == jsonValue);
+    switch (jsonValue) {
+      case 'legacy':
+        return BarcodeTrackingBasicOverlayStyle.legacy;
+      case 'frame':
+        return BarcodeTrackingBasicOverlayStyle.frame;
+      case 'dot':
+        return BarcodeTrackingBasicOverlayStyle.dot;
+      default:
+        throw Exception('Missing BarcodeTrackingBasicOverlayStyle for name "$jsonValue"');
+    }
+  }
+
+  String get jsonValue => _jsonValue();
+
+  String _jsonValue() {
+    switch (this) {
+      case BarcodeTrackingBasicOverlayStyle.legacy:
+        return 'legacy';
+      case BarcodeTrackingBasicOverlayStyle.frame:
+        return 'frame';
+      case BarcodeTrackingBasicOverlayStyle.dot:
+        return 'dot';
+    }
   }
 }
 
@@ -125,15 +135,15 @@ class BarcodeTrackingBasicOverlay extends DataCaptureOverlay {
     json.addAll({
       'defaultBrush': _brush.toMap(),
       'shouldShowScanAreaGuides': _shouldShowScanAreaGuides,
-      'style': style.toString()
+      'style': style.jsonValue
     });
     return json;
   }
 }
 
 abstract class BarcodeTrackingBasicOverlayListener {
-  static const String _brushForTrackedBarcodeEventName = 'BarcodeTrackingBasicOverlayListener.brushForTrackedBarcode';
-  static const String _didTapTrackedBarcodeEventName = 'BarcodeTrackingBasicOverlayListener.didTapTrackedBarcode';
+  static const String _brushForTrackedBarcodeEventName = 'barcodeTrackingBasicOverlayListener-brushForTrackedBarcode';
+  static const String _didTapTrackedBarcodeEventName = 'barcodeTrackingBasicOverlayListener-didTapTrackedBarcode';
 
   Brush brushForTrackedBarcode(BarcodeTrackingBasicOverlay overlay, TrackedBarcode trackedBarcode);
   void didTapTrackedBarcode(BarcodeTrackingBasicOverlay overlay, TrackedBarcode trackedBarcode);
@@ -141,14 +151,17 @@ abstract class BarcodeTrackingBasicOverlayListener {
 
 class _BarcodeTrackingBasicOverlayController {
   final BarcodeTrackingBasicOverlay _overlay;
-  final MethodChannel _methodChannel = MethodChannel(BarcodeTrackingFunctionNames.methodsChannelName);
+  final EventChannel _eventChannel =
+      EventChannel('com.scandit.datacapture.barcode.tracking.event/barcode_tracking_basic_overlay');
+  final MethodChannel _methodChannel =
+      MethodChannel("com.scandit.datacapture.barcode.tracking.method/barcode_tracking_basic_overlay");
   StreamSubscription<dynamic>? _overlaySubscription;
 
   _BarcodeTrackingBasicOverlayController(this._overlay);
 
   Future<void> setBrushForTrackedBarcode(Brush brush, TrackedBarcode trackedBarcode) {
     var arguments = {
-      'brush': jsonEncode(brush.toMap()),
+      'brush': brush.toMap(),
       'sessionFrameSequenceID': trackedBarcode.sessionFrameSequenceId,
       'trackedBarcodeID': trackedBarcode.identifier
     };
@@ -173,7 +186,7 @@ class _BarcodeTrackingBasicOverlayController {
   }
 
   void _registerEventChannelStreamListener() {
-    _overlaySubscription = BarcodePluginEvents.barcodeTrackingEventStream.listen((event) async {
+    _overlaySubscription = _eventChannel.receiveBroadcastStream().listen((event) async {
       if (_overlay._listener == null) return;
 
       var json = jsonDecode(event as String);
@@ -185,12 +198,7 @@ class _BarcodeTrackingBasicOverlayController {
             break;
           }
           await _methodChannel.invokeMethod(
-              BarcodeTrackingFunctionNames.setBrushForTrackedBarcode,
-              jsonEncode({
-                'brush': brush.toMap(),
-                'trackedBarcodeID': trackedBarcode.identifier,
-                'sessionFrameSequenceID': trackedBarcode.sessionFrameSequenceId
-              }));
+              BarcodeTrackingFunctionNames.finishBrushForTrackedBarcodeCallback, jsonEncode(brush.toMap()));
           break;
         case BarcodeTrackingBasicOverlayListener._didTapTrackedBarcodeEventName:
           _overlay._listener

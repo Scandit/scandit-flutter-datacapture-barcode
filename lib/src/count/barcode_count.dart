@@ -11,7 +11,6 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 import '../../scandit_flutter_datacapture_barcode.dart';
-import '../barcode_plugin_events.dart';
 import 'barcode_count_capture_list_session.dart';
 import 'barcode_count_defaults.dart';
 import 'barcode_count_feedback.dart';
@@ -56,7 +55,7 @@ class BarcodeCount extends DataCaptureMode {
     var defaults = BarcodeCountDefaults.cameraSettingsDefaults;
     return CameraSettings(defaults.preferredResolution, defaults.zoomFactor, defaults.focusRange,
         defaults.focusGestureStrategy, defaults.zoomGestureZoomFactor,
-        shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus, properties: defaults.properties);
+        shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus);
   }
 
   BarcodeCount._(DataCaptureContext context, this._settings) {
@@ -143,13 +142,13 @@ class BarcodeCount extends DataCaptureMode {
 }
 
 abstract class BarcodeCountListener {
-  static const String _onScanEventName = 'BarcodeCountListener.onScan';
+  static const String _onScanEventName = 'barcodeCountListener-onScan';
 
   void didScan(BarcodeCount barcodeCount, BarcodeCountSession session, Future<FrameData> getFrameData());
 }
 
 abstract class BarcodeCountCaptureListListener {
-  static const String _didUpdateSessionEventName = 'BarcodeCountCaptureListListener.didUpdateSession';
+  static const String _didUpdateSessionEventName = 'barcodeCountCaptureListListener-didUpdateSession';
 
   void didUpdateSession(BarcodeCountCaptureList barcodeCountCaptureList, BarcodeCountCaptureListSession session);
 }
@@ -166,7 +165,10 @@ class BarcodeCountCaptureList {
 }
 
 class _BarcodeCountController {
-  final MethodChannel _methodChannel = MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
+  final EventChannel _eventChannel =
+      const EventChannel('com.scandit.datacapture.barcode.count.event/barcode_count_events');
+  final MethodChannel _methodChannel =
+      MethodChannel('com.scandit.datacapture.barcode.capture.method/barcode_count_methods');
   final BarcodeCount _barcodeCount;
   StreamSubscription<dynamic>? _streamSubscription;
   BarcodeCountCaptureList? _barcodeCountCaptureList;
@@ -181,7 +183,7 @@ class _BarcodeCountController {
   }
 
   void _setupBarcodeCountSubscription() {
-    _streamSubscription = BarcodePluginEvents.barcodeCountEventStream.listen((event) {
+    _streamSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
       var eventJSON = jsonDecode(event);
       var eventName = eventJSON['event'] as String;
       if (eventName == BarcodeCountListener._onScanEventName) {
@@ -200,7 +202,6 @@ class _BarcodeCountController {
 
   void unsubscribeListeners() {
     _streamSubscription?.cancel();
-    _streamSubscription = null;
     _methodChannel
         .invokeMethod(BarcodeCountFunctionNames.removeBarcodeCountListener)
         .then((value) => null, onError: _onError);

@@ -19,7 +19,7 @@ class BarcodeDefaults {
   static late Map<String, SymbologySettings> _symbologySettingsDefaults;
   static late List<CompositeTypeDescription> _compositeTypeDescriptionsDefaults;
 
-  static MethodChannel channel = MethodChannel(BarcodeFunctionNames.methodsChannelName);
+  static MethodChannel channel = MethodChannel('com.scandit.datacapture.barcode.method/barcode_defaults');
 
   static bool _isInitialized = false;
 

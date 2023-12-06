@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'package:flutter/services.dart';
@@ -51,7 +50,7 @@ class BarcodeSelection extends DataCaptureMode {
     var defaults = BarcodeSelectionDefaults.cameraSettingsDefaults;
     return CameraSettings(defaults.preferredResolution, defaults.zoomFactor, defaults.focusRange,
         defaults.focusGestureStrategy, defaults.zoomGestureZoomFactor,
-        properties: defaults.properties, shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus);
+        shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus);
   }
 
   BarcodeSelectionFeedback get feedback => _feedback;
@@ -146,8 +145,8 @@ class BarcodeSelection extends DataCaptureMode {
 }
 
 abstract class BarcodeSelectionListener {
-  static const String _didUpdateSelectionEventName = 'BarcodeSelectionListener.didUpdateSelection';
-  static const String _didUpdateSessionEventName = 'BarcodeSelectionListener.didUpdateSession';
+  static const String _didUpdateSelectionEventName = 'barcodeSelectionListener-didUpdateSelection';
+  static const String _didUpdateSessionEventName = 'barcodeSelectionListener-didUpdateSession';
 
   void didUpdateSelection(BarcodeSelection barcodeSelection, BarcodeSelectionSession session);
   void didUpdateSession(BarcodeSelection barcodeSelection, BarcodeSelectionSession session);
@@ -161,7 +160,10 @@ abstract class BarcodeSelectionAdvancedListener {
 }
 
 class _BarcodeSelectionListenerController {
-  final MethodChannel _methodChannel = MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
+  final EventChannel _eventChannel =
+      const EventChannel('com.scandit.datacapture.barcode.selection.event/barcode_selection_listener');
+  final MethodChannel _methodChannel =
+      MethodChannel('com.scandit.datacapture.barcode.selection.method/barcode_selection_listener');
   final BarcodeSelection _barcodeSelection;
   StreamSubscription<dynamic>? _barcodeSelectionSubscription;
 
@@ -179,7 +181,7 @@ class _BarcodeSelectionListenerController {
   }
 
   void _setupBarcodeSelectionSubscription() {
-    _barcodeSelectionSubscription = BarcodePluginEvents.barcodeSelectionEventStream.listen((event) {
+    _barcodeSelectionSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
       if (_barcodeSelection._listeners.isEmpty && _barcodeSelection._advancedListeners.isEmpty) return;
 
       var eventJSON = jsonDecode(event);

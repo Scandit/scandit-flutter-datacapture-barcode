@@ -14,7 +14,8 @@ import 'barcode_tracking_function_names.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeTrackingDefaults {
-  static final MethodChannel channel = MethodChannel(BarcodeTrackingFunctionNames.methodsChannelName);
+  static final MethodChannel channel =
+      MethodChannel('com.scandit.datacapture.barcode.tracking.method/barcode_tracking_defaults');
 
   static late CameraSettingsDefaults _recommendedCameraSettings;
   static CameraSettingsDefaults get recommendedCameraSettings => _recommendedCameraSettings;

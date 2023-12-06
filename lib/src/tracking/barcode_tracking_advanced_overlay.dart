@@ -8,23 +8,23 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'barcode_tracking.dart';
 import 'tracked_barcode.dart';
+// ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/widget_to_base64_converter.dart';
 import 'barcode_tracking_function_names.dart';
 
 abstract class BarcodeTrackingAdvancedOverlayListener {
   static const String _widgetForTrackedBarcodeEventName =
-      'BarcodeTrackingAdvancedOverlayListener.viewForTrackedBarcode';
+      'barcodeTrackingAdvancedOverlayListener-widgetForTrackedBarcode';
   static const String _anchorForTrackedBarcodeEventName =
-      'BarcodeTrackingAdvancedOverlayListener.anchorForTrackedBarcode';
+      'barcodeTrackingAdvancedOverlayListener-anchorForTrackedBarcode';
   static const String _offsetForTrackedBarcodeEventName =
-      'BarcodeTrackingAdvancedOverlayListener.offsetForTrackedBarcode';
+      'barcodeTrackingAdvancedOverlayListener-offsetForTrackedBarcode';
   static const String _didTapViewForTrackedBarcodeEventName =
-      'BarcodeTrackingAdvancedOverlayListener.didTapViewForTrackedBarcode';
+      'barcodeTrackingAdvancedOverlayListener-didTapViewForTrackedBarcode';
 
   Widget? widgetForTrackedBarcode(BarcodeTrackingAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
   Anchor anchorForTrackedBarcode(BarcodeTrackingAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
@@ -108,7 +108,11 @@ class BarcodeTrackingAdvancedOverlay extends DataCaptureOverlay {
 class _BarcodeTrackingAdvancedOverlayController {
   final BarcodeTrackingAdvancedOverlay _overlay;
 
-  final MethodChannel _methodChannel = MethodChannel(BarcodeTrackingFunctionNames.methodsChannelName);
+  final EventChannel _eventChannel =
+      EventChannel('com.scandit.datacapture.barcode.tracking.event/barcode_tracking_advanced_overlay');
+
+  final MethodChannel _methodChannel =
+      MethodChannel('com.scandit.datacapture.barcode.tracking.method/barcode_tracking_advanced_overlay');
 
   StreamSubscription<dynamic>? _overlaySubscription;
 
@@ -135,7 +139,7 @@ class _BarcodeTrackingAdvancedOverlayController {
   }
 
   Future<void> setAnchorForTrackedBarcode(Anchor anchor, TrackedBarcode trackedBarcode) {
-    var arguments = {'anchor': anchor.toString(), 'identifier': trackedBarcode.identifier};
+    var arguments = {'anchor': anchor.jsonValue, 'identifier': trackedBarcode.identifier};
     if (trackedBarcode.sessionFrameSequenceId != null) {
       arguments['sessionFrameSequenceID'] = trackedBarcode.sessionFrameSequenceId!;
     }
@@ -161,21 +165,19 @@ class _BarcodeTrackingAdvancedOverlayController {
   }
 
   void _listenToEvents() {
-    _overlaySubscription = BarcodePluginEvents.barcodeTrackingEventStream.listen((event) async {
+    _overlaySubscription = _eventChannel.receiveBroadcastStream().listen((event) async {
       if (_overlay._listener == null) return;
 
       var json = jsonDecode(event as String);
       switch (json['event'] as String) {
         case BarcodeTrackingAdvancedOverlayListener._widgetForTrackedBarcodeEventName:
           var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
-          print(trackedBarcode);
           // this is to avoid processing multiple requests for the same
           // barcode at the same time.
           if (_widgetRequestsCache.contains(trackedBarcode.identifier)) return;
           _widgetRequestsCache.add(trackedBarcode.identifier);
 
           var widget = _overlay._listener?.widgetForTrackedBarcode(_overlay, trackedBarcode);
-          print(widget);
           if (widget == null) return;
           // ignore: unnecessary_lambdas
           setWidgetForTrackedBarcode(widget, trackedBarcode).catchError((error) => print(error));

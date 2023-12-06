@@ -5,6 +5,8 @@
  */
 
 import 'dart:convert';
+// ignore: unnecessary_import
+import 'dart:ui';
 import 'package:meta/meta.dart';
 import 'package:flutter/services.dart';
 import '../../scandit_flutter_datacapture_barcode_selection.dart';
@@ -19,7 +21,8 @@ import 'barcode_selection_strategy.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeSelectionDefaults {
-  static MethodChannel channel = MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
+  static MethodChannel channel =
+      MethodChannel('com.scandit.datacapture.barcode.selection.method/barcode_selection_defaults');
 
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
@@ -54,17 +57,17 @@ class BarcodeSelectionDefaults {
     if (_isInitialized) return;
     var result = await channel.invokeMethod(BarcodeSelectionFunctionNames.getBarcodeSelectionDefaults);
     var json = jsonDecode(result as String);
-    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(json['RecommendedCameraSettings']);
+    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(json['cameraSettings']);
     _barcodeSelectionSettingsDefaults =
-        BarcodeSelectionSettingsDefaults.fromJSON(json['BarcodeSelectionSettings'] as Map<String, dynamic>);
+        BarcodeSelectionSettingsDefaults.fromJSON(json['settings'] as Map<String, dynamic>);
     _barcodeCaptureOverlayDefaults =
-        BarcodeSelectionBasicOverlayDefaults.fromJSON(json['BarcodeSelectionBasicOverlay'] as Map<String, dynamic>);
+        BarcodeSelectionBasicOverlayDefaults.fromJSON(json['overlay'] as Map<String, dynamic>);
     _barcodeSelectionFeedbackDefaults =
-        BarcodeSelectionFeedbackDefaults.fromJSON(jsonDecode(json['Feedback']) as Map<String, dynamic>);
+        BarcodeSelectionFeedbackDefaults.fromJSON(jsonDecode(json['feedback']) as Map<String, dynamic>);
     _barcodeSelectionTapSelectionDefaults =
-        BarcodeSelectionTapSelectionDefaults.fromJSON(json['BarcodeSelectionTapSelection'] as Map<String, dynamic>);
+        BarcodeSelectionTapSelectionDefaults.fromJSON(json['tapSelection'] as Map<String, dynamic>);
     _barcodeSelectionAimerSelectionDefaults =
-        BarcodeSelectionAimerSelectionDefaults.fromJSON(json['BarcodeSelectionAimerSelection'] as Map<String, dynamic>);
+        BarcodeSelectionAimerSelectionDefaults.fromJSON(json['aimerSelection'] as Map<String, dynamic>);
 
     _isInitialized = true;
   }
@@ -170,13 +173,13 @@ class BarcodeSelectionBasicOverlayDefaults {
 
   factory BarcodeSelectionBasicOverlayDefaults.fromJSON(Map<String, dynamic> json) {
     var defaultStyle = BarcodeSelectionBasicOverlayStyleSerializer.fromJSON(json['defaultStyle'] as String);
-    var styles = (json['styles'] as Map<String, dynamic>).map((key, value) => MapEntry(
+    var brushes = (json['Brushes'] as Map<String, dynamic>).map((key, value) => MapEntry(
         BarcodeSelectionBasicOverlayStyleSerializer.fromJSON(key),
         BarcodeSelectionBasicOverlayBrushDefaults.fromJSON(value as Map<String, dynamic>)));
     var frozenBackgroundColor = ColorDeserializer.fromRgbaHex(json['frozenBackgroundColor'] as String);
 
     return BarcodeSelectionBasicOverlayDefaults(
-        defaultStyle, styles, json['shouldShowHints'] as bool, frozenBackgroundColor);
+        defaultStyle, brushes, json['shouldShowHints'] as bool, frozenBackgroundColor);
   }
 }
 
@@ -191,10 +194,10 @@ class BarcodeSelectionBasicOverlayBrushDefaults {
       this.aimedBrush, this.selectingBrush, this.selectedBrush, this.trackedBrush);
 
   factory BarcodeSelectionBasicOverlayBrushDefaults.fromJSON(Map<String, dynamic> json) {
-    var aimedBrushDefaults = BrushDefaults.fromJSON(json['DefaultAimedBrush'] as Map<String, dynamic>);
-    var selectingBrushDefaults = BrushDefaults.fromJSON(json['DefaultSelectingBrush'] as Map<String, dynamic>);
-    var selectedBrushDefaults = BrushDefaults.fromJSON(json['DefaultSelectedBrush'] as Map<String, dynamic>);
-    var trackedBrushDefaults = BrushDefaults.fromJSON(json['DefaultTrackedBrush'] as Map<String, dynamic>);
+    var aimedBrushDefaults = BrushDefaults.fromJSON(json['aimedBrush'] as Map<String, dynamic>);
+    var selectingBrushDefaults = BrushDefaults.fromJSON(json['selectingBrush'] as Map<String, dynamic>);
+    var selectedBrushDefaults = BrushDefaults.fromJSON(json['selectedBrush'] as Map<String, dynamic>);
+    var trackedBrushDefaults = BrushDefaults.fromJSON(json['trackedBrush'] as Map<String, dynamic>);
     return BarcodeSelectionBasicOverlayBrushDefaults(aimedBrushDefaults.toBrush(), selectingBrushDefaults.toBrush(),
         selectedBrushDefaults.toBrush(), trackedBrushDefaults.toBrush());
   }

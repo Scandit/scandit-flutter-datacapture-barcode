@@ -9,21 +9,29 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 import '../capture/barcode_capture_defaults.dart';
 import '../capture/barcode_capture.dart';
 
-enum BarcodeCaptureOverlayStyle {
-  legacy('legacy'),
-  frame('frame');
-
-  const BarcodeCaptureOverlayStyle(this._name);
-
-  @override
-  String toString() => _name;
-
-  final String _name;
-}
+enum BarcodeCaptureOverlayStyle { legacy, frame }
 
 extension BarcodeCaptureOverlayStyleSerializer on BarcodeCaptureOverlayStyle {
   static BarcodeCaptureOverlayStyle fromJSON(String jsonValue) {
-    return BarcodeCaptureOverlayStyle.values.firstWhere((element) => element.toString() == jsonValue);
+    switch (jsonValue) {
+      case 'legacy':
+        return BarcodeCaptureOverlayStyle.legacy;
+      case 'frame':
+        return BarcodeCaptureOverlayStyle.frame;
+      default:
+        throw Exception('Missing BarcodeCaptureOverlayStyle for name "$jsonValue"');
+    }
+  }
+
+  String get jsonValue => _jsonValue();
+
+  String _jsonValue() {
+    switch (this) {
+      case BarcodeCaptureOverlayStyle.legacy:
+        return 'legacy';
+      case BarcodeCaptureOverlayStyle.frame:
+        return 'frame';
+    }
   }
 }
 
@@ -93,7 +101,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
       'brush': _brush.toMap(),
       'shouldShowScanAreaGuides': _shouldShowScanAreaGuides,
       'viewfinder': _viewfinder == null ? _noViewfinder : _viewfinder?.toMap(),
-      'style': style.toString()
+      'style': style.jsonValue
     });
     return json;
   }

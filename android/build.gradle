@@ -1,10 +1,7 @@
-def safeExtGet(prop, fallback) {
-    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
-}
-
 buildscript {
     ext {
-        kotlin_version = "1.7.21"
+        sdk_version = "6.17.3"
+        kotlin_version = "1.6.21"
         agp_version = "7.2.1"
     }
 
@@ -15,7 +12,7 @@ buildscript {
 
     dependencies {
         classpath "com.android.tools.build:gradle:$agp_version"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"        
     }
 }
 
@@ -38,14 +35,7 @@ android {
 }
 
 dependencies {
-    def sdk_version = "6.20.1"
-
-    println("Version of the native sdk used in this build: ${safeExtGet('global_sdk_version', sdk_version)}")
-    if (findProject(':scandit-datacapture-frameworks-barcode') != null) {
-        api project(":scandit-datacapture-frameworks-barcode")
-    } else {
-        api "com.scandit.datacapture.frameworks:barcode:${safeExtGet('global_sdk_version', sdk_version)}"
-    }
-
     api project(path: ':scandit_flutter_datacapture_core')
+
+    api "com.scandit.datacapture:barcode:$sdk_version"
 }

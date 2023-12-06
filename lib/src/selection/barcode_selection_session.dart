@@ -4,6 +4,7 @@
  * Copyright (C) 2021- Scandit AG. All rights reserved.
  */
 
+import 'dart:convert';
 import 'package:flutter/services.dart';
 
 import 'barcode_selection_function_names.dart';
@@ -32,7 +33,7 @@ class BarcodeSelectionSession {
   }
 
   Future<int> getCount(Barcode barcode) {
-    return _controller.getCount(barcode);
+    return _controller.getCount(_frameSequenceId, barcode);
   }
 
   BarcodeSelectionSession.fromJSON(Map<String, dynamic> json)
@@ -58,10 +59,14 @@ class BarcodeSelectionSession {
 class _BarcodeSelectionSessionController {
   late final MethodChannel _methodChannel = _getChannel();
 
-  Future<int> getCount(Barcode barcode) {
-    var selectionIdentifier = (barcode.data ?? '') + barcode.symbology.toString();
+  Future<int> getCount(int frameSequenceId, Barcode barcode) {
+    var arguments = {
+      'frameSequenceId': frameSequenceId,
+      'symbology': barcode.symbology.jsonValue,
+      'data': barcode.data
+    };
     return _methodChannel
-        .invokeMethod<int>(BarcodeSelectionFunctionNames.getBarcodeSelectionSessionCount, selectionIdentifier)
+        .invokeMethod<int>(BarcodeSelectionFunctionNames.getBarcodeSelectionSessionCount, jsonEncode(arguments))
         .then((value) => value ?? 0);
   }
 
@@ -70,6 +75,6 @@ class _BarcodeSelectionSessionController {
   }
 
   MethodChannel _getChannel() {
-    return MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
+    return MethodChannel('com.scandit.datacapture.barcode.selection.method/barcode_selection_session');
   }
 }

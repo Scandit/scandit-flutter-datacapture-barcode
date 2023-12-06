@@ -45,7 +45,7 @@ class BarcodeSelectionSettings implements Serializable {
   }
 
   SymbologySettings settingsForSymbology(Symbology symbology) {
-    var identifier = symbology.toString();
+    var identifier = symbology.jsonValue;
     if (!_symbologies.containsKey(identifier)) {
       var symbologySettings = BarcodeDefaults.symbologySettingsDefaults[identifier]!;
       _symbologies[identifier] = symbologySettings;
