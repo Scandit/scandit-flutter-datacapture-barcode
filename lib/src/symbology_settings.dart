@@ -9,63 +9,26 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 import 'symbology.dart';
 
 enum Checksum {
-  mod10,
-  mod11,
-  mod16,
-  mod43,
-  mod47,
-  mod103,
-  mod10AndMod11,
-  mod10AndMod10,
+  mod10('mod10'),
+  mod11('mod11'),
+  mod16('mod16'),
+  mod43('mod43'),
+  mod47('mod47'),
+  mod103('mod103'),
+  mod10AndMod11('mod1110'),
+  mod10AndMod10('mod1010');
+
+  const Checksum(this._name);
+
+  @override
+  String toString() => _name;
+
+  final String _name;
 }
 
 extension ChecksumDeserializer on Checksum {
   static Checksum fromJSON(String jsonValue) {
-    switch (jsonValue) {
-      case 'mod10':
-        return Checksum.mod10;
-      case 'mod11':
-        return Checksum.mod11;
-      case 'mod16':
-        return Checksum.mod16;
-      case 'mod43':
-        return Checksum.mod43;
-      case 'mod47':
-        return Checksum.mod47;
-      case 'mod103':
-        return Checksum.mod103;
-      case 'mod1110':
-        return Checksum.mod10AndMod11;
-      case 'mod1010':
-        return Checksum.mod10AndMod10;
-      default:
-        throw Exception("Missing Checksum for name '$jsonValue'");
-    }
-  }
-
-  String get jsonValue => _jsonValue();
-
-  String _jsonValue() {
-    switch (this) {
-      case Checksum.mod10:
-        return 'mod10';
-      case Checksum.mod11:
-        return 'mod11';
-      case Checksum.mod16:
-        return 'mod16';
-      case Checksum.mod43:
-        return 'mod43';
-      case Checksum.mod47:
-        return 'mod47';
-      case Checksum.mod103:
-        return 'mod103';
-      case Checksum.mod10AndMod11:
-        return 'mod1110';
-      case Checksum.mod10AndMod10:
-        return 'mod1010';
-      default:
-        throw Exception("Missing name for checksum '$this'");
-    }
+    return Checksum.values.firstWhere((element) => element.toString() == jsonValue);
   }
 }
 
@@ -109,7 +72,7 @@ class SymbologySettings implements Serializable {
       'extensions': _extensions.toList(),
       'enabled': isEnabled,
       'colorInvertedEnabled': isColorInvertedEnabled,
-      'checksums': checksums.map((e) => e.jsonValue).toList(),
+      'checksums': checksums.map((e) => e.toString()).toList(),
       'activeSymbolCounts': activeSymbolCounts.toList()
     };
   }

@@ -11,6 +11,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 import '../../scandit_flutter_datacapture_barcode.dart';
+import '../barcode_plugin_events.dart';
 import 'barcode_count_capture_list_session.dart';
 import 'barcode_count_defaults.dart';
 import 'barcode_count_feedback.dart';
@@ -39,7 +40,7 @@ class BarcodeCount extends DataCaptureMode {
     if (_isInCallback) {
       return;
     }
-    didChange();
+    _controller.setModeEnabledState(newValue);
   }
 
   BarcodeCountFeedback get feedback => _feedback;
@@ -55,7 +56,7 @@ class BarcodeCount extends DataCaptureMode {
     var defaults = BarcodeCountDefaults.cameraSettingsDefaults;
     return CameraSettings(defaults.preferredResolution, defaults.zoomFactor, defaults.focusRange,
         defaults.focusGestureStrategy, defaults.zoomGestureZoomFactor,
-        shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus);
+        shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus, properties: defaults.properties);
   }
 
   BarcodeCount._(DataCaptureContext context, this._settings) {
@@ -142,13 +143,13 @@ class BarcodeCount extends DataCaptureMode {
 }
 
 abstract class BarcodeCountListener {
-  static const String _onScanEventName = 'barcodeCountListener-onScan';
+  static const String _onScanEventName = 'BarcodeCountListener.onScan';
 
   void didScan(BarcodeCount barcodeCount, BarcodeCountSession session, Future<FrameData> getFrameData());
 }
 
 abstract class BarcodeCountCaptureListListener {
-  static const String _didUpdateSessionEventName = 'barcodeCountCaptureListListener-didUpdateSession';
+  static const String _didUpdateSessionEventName = 'BarcodeCountCaptureListListener.didUpdateSession';
 
   void didUpdateSession(BarcodeCountCaptureList barcodeCountCaptureList, BarcodeCountCaptureListSession session);
 }
@@ -165,10 +166,7 @@ class BarcodeCountCaptureList {
 }
 
 class _BarcodeCountController {
-  final EventChannel _eventChannel =
-      const EventChannel('com.scandit.datacapture.barcode.count.event/barcode_count_events');
-  final MethodChannel _methodChannel =
-      MethodChannel('com.scandit.datacapture.barcode.capture.method/barcode_count_methods');
+  final MethodChannel _methodChannel = MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
   final BarcodeCount _barcodeCount;
   StreamSubscription<dynamic>? _streamSubscription;
   BarcodeCountCaptureList? _barcodeCountCaptureList;
@@ -183,7 +181,7 @@ class _BarcodeCountController {
   }
 
   void _setupBarcodeCountSubscription() {
-    _streamSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
+    _streamSubscription = BarcodePluginEvents.barcodeCountEventStream.listen((event) {
       var eventJSON = jsonDecode(event);
       var eventName = eventJSON['event'] as String;
       if (eventName == BarcodeCountListener._onScanEventName) {
@@ -202,6 +200,7 @@ class _BarcodeCountController {
 
   void unsubscribeListeners() {
     _streamSubscription?.cancel();
+    _streamSubscription = null;
     _methodChannel
         .invokeMethod(BarcodeCountFunctionNames.removeBarcodeCountListener)
         .then((value) => null, onError: _onError);
@@ -234,6 +233,12 @@ class _BarcodeCountController {
   Future<void> updateMode() {
     return _methodChannel.invokeMethod(
         BarcodeCountFunctionNames.updateBarcodeCountMode, jsonEncode(_barcodeCount.toMap()));
+  }
+
+  void setModeEnabledState(bool newValue) {
+    _methodChannel
+        .invokeMethod(BarcodeCountFunctionNames.setModeEnabledState, newValue)
+        .then((value) => null, onError: _onError);
   }
 
   DefaultFrameData _getFrom(String response) {

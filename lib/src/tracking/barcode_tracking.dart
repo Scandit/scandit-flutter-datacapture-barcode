@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'barcode_tracking_defaults.dart';
@@ -33,7 +34,7 @@ class BarcodeTracking extends DataCaptureMode {
     if (_isInCallback) {
       return;
     }
-    didChange();
+    _controller.setModeEnabledState(newValue);
   }
 
   static CameraSettings get recommendedCameraSettings => CameraSettings(
@@ -42,6 +43,7 @@ class BarcodeTracking extends DataCaptureMode {
         BarcodeTrackingDefaults.recommendedCameraSettings.focusRange,
         BarcodeTrackingDefaults.recommendedCameraSettings.focusGestureStrategy,
         BarcodeTrackingDefaults.recommendedCameraSettings.zoomGestureZoomFactor,
+        properties: BarcodeTrackingDefaults.recommendedCameraSettings.properties,
         shouldPreferSmoothAutoFocus: BarcodeTrackingDefaults.recommendedCameraSettings.shouldPreferSmoothAutoFocus,
       );
 
@@ -112,7 +114,7 @@ class BarcodeTracking extends DataCaptureMode {
 }
 
 abstract class BarcodeTrackingListener {
-  static const String _barcodeTrackingListenerDidUpdateSession = 'barcodeTrackingListener-didUpdateSession';
+  static const String _barcodeTrackingListenerDidUpdateSession = 'BarcodeTrackingListener.didUpdateSession';
   void didUpdateSession(BarcodeTracking barcodeTracking, BarcodeTrackingSession session);
 }
 
@@ -122,10 +124,7 @@ abstract class BarcodeTrackingAdvancedListener {
 }
 
 class _BarcodeTrackingListenerController {
-  final EventChannel _eventChannel =
-      const EventChannel('com.scandit.datacapture.barcode.tracking.event/barcode_tracking_listener');
-  final MethodChannel _methodChannel =
-      MethodChannel('com.scandit.datacapture.barcode.tracking.method/barcode_tracking_listener');
+  final MethodChannel _methodChannel = MethodChannel(BarcodeTrackingFunctionNames.methodsChannelName);
   final BarcodeTracking _barcodeTracking;
   StreamSubscription<dynamic>? _barcodeTrackingSubscription;
 
@@ -140,7 +139,7 @@ class _BarcodeTrackingListenerController {
   }
 
   StreamSubscription _listenForEvents() {
-    return _barcodeTrackingSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
+    return _barcodeTrackingSubscription = BarcodePluginEvents.barcodeTrackingEventStream.listen((event) {
       if (_barcodeTracking._listeners.isEmpty && _barcodeTracking._advancedListeners.isEmpty) return;
 
       var payload = jsonDecode(event as String);
@@ -186,6 +185,12 @@ class _BarcodeTrackingListenerController {
   DefaultFrameData getFrom(String response) {
     final decoded = jsonDecode(response);
     return DefaultFrameData.fromJSON(decoded);
+  }
+
+  void setModeEnabledState(bool newValue) {
+    _methodChannel
+        .invokeMethod(BarcodeTrackingFunctionNames.setModeEnabledState, newValue)
+        .then((value) => null, onError: _onError);
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {

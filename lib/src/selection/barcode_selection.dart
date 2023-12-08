@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'package:flutter/services.dart';
@@ -41,7 +42,7 @@ class BarcodeSelection extends DataCaptureMode {
     if (_isInCallback) {
       return;
     }
-    didChange();
+    _controller.setModeEnabledState(newValue);
   }
 
   static CameraSettings get recommendedCameraSettings => _recommendedCameraSettings();
@@ -50,7 +51,7 @@ class BarcodeSelection extends DataCaptureMode {
     var defaults = BarcodeSelectionDefaults.cameraSettingsDefaults;
     return CameraSettings(defaults.preferredResolution, defaults.zoomFactor, defaults.focusRange,
         defaults.focusGestureStrategy, defaults.zoomGestureZoomFactor,
-        shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus);
+        properties: defaults.properties, shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus);
   }
 
   BarcodeSelectionFeedback get feedback => _feedback;
@@ -145,8 +146,8 @@ class BarcodeSelection extends DataCaptureMode {
 }
 
 abstract class BarcodeSelectionListener {
-  static const String _didUpdateSelectionEventName = 'barcodeSelectionListener-didUpdateSelection';
-  static const String _didUpdateSessionEventName = 'barcodeSelectionListener-didUpdateSession';
+  static const String _didUpdateSelectionEventName = 'BarcodeSelectionListener.didUpdateSelection';
+  static const String _didUpdateSessionEventName = 'BarcodeSelectionListener.didUpdateSession';
 
   void didUpdateSelection(BarcodeSelection barcodeSelection, BarcodeSelectionSession session);
   void didUpdateSession(BarcodeSelection barcodeSelection, BarcodeSelectionSession session);
@@ -160,10 +161,7 @@ abstract class BarcodeSelectionAdvancedListener {
 }
 
 class _BarcodeSelectionListenerController {
-  final EventChannel _eventChannel =
-      const EventChannel('com.scandit.datacapture.barcode.selection.event/barcode_selection_listener');
-  final MethodChannel _methodChannel =
-      MethodChannel('com.scandit.datacapture.barcode.selection.method/barcode_selection_listener');
+  final MethodChannel _methodChannel = MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
   final BarcodeSelection _barcodeSelection;
   StreamSubscription<dynamic>? _barcodeSelectionSubscription;
 
@@ -181,7 +179,7 @@ class _BarcodeSelectionListenerController {
   }
 
   void _setupBarcodeSelectionSubscription() {
-    _barcodeSelectionSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
+    _barcodeSelectionSubscription = BarcodePluginEvents.barcodeSelectionEventStream.listen((event) {
       if (_barcodeSelection._listeners.isEmpty && _barcodeSelection._advancedListeners.isEmpty) return;
 
       var eventJSON = jsonDecode(event);
@@ -246,6 +244,12 @@ class _BarcodeSelectionListenerController {
   DefaultFrameData getFrom(String response) {
     final decoded = jsonDecode(response);
     return DefaultFrameData.fromJSON(decoded);
+  }
+
+  void setModeEnabledState(bool newValue) {
+    _methodChannel
+        .invokeMethod(BarcodeSelectionFunctionNames.setModeEnabledState, newValue)
+        .then((value) => null, onError: _onError);
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {

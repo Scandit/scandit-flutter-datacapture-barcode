@@ -19,7 +19,9 @@ abstract class BarcodeTrackingFunctionNames {
   static const String clearTrackedBarcodeBrushes = 'clearTrackedBarcodeBrushes';
   static const String subscribeBTBasicOverlayListener = 'subscribeBarcodeTrackingBasicOverlayListener';
   static const String unsubscribeBTBasicOverlayListener = 'unsubscribeBarcodeTrackingBasicOverlayListener';
-  static const String finishBrushForTrackedBarcodeCallback = 'finishBrushForTrackedBarcodeCallback';
   static const String resetBarcodeTrackingSession = 'resetBarcodeTrackingSession';
   static const String getLastFrameData = 'getLastFrameData';
+  static const String setModeEnabledState = 'setModeEnabledState';
+
+  static const String methodsChannelName = 'com.scandit.datacapture.barcode.tracking/method_channel';
 }

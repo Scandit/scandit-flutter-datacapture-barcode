@@ -4,27 +4,47 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-@objc
-public class FlutterBarcodeCountViewFactory: NSObject, FlutterPlatformViewFactory {
-    let barcodeCountPlugin: ScanditFlutterDataCaptureBarcodeCount
+import Flutter
+import ScanditFrameworksBarcode
+import ScanditFrameworksCore
 
-    @objc
-    public init(barcodeCountPlugin: ScanditFlutterDataCaptureBarcodeCount) {
-        self.barcodeCountPlugin = barcodeCountPlugin
+class FlutterBarcodeCountViewFactory: NSObject, FlutterPlatformViewFactory {
+    var views: [FlutterBarcodeCountView] = []
+
+    let barcodeCountModule: BarcodeCountModule
+
+    init(barcodeCountModule: BarcodeCountModule) {
+        self.barcodeCountModule = barcodeCountModule
+        super.init()
     }
 
-    public func create(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?) -> FlutterPlatformView {
-        guard let args = args as? [String: Any],
-              let creationJson = args["BarcodeCountView"] as? String else {
+    func create(withFrame frame: CGRect,
+                viewIdentifier viewId: Int64,
+                arguments args: Any?) -> FlutterPlatformView {
+        guard let creationArgs = args as? [String: Any] else {
+            Log.error("Unable to create BarcodeCountView without the JSON.")
+            fatalError("Unable to create BarcodeCountView without the JSON.")
+        }
+        guard let creationJson = creationArgs["BarcodeCountView"] as? String else {
+            Log.error("Unable to create the BarcodeCountView without the json.")
             fatalError("Unable to create the BarcodeCountView without the json.")
         }
         let view = FlutterBarcodeCountView(frame: frame)
-        barcodeCountPlugin.add(view, from: creationJson)
-
+        view.factory = self
+        barcodeCountModule.addViewFromJson(parent: view, viewJson: creationJson)
+        views.append(view)
         return view
     }
 
-    public func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
+    func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
         FlutterStandardMessageCodec.sharedInstance()
+    }
+
+    func addBarcodeCountViewToLastContainer() {
+        guard let view = views.last, let barcodeCountView = barcodeCountModule.barcodeCountView else { return }
+        if barcodeCountView.superview != nil {
+            barcodeCountView.removeFromSuperview()
+        }
+        view.addSubview(barcodeCountView)
     }
 }

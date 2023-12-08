@@ -6,4 +6,6 @@
 
 abstract class BarcodeFunctionNames {
   static const String getDefaults = 'getDefaults';
+
+  static const String methodsChannelName = 'com.scandit.datacapture.barcode/method_channel';
 }

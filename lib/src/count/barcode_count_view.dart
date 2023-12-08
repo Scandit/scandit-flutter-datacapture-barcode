@@ -13,6 +13,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import '../../scandit_flutter_datacapture_barcode_tracking.dart';
@@ -22,39 +23,40 @@ import 'barcode_count_defaults.dart';
 import 'barcode_count_function_names.dart';
 import 'barcode_count_toolbar_settings.dart';
 
-enum BarcodeCountViewStyle { icon, dot }
+enum BarcodeCountViewStyle {
+  icon('icon'),
+  dot('dot');
+
+  const BarcodeCountViewStyle(this._name);
+
+  @override
+  String toString() => _name;
+
+  final String _name;
+}
 
 extension BarcodeCountViewStyleSerializer on BarcodeCountViewStyle {
   static BarcodeCountViewStyle fromJSON(String jsonValue) {
-    switch (jsonValue) {
-      case 'dot':
-        return BarcodeCountViewStyle.dot;
-      case 'icon':
-        return BarcodeCountViewStyle.icon;
-      default:
-        throw Exception('Missing BarcodeCountViewStyle for name "$jsonValue"');
-    }
-  }
-
-  String get jsonValue => _jsonValue();
-
-  String _jsonValue() {
-    switch (this) {
-      case BarcodeCountViewStyle.dot:
-        return 'dot';
-      case BarcodeCountViewStyle.icon:
-        return 'icon';
-    }
+    return BarcodeCountViewStyle.values.firstWhere((element) => element.toString() == jsonValue);
   }
 }
 
 abstract class BarcodeCountViewListener {
-  static const String _didTapRecognizedBarcodeEventName = 'barcodeCountViewListener-didTapRecognizedBarcode';
-  static const String _didTapUnrecognizedBarcodeEventName = 'barcodeCountViewListener-didTapUnrecognizedBarcode';
-  static const String _didTapFilteredBarcodeEventName = 'barcodeCountViewListener-didTapFilteredBarcode';
+  static const String _brushForRecognizedBarcodeEventName = 'BarcodeCountViewListener.brushForRecognizedBarcode';
+  static const String _brushForRecognizedBarcodeNotInListEventName =
+      'BarcodeCountViewListener.brushForRecognizedBarcodeNotInList';
+  static const String _brushForUnrecognizedBarcodeEventName = 'BarcodeCountViewListener.brushForUnrecognizedBarcode';
+
+  static const String _didTapRecognizedBarcodeEventName = 'BarcodeCountViewListener.didTapRecognizedBarcode';
+  static const String _didTapUnrecognizedBarcodeEventName = 'BarcodeCountViewListener.didTapUnrecognizedBarcode';
+  static const String _didTapFilteredBarcodeEventName = 'BarcodeCountViewListener.didTapFilteredBarcode';
   static const String _didTapRecognizedBarcodeNotInListEventName =
-      'barcodeCountViewListener-didTapRecognizedBarcodeNotInList';
-  static const String _didCompleteCaptureListEventName = 'barcodeCountViewListener-didCompleteCaptureList';
+      'BarcodeCountViewListener.didTapRecognizedBarcodeNotInList';
+  static const String _didCompleteCaptureListEventName = 'BarcodeCountViewListener.didCompleteCaptureList';
+
+  Brush? brushForRecognizedBarcode(BarcodeCountView view, TrackedBarcode trackedBarcode);
+  Brush? brushForUnrecognizedBarcode(BarcodeCountView view, TrackedBarcode trackedBarcode);
+  Brush? brushForRecognizedBarcodeNotInList(BarcodeCountView view, TrackedBarcode trackedBarcode);
 
   void didTapRecognizedBarcode(BarcodeCountView view, TrackedBarcode trackedBarcode) {}
   void didTapUnrecognizedBarcode(BarcodeCountView view, TrackedBarcode trackedBarcode);
@@ -64,9 +66,9 @@ abstract class BarcodeCountViewListener {
 }
 
 abstract class BarcodeCountViewUiListener {
-  static const String _onExitButtonTappedEventName = 'barcodeCountViewUiListener-onExitButtonTapped';
-  static const String _onListButtonTappedEventName = 'barcodeCountViewUiListener-onListButtonTapped';
-  static const String _onSingleScanButtonTappedEventName = 'barcodeCountViewUiListener-onSingleScanButtonTapped';
+  static const String _onExitButtonTappedEventName = 'BarcodeCountViewUiListener.onExitButtonTapped';
+  static const String _onListButtonTappedEventName = 'BarcodeCountViewUiListener.onListButtonTapped';
+  static const String _onSingleScanButtonTappedEventName = 'BarcodeCountViewUiListener.onSingleScanButtonTapped';
 
   void didTapListButton(BarcodeCountView view);
   void didTapExitButton(BarcodeCountView view);
@@ -512,8 +514,7 @@ class BarcodeCountView extends StatefulWidget implements Serializable {
   Map<String, dynamic> toMap() {
     var json = <String, dynamic>{
       'View': {
-        'style': _style.jsonValue,
-        'mode': _barcodeCount.toMap(),
+        'style': _style.toString(),
         'shouldShowUserGuidanceView': shouldShowUserGuidanceView,
         'shouldShowListButton': shouldShowListButton,
         'shouldShowExitButton': shouldShowExitButton,
@@ -654,18 +655,9 @@ class BarcodeCountView extends StatefulWidget implements Serializable {
 }
 
 class _BarcodeCountViewController {
-  final MethodChannel _methodChannel =
-      MethodChannel('com.scandit.datacapture.barcode.capture.method/barcode_count_view_methods');
-
-  final EventChannel _eventChannel =
-      const EventChannel('com.scandit.datacapture.barcode.count.event/barcode_count_view_events');
+  final MethodChannel _methodChannel = MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
 
   StreamSubscription<dynamic>? _viewEventsSubscription;
-
-  final EventChannel _uiEventChannel =
-      const EventChannel('com.scandit.datacapture.barcode.count.event/barcode_count_view_ui_events');
-
-  StreamSubscription<dynamic>? _viewUiEventsSubscription;
 
   BarcodeCountViewUiListener? _uiListener;
   BarcodeCountViewListener? _listener;
@@ -685,10 +677,19 @@ class _BarcodeCountViewController {
   }
 
   void _subscribeToEvents() {
-    _viewEventsSubscription = _eventChannel.receiveBroadcastStream().listen((event) {
+    _viewEventsSubscription = BarcodePluginEvents.barcodeCountEventStream.listen((event) {
       var eventJSON = jsonDecode(event);
       var eventName = eventJSON['event'] as String;
       switch (eventName) {
+        case BarcodeCountViewListener._brushForRecognizedBarcodeEventName:
+          _handleBrushForRecognizedBarcodeEvent(eventJSON);
+          break;
+        case BarcodeCountViewListener._brushForRecognizedBarcodeNotInListEventName:
+          _handleBrushForRecognizedBarcodeNotInListEvent(eventJSON);
+          break;
+        case BarcodeCountViewListener._brushForUnrecognizedBarcodeEventName:
+          _handleBrushForUnrecognizedBarcodeEvent(eventJSON);
+          break;
         case BarcodeCountViewListener._didTapFilteredBarcodeEventName:
           _listener?.didTapFilteredBarcode(
               _barcodeCountView, TrackedBarcode.fromJSON(jsonDecode(eventJSON['trackedBarcode'])));
@@ -708,13 +709,6 @@ class _BarcodeCountViewController {
         case BarcodeCountViewListener._didCompleteCaptureListEventName:
           _listener?.didCompleteCaptureList(_barcodeCountView);
           break;
-      }
-    });
-
-    _viewUiEventsSubscription = _uiEventChannel.receiveBroadcastStream().listen((event) {
-      var eventJSON = jsonDecode(event);
-      var eventName = eventJSON['event'] as String;
-      switch (eventName) {
         case BarcodeCountViewUiListener._onExitButtonTappedEventName:
           _uiListener?.didTapExitButton(_barcodeCountView);
           break;
@@ -726,6 +720,42 @@ class _BarcodeCountViewController {
           break;
       }
     });
+  }
+
+  void _handleBrushForRecognizedBarcodeEvent(dynamic json) {
+    var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
+
+    var brush = _listener?.brushForRecognizedBarcode(_barcodeCountView, trackedBarcode);
+    var argument = <String, dynamic>{'trackedBarcodeId': trackedBarcode.identifier};
+    if (brush != null) {
+      argument['brush'] = jsonEncode(brush.toMap());
+    }
+
+    _methodChannel.invokeMethod(BarcodeCountFunctionNames.finishBrushForRecognizedBarcodeEvent, argument);
+  }
+
+  void _handleBrushForRecognizedBarcodeNotInListEvent(dynamic json) {
+    var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
+
+    var brush = _listener?.brushForRecognizedBarcodeNotInList(_barcodeCountView, trackedBarcode);
+    var argument = <String, dynamic>{'trackedBarcodeId': trackedBarcode.identifier};
+    if (brush != null) {
+      argument['brush'] = jsonEncode(brush.toMap());
+    }
+
+    _methodChannel.invokeMethod(BarcodeCountFunctionNames.finishBrushForRecognizedBarcodeNotInListEvent, argument);
+  }
+
+  void _handleBrushForUnrecognizedBarcodeEvent(dynamic json) {
+    var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
+
+    var brush = _listener?.brushForUnrecognizedBarcode(_barcodeCountView, trackedBarcode);
+    var argument = <String, dynamic>{'trackedBarcodeId': trackedBarcode.identifier};
+    if (brush != null) {
+      argument['brush'] = jsonEncode(brush.toMap());
+    }
+
+    _methodChannel.invokeMethod(BarcodeCountFunctionNames.finishBrushForUnrecognizedBarcodeEvent, argument);
   }
 
   Future<void> clearHighlights() {
@@ -761,7 +791,7 @@ class _BarcodeCountViewController {
 
   void dispose() {
     _viewEventsSubscription?.cancel();
-    _viewUiEventsSubscription?.cancel();
+    _viewEventsSubscription = null;
   }
 }
 

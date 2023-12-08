@@ -1,4 +1,4 @@
-ScanditOCR / ScanditTextCaptureBase includes components licensed under the following licenses:
+ScanditOCR / ScanditTextCaptureBackend / ScanditIdCaptureBackend includes components licensed under the following licenses:
 
 ================================================================================================
 By downloading, copying, installing or using the software you agree to this license.
@@ -448,5 +448,5 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
 
 ================================================================================================
 
-The unchanged source code for Eigen used in ScanditOCR/ScanditTextCaptureBase can be found at 
+The unchanged source code for Eigen used in ScanditOCR/ScanditTextCaptureBackend/ScanditIdCaptureBackend can be found at
 https://github.com/eigenteam/eigen-git-mirror
