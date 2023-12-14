@@ -16,7 +16,6 @@ abstract class BarcodeCountFunctionNames {
   static const String endScanningPhase = 'endScanningPhase';
   static const String setBarcodeCountCaptureList = 'setBarcodeCountCaptureList';
   static const String updateBarcodeCountMode = 'updateBarcodeCountMode';
-  static const String setModeEnabledState = 'setModeEnabledState';
 
   static const String addBarcodeCountViewListener = 'addBarcodeCountViewListener';
   static const String removeBarcodeCountViewListener = 'removeBarcodeCountViewListener';

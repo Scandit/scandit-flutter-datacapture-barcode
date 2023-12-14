@@ -42,7 +42,7 @@ class BarcodeSelection extends DataCaptureMode {
     if (_isInCallback) {
       return;
     }
-    _controller.setModeEnabledState(newValue);
+    didChange();
   }
 
   static CameraSettings get recommendedCameraSettings => _recommendedCameraSettings();
@@ -244,12 +244,6 @@ class _BarcodeSelectionListenerController {
   DefaultFrameData getFrom(String response) {
     final decoded = jsonDecode(response);
     return DefaultFrameData.fromJSON(decoded);
-  }
-
-  void setModeEnabledState(bool newValue) {
-    _methodChannel
-        .invokeMethod(BarcodeSelectionFunctionNames.setModeEnabledState, newValue)
-        .then((value) => null, onError: _onError);
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {

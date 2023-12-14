@@ -1,9 +1,3 @@
-/*
- * This file is part of the Scandit Data Capture SDK
- *
- * Copyright (C) 2023- Scandit AG. All rights reserved.
- */
-
 package com.scandit.datacapture.flutter.barcode;
 
 import android.content.Context;
@@ -20,11 +14,11 @@ import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
 
-public class BarcodeCountPlatformViewFactory extends PlatformViewFactory {
+public class ScanditBarcodeCountPlatformViewFactory extends PlatformViewFactory {
 
     BarcodeCountModule barcodeCountModule;
 
-    public BarcodeCountPlatformViewFactory(BarcodeCountModule barcodeCountModule) {
+    public ScanditBarcodeCountPlatformViewFactory(BarcodeCountModule barcodeCountModule) {
         super(StandardMessageCodec.INSTANCE);
         this.barcodeCountModule = barcodeCountModule;
     }

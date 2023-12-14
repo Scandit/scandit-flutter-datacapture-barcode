@@ -38,7 +38,7 @@ class BarcodeCapture extends DataCaptureMode {
     if (_isInCallback) {
       return;
     }
-    _controller.setModeEnabledState(newValue);
+    didChange();
   }
 
   BarcodeCaptureFeedback get feedback => _feedback;
@@ -173,12 +173,6 @@ class _BarcodeCaptureListenerController {
             .then((value) => null, onError: (error) => print(error));
       }
     });
-  }
-
-  void setModeEnabledState(bool newValue) {
-    _methodChannel
-        .invokeMethod(BarcodeCaptureFunctionNames.setModeEnabledState, newValue)
-        .then((value) => null, onError: _onError);
   }
 
   void unsubscribeListeners() {

@@ -20,7 +20,6 @@ class BarcodeSelectionMethodHandler {
         static let resetBarcodeSelectionSession = "resetBarcodeSelectionSession"
         static let getLastFrameData = "getLastFrameData"
         static let getDefaults = "getBarcodeSelectionDefaults"
-        static let setModeEnabledState = "setModeEnabledState"
     }
 
     private let barcodeSelectionModule: BarcodeSelectionModule
@@ -63,9 +62,6 @@ class BarcodeSelectionMethodHandler {
             LastFrameData.shared.getLastFrameDataJSON {
                 result($0)
             }
-        case FunctionNames.setModeEnabledState:
-            barcodeSelectionModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
-            result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }

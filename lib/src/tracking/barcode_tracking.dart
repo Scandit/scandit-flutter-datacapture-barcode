@@ -34,7 +34,7 @@ class BarcodeTracking extends DataCaptureMode {
     if (_isInCallback) {
       return;
     }
-    _controller.setModeEnabledState(newValue);
+    didChange();
   }
 
   static CameraSettings get recommendedCameraSettings => CameraSettings(
@@ -185,12 +185,6 @@ class _BarcodeTrackingListenerController {
   DefaultFrameData getFrom(String response) {
     final decoded = jsonDecode(response);
     return DefaultFrameData.fromJSON(decoded);
-  }
-
-  void setModeEnabledState(bool newValue) {
-    _methodChannel
-        .invokeMethod(BarcodeTrackingFunctionNames.setModeEnabledState, newValue)
-        .then((value) => null, onError: _onError);
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {

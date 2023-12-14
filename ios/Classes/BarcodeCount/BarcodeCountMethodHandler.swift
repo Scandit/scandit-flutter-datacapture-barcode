@@ -5,6 +5,7 @@
  */
 
 import Flutter
+import ScanditCaptureCore
 import scandit_flutter_datacapture_core
 import ScanditFrameworksBarcode
 import ScanditFrameworksCore
@@ -37,7 +38,6 @@ class BarcodeCountMethodHandler {
         static let finishBrushForRecognizedBarcodeNotInListEvent = "finishBrushForRecognizedBarcodeNotInListEvent"
 
         static let getBarcodeCountDefaults = "getBarcodeCountDefaults"
-        static let setModeEnabledState = "setModeEnabledState"
     }
 
     private let barcodeCountModule: BarcodeCountModule
@@ -136,9 +136,6 @@ class BarcodeCountMethodHandler {
             result(nil)
         case FunctionNames.updateBarcodeCount:
             barcodeCountModule.updateBarcodeCount(modeJson: methodCall.arguments as! String)
-            result(nil)
-        case FunctionNames.setModeEnabledState:
-            barcodeCountModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
             result(nil)
         default:
             result(FlutterMethodNotImplemented)

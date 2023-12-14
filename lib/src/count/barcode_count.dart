@@ -40,7 +40,7 @@ class BarcodeCount extends DataCaptureMode {
     if (_isInCallback) {
       return;
     }
-    _controller.setModeEnabledState(newValue);
+    didChange();
   }
 
   BarcodeCountFeedback get feedback => _feedback;
@@ -233,12 +233,6 @@ class _BarcodeCountController {
   Future<void> updateMode() {
     return _methodChannel.invokeMethod(
         BarcodeCountFunctionNames.updateBarcodeCountMode, jsonEncode(_barcodeCount.toMap()));
-  }
-
-  void setModeEnabledState(bool newValue) {
-    _methodChannel
-        .invokeMethod(BarcodeCountFunctionNames.setModeEnabledState, newValue)
-        .then((value) => null, onError: _onError);
   }
 
   DefaultFrameData _getFrom(String response) {
