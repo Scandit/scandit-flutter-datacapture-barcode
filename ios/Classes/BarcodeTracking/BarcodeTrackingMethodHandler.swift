@@ -26,6 +26,7 @@ class BarcodeTrackingMethodHandler {
         static let addBarcodeTrackingAdvancedOverlayDelegate = "addBarcodeTrackingAdvancedOverlayDelegate"
         static let removeBarcodeTrackingAdvancedOverlayDelegate = "removeBarcodeTrackingAdvancedOverlayDelegate"
         static let getBarcodeTrackingDefaults = "getBarcodeTrackingDefaults"
+        static let setModeEnabledState = "setModeEnabledState"
     }
 
     private let barcodeTrackingModule: BarcodeTrackingModule
@@ -106,6 +107,9 @@ class BarcodeTrackingMethodHandler {
             result(nil)
         case FunctionNames.clearTrackedBarcodeBrushes:
             barcodeTrackingModule.clearBasicOverlayTrackedBarcodeBrushes()
+            result(nil)
+        case FunctionNames.setModeEnabledState:
+            barcodeTrackingModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
             result(nil)
         default:
             result(FlutterMethodNotImplemented)

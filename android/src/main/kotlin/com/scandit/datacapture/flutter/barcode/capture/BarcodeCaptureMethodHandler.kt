@@ -8,6 +8,7 @@ package com.scandit.datacapture.flutter.barcode.capture
 import com.scandit.datacapture.flutter.core.utils.rejectKotlinError
 import com.scandit.datacapture.frameworks.barcode.capture.BarcodeCaptureModule
 import com.scandit.datacapture.frameworks.core.errors.FrameDataNullError
+import com.scandit.datacapture.frameworks.core.utils.DefaultLastFrameData
 import com.scandit.datacapture.frameworks.core.utils.LastFrameData
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -15,7 +16,8 @@ import org.json.JSONObject
 
 /** ScanditFlutterDataCaptureBarcodeCapturePlugin. */
 class BarcodeCaptureMethodHandler(
-    private val barcodeCaptureModule: BarcodeCaptureModule
+    private val barcodeCaptureModule: BarcodeCaptureModule,
+    private val lastFrameData: LastFrameData = DefaultLastFrameData.getInstance()
 ) : MethodChannel.MethodCallHandler {
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -26,30 +28,40 @@ class BarcodeCaptureMethodHandler(
                 barcodeCaptureModule.finishDidScan(enabled)
                 result.success(null)
             }
+
             METHOD_FINISH_DID_UPDATE_SESSION -> {
                 val enabled = call.arguments as? Boolean ?: false
                 barcodeCaptureModule.finishDidUpdateSession(enabled)
                 result.success(null)
             }
+
             METHOD_ADD_BC_LISTENER -> {
                 barcodeCaptureModule.addListener()
                 result.success(null)
             }
+
             METHOD_REMOVE_BC_LISTENER -> {
                 barcodeCaptureModule.removeListener()
                 result.success(null)
             }
+
             METHOD_RESET_BC_SESSION -> {
                 barcodeCaptureModule.resetSession(call.arguments as? Long)
                 result.success(null)
             }
-            METHOD_GET_LAST_FRAME_DATA -> LastFrameData.getLastFrameDataJson {
+
+            METHOD_GET_LAST_FRAME_DATA -> lastFrameData.getLastFrameDataJson {
                 if (it.isNullOrBlank()) {
                     result.rejectKotlinError(FrameDataNullError())
                     return@getLastFrameDataJson
                 }
                 result.success(it)
             }
+
+            METHOD_SET_MODE_ENABLED_STATE -> barcodeCaptureModule.setModeEnabled(
+                call.arguments as Boolean
+            )
+
             else -> result.notImplemented()
         }
     }
@@ -67,6 +79,7 @@ class BarcodeCaptureMethodHandler(
         private const val METHOD_REMOVE_BC_LISTENER = "removeBarcodeCaptureListener"
         private const val METHOD_RESET_BC_SESSION = "resetBarcodeCaptureSession"
         private const val METHOD_GET_LAST_FRAME_DATA = "getLastFrameData"
+        private const val METHOD_SET_MODE_ENABLED_STATE = "setModeEnabledState"
 
         const val EVENT_CHANNEL_NAME =
             "com.scandit.datacapture.barcode.capture/event_channel"

@@ -17,6 +17,7 @@ class BarcodeCaptureMethodHandler {
         static let resetBarcodeCaptureSession = "resetBarcodeCaptureSession"
         static let getLastFrameData = "getLastFrameData"
         static let getBarcodeCaptureDefaults = "getBarcodeCaptureDefaults"
+        static let setModeEnabledState = "setModeEnabledState"
     }
 
     private let barcodeCaptureModule: BarcodeCaptureModule
@@ -51,6 +52,9 @@ class BarcodeCaptureMethodHandler {
             LastFrameData.shared.getLastFrameDataJSON {
                 result($0)
             }
+        case FunctionNames.setModeEnabledState:
+            barcodeCaptureModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
+            result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }

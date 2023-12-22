@@ -9,6 +9,7 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 import '../barcode_defaults.dart';
 import '../symbology.dart';
 import '../symbology_settings.dart';
+import 'battery_saving_mode.dart';
 import 'spark_scan_defaults.dart';
 
 class SparkScanSettings implements Serializable {
@@ -16,6 +17,8 @@ class SparkScanSettings implements Serializable {
 
   Duration codeDuplicateFilter =
       Duration(milliseconds: SparkScanDefaults.sparkScanSettingsDefaults.codeDuplicateFilter);
+
+  BatterySavingMode batterySaving = SparkScanDefaults.sparkScanSettingsDefaults.batterySaving;
 
   final Map<String, dynamic> _properties = {};
 
@@ -62,6 +65,7 @@ class SparkScanSettings implements Serializable {
     return {
       'codeDuplicateFilter': codeDuplicateFilter.inMilliseconds,
       'properties': _properties,
+      'batterySaving': batterySaving.toString(),
       'symbologies': _symbologies.map<String, Map<String, dynamic>>((key, value) => MapEntry(key, value.toMap())),
     };
   }

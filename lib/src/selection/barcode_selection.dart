@@ -18,7 +18,6 @@ class BarcodeSelection extends DataCaptureMode {
   BarcodeSelectionSettings _settings;
   BarcodeSelectionFeedback _feedback = BarcodeSelectionFeedback.defaultFeedback;
   PointWithUnit? _pointOfInterest;
-  bool _isInCallback = false;
 
   BarcodeSelection._(DataCaptureContext? context, this._settings) {
     _controller = _BarcodeSelectionListenerController.forBarcodeSelection(this);
@@ -39,10 +38,7 @@ class BarcodeSelection extends DataCaptureMode {
   @override
   set isEnabled(bool newValue) {
     _enabled = newValue;
-    if (_isInCallback) {
-      return;
-    }
-    didChange();
+    _controller.setModeEnabledState(newValue);
   }
 
   static CameraSettings get recommendedCameraSettings => _recommendedCameraSettings();
@@ -134,7 +130,6 @@ class BarcodeSelection extends DataCaptureMode {
   Map<String, dynamic> toMap() {
     var json = <String, dynamic>{
       'type': 'barcodeSelection',
-      'enabled': _enabled,
       'feedback': _feedback.toMap(),
       'settings': _settings.toMap()
     };
@@ -214,25 +209,21 @@ class _BarcodeSelectionListenerController {
   }
 
   void _notifyListenersOfDidUpateSession(BarcodeSelectionSession session) {
-    _barcodeSelection._isInCallback = true;
     for (var listener in _barcodeSelection._listeners) {
       listener.didUpdateSession(_barcodeSelection, session);
     }
     for (var listener in _barcodeSelection._advancedListeners) {
       listener.didUpdateSession(_barcodeSelection, session, _getLastFrameData);
     }
-    _barcodeSelection._isInCallback = false;
   }
 
   void _notifyListenersOfDidUpdateSelection(BarcodeSelectionSession session) {
-    _barcodeSelection._isInCallback = true;
     for (var listener in _barcodeSelection._listeners) {
       listener.didUpdateSelection(_barcodeSelection, session);
     }
     for (var listener in _barcodeSelection._advancedListeners) {
       listener.didUpdateSelection(_barcodeSelection, session, _getLastFrameData);
     }
-    _barcodeSelection._isInCallback = false;
   }
 
   Future<FrameData> _getLastFrameData() {
@@ -244,6 +235,12 @@ class _BarcodeSelectionListenerController {
   DefaultFrameData getFrom(String response) {
     final decoded = jsonDecode(response);
     return DefaultFrameData.fromJSON(decoded);
+  }
+
+  void setModeEnabledState(bool newValue) {
+    _methodChannel
+        .invokeMethod(BarcodeSelectionFunctionNames.setModeEnabledState, newValue)
+        .then((value) => null, onError: _onError);
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {

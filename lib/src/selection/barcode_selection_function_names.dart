@@ -15,6 +15,7 @@ abstract class BarcodeSelectionFunctionNames {
   static const String barcodeSelectionFinishDidUpdateSelection = 'finishDidUpdateSelection';
   static const String barcodeSelectionFinishDidUpdateSession = 'finishDidUpdateSession';
   static const String getLastFrameData = 'getLastFrameData';
+  static const String setModeEnabledState = 'setModeEnabledState';
 
   static const String methodsChannelName = 'com.scandit.datacapture.barcode.selection/method_channel';
 }

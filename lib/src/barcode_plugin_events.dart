@@ -17,6 +17,8 @@ class BarcodePluginEvents {
 
   static late Stream sparkScanEventStream = _getSparkScanStream();
 
+  static late Stream barcodeFindEventStream = _getBarcodeFindStream();
+
   static Stream _getBarcodeCountStream() {
     return EventChannel('com.scandit.datacapture.barcode.count/event_channel').receiveBroadcastStream();
   }
@@ -35,5 +37,9 @@ class BarcodePluginEvents {
 
   static Stream _getSparkScanStream() {
     return EventChannel('com.scandit.datacapture.barcode.spark/event_channel').receiveBroadcastStream();
+  }
+
+  static Stream _getBarcodeFindStream() {
+    return EventChannel('com.scandit.datacapture.barcode.find/event_channel').receiveBroadcastStream();
   }
 }

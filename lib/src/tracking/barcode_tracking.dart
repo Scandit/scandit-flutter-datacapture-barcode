@@ -22,7 +22,6 @@ class BarcodeTracking extends DataCaptureMode {
   final List<BarcodeTrackingListener> _listeners = [];
   final List<BarcodeTrackingAdvancedListener> _advancedListeners = [];
   late _BarcodeTrackingListenerController _controller;
-  bool _isInCallback = false;
 
   @override
   DataCaptureContext? get context => super.context;
@@ -31,10 +30,7 @@ class BarcodeTracking extends DataCaptureMode {
 
   set isEnabled(bool newValue) {
     _enabled = newValue;
-    if (_isInCallback) {
-      return;
-    }
-    didChange();
+    _controller.setModeEnabledState(newValue);
   }
 
   static CameraSettings get recommendedCameraSettings => CameraSettings(
@@ -105,7 +101,7 @@ class BarcodeTracking extends DataCaptureMode {
 
   @override
   Map<String, dynamic> toMap() {
-    return {'type': 'barcodeTracking', 'settings': _settings.toMap(), 'enabled': isEnabled};
+    return {'type': 'barcodeTracking', 'settings': _settings.toMap()};
   }
 
   Future<void> didChange() {
@@ -166,14 +162,12 @@ class _BarcodeTrackingListenerController {
   }
 
   void _notifyDidUpdateListeners(BarcodeTrackingSession session) {
-    _barcodeTracking._isInCallback = true;
     for (var listener in _barcodeTracking._listeners) {
       listener.didUpdateSession(_barcodeTracking, session);
     }
     for (var listener in _barcodeTracking._advancedListeners) {
       listener.didUpdateSession(_barcodeTracking, session, _getLastFrameData);
     }
-    _barcodeTracking._isInCallback = false;
   }
 
   Future<FrameData> _getLastFrameData() {
@@ -185,6 +179,12 @@ class _BarcodeTrackingListenerController {
   DefaultFrameData getFrom(String response) {
     final decoded = jsonDecode(response);
     return DefaultFrameData.fromJSON(decoded);
+  }
+
+  void setModeEnabledState(bool newValue) {
+    _methodChannel
+        .invokeMethod(BarcodeTrackingFunctionNames.setModeEnabledState, newValue)
+        .then((value) => null, onError: _onError);
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {
