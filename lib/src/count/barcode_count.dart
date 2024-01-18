@@ -26,6 +26,7 @@ class BarcodeCount extends DataCaptureMode {
   BarcodeCountSettings _settings;
   final List<BarcodeCountListener> _listeners = [];
   late _BarcodeCountController _controller;
+  bool _isInCallback = false;
 
   @override
   DataCaptureContext? get context => super.context;
@@ -36,7 +37,10 @@ class BarcodeCount extends DataCaptureMode {
   @override
   set isEnabled(bool newValue) {
     _enabled = newValue;
-    _controller.setModeEnabledState(newValue);
+    if (_isInCallback) {
+      return;
+    }
+    didChange();
   }
 
   BarcodeCountFeedback get feedback => _feedback;
@@ -128,6 +132,7 @@ class BarcodeCount extends DataCaptureMode {
   Map<String, dynamic> toMap() {
     var json = <String, dynamic>{
       'type': 'barcodeCount',
+      'enabled': _enabled,
       'feedback': _feedback.toMap(),
       'settings': _settings.toMap(),
       'additionalBarcodes': _additionalBarcodes.map((e) => e.toMap()).toList(growable: false)
@@ -230,28 +235,26 @@ class _BarcodeCountController {
         BarcodeCountFunctionNames.updateBarcodeCountMode, jsonEncode(_barcodeCount.toMap()));
   }
 
-  void setModeEnabledState(bool newValue) {
-    _methodChannel
-        .invokeMethod(BarcodeCountFunctionNames.setModeEnabledState, newValue)
-        .then((value) => null, onError: _onError);
-  }
-
   DefaultFrameData _getFrom(String response) {
     final decoded = jsonDecode(response);
     return DefaultFrameData.fromJSON(decoded);
   }
 
   void _notifyListenersOfOnScan(BarcodeCountSession session) {
+    _barcodeCount._isInCallback = true;
     for (var listener in _barcodeCount._listeners) {
       listener.didScan(_barcodeCount, session, _getLastFrameData);
     }
+    _barcodeCount._isInCallback = false;
   }
 
   void _notifyBarcodeCountCaptureList(BarcodeCountCaptureListSession session) {
+    _barcodeCount._isInCallback = true;
     var barcodeCountCaptureList = _barcodeCountCaptureList;
     if (barcodeCountCaptureList != null) {
       _barcodeCountCaptureList?._listener.didUpdateSession(barcodeCountCaptureList, session);
     }
+    _barcodeCount._isInCallback = false;
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {

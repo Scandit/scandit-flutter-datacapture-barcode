@@ -40,7 +40,7 @@ class SparkScan extends DataCaptureMode {
     if (_isInCallback) {
       return;
     }
-    _controller.setModeEnabledState(newValue);
+    _didChange();
   }
 
   Future<void> applySettings(SparkScanSettings settings) {
@@ -137,12 +137,6 @@ class _SparkScanController {
     return _methodChannel
         .invokeMethod(SparkScanFunctionNames.updateSparkScanMode, jsonEncode(_sparkScan.toMap()))
         .onError(_onError);
-  }
-
-  void setModeEnabledState(bool newValue) {
-    _methodChannel
-        .invokeMethod(SparkScanFunctionNames.setModeEnabledState, newValue)
-        .then((value) => null, onError: _onError);
   }
 
   void _notifyListenersOfDidUpateSession(SparkScanSession session) {

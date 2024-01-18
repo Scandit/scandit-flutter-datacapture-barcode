@@ -24,6 +24,7 @@ class BarcodeCapture extends DataCaptureMode {
   final List<BarcodeCaptureListener> _listeners = [];
   final List<BarcodeCaptureAdvancedListener> _advancedListeners = [];
   late _BarcodeCaptureListenerController _controller;
+  bool _isInCallback = false;
 
   @override
   DataCaptureContext? get context => super.context;
@@ -34,7 +35,10 @@ class BarcodeCapture extends DataCaptureMode {
   @override
   set isEnabled(bool newValue) {
     _enabled = newValue;
-    _controller.setModeEnabledState(newValue);
+    if (_isInCallback) {
+      return;
+    }
+    didChange();
   }
 
   BarcodeCaptureFeedback get feedback => _feedback;
@@ -113,7 +117,12 @@ class BarcodeCapture extends DataCaptureMode {
 
   @override
   Map<String, dynamic> toMap() {
-    return {'type': 'barcodeCapture', 'feedback': _feedback.toMap(), 'settings': _settings.toMap()};
+    return {
+      'type': 'barcodeCapture',
+      'enabled': _enabled,
+      'feedback': _feedback.toMap(),
+      'settings': _settings.toMap()
+    };
   }
 }
 
@@ -166,12 +175,6 @@ class _BarcodeCaptureListenerController {
     });
   }
 
-  void setModeEnabledState(bool newValue) {
-    _methodChannel
-        .invokeMethod(BarcodeCaptureFunctionNames.setModeEnabledState, newValue)
-        .then((value) => null, onError: _onError);
-  }
-
   void unsubscribeListeners() {
     _barcodeCaptureSubscription?.cancel();
     _methodChannel
@@ -180,12 +183,14 @@ class _BarcodeCaptureListenerController {
   }
 
   void _notifyListenersOfDidUpateSession(BarcodeCaptureSession session) {
+    _barcodeCapture._isInCallback = true;
     for (var listener in _barcodeCapture._listeners) {
       listener.didUpdateSession(_barcodeCapture, session);
     }
     for (var listener in _barcodeCapture._advancedListeners) {
       listener.didUpdateSession(_barcodeCapture, session, _getLastFrameData);
     }
+    _barcodeCapture._isInCallback = false;
   }
 
   Future<FrameData> _getLastFrameData() {
@@ -200,12 +205,14 @@ class _BarcodeCaptureListenerController {
   }
 
   void _notifyListenersOfDidScan(BarcodeCaptureSession session) {
+    _barcodeCapture._isInCallback = true;
     for (var listener in _barcodeCapture._listeners) {
       listener.didScan(_barcodeCapture, session);
     }
     for (var listener in _barcodeCapture._advancedListeners) {
       listener.didScan(_barcodeCapture, session, _getLastFrameData);
     }
+    _barcodeCapture._isInCallback = false;
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {

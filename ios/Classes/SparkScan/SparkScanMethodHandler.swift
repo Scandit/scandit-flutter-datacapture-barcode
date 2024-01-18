@@ -28,7 +28,6 @@ class SparkScanMethodHandler {
         static let sparkScanViewEmitFeedback = "sparkScanViewEmitFeedback"
         static let showToast = "showToast"
         static let onWidgetPaused = "onWidgetPaused"
-        static let setModeEnabledState = "setModeEnabledState"
     }
 
     private let sparkScanModule: SparkScanModule
@@ -82,9 +81,6 @@ class SparkScanMethodHandler {
             sparkScanModule.showToast(text: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.onWidgetPaused:
             sparkScanModule.onPause(result: FlutterFrameworkResult(reply: result))
-        case FunctionNames.setModeEnabledState:
-            sparkScanModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
-            result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }

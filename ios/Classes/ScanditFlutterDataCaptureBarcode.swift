@@ -185,8 +185,5 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
 
         barcodeCountModule.didStop()
         barcodeCountMethodChannel.setMethodCallHandler(nil)
-
-        sparkScanModule.didStop()
-        sparkScanMethodChannel.setMethodCallHandler(nil)
     }
 }

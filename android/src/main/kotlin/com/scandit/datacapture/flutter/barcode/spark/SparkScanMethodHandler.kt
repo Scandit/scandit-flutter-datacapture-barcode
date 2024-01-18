@@ -7,15 +7,13 @@ package com.scandit.datacapture.flutter.barcode.spark
 
 import com.scandit.datacapture.flutter.core.utils.FlutterResult
 import com.scandit.datacapture.frameworks.barcode.spark.SparkScanModule
-import com.scandit.datacapture.frameworks.core.utils.DefaultLastFrameData
 import com.scandit.datacapture.frameworks.core.utils.LastFrameData
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import org.json.JSONObject
 
 class SparkScanMethodHandler(
-    private val sparkScanModule: SparkScanModule,
-    private val lastFrameData: LastFrameData = DefaultLastFrameData.getInstance()
+    private val sparkScanModule: SparkScanModule
 ) : MethodChannel.MethodCallHandler {
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -55,7 +53,7 @@ class SparkScanMethodHandler(
             }
 
             METHOD_GET_LAST_FRAME_DATA ->
-                lastFrameData.getLastFrameDataJson {
+                LastFrameData.getLastFrameDataJson {
                     result.success(result)
                 }
 
@@ -92,10 +90,6 @@ class SparkScanMethodHandler(
                 sparkScanModule.onPause()
                 result.success(null)
             }
-
-            METHOD_SET_MODE_ENABLED_STATE -> sparkScanModule.setModeEnabled(
-                call.arguments as Boolean
-            )
         }
     }
 
@@ -116,7 +110,6 @@ class SparkScanMethodHandler(
         private const val METHOD_SPARK_SCAN_VIEW_EMIT_FEEDBACK = "sparkScanViewEmitFeedback"
         private const val METHOD_SPARK_SCAN_VIEW_SHOW_TOAST = "showToast"
         private const val METHOD_SPARK_SCAN_VIEW_ON_WIDGET_PAUSED = "onWidgetPaused"
-        private const val METHOD_SET_MODE_ENABLED_STATE = "setModeEnabledState"
 
         const val EVENT_CHANNEL_NAME =
             "com.scandit.datacapture.barcode.spark/event_channel"

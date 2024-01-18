@@ -35,18 +35,7 @@ class FlutterSparkScanView: UIView, FlutterPlatformView {
         sparkScanModule.addViewToContainer(flutterView,
                                            jsonString: creationJson,
                                            result: FlutterLogInsteadOfResult())
-        let sparkScanView = sparkScanModule.sparkScanView!
-        flutterView.bringSubviewToFront(sparkScanView)
-        let sparkScanViewConstraints = flutterView.constraints.filter {
-            $0.firstItem === sparkScanView
-        }
-        flutterView.removeConstraints(sparkScanViewConstraints)
-        flutterView.addConstraints([
-            sparkScanView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            sparkScanView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
-            sparkScanView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
-            sparkScanView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
-        ])
+        flutterView.bringSubviewToFront(sparkScanModule.sparkScanView!)
     }
 
     override func removeFromSuperview() {
