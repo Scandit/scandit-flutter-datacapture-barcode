@@ -33,16 +33,22 @@ import com.scandit.datacapture.frameworks.barcode.tracking.listeners.FrameworksB
 import com.scandit.datacapture.frameworks.barcode.tracking.listeners.FrameworksBarcodeTrackingListener
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import java.lang.ref.WeakReference
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 /** ScanditFlutterDataCaptureBarcodePlugin */
-class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHandler {
+class ScanditFlutterDataCaptureBarcodeProxyPlugin :
+    FlutterPlugin,
+    MethodCallHandler,
+    ActivityAware {
 
     private val barcodeModule: BarcodeModule = BarcodeModule()
 
@@ -68,30 +74,99 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
 
     private var sparkScanMethodChannel: MethodChannel? = null
 
+    private var flutterPluginBinding: WeakReference<FlutterPluginBinding?> = WeakReference(null)
+
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        onAttached()
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+        onDetached()
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        onAttached()
+    }
+
+    override fun onDetachedFromActivity() {
+        onDetached()
+    }
+
     override fun onAttachedToEngine(binding: FlutterPluginBinding) {
+        flutterPluginBinding = WeakReference(binding)
+    }
+
+    override fun onDetachedFromEngine(binding: FlutterPluginBinding) {
+        flutterPluginBinding = WeakReference(null)
+    }
+
+    private fun onAttached() {
         lock.withLock {
             if (isPluginAttached) return
 
-            // Barcode
-            setupBarcodeModule(binding)
+            val flutterBinding = flutterPluginBinding.get() ?: return
 
-            // Barcode Capture
-            setupBarcodeCapture(binding)
-
-            // Barcode Count
-            setupBarcodeCount(binding)
-
-            // Barcode Selection
-            setupBarcodeSelection(binding)
-
-            // Barcode Tracking
-            setupBarcodeTracking(binding)
-
-            // Spark Scan
-            setupSparkScan(binding)
+            setupModules(flutterBinding)
 
             isPluginAttached = true
         }
+    }
+
+    private fun onDetached() {
+        lock.withLock {
+            disposeModules()
+            isPluginAttached = false
+        }
+    }
+
+    private fun setupModules(binding: FlutterPluginBinding) {
+        // Barcode
+        setupBarcodeModule(binding)
+
+        // Barcode Capture
+        setupBarcodeCapture(binding)
+
+        // Barcode Count
+        setupBarcodeCount(binding)
+
+        // Barcode Selection
+        setupBarcodeSelection(binding)
+
+        // Barcode Tracking
+        setupBarcodeTracking(binding)
+
+        // Spark Scan
+        setupSparkScan(binding)
+    }
+
+    private fun disposeModules() {
+        // Barcode Module
+        barcodeModule.onDestroy()
+        barcodeMethodChannel?.setMethodCallHandler(null)
+        // Barcode Capture Module
+        barcodeCaptureModule?.onDestroy()
+        barcodeCaptureModule = null
+        barcodeCaptureMethodChannel?.setMethodCallHandler(null)
+
+        // Barcode Count Module
+        barcodeCountModule?.onDestroy()
+        barcodeCountModule = null
+        barcodeCountMethodChannel?.setMethodCallHandler(null)
+
+        // Barcode Selection Module
+        barcodeSelectionModule?.onDestroy()
+        barcodeSelectionModule = null
+        barcodeSelectionMethodChannel?.setMethodCallHandler(null)
+
+        // Barcode Tracking Module
+        barcodeTrackingModule?.onDestroy()
+        barcodeTrackingModule = null
+        barcodeTrackingMethodChannel?.setMethodCallHandler(null)
+
+        // Spark Scan Module
+        sparkScanModule?.onDestroy()
+        sparkScanModule = null
+        sparkScanMethodChannel?.setMethodCallHandler(null)
     }
 
     private fun setupBarcodeTracking(binding: FlutterPluginBinding) {
@@ -188,7 +263,9 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
 
             binding.platformViewRegistry.registerViewFactory(
                 "com.scandit.BarcodeCountView",
-                ScanditBarcodeCountPlatformViewFactory(module)
+                BarcodeCountPlatformViewFactory(
+                    module
+                )
             )
         }
     }
@@ -223,40 +300,6 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
         barcodeMethodChannel?.setMethodCallHandler(
             BarcodeMethodHandler(barcodeModule)
         )
-    }
-
-    override fun onDetachedFromEngine(binding: FlutterPluginBinding) {
-        lock.withLock {
-            // Barcode Module
-            barcodeModule.onDestroy()
-            barcodeMethodChannel?.setMethodCallHandler(null)
-            // Barcode Capture Module
-            barcodeCaptureModule?.onDestroy()
-            barcodeCaptureModule = null
-            barcodeCaptureMethodChannel?.setMethodCallHandler(null)
-
-            // Barcode Count Module
-            barcodeCountModule?.onDestroy()
-            barcodeCountModule = null
-            barcodeCountMethodChannel?.setMethodCallHandler(null)
-
-            // Barcode Selection Module
-            barcodeSelectionModule?.onDestroy()
-            barcodeSelectionModule = null
-            barcodeSelectionMethodChannel?.setMethodCallHandler(null)
-
-            // Barcode Tracking Module
-            barcodeTrackingModule?.onDestroy()
-            barcodeTrackingModule = null
-            barcodeTrackingMethodChannel?.setMethodCallHandler(null)
-
-            // Spark Scan Module
-            sparkScanModule?.onDestroy()
-            sparkScanModule = null
-            sparkScanMethodChannel?.setMethodCallHandler(null)
-
-            isPluginAttached = false
-        }
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {

@@ -8,6 +8,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/spark/battery_saving_mode.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 // ignore: implementation_imports
@@ -235,12 +236,15 @@ class SparkScanToastSettingsDefaults {
 class SparkScanSettingsDefaults {
   final int codeDuplicateFilter;
   final bool singleBarcodeAutoDetection;
+  final BatterySavingMode batterySaving;
 
-  SparkScanSettingsDefaults(this.codeDuplicateFilter, this.singleBarcodeAutoDetection);
+  SparkScanSettingsDefaults(this.codeDuplicateFilter, this.singleBarcodeAutoDetection, this.batterySaving);
 
   factory SparkScanSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     return SparkScanSettingsDefaults(
-        (json['codeDuplicateFilter'] as num).toInt(), json['singleBarcodeAutoDetection'] as bool);
+        (json['codeDuplicateFilter'] as num).toInt(),
+        json['singleBarcodeAutoDetection'] as bool,
+        BatterySavingModeDeserializer.fromJSON(json['batterySaving'] as String));
   }
 }
 

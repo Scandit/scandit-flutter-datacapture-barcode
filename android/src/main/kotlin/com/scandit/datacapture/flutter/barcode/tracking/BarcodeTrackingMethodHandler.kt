@@ -8,6 +8,7 @@ package com.scandit.datacapture.flutter.barcode.tracking
 import com.scandit.datacapture.flutter.core.utils.rejectKotlinError
 import com.scandit.datacapture.frameworks.barcode.tracking.BarcodeTrackingModule
 import com.scandit.datacapture.frameworks.core.errors.FrameDataNullError
+import com.scandit.datacapture.frameworks.core.utils.DefaultLastFrameData
 import com.scandit.datacapture.frameworks.core.utils.LastFrameData
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -15,7 +16,8 @@ import org.json.JSONObject
 
 /** ScanditFlutterDataCaptureBarcodeTrackingPlugin */
 class BarcodeTrackingMethodHandler(
-    private val barcodeTrackingModule: BarcodeTrackingModule
+    private val barcodeTrackingModule: BarcodeTrackingModule,
+    private val lastFrameData: LastFrameData = DefaultLastFrameData.getInstance()
 ) : MethodChannel.MethodCallHandler {
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -40,7 +42,7 @@ class BarcodeTrackingMethodHandler(
                 barcodeTrackingModule.resetSession(call.arguments as? Long)
                 result.success(null)
             }
-            METHOD_GET_LAST_FRAME_DATA -> LastFrameData.getLastFrameDataJson {
+            METHOD_GET_LAST_FRAME_DATA -> lastFrameData.getLastFrameDataJson {
                 if (it.isNullOrBlank()) {
                     result.rejectKotlinError(FrameDataNullError())
                     return@getLastFrameDataJson
@@ -116,6 +118,9 @@ class BarcodeTrackingMethodHandler(
                 barcodeTrackingModule.clearBasicOverlayTrackedBarcodeBrushes()
                 result.success(null)
             }
+            METHOD_SET_MODE_ENABLED_STATE -> barcodeTrackingModule.setModeEnabled(
+                call.arguments as Boolean
+            )
             else -> result.notImplemented()
         }
     }
@@ -143,6 +148,7 @@ class BarcodeTrackingMethodHandler(
             "subscribeBarcodeTrackingBasicOverlayListener"
         private const val METHOD_UNSUBSCRIBE_BASIC_OVERLAY_LISTENER =
             "unsubscribeBarcodeTrackingBasicOverlayListener"
+        private const val METHOD_SET_MODE_ENABLED_STATE = "setModeEnabledState"
 
         const val EVENT_CHANNEL_NAME =
             "com.scandit.datacapture.barcode.tracking/event_channel"

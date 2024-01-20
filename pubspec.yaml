@@ -1,6 +1,6 @@
 name: scandit_flutter_datacapture_barcode
 description: This plugin implements the barcode capture capabilities of the Scandit Data Capture SDK. It supports reading a large number of different barcode symbologies.
-version: 6.20.3
+version: 6.21.2
 homepage: https://scandit.com
 
 
@@ -14,7 +14,7 @@ dependencies:
     sdk: flutter
   meta: ^1.8.0
   scandit_flutter_datacapture_core:
-    '>=6.20.3 <6.20.4'
+    '>=6.21.2 <6.21.3'
 
 dev_dependencies:
   flutter_test:
