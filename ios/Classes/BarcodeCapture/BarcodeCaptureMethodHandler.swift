@@ -7,6 +7,7 @@
 import Flutter
 import ScanditFrameworksBarcode
 import ScanditFrameworksCore
+import scandit_flutter_datacapture_core
 
 class BarcodeCaptureMethodHandler {
     private enum FunctionNames {
@@ -18,6 +19,9 @@ class BarcodeCaptureMethodHandler {
         static let getLastFrameData = "getLastFrameData"
         static let getBarcodeCaptureDefaults = "getBarcodeCaptureDefaults"
         static let setModeEnabledState = "setModeEnabledState"
+        static let updateBarcodeCaptureMode = "updateBarcodeCaptureMode"
+        static let applyBarcodeCaptureModeSettings = "applyBarcodeCaptureModeSettings"
+        static let updateBarcodeCaptureOverlay = "updateBarcodeCaptureOverlay"
     }
 
     private let barcodeCaptureModule: BarcodeCaptureModule
@@ -49,12 +53,18 @@ class BarcodeCaptureMethodHandler {
             barcodeCaptureModule.resetSession(frameSequenceId: methodCall.arguments as? Int)
             result(nil)
         case FunctionNames.getLastFrameData:
-            LastFrameData.shared.getLastFrameDataJSON {
+            LastFrameData.shared.getLastFrameDataBytes {
                 result($0)
             }
         case FunctionNames.setModeEnabledState:
             barcodeCaptureModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
             result(nil)
+        case FunctionNames.updateBarcodeCaptureMode:
+            barcodeCaptureModule.updateModeFromJson(modeJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.applyBarcodeCaptureModeSettings:
+            barcodeCaptureModule.applyModeSettings(modeSettingsJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.updateBarcodeCaptureOverlay:
+            barcodeCaptureModule.updateOverlay(overlayJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
         default:
             result(FlutterMethodNotImplemented)
         }

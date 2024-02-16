@@ -119,7 +119,7 @@ class BarcodeCountMethodHandler {
             barcodeCountModule.removeBarcodeCountListener()
             result(nil)
         case FunctionNames.getBarcodeCountLastFrameData:
-            LastFrameData.shared.getLastFrameDataJSON {
+            LastFrameData.shared.getLastFrameDataBytes {
                 result($0)
             }
         case FunctionNames.resetBarcodeCount:

@@ -6,6 +6,8 @@
 
 package com.scandit.datacapture.flutter.barcode.selection
 
+import com.scandit.datacapture.flutter.barcode.tracking.BarcodeTrackingMethodHandler
+import com.scandit.datacapture.flutter.core.utils.FlutterResult
 import com.scandit.datacapture.flutter.core.utils.rejectKotlinError
 import com.scandit.datacapture.frameworks.barcode.selection.BarcodeSelectionModule
 import com.scandit.datacapture.frameworks.core.errors.FrameDataNullError
@@ -69,16 +71,31 @@ class BarcodeSelectionMethodHandler(
                 result.success(null)
             }
 
-            METHOD_GET_LAST_FRAME_DATA -> lastFrameData.getLastFrameDataJson {
-                if (it.isNullOrBlank()) {
+            METHOD_GET_LAST_FRAME_DATA -> lastFrameData.getLastFrameDataBytes {
+                if (it == null) {
                     result.rejectKotlinError(FrameDataNullError())
-                    return@getLastFrameDataJson
+                    return@getLastFrameDataBytes
                 }
                 result.success(result)
             }
 
             METHOD_SET_MODE_ENABLED_STATE -> barcodeSelectionModule.setModeEnabled(
                 call.arguments as Boolean
+            )
+
+            METHOD_UPDATE_MODE_FROM_JSON -> barcodeSelectionModule.updateModeFromJson(
+                call.arguments as String,
+                FlutterResult(result)
+            )
+
+            METHOD_APPLY_MODE_SETTINGS -> barcodeSelectionModule.applyModeSettings(
+                call.arguments as String,
+                FlutterResult(result)
+            )
+
+            METHOD_UPDATE_BASIC_OVERLAY -> barcodeSelectionModule.updateBasicOverlay(
+                call.arguments as String,
+                FlutterResult(result)
             )
         }
     }
@@ -95,6 +112,9 @@ class BarcodeSelectionMethodHandler(
         private const val METHOD_BARCODE_SELECTION_DID_UPDATE_SESSION = "finishDidUpdateSession"
         private const val METHOD_GET_LAST_FRAME_DATA = "getLastFrameData"
         private const val METHOD_SET_MODE_ENABLED_STATE = "setModeEnabledState"
+        private const val METHOD_UPDATE_MODE_FROM_JSON = "updateBarcodeSelectionMode"
+        private const val METHOD_APPLY_MODE_SETTINGS = "applyBarcodeSelectionModeSettings"
+        private const val METHOD_UPDATE_BASIC_OVERLAY = "updateBarcodeSelectionBasicOverlay"
 
         const val EVENT_CHANNEL_NAME =
             "com.scandit.datacapture.barcode.selection/event_channel"

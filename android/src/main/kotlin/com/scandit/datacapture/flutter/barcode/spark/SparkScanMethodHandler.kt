@@ -55,7 +55,7 @@ class SparkScanMethodHandler(
             }
 
             METHOD_GET_LAST_FRAME_DATA ->
-                lastFrameData.getLastFrameDataJson {
+                lastFrameData.getLastFrameDataBytes {
                     result.success(result)
                 }
 

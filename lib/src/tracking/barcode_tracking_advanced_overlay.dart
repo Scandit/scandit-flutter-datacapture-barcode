@@ -92,7 +92,7 @@ class BarcodeTrackingAdvancedOverlay extends DataCaptureOverlay {
   var _shouldShowScanAreaGuides = false;
   set shouldShowScanAreaGuides(bool newValue) {
     _shouldShowScanAreaGuides = newValue;
-    _barcodeTracking.didChange();
+    _controller.update();
   }
 
   bool get shouldShowScanAreaGuides => _shouldShowScanAreaGuides;
@@ -152,6 +152,12 @@ class _BarcodeTrackingAdvancedOverlayController {
 
   Future<void> clearTrackedBarcodeWidgets() {
     return _methodChannel.invokeMethod(BarcodeTrackingFunctionNames.clearTrackedBarcodeWidgets);
+  }
+
+  Future<void> update() {
+    return _methodChannel
+        .invokeMethod(BarcodeTrackingFunctionNames.updateBarcodeTrackingAdvancedOverlay, jsonEncode(_overlay.toMap()))
+        .then((value) => null, onError: _onError);
   }
 
   void subscribeListener() {

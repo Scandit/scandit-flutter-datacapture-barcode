@@ -9,6 +9,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
 import android.widget.FrameLayout
+import com.scandit.datacapture.flutter.core.ui.FlutterBasePlatformView
 import com.scandit.datacapture.flutter.core.utils.FlutterLogInsteadOfResult
 import com.scandit.datacapture.frameworks.barcode.spark.SparkScanModule
 import io.flutter.embedding.android.FlutterView
@@ -19,8 +20,7 @@ class FlutterSparkScanView(
     context: Context,
     private val jsonString: String,
     private val sparkScanModule: SparkScanModule
-) : FrameLayout(context),
-    PlatformView {
+) : FlutterBasePlatformView(context) {
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         val parentView = (this.parent as View)
@@ -38,6 +38,15 @@ class FlutterSparkScanView(
     override fun getView(): View = this
 
     override fun dispose() {
+        super.dispose()
         sparkScanModule.disposeView()
+    }
+
+    override fun onCurrentTopViewVisibleChanged(topViewId: String?) {
+        if (topViewId == viewId) {
+            sparkScanModule.sparkScanView?.let {
+                it.dispatchWindowVisibilityChanged(it.visibility)
+            }
+        }
     }
 }
