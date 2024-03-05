@@ -16,6 +16,3 @@ export 'src/composite_type_description.dart' show CompositeTypeDescription;
 export 'src/barcode_filter_settings.dart' show BarcodeFilterSettings;
 export 'src/barcode_filter_highlight_settings.dart'
     show BarcodeFilterHighlightSettings, BarcodeFilterHighlightSettingsBrush, BarcodeFilterHighlightType;
-export 'src/aruco_dictionary.dart' show ArucoDictionary;
-export 'src/aruco_dictionary_preset.dart' show ArucoDictionaryPreset;
-export 'src/aruco_marker.dart' show ArucoMarker;

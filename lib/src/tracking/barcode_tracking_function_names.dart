@@ -22,10 +22,6 @@ abstract class BarcodeTrackingFunctionNames {
   static const String resetBarcodeTrackingSession = 'resetBarcodeTrackingSession';
   static const String getLastFrameData = 'getLastFrameData';
   static const String setModeEnabledState = 'setModeEnabledState';
-  static const String updateBarcodeTrackingMode = 'updateBarcodeTrackingMode';
-  static const String applyBarcodeTrackingModeSettings = 'applyBarcodeTrackingModeSettings';
-  static const String updateBarcodeTrackingBasicOverlay = 'updateBarcodeTrackingBasicOverlay';
-  static const String updateBarcodeTrackingAdvancedOverlay = 'updateBarcodeTrackingAdvancedOverlay';
 
   static const String methodsChannelName = 'com.scandit.datacapture.barcode.tracking/method_channel';
 }

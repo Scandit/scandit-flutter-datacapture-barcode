@@ -54,7 +54,7 @@ class BarcodeSelection extends DataCaptureMode {
 
   set feedback(BarcodeSelectionFeedback newValue) {
     _feedback = newValue;
-    _controller.updateMode();
+    didChange();
   }
 
   PointWithUnit? get pointOfInterest {
@@ -63,7 +63,7 @@ class BarcodeSelection extends DataCaptureMode {
 
   set pointOfInterest(PointWithUnit? newValue) {
     _pointOfInterest = newValue;
-    _controller.updateMode();
+    didChange();
   }
 
   void addListener(BarcodeSelectionListener listener) {
@@ -108,7 +108,7 @@ class BarcodeSelection extends DataCaptureMode {
 
   Future<void> applySettings(BarcodeSelectionSettings settings) {
     _settings = settings;
-    return _controller.applyNewSettings(settings);
+    return didChange();
   }
 
   Future<void> unfreezeCamera() {
@@ -117,6 +117,13 @@ class BarcodeSelection extends DataCaptureMode {
 
   Future<void> reset() {
     return _controller.reset();
+  }
+
+  Future<void> didChange() {
+    if (context != null) {
+      return context!.update();
+    }
+    return Future.value();
   }
 
   @override
@@ -201,17 +208,6 @@ class _BarcodeSelectionListenerController {
     return _methodChannel.invokeMethod(BarcodeSelectionFunctionNames.resetMode);
   }
 
-  Future<void> updateMode() {
-    return _methodChannel.invokeMethod(
-        BarcodeSelectionFunctionNames.updateBarcodeSelectionMode, jsonEncode(_barcodeSelection.toMap()));
-  }
-
-  Future<void> applyNewSettings(BarcodeSelectionSettings settings) {
-    return _methodChannel
-        .invokeMethod(BarcodeSelectionFunctionNames.applyBarcodeSelectionModeSettings, jsonEncode(settings.toMap()))
-        .then((value) => null, onError: _onError);
-  }
-
   void _notifyListenersOfDidUpateSession(BarcodeSelectionSession session) {
     for (var listener in _barcodeSelection._listeners) {
       listener.didUpdateSession(_barcodeSelection, session);
@@ -233,7 +229,12 @@ class _BarcodeSelectionListenerController {
   Future<FrameData> _getLastFrameData() {
     return _methodChannel
         .invokeMethod(BarcodeSelectionFunctionNames.getLastFrameData)
-        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: _onError);
+        .then((value) => getFrom(value as String), onError: _onError);
+  }
+
+  DefaultFrameData getFrom(String response) {
+    final decoded = jsonDecode(response);
+    return DefaultFrameData.fromJSON(decoded);
   }
 
   void setModeEnabledState(bool newValue) {

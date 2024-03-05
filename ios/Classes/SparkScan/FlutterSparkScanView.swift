@@ -57,6 +57,11 @@ class FlutterSparkScanView: UIView, FlutterPlatformView {
     }
 
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        sparkScanModule.sparkScanView?.hitTest(point, with: event)
+        let view = super.hitTest(point, with: event)
+        if view === self {
+            return nil;
+        }
+
+        return view;
     }
 }

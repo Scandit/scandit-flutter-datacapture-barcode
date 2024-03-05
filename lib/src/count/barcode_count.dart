@@ -222,7 +222,7 @@ class _BarcodeCountController {
   Future<FrameData> _getLastFrameData() {
     return _methodChannel
         .invokeMethod(BarcodeCountFunctionNames.getBarcodeCountLastFrameData)
-        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: _onError);
+        .then((value) => _getFrom(value as String), onError: _onError);
   }
 
   Future<void> updateMode() {
@@ -234,6 +234,11 @@ class _BarcodeCountController {
     _methodChannel
         .invokeMethod(BarcodeCountFunctionNames.setModeEnabledState, newValue)
         .then((value) => null, onError: _onError);
+  }
+
+  DefaultFrameData _getFrom(String response) {
+    final decoded = jsonDecode(response);
+    return DefaultFrameData.fromJSON(decoded);
   }
 
   void _notifyListenersOfOnScan(BarcodeCountSession session) {

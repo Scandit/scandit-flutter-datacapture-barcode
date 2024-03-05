@@ -60,7 +60,7 @@ class SparkScanMethodHandler {
             sparkScanModule.resetSession()
             result(nil)
         case FunctionNames.getLastFrameData:
-            LastFrameData.shared.getLastFrameDataBytes {
+            LastFrameData.shared.getLastFrameDataJSON {
                 result($0)
             }
         case FunctionNames.updateSparkScanMode:

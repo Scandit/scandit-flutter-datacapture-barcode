@@ -49,7 +49,6 @@ class BarcodeTrackingBasicOverlay extends DataCaptureOverlay {
     _view = newValue;
   }
 
-  // ignore: unused_field
   final BarcodeTracking _barcodeTracking;
 
   late _BarcodeTrackingBasicOverlayController _controller;
@@ -87,7 +86,7 @@ class BarcodeTrackingBasicOverlay extends DataCaptureOverlay {
 
   set brush(Brush newValue) {
     _brush = newValue;
-    _controller.update();
+    _barcodeTracking.didChange();
   }
 
   final BarcodeTrackingBasicOverlayStyle style;
@@ -116,7 +115,7 @@ class BarcodeTrackingBasicOverlay extends DataCaptureOverlay {
   var _shouldShowScanAreaGuides = false;
   set shouldShowScanAreaGuides(bool newValue) {
     _shouldShowScanAreaGuides = newValue;
-    _controller.update();
+    _barcodeTracking.didChange();
   }
 
   bool get shouldShowScanAreaGuides => _shouldShowScanAreaGuides;
@@ -160,11 +159,6 @@ class _BarcodeTrackingBasicOverlayController {
     return _methodChannel.invokeMethod(BarcodeTrackingFunctionNames.clearTrackedBarcodeBrushes);
   }
 
-  Future<void> update() {
-    return _methodChannel.invokeMethod(
-        BarcodeTrackingFunctionNames.updateBarcodeTrackingBasicOverlay, jsonEncode(_overlay.toMap()));
-  }
-
   void unsubscribeListener() {
     _overlaySubscription?.cancel();
     _methodChannel
@@ -193,7 +187,7 @@ class _BarcodeTrackingBasicOverlayController {
           await _methodChannel.invokeMethod(
               BarcodeTrackingFunctionNames.setBrushForTrackedBarcode,
               jsonEncode({
-                'brush': jsonEncode(brush.toMap()),
+                'brush': brush.toMap(),
                 'trackedBarcodeID': trackedBarcode.identifier,
                 'sessionFrameSequenceID': trackedBarcode.sessionFrameSequenceId
               }));

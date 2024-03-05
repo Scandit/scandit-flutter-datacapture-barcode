@@ -135,10 +135,10 @@ class BarcodeCountMethodHandler(
                 result.success(null)
             }
 
-            METHOD_GET_LAST_FRAME -> lastFrameData.getLastFrameDataBytes {
-                if (it == null) {
+            METHOD_GET_LAST_FRAME -> lastFrameData.getLastFrameDataJson {
+                if (it.isNullOrBlank()) {
                     result.rejectKotlinError(FrameDataNullError())
-                    return@getLastFrameDataBytes
+                    return@getLastFrameDataJson
                 }
                 result.success(it)
             }

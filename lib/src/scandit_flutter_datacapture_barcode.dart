@@ -9,8 +9,6 @@ import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_default
 import 'capture/barcode_capture_defaults.dart';
 import 'barcode_defaults.dart';
 import 'count/barcode_count_defaults.dart';
-import 'find/barcode_find_defaults.dart';
-import 'pick/barcode_pick_defaults.dart';
 import 'tracking/barcode_tracking_defaults.dart';
 import 'selection/barcode_selection_defaults.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
@@ -25,7 +23,5 @@ class ScanditFlutterDataCaptureBarcode {
     await BarcodeSelectionDefaults.initializeDefaults();
     await BarcodeCountDefaults.initializeDefaults();
     await SparkScanDefaults.initializeDefaults();
-    await BarcodeFindDefaults.initializeDefaults();
-    await BarcodePickDefaults.initializeDefaults();
   }
 }

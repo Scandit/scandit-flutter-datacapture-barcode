@@ -7,8 +7,6 @@ package com.scandit.datacapture.flutter.barcode
 
 import com.scandit.datacapture.flutter.barcode.capture.BarcodeCaptureMethodHandler
 import com.scandit.datacapture.flutter.barcode.count.BarcodeCountMethodHandler
-import com.scandit.datacapture.flutter.barcode.find.BarcodeFindMethodHandler
-import com.scandit.datacapture.flutter.barcode.pick.BarcodePickMethodHandler
 import com.scandit.datacapture.flutter.barcode.selection.BarcodeSelectionMethodHandler
 import com.scandit.datacapture.flutter.barcode.spark.SparkScanMethodHandler
 import com.scandit.datacapture.flutter.barcode.tracking.BarcodeTrackingMethodHandler
@@ -22,10 +20,6 @@ import com.scandit.datacapture.frameworks.barcode.count.listeners.FrameworksBarc
 import com.scandit.datacapture.frameworks.barcode.count.listeners.FrameworksBarcodeCountListener
 import com.scandit.datacapture.frameworks.barcode.count.listeners.FrameworksBarcodeCountViewListener
 import com.scandit.datacapture.frameworks.barcode.count.listeners.FrameworksBarcodeCountViewUiListener
-import com.scandit.datacapture.frameworks.barcode.find.BarcodeFindModule
-import com.scandit.datacapture.frameworks.barcode.find.listeners.FrameworksBarcodeFindListener
-import com.scandit.datacapture.frameworks.barcode.find.listeners.FrameworksBarcodeFindViewUiListener
-import com.scandit.datacapture.frameworks.barcode.pick.BarcodePickModule
 import com.scandit.datacapture.frameworks.barcode.selection.BarcodeSelectionModule
 import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionAimedBrushProvider
 import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionListener
@@ -51,7 +45,9 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 /** ScanditFlutterDataCaptureBarcodePlugin */
-class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHandler,
+class ScanditFlutterDataCaptureBarcodeProxyPlugin :
+    FlutterPlugin,
+    MethodCallHandler,
     ActivityAware {
 
     private val barcodeModule: BarcodeModule = BarcodeModule()
@@ -77,14 +73,6 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
     private var sparkScanModule: SparkScanModule? = null
 
     private var sparkScanMethodChannel: MethodChannel? = null
-
-    private var barcodeFindModule: BarcodeFindModule? = null
-
-    private var barcodeFindMethodChannel: MethodChannel? = null
-
-    private var barcodePickModule: BarcodePickModule? = null
-
-    private var barcodePickMethodChannel: MethodChannel? = null
 
     private var flutterPluginBinding: WeakReference<FlutterPluginBinding?> = WeakReference(null)
 
@@ -149,12 +137,6 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
 
         // Spark Scan
         setupSparkScan(binding)
-
-        // Barcode Find
-        setupBarcodeFind(binding)
-
-        // Barcode Pick
-        setupBarcodePick(binding)
     }
 
     private fun disposeModules() {
@@ -185,73 +167,6 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
         sparkScanModule?.onDestroy()
         sparkScanModule = null
         sparkScanMethodChannel?.setMethodCallHandler(null)
-
-        // Barcode Find Module
-        barcodeFindModule?.onDestroy()
-        barcodeFindModule = null
-        barcodeFindMethodChannel?.setMethodCallHandler(null)
-
-        // Barcode Pick Module
-        barcodePickModule?.onDestroy()
-        barcodePickModule = null
-        barcodePickMethodChannel?.setMethodCallHandler(null)
-    }
-
-    private fun setupBarcodePick(binding: FlutterPluginBinding) {
-        val eventEmitter = FlutterEmitter(
-            EventChannel(
-                binding.binaryMessenger,
-                BarcodePickMethodHandler.EVENT_CHANNEL_NAME
-            )
-        )
-
-        barcodePickModule = BarcodePickModule(
-            eventEmitter
-        ).also { module ->
-            module.onCreate(binding.applicationContext)
-
-            barcodePickMethodChannel = binding.getMethodChannel(
-                BarcodePickMethodHandler.METHOD_CHANNEL_NAME
-            ).also {
-                it.setMethodCallHandler(BarcodePickMethodHandler(module))
-            }
-
-            binding.platformViewRegistry.registerViewFactory(
-                "com.scandit.BarcodePickView",
-                BarcodePickPlatformViewFactory(
-                    module
-                )
-            )
-        }
-    }
-
-    private fun setupBarcodeFind(binding: FlutterPluginBinding) {
-        val eventEmitter = FlutterEmitter(
-            EventChannel(
-                binding.binaryMessenger,
-                BarcodeFindMethodHandler.EVENT_CHANNEL_NAME
-            )
-        )
-
-        barcodeFindModule = BarcodeFindModule(
-            FrameworksBarcodeFindListener(eventEmitter),
-            FrameworksBarcodeFindViewUiListener(eventEmitter)
-        ).also { module ->
-            module.onCreate(binding.applicationContext)
-
-            barcodeFindMethodChannel = binding.getMethodChannel(
-                BarcodeFindMethodHandler.METHOD_CHANNEL_NAME
-            ).also {
-                it.setMethodCallHandler(BarcodeFindMethodHandler(module))
-            }
-
-            binding.platformViewRegistry.registerViewFactory(
-                "com.scandit.BarcodeFindView",
-                BarcodeFindPlatformViewFactory(
-                    module
-                )
-            )
-        }
     }
 
     private fun setupBarcodeTracking(binding: FlutterPluginBinding) {

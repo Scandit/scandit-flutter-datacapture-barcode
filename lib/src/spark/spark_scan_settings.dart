@@ -9,6 +9,7 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 import '../barcode_defaults.dart';
 import '../symbology.dart';
 import '../symbology_settings.dart';
+import 'battery_saving_mode.dart';
 import 'spark_scan_defaults.dart';
 
 class SparkScanSettings implements Serializable {

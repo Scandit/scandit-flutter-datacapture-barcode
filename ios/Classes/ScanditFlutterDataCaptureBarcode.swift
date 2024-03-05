@@ -28,12 +28,6 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
     private let sparkScanModule: SparkScanModule
     private let sparkScanMethodChannel: FlutterMethodChannel
 
-    private let barcodeFindModule: BarcodeFindModule
-    private let barcodeFindMethodChannel: FlutterMethodChannel
-    
-    private let barcodePickModule: BarcodePickModule
-    private let barcodePickMethodChannel: FlutterMethodChannel
-
     init(barcodeModule: BarcodeModule,
          barcodeMethodChannel: FlutterMethodChannel,
          barcodeCaptureModule: BarcodeCaptureModule,
@@ -45,11 +39,7 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
          barcodeCountModule: BarcodeCountModule,
          barcodeCountMethodChannel: FlutterMethodChannel,
          sparkScanModule: SparkScanModule,
-         sparkScanMethodChannel: FlutterMethodChannel,
-         barcodeFindModule: BarcodeFindModule,
-         barcodeFindMethodChannel: FlutterMethodChannel,
-         barcodePickModule: BarcodePickModule,
-         barcodePickMethodChannel: FlutterMethodChannel) {
+         sparkScanMethodChannel: FlutterMethodChannel) {
         self.barcodeModule = barcodeModule
         self.barcodeMethodChannel = barcodeMethodChannel
         self.barcodeCaptureModule = barcodeCaptureModule
@@ -62,10 +52,6 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
         self.barcodeCountMethodChannel = barcodeCountMethodChannel
         self.sparkScanModule = sparkScanModule
         self.sparkScanMethodChannel = sparkScanMethodChannel
-        self.barcodeFindModule = barcodeFindModule
-        self.barcodeFindMethodChannel = barcodeFindMethodChannel
-        self.barcodePickModule = barcodePickModule
-        self.barcodePickMethodChannel = barcodePickMethodChannel
 
         super.init()
     }
@@ -168,41 +154,6 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
         let sparkScanViewFactory = FlutterSparkScanViewFactory(sparkScanModule: sparkScanModule)
         registrar.register(sparkScanViewFactory, withId: "com.scandit.SparkScanView")
 
-        // Barcode Find
-        let barcodeFindEmitter = FlutterEventEmitter(
-            eventChannel: FlutterEventChannel(name: "com.scandit.datacapture.barcode.find/event_channel",
-                                              binaryMessenger: registrar.messenger())
-        )
-        let barcodeFindModule = BarcodeFindModule(
-            listener: FrameworksBarcodeFindListener(emitter: barcodeFindEmitter),
-            viewListener: FrameworksBarcodeFindViewUIListener(emitter: barcodeFindEmitter)
-        )
-        barcodeFindModule.didStart()
-
-        let barcodeFindMethodChannel = FlutterMethodChannel(name: "com.scandit.datacapture.barcode.find/method_channel",
-                                                            binaryMessenger: registrar.messenger())
-        let barcodeFindMethodHandler = BarcodeFindMethodHandler(barcodeFindModule: barcodeFindModule)
-        barcodeFindMethodChannel.setMethodCallHandler(barcodeFindMethodHandler.methodCallHandler(methodCall:result:))
-
-        let barcodeFindViewFactory = FlutterBarcodeFindViewFactory(barcodeFindModule: barcodeFindModule)
-        registrar.register(barcodeFindViewFactory, withId: "com.scandit.BarcodeFindView")
-        
-        
-        let barcodePickEmitter = FlutterEventEmitter(
-            eventChannel: FlutterEventChannel(name: "com.scandit.datacapture.barcode.pick/event_channel",
-                                              binaryMessenger: registrar.messenger())
-        )
-        let barcodePickModule = BarcodePickModule(emitter: barcodePickEmitter)
-        barcodePickModule.didStart()
-
-        let barcdePickMethodChannel = FlutterMethodChannel(name: "com.scandit.datacapture.barcode.pick/method_channel",
-                                                            binaryMessenger: registrar.messenger())
-        let barcodePickMethodHandler = BarcodePickMethodHandler(barcodePickModule: barcodePickModule)
-        barcdePickMethodChannel.setMethodCallHandler(barcodePickMethodHandler.methodCallHandler(methodCall:result:))
-        let barcodePickViewFactory = FlutterBarcodePickViewFactory(barcodePickModule: barcodePickModule)
-        registrar.register(barcodePickViewFactory, withId: "com.scandit.BarcodePickView")
-
-
         let plugin = ScanditFlutterDataCaptureBarcode(barcodeModule: barcodeModule,
                                                       barcodeMethodChannel: barcodeMethodChannel,
                                                       barcodeCaptureModule: barcodeCaptureModule,
@@ -214,11 +165,7 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
                                                       barcodeCountModule: barcodeCountModule,
                                                       barcodeCountMethodChannel: barcodeCountMethodChannel,
                                                       sparkScanModule: sparkScanModule,
-                                                      sparkScanMethodChannel: sparkScanMethodChannel,
-                                                      barcodeFindModule: barcodeFindModule,
-                                                      barcodeFindMethodChannel: barcodeFindMethodChannel,
-                                                      barcodePickModule: barcodePickModule,
-                                                      barcodePickMethodChannel: barcdePickMethodChannel
+                                                      sparkScanMethodChannel: sparkScanMethodChannel
         )
         registrar.publish(plugin)
     }
@@ -241,8 +188,5 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
 
         sparkScanModule.didStop()
         sparkScanMethodChannel.setMethodCallHandler(nil)
-
-        barcodeFindModule.didStop()
-        barcodeFindMethodChannel.setMethodCallHandler(nil)
     }
 }

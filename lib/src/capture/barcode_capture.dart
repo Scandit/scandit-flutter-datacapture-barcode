@@ -41,7 +41,7 @@ class BarcodeCapture extends DataCaptureMode {
 
   set feedback(BarcodeCaptureFeedback newValue) {
     _feedback = newValue;
-    _controller.updateMode();
+    didChange();
   }
 
   static CameraSettings get recommendedCameraSettings => _recommendedCameraSettings();
@@ -63,7 +63,7 @@ class BarcodeCapture extends DataCaptureMode {
 
   Future<void> applySettings(BarcodeCaptureSettings settings) {
     _settings = settings;
-    return _controller.applyNewSettings(settings);
+    return didChange();
   }
 
   void addListener(BarcodeCaptureListener listener) {
@@ -102,6 +102,13 @@ class BarcodeCapture extends DataCaptureMode {
     if (_listeners.isEmpty && _advancedListeners.isEmpty) {
       _controller.unsubscribeListeners();
     }
+  }
+
+  Future<void> didChange() {
+    if (context != null) {
+      return context!.update();
+    }
+    return Future.value();
   }
 
   @override
@@ -165,18 +172,6 @@ class _BarcodeCaptureListenerController {
         .then((value) => null, onError: _onError);
   }
 
-  Future<void> updateMode() {
-    return _methodChannel
-        .invokeMethod(BarcodeCaptureFunctionNames.updateBarcodeCaptureMode, jsonEncode(_barcodeCapture.toMap()))
-        .then((value) => null, onError: _onError);
-  }
-
-  Future<void> applyNewSettings(BarcodeCaptureSettings settings) {
-    return _methodChannel
-        .invokeMethod(BarcodeCaptureFunctionNames.applyBarcodeCaptureModeSettings, jsonEncode(settings.toMap()))
-        .then((value) => null, onError: _onError);
-  }
-
   void unsubscribeListeners() {
     _barcodeCaptureSubscription?.cancel();
     _methodChannel
@@ -196,7 +191,12 @@ class _BarcodeCaptureListenerController {
   Future<FrameData> _getLastFrameData() {
     return _methodChannel
         .invokeMethod(BarcodeCaptureFunctionNames.getLastFrameData)
-        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: _onError);
+        .then((value) => getFrom(value as String), onError: _onError);
+  }
+
+  DefaultFrameData getFrom(String response) {
+    final decoded = jsonDecode(response);
+    return DefaultFrameData.fromJSON(decoded);
   }
 
   void _notifyListenersOfDidScan(BarcodeCaptureSession session) {

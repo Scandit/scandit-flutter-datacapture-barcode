@@ -7,7 +7,6 @@
 import Flutter
 import ScanditFrameworksBarcode
 import ScanditFrameworksCore
-import scandit_flutter_datacapture_core
 
 class BarcodeTrackingMethodHandler {
     private enum FunctionNames {
@@ -28,10 +27,6 @@ class BarcodeTrackingMethodHandler {
         static let removeBarcodeTrackingAdvancedOverlayDelegate = "removeBarcodeTrackingAdvancedOverlayDelegate"
         static let getBarcodeTrackingDefaults = "getBarcodeTrackingDefaults"
         static let setModeEnabledState = "setModeEnabledState"
-        static let updateBarcodeTrackingMode = "updateBarcodeTrackingMode"
-        static let applyBarcodeTrackingModeSettings = "applyBarcodeTrackingModeSettings"
-        static let updateBarcodeTrackingBasicOverlay = "updateBarcodeTrackingBasicOverlay"
-        static let updateBarcodeTrackingAdvancedOverlay  = "updateBarcodeTrackingAdvancedOverlay"
     }
 
     private let barcodeTrackingModule: BarcodeTrackingModule
@@ -59,7 +54,7 @@ class BarcodeTrackingMethodHandler {
             barcodeTrackingModule.resetSession(frameSequenceId: methodCall.arguments as? Int)
             result(nil)
         case FunctionNames.getLastFrameData:
-            LastFrameData.shared.getLastFrameDataBytes {
+            LastFrameData.shared.getLastFrameDataJSON {
                 result($0)
             }
         case FunctionNames.addBarcodeTrackingAdvancedOverlayDelegate:
@@ -116,14 +111,6 @@ class BarcodeTrackingMethodHandler {
         case FunctionNames.setModeEnabledState:
             barcodeTrackingModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
             result(nil)
-        case FunctionNames.updateBarcodeTrackingMode:
-            barcodeTrackingModule.updateModeFromJson(modeJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
-        case FunctionNames.applyBarcodeTrackingModeSettings:
-            barcodeTrackingModule.applyModeSettings(modeSettingsJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
-        case FunctionNames.updateBarcodeTrackingBasicOverlay:
-            barcodeTrackingModule.updateBasicOverlay(overlayJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
-        case FunctionNames.updateBarcodeTrackingAdvancedOverlay:
-            barcodeTrackingModule.updateAdvancedOverlay(overlayJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
         default:
             result(FlutterMethodNotImplemented)
         }
