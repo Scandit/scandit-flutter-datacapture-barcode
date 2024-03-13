@@ -7,6 +7,7 @@
 import 'dart:ui';
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+import 'package:scandit_flutter_datacapture_core/src/common.dart';
 
 abstract class SparkScanViewFeedback extends Serializable {}
 
@@ -40,7 +41,7 @@ class SparkScanViewErrorFeedback implements SparkScanViewFeedback {
       'resumeCapturingDelay': _resumeCapturingDelay.inMilliseconds
     };
     if (_visualFeedbackColor != null) {
-      json['visualFeedbackColor'] = _visualFeedbackColor;
+      json['visualFeedbackColor'] = _visualFeedbackColor?.jsonValue;
     }
     return json;
   }
@@ -63,7 +64,7 @@ class SparkScanViewSuccessFeedback extends SparkScanViewFeedback {
       'type': 'success',
     };
     if (_visualFeedbackColor != null) {
-      json['visualFeedbackColor'] = _visualFeedbackColor;
+      json['visualFeedbackColor'] = _visualFeedbackColor?.jsonValue;
     }
     return json;
   }

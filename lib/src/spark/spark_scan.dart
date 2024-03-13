@@ -156,12 +156,7 @@ class _SparkScanController {
   Future<FrameData> _getLastFrameData() {
     return _methodChannel
         .invokeMethod(SparkScanFunctionNames.getLastFrameData)
-        .then((value) => getFrom(value as String), onError: _onError);
-  }
-
-  DefaultFrameData getFrom(String response) {
-    final decoded = jsonDecode(response);
-    return DefaultFrameData.fromJSON(decoded);
+        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: _onError);
   }
 
   void _notifyListenersOfDidScan(SparkScanSession session) {

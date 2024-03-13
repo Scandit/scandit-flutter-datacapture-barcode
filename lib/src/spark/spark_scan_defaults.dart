@@ -8,7 +8,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/spark/battery_saving_mode.dart';
+import 'package:scandit_flutter_datacapture_core/src/battery_saving_mode.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 // ignore: implementation_imports
@@ -275,7 +275,6 @@ class SparkScanViewSettingsDefaults {
   final bool hardwareTriggerEnabled;
   final int? hardwareTriggerKeyCode;
   final bool visualFeedbackEnabled;
-  final bool ignoreDragLimits;
   final double targetZoomFactorOut;
   final double targetZoomFactorIn;
   final SparkScanToastSettingsDefaults toastSettingsDefaults;
@@ -292,7 +291,6 @@ class SparkScanViewSettingsDefaults {
       this.hardwareTriggerEnabled,
       this.hardwareTriggerKeyCode,
       this.visualFeedbackEnabled,
-      this.ignoreDragLimits,
       this.targetZoomFactorOut,
       this.targetZoomFactorIn,
       this.toastSettingsDefaults);
@@ -323,7 +321,6 @@ class SparkScanViewSettingsDefaults {
     if (json.containsKey('visualFeedbackEnabled')) {
       visualFeedbackEnabled = json['visualFeedbackEnabled'] as bool;
     }
-    final ignoreDragLimits = json['ignoreDragLimits'] as bool;
     final targetZoomFactorOut = (json['targetZoomFactorOut'] as num).toDouble();
     final targetZoomFactorIn = (json['targetZoomFactorIn'] as num).toDouble();
 
@@ -341,7 +338,6 @@ class SparkScanViewSettingsDefaults {
         hardwareTriggerEnabled,
         hardwareTriggerKeyCode,
         visualFeedbackEnabled,
-        ignoreDragLimits,
         targetZoomFactorOut,
         targetZoomFactorIn,
         sparkScanToastSettingsDefaults);

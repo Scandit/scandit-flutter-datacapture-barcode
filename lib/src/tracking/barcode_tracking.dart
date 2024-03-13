@@ -54,7 +54,7 @@ class BarcodeTracking extends DataCaptureMode {
 
   Future<void> applySettings(BarcodeTrackingSettings settings) {
     _settings = settings;
-    return didChange();
+    return _controller.applyNewSettings(settings);
   }
 
   void addListener(BarcodeTrackingListener listener) {
@@ -103,10 +103,6 @@ class BarcodeTracking extends DataCaptureMode {
   Map<String, dynamic> toMap() {
     return {'type': 'barcodeTracking', 'settings': _settings.toMap()};
   }
-
-  Future<void> didChange() {
-    return context?.update() ?? Future.value();
-  }
 }
 
 abstract class BarcodeTrackingListener {
@@ -152,6 +148,18 @@ class _BarcodeTrackingListenerController {
     });
   }
 
+  Future<void> updateMode() {
+    return _methodChannel
+        .invokeMethod(BarcodeTrackingFunctionNames.updateBarcodeTrackingMode, jsonEncode(_barcodeTracking.toMap()))
+        .then((value) => null, onError: _onError);
+  }
+
+  Future<void> applyNewSettings(BarcodeTrackingSettings settings) {
+    return _methodChannel
+        .invokeMethod(BarcodeTrackingFunctionNames.applyBarcodeTrackingModeSettings, jsonEncode(settings.toMap()))
+        .then((value) => null, onError: _onError);
+  }
+
   void unsubscribeListeners() {
     _barcodeTrackingSubscription?.cancel();
     _methodChannel
@@ -173,12 +181,7 @@ class _BarcodeTrackingListenerController {
   Future<FrameData> _getLastFrameData() {
     return _methodChannel
         .invokeMethod(BarcodeTrackingFunctionNames.getLastFrameData)
-        .then((value) => getFrom(value as String), onError: _onError);
-  }
-
-  DefaultFrameData getFrom(String response) {
-    final decoded = jsonDecode(response);
-    return DefaultFrameData.fromJSON(decoded);
+        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: _onError);
   }
 
   void setModeEnabledState(bool newValue) {

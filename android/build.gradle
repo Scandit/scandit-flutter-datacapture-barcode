@@ -22,12 +22,17 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
+def test_gradle = "../../common-build-test.gradle"
+if (file(test_gradle).exists()) {
+    apply from: test_gradle
+}
+
 android {
-    compileSdkVersion 32
+    compileSdkVersion safeExtGet("compileSdkVersion", 32)
 
     defaultConfig {
-        minSdkVersion 23
-        targetSdkVersion 32
+        minSdkVersion safeExtGet("minSdkVersion", 23)
+        targetSdkVersion safeExtGet("targetSdkVersion", 32)
         versionCode 1
         versionName "1.0"
     }
@@ -38,7 +43,7 @@ android {
 }
 
 dependencies {
-    def sdk_version = "6.21.3"
+    def sdk_version = "6.22.1"
 
     println("Version of the native sdk used in this build: ${safeExtGet('global_sdk_version', sdk_version)}")
     if (findProject(':scandit-datacapture-frameworks-barcode') != null) {

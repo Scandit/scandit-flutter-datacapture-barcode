@@ -18,4 +18,3 @@ export 'src/spark/spark_scan_view_hand_mode.dart' show SparkScanViewHandMode;
 export 'src/spark/spark_scan_view_feedback.dart'
     show SparkScanViewErrorFeedback, SparkScanViewFeedback, SparkScanViewSuccessFeedback;
 export 'src/spark/spark_scan_toast_settings.dart' show SparkScanToastSettings;
-export 'src/spark/battery_saving_mode.dart' show BatterySavingMode;

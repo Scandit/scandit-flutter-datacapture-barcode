@@ -4,10 +4,14 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import '../capture/barcode_capture_defaults.dart';
 import '../capture/barcode_capture.dart';
+import 'barcode_capture_function_names.dart';
 
 enum BarcodeCaptureOverlayStyle {
   legacy('legacy'),
@@ -30,9 +34,12 @@ extension BarcodeCaptureOverlayStyleSerializer on BarcodeCaptureOverlayStyle {
 class BarcodeCaptureOverlay extends DataCaptureOverlay {
   static final _noViewfinder = {'type': 'none'};
 
+  late _BarcodeCaptureOverlayController _controller;
+
   @override
   DataCaptureView? view;
 
+  // ignore: unused_field
   BarcodeCapture _barcodeCapture;
 
   late Brush _brush;
@@ -41,7 +48,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
 
   set brush(Brush newValue) {
     _brush = newValue;
-    _barcodeCapture.didChange();
+    _controller.update();
   }
 
   bool _shouldShowScanAreaGuides = false;
@@ -50,7 +57,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
 
   set shouldShowScanAreaGuides(bool newValue) {
     _shouldShowScanAreaGuides = newValue;
-    _barcodeCapture.didChange();
+    _controller.update();
   }
 
   Viewfinder? _viewfinder;
@@ -59,7 +66,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
 
   set viewfinder(Viewfinder? newValue) {
     _viewfinder = newValue;
-    _barcodeCapture.didChange();
+    _controller.update();
   }
 
   final BarcodeCaptureOverlayStyle style;
@@ -67,6 +74,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
   BarcodeCaptureOverlay._(this._barcodeCapture, this.view, this.style) : super('barcodeCapture') {
     _brush = BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.brushes[style]!;
     view?.addOverlay(this);
+    _controller = _BarcodeCaptureOverlayController(this);
   }
 
   BarcodeCaptureOverlay.withBarcodeCapture(BarcodeCapture barcodeCapture)
@@ -96,5 +104,22 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
       'style': style.toString()
     });
     return json;
+  }
+}
+
+class _BarcodeCaptureOverlayController {
+  late final MethodChannel _methodChannel = _getChannel();
+
+  BarcodeCaptureOverlay _overlay;
+
+  _BarcodeCaptureOverlayController(this._overlay);
+
+  Future<void> update() {
+    return _methodChannel.invokeMethod(
+        BarcodeCaptureFunctionNames.updateBarcodeCaptureOverlay, jsonEncode(_overlay.toMap()));
+  }
+
+  MethodChannel _getChannel() {
+    return MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
   }
 }

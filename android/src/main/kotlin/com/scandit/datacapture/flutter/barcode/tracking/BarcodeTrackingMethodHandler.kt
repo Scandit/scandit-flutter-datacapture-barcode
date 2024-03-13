@@ -5,6 +5,8 @@
  */
 package com.scandit.datacapture.flutter.barcode.tracking
 
+import com.scandit.datacapture.flutter.barcode.capture.BarcodeCaptureMethodHandler
+import com.scandit.datacapture.flutter.core.utils.FlutterResult
 import com.scandit.datacapture.flutter.core.utils.rejectKotlinError
 import com.scandit.datacapture.frameworks.barcode.tracking.BarcodeTrackingModule
 import com.scandit.datacapture.frameworks.core.errors.FrameDataNullError
@@ -42,10 +44,10 @@ class BarcodeTrackingMethodHandler(
                 barcodeTrackingModule.resetSession(call.arguments as? Long)
                 result.success(null)
             }
-            METHOD_GET_LAST_FRAME_DATA -> lastFrameData.getLastFrameDataJson {
-                if (it.isNullOrBlank()) {
+            METHOD_GET_LAST_FRAME_DATA -> lastFrameData.getLastFrameDataBytes {
+                if (it == null) {
                     result.rejectKotlinError(FrameDataNullError())
-                    return@getLastFrameDataJson
+                    return@getLastFrameDataBytes
                 }
                 result.success(it)
             }
@@ -121,6 +123,22 @@ class BarcodeTrackingMethodHandler(
             METHOD_SET_MODE_ENABLED_STATE -> barcodeTrackingModule.setModeEnabled(
                 call.arguments as Boolean
             )
+            METHOD_UPDATE_MODE_FROM_JSON -> barcodeTrackingModule.updateModeFromJson(
+                call.arguments as String,
+                FlutterResult(result)
+            )
+            METHOD_APPLY_MODE_SETTINGS -> barcodeTrackingModule.applyModeSettings(
+                call.arguments as String,
+                FlutterResult(result)
+            )
+            METHOD_UPDATE_BASIC_OVERLAY -> barcodeTrackingModule.updateBasicOverlay(
+                call.arguments as String,
+                FlutterResult(result)
+            )
+            METHOD_UPDATE_ADVANCED_OVERLAY -> barcodeTrackingModule.updateAdvancedOverlay(
+                call.arguments as String,
+                FlutterResult(result)
+            )
             else -> result.notImplemented()
         }
     }
@@ -149,6 +167,10 @@ class BarcodeTrackingMethodHandler(
         private const val METHOD_UNSUBSCRIBE_BASIC_OVERLAY_LISTENER =
             "unsubscribeBarcodeTrackingBasicOverlayListener"
         private const val METHOD_SET_MODE_ENABLED_STATE = "setModeEnabledState"
+        private const val METHOD_UPDATE_MODE_FROM_JSON = "updateBarcodeTrackingMode"
+        private const val METHOD_APPLY_MODE_SETTINGS = "applyBarcodeTrackingModeSettings"
+        private const val METHOD_UPDATE_BASIC_OVERLAY = "updateBarcodeTrackingBasicOverlay"
+        private const val METHOD_UPDATE_ADVANCED_OVERLAY = "updateBarcodeTrackingAdvancedOverlay"
 
         const val EVENT_CHANNEL_NAME =
             "com.scandit.datacapture.barcode.tracking/event_channel"

@@ -7,6 +7,7 @@
 import Flutter
 import ScanditFrameworksBarcode
 import ScanditFrameworksCore
+import scandit_flutter_datacapture_core
 
 class BarcodeSelectionMethodHandler {
     private enum FunctionNames {
@@ -21,6 +22,9 @@ class BarcodeSelectionMethodHandler {
         static let getLastFrameData = "getLastFrameData"
         static let getDefaults = "getBarcodeSelectionDefaults"
         static let setModeEnabledState = "setModeEnabledState"
+        static let updateBarcodeSelectionMode = "updateBarcodeSelectionMode"
+        static let applyBarcodeSelectionModeSettings = "applyBarcodeSelectionModeSettings"
+        static let updateBarcodeSelectionBasicOverlay = "updateBarcodeSelectionBasicOverlay"
     }
 
     private let barcodeSelectionModule: BarcodeSelectionModule
@@ -60,12 +64,18 @@ class BarcodeSelectionMethodHandler {
             let enabled = methodCall.arguments as? Bool ?? false
             barcodeSelectionModule.finishDidUpdate(enabled: enabled)
         case FunctionNames.getLastFrameData:
-            LastFrameData.shared.getLastFrameDataJSON {
+            LastFrameData.shared.getLastFrameDataBytes {
                 result($0)
             }
         case FunctionNames.setModeEnabledState:
             barcodeSelectionModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
             result(nil)
+        case FunctionNames.updateBarcodeSelectionMode:
+            barcodeSelectionModule.updateModeFromJson(modeJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.applyBarcodeSelectionModeSettings:
+            barcodeSelectionModule.applyModeSettings(modeSettingsJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.updateBarcodeSelectionBasicOverlay:
+            barcodeSelectionModule.updateBasicOverlay(overlayJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
         default:
             result(FlutterMethodNotImplemented)
         }

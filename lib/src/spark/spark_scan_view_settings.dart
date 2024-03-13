@@ -32,7 +32,17 @@ class SparkScanViewSettings extends Serializable {
   int? hardwareTriggerKeyCode = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.hardwareTriggerKeyCode;
   bool visualFeedbackEnabled = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.visualFeedbackEnabled;
 
-  bool ignoreDragLimits = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.ignoreDragLimits;
+  bool _ignoreDragLimits = true;
+
+  @Deprecated('There is no drag limit anymore.')
+  bool get ignoreDragLimits => _ignoreDragLimits;
+
+  @Deprecated('There is no drag limit anymore.')
+  set ignoreDragLimits(bool newValue) {
+    // ignore set
+    _ignoreDragLimits = true;
+  }
+
   double targetZoomFactorOut = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.targetZoomFactorOut;
   double targetZoomFactorIn = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.targetZoomFactorIn;
   SparkScanToastSettings toastSettings = SparkScanToastSettings(); // defaults are loaded automatically
@@ -51,7 +61,6 @@ class SparkScanViewSettings extends Serializable {
       'hardwareTriggerEnabled': hardwareTriggerEnabled,
       'hardwareTriggerKeyCode': hardwareTriggerKeyCode,
       'visualFeedbackEnabled': visualFeedbackEnabled,
-      'ignoreDragLimits': ignoreDragLimits,
       'targetZoomFactorOut': targetZoomFactorOut,
       'targetZoomFactorIn': targetZoomFactorIn
     };
