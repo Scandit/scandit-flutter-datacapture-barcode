@@ -22,6 +22,7 @@ class SparkScan extends DataCaptureMode {
   late _SparkScanController _controller;
   SparkScanSettings _settings;
   final List<SparkScanListener> _listeners = [];
+  // ignore: deprecated_member_use_from_same_package
   SparkScanFeedback _feedback = SparkScanFeedback.defaultFeedback;
 
   SparkScan._(this._settings) {
@@ -65,8 +66,12 @@ class SparkScan extends DataCaptureMode {
     }
   }
 
+  @Deprecated(
+      'The feedback emitted is now specified for each detected barcode. See the feedbackDelegate property of the SparkScanView.')
   SparkScanFeedback get feedback => _feedback;
 
+  @Deprecated(
+      'The feedback emitted is now specified for each detected barcode. See the feedbackDelegate property of the SparkScanView.')
   set feedback(SparkScanFeedback newValue) {
     _feedback = newValue;
     _didChange();
@@ -108,15 +113,17 @@ class _SparkScanController {
       if (_sparkScan._listeners.isEmpty) return;
 
       var eventJSON = jsonDecode(event);
-      var session = SparkScanSession.fromJSON(jsonDecode(eventJSON['session']));
       var eventName = eventJSON['event'] as String;
+
       if (eventName == SparkScanListener._didScanEventName) {
+        var session = SparkScanSession.fromJSON(jsonDecode(eventJSON['session']));
         _notifyListenersOfDidScan(session);
         _methodChannel
             .invokeMethod(SparkScanFunctionNames.sparkScanFinishDidScan, _sparkScan.isEnabled)
             // ignore: unnecessary_lambdas
             .then((value) => null, onError: (error) => print(error));
       } else if (eventName == SparkScanListener._didUpdateSessionEventName) {
+        var session = SparkScanSession.fromJSON(jsonDecode(eventJSON['session']));
         _notifyListenersOfDidUpateSession(session);
         _methodChannel
             .invokeMethod(SparkScanFunctionNames.sparkScanFinishDidUpdateSession, _sparkScan.isEnabled)
