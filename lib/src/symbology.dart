@@ -39,8 +39,7 @@ enum Symbology {
   matrixTwoOfFive('matrix2of5'),
   uspsIntelligentMail('uspsIntelligentMail'),
   arUco('aruco'),
-  upu4State('upu-4state'),
-  australianPost('australian-post-4state');
+  upu4State('upu-4state');
 
   const Symbology(this._name);
 

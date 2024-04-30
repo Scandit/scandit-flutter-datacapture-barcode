@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 /*
  * This file is part of the Scandit Data Capture SDK
  *
@@ -15,35 +13,24 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-
-import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
-
-import '../barcode.dart';
-import '../barcode_plugin_events.dart';
-
-import 'spark_scan.dart';
-import 'spark_scan_barcode_feedback.dart';
-import 'spark_scan_view_feedback.dart';
-import 'spark_scan_view_settings.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'spark_scan_defaults.dart';
 import 'spark_scan_function_names.dart';
+import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+
+import 'spark_scan.dart';
+import 'spark_scan_view_feedback.dart';
+import 'spark_scan_view_settings.dart';
 
 abstract class SparkScanViewUiListener {
-  static const String _didTapFastFindButtonEventName = 'SparkScanViewUiListener.fastFindButtonTapped';
-  static const String _didTapBarcodeCountButtonEventName = 'SparkScanViewUiListener.barcodeCountButtonTapped';
+  static const String _didTapFastFindButtonEventName = 'sparkScanViewUiListener-didTapFastFindButton';
+  static const String _didTapBarcodeCountButtonEventName = 'sparkScanViewUiListener-didTapBarcodeCountButton';
 
   void didTapFastFindButton(SparkScanView view);
 
   void didTapBarcodeCountButton(SparkScanView view);
 }
 
-abstract class SparkScanFeedbackDelegate {
-  static const String _onFeedbackForBarcode = 'SparkScanFeedbackDelegate.feedbackForBarcode';
-
-  SparkScanBarcodeFeedback? feedbackForBarcode(Barcode barcode);
-}
-
-@Deprecated('Replaced by SparkScanPreviewBehavior because accurate workflow have been simplified.')
 enum SparkScanScanningPrecision {
   defaultPrecision('default'),
   accurate('accurate');
@@ -62,24 +49,6 @@ extension SparkScanScanningPrecisionDeserializer on SparkScanScanningPrecision {
   }
 }
 
-enum SparkScanPreviewBehavior {
-  defaultBehaviour('default'),
-  persistent('accurate');
-
-  const SparkScanPreviewBehavior(this._name);
-
-  @override
-  String toString() => _name;
-
-  final String _name;
-}
-
-extension SparkScanPreviewBehaviorDeserializer on SparkScanPreviewBehavior {
-  static SparkScanPreviewBehavior fromJSON(String jsonValue) {
-    return SparkScanPreviewBehavior.values.firstWhere((element) => element.toString() == jsonValue);
-  }
-}
-
 // ignore: must_be_immutable
 class SparkScanView extends StatefulWidget implements Serializable {
   final Widget _child;
@@ -87,9 +56,9 @@ class SparkScanView extends StatefulWidget implements Serializable {
   final SparkScan _sparkScan;
   SparkScanViewSettings _settings;
   SparkScanViewUiListener? _uiListener;
-  SparkScanFeedbackDelegate? _feedbackDelegate;
-
   late _SparkScanViewController _controller;
+  Brush brush = SparkScanDefaults.sparkScanViewDefaults.defaultBrush;
+  bool shouldShowScanAreaGuides = false;
 
   SparkScanView._(this._child, this._dataCaptureContext, this._sparkScan, this._settings) : super() {
     _dataCaptureContext.initialize();
@@ -111,28 +80,6 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   static bool get hardwareTriggerSupported {
     return SparkScanDefaults.sparkScanViewDefaults.hardwareTriggerSupported;
-  }
-
-  Brush _brush = SparkScanDefaults.sparkScanViewDefaults.defaultBrush;
-
-  @Deprecated(
-      'The brush is now specified for each detected barcode. See the type SparkScanBarcodeFeedback and the feedbackDelegate property.')
-  Brush get brush => _brush;
-
-  @Deprecated(
-      'The brush is now specified for each detected barcode. See the type SparkScanBarcodeFeedback and the feedbackDelegate property.')
-  set brush(Brush newValue) {
-    _brush = newValue;
-    _update();
-  }
-
-  bool _shouldShowScanAreaGuides = false;
-
-  bool get shouldShowScanAreaGuides => _shouldShowScanAreaGuides;
-
-  set shouldShowScanAreaGuides(bool newValue) {
-    _shouldShowScanAreaGuides = newValue;
-    _update();
   }
 
   bool _torchButtonVisible = SparkScanDefaults.sparkScanViewDefaults.torchButtonVisible;
@@ -323,16 +270,15 @@ class SparkScanView extends StatefulWidget implements Serializable {
     _update();
   }
 
-  bool _shouldShowTargetModeHint = false;
+  bool _shouldShowTargetModeHint = SparkScanDefaults.sparkScanViewDefaults.shouldShowTargetModeHint;
 
-  @Deprecated('shouldShowTargetModeHint is deprecated. Unused.')
   bool get shouldShowTargetModeHint {
     return _shouldShowTargetModeHint;
   }
 
-  @Deprecated('shouldShowTargetModeHint is deprecated. Unused. Setting this will have no effect.')
   set shouldShowTargetModeHint(bool newValue) {
-    _shouldShowTargetModeHint = false;
+    _shouldShowTargetModeHint = newValue;
+    _update();
   }
 
   bool _soundModeButtonVisible = SparkScanDefaults.sparkScanViewDefaults.soundModeButtonVisible;
@@ -377,26 +323,6 @@ class SparkScanView extends StatefulWidget implements Serializable {
     _uiListener = listener;
   }
 
-  SparkScanFeedbackDelegate? get feedbackDelegate => _feedbackDelegate;
-
-  set feedbackDelegate(SparkScanFeedbackDelegate? newValue) {
-    if (newValue != null) {
-      _controller.addFeedbackDelegate();
-    } else {
-      _controller.removeFeedbackDelegate();
-    }
-    _feedbackDelegate = newValue;
-  }
-
-  bool _previewSizeControlVisible = SparkScanDefaults.sparkScanViewDefaults.previewSizeControlVisible;
-
-  bool get previewSizeControlVisible => _previewSizeControlVisible;
-
-  set previewSizeControlVisible(bool newValue) {
-    _previewSizeControlVisible = newValue;
-    _update();
-  }
-
   void onPause() {
     _controller.onPause();
   }
@@ -409,7 +335,6 @@ class SparkScanView extends StatefulWidget implements Serializable {
     return _controller.pauseScanning();
   }
 
-  @Deprecated('Use property feedbackDelegate instead.')
   Future<void> emitFeedback(SparkScanViewFeedback feedback) {
     return _controller.emitFeedback(feedback);
   }
@@ -420,10 +345,6 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   Future<void> _update() {
     return _controller.updateView();
-  }
-
-  Future<void> _bringViewToFront() {
-    return _controller._bringViewToFront();
   }
 
   @override
@@ -453,8 +374,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
         'captureButtonTintColor': captureButtonTintColor?.jsonValue,
         'zoomSwitchControlVisible': zoomSwitchControlVisible,
         'targetModeHintText': targetModeHintText,
-        'previewSizeControlVisible': previewSizeControlVisible,
-        'hasFeedbackDelegate': _feedbackDelegate != null,
+        'shouldShowTargetModeHint': shouldShowTargetModeHint,
       },
       'SparkScan': _sparkScan.toMap(),
     };
@@ -522,18 +442,11 @@ class _SparkScanViewState extends State<SparkScanView> {
       ],
     );
   }
-
-  @override
-  void didUpdateWidget(SparkScanView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    oldWidget._bringViewToFront();
-  }
 }
 
 class _SparkScanViewController {
   final MethodChannel _methodChannel = MethodChannel(SparkScanFunctionNames.methodsChannelName);
   StreamSubscription<dynamic>? _sparkScanViewSubscription;
-  StreamSubscription<dynamic>? _sparkScanDelegateFeedbackSubscription;
   final SparkScanView _sparkScanView;
 
   _SparkScanViewController._(this._sparkScanView);
@@ -581,8 +494,9 @@ class _SparkScanViewController {
   }
 
   Future<void> emitFeedback(SparkScanViewFeedback feedback) {
-    // NOOP
-    return Future.value(null);
+    return _methodChannel
+        .invokeMethod(SparkScanFunctionNames.sparkScanViewEmitFeedback, jsonEncode(feedback.toMap()))
+        .onError(_onError);
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {
@@ -602,33 +516,5 @@ class _SparkScanViewController {
 
   void onPause() {
     _methodChannel.invokeMethod(SparkScanFunctionNames.onWidgetPaused).onError(_onError);
-  }
-
-  void addFeedbackDelegate() {
-    _methodChannel.invokeMethod(SparkScanFunctionNames.addFeedbackDelegate).onError(_onError);
-    if (_sparkScanDelegateFeedbackSubscription != null) return;
-    _sparkScanDelegateFeedbackSubscription = BarcodePluginEvents.sparkScanEventStream.listen((event) {
-      var json = jsonDecode(event);
-      var eventName = json['event'] as String;
-      if (eventName != SparkScanFeedbackDelegate._onFeedbackForBarcode) return;
-      var barcode = Barcode.fromJSON(jsonDecode(json['barcode']));
-      var feedback = this._sparkScanView._feedbackDelegate?.feedbackForBarcode(barcode);
-      String? feedbackJson = null;
-      if (feedback != null) {
-        feedbackJson = jsonEncode(feedback.toMap());
-      }
-      _methodChannel.invokeMethod(SparkScanFunctionNames.submitFeedbackForBarcode, feedbackJson).onError(_onError);
-    });
-  }
-
-  void removeFeedbackDelegate() {
-    _methodChannel.invokeMethod(SparkScanFunctionNames.removeFeedbackDelegate).onError(_onError);
-  }
-
-  Future<void> _bringViewToFront() {
-    if (Platform.isIOS) {
-      return _methodChannel.invokeMethod(SparkScanFunctionNames.bringViewToFront).onError(_onError);
-    }
-    return Future.value();
   }
 }

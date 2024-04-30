@@ -28,8 +28,6 @@ class BarcodeFindMethodHandler {
         static let barcodeFindModePause = "barcodeFindModePause"
         static let barcodeFindModeStop = "barcodeFindModeStop"
         static let setModeEnabledState = "setModeEnabledState"
-        static let setBarcodeTransformer = "setBarcodeTransformer"
-        static let submitBarcodeTransformerResult = "submitBarcodeTransformerResult"
     }
 
     private let barcodeFindModule: BarcodeFindModule
@@ -80,10 +78,6 @@ class BarcodeFindMethodHandler {
         case FunctionNames.setModeEnabledState:
             barcodeFindModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
             result(nil)
-        case FunctionNames.setBarcodeTransformer:
-            barcodeFindModule.setBarcodeFindTransformer(result: .create(result))
-        case FunctionNames.submitBarcodeTransformerResult:
-            barcodeFindModule.submitBarcodeFindTransformerResult(transformedData: methodCall.arguments as! String?, result: .create(result))
         default:
             result(FlutterMethodNotImplemented)
         }

@@ -30,9 +30,7 @@ class FlutterSparkScanViewFactory: NSObject, FlutterPlatformViewFactory {
             Log.error("Unable to create the SparkScanView without the json.")
             fatalError("Unable to create the SparkScanView without the json.")
         }
-        let view = FlutterSparkScanView(frame: frame, 
-                                        creationJson: creationJson,
-                                        sparkScanModule: sparkScanModule)
+        let view = FlutterSparkScanView(frame: frame, creationJson: creationJson, sparkScanModule: sparkScanModule)
         views.append(view)
         view.factory = self
         return view

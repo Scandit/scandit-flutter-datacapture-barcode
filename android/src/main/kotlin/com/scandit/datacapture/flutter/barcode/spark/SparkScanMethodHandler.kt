@@ -96,19 +96,6 @@ class SparkScanMethodHandler(
             METHOD_SET_MODE_ENABLED_STATE -> sparkScanModule.setModeEnabled(
                 call.arguments as Boolean
             )
-
-            METHOD_ADD_FEEDBACK_DELEGATE -> sparkScanModule.addFeedbackDelegate(
-                FlutterResult(result)
-            )
-
-            METHOD_REMOVE_FEEDBACK_DELEGATE -> sparkScanModule.removeFeedbackDelegate(
-                FlutterResult(result)
-            )
-
-            METHOD_SUBMIT_FEEDBACK_FOR_BARCODE -> sparkScanModule.submitFeedbackForBarcode(
-                call.arguments as String?,
-                FlutterResult(result)
-            )
         }
     }
 
@@ -130,9 +117,6 @@ class SparkScanMethodHandler(
         private const val METHOD_SPARK_SCAN_VIEW_SHOW_TOAST = "showToast"
         private const val METHOD_SPARK_SCAN_VIEW_ON_WIDGET_PAUSED = "onWidgetPaused"
         private const val METHOD_SET_MODE_ENABLED_STATE = "setModeEnabledState"
-        private const val METHOD_ADD_FEEDBACK_DELEGATE = "addFeedbackDelegate"
-        private const val METHOD_REMOVE_FEEDBACK_DELEGATE = "removeFeedbackDelegate"
-        private const val METHOD_SUBMIT_FEEDBACK_FOR_BARCODE = "submitFeedbackForBarcode"
 
         const val EVENT_CHANNEL_NAME =
             "com.scandit.datacapture.barcode.spark/event_channel"
