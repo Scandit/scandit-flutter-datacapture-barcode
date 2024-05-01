@@ -28,43 +28,71 @@ extension SparkScanScanningBehaviorDeserializer on SparkScanScanningBehavior {
 
 abstract class SparkScanScanningMode extends Serializable {
   final SparkScanScanningBehavior _scanningBehavior;
+  // ignore: deprecated_member_use_from_same_package
   final SparkScanScanningPrecision _scanningPrecision;
+  final SparkScanPreviewBehavior _previewBehavior;
   final String _type;
 
-  SparkScanScanningMode._(this._type, this._scanningBehavior, this._scanningPrecision);
+  SparkScanScanningMode._(this._type, this._scanningBehavior, this._scanningPrecision, this._previewBehavior);
 
   @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       "type": _type,
-      "settings": {"scanningBehavior": _scanningBehavior.toString(), "scanningPrecision": _scanningPrecision.toString()}
+      "settings": {
+        "scanningBehavior": _scanningBehavior.toString(),
+        "scanningPrecision": _scanningPrecision.toString(),
+        "previewBehavior": _previewBehavior.toString(),
+      }
     };
   }
 }
 
 class SparkScanScanningModeTarget extends SparkScanScanningMode {
+  @Deprecated('Replaced by the fromPreviewBehavior constructor.')
   SparkScanScanningModeTarget(SparkScanScanningBehavior scanningBehavior, SparkScanScanningPrecision scanningPrecision)
-      : super._('target', scanningBehavior, scanningPrecision);
+      : super._('target', scanningBehavior, scanningPrecision, SparkScanPreviewBehavior.defaultBehaviour);
+
+  SparkScanScanningModeTarget.fromPreviewBehavior(
+      SparkScanScanningBehavior scanningBehavior, SparkScanPreviewBehavior previewBehavior)
+      // ignore: deprecated_member_use_from_same_package
+      : super._('target', scanningBehavior, SparkScanScanningPrecision.defaultPrecision, previewBehavior);
 
   SparkScanScanningBehavior get scanningBehavior {
     return _scanningBehavior;
   }
 
+  @Deprecated('Replaced by previewBehavior.')
   SparkScanScanningPrecision get scanningPrecision {
     return _scanningPrecision;
+  }
+
+  SparkScanPreviewBehavior get previewBehavior {
+    return _previewBehavior;
   }
 }
 
 class SparkScanScanningModeDefault extends SparkScanScanningMode {
+  @Deprecated('Replaced by the fromPreviewBehavior constructor.')
   SparkScanScanningModeDefault(SparkScanScanningBehavior scanningBehavior, SparkScanScanningPrecision scanningPrecision)
-      : super._('default', scanningBehavior, scanningPrecision);
+      : super._('default', scanningBehavior, scanningPrecision, SparkScanPreviewBehavior.defaultBehaviour);
+
+  SparkScanScanningModeDefault.fromPreviewBehavior(
+      SparkScanScanningBehavior scanningBehavior, SparkScanPreviewBehavior previewBehavior)
+      // ignore: deprecated_member_use_from_same_package
+      : super._('default', scanningBehavior, SparkScanScanningPrecision.defaultPrecision, previewBehavior);
 
   SparkScanScanningBehavior get scanningBehavior {
     return _scanningBehavior;
   }
 
+  @Deprecated('Replaced by previewBehavior.')
   SparkScanScanningPrecision get scanningPrecision {
     return _scanningPrecision;
+  }
+
+  SparkScanPreviewBehavior get previewBehavior {
+    return _previewBehavior;
   }
 }
 
@@ -73,13 +101,13 @@ extension SparkScanScanningModeSerializer on SparkScanScanningMode {
     var scanningModeType = json['type'];
     switch (scanningModeType) {
       case 'default':
-        return SparkScanScanningModeDefault(
+        return SparkScanScanningModeDefault.fromPreviewBehavior(
             SparkScanScanningBehaviorDeserializer.fromJSON(json['settings']['scanningBehavior'].toString()),
-            SparkScanScanningPrecisionDeserializer.fromJSON(json['settings']['scanningPrecision'].toString()));
+            SparkScanPreviewBehaviorDeserializer.fromJSON(json['settings']['previewBehavior'].toString()));
       case 'target':
-        return SparkScanScanningModeTarget(
+        return SparkScanScanningModeTarget.fromPreviewBehavior(
             SparkScanScanningBehaviorDeserializer.fromJSON(json['settings']['scanningBehavior'].toString()),
-            SparkScanScanningPrecisionDeserializer.fromJSON(json['settings']['scanningPrecision'].toString()));
+            SparkScanPreviewBehaviorDeserializer.fromJSON(json['settings']['previewBehavior'].toString()));
       default:
         throw Exception("Missing SparkScanScanningMode for type '$scanningModeType'");
     }

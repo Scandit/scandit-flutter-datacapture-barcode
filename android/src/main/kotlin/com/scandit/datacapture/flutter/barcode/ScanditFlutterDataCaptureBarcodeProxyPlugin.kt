@@ -25,12 +25,14 @@ import com.scandit.datacapture.frameworks.barcode.count.listeners.FrameworksBarc
 import com.scandit.datacapture.frameworks.barcode.find.BarcodeFindModule
 import com.scandit.datacapture.frameworks.barcode.find.listeners.FrameworksBarcodeFindListener
 import com.scandit.datacapture.frameworks.barcode.find.listeners.FrameworksBarcodeFindViewUiListener
+import com.scandit.datacapture.frameworks.barcode.find.transformer.FrameworksBarcodeFindTransformer
 import com.scandit.datacapture.frameworks.barcode.pick.BarcodePickModule
 import com.scandit.datacapture.frameworks.barcode.selection.BarcodeSelectionModule
 import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionAimedBrushProvider
 import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionListener
 import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionTrackedBrushProvider
 import com.scandit.datacapture.frameworks.barcode.spark.SparkScanModule
+import com.scandit.datacapture.frameworks.barcode.spark.delegates.FrameworksSparkScanFeedbackDelegate
 import com.scandit.datacapture.frameworks.barcode.spark.listeners.FrameworksSparkScanListener
 import com.scandit.datacapture.frameworks.barcode.spark.listeners.FrameworksSparkScanViewUiListener
 import com.scandit.datacapture.frameworks.barcode.tracking.BarcodeTrackingModule
@@ -235,7 +237,8 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
 
         barcodeFindModule = BarcodeFindModule(
             FrameworksBarcodeFindListener(eventEmitter),
-            FrameworksBarcodeFindViewUiListener(eventEmitter)
+            FrameworksBarcodeFindViewUiListener(eventEmitter),
+            FrameworksBarcodeFindTransformer(eventEmitter)
         ).also { module ->
             module.onCreate(binding.applicationContext)
 
@@ -286,7 +289,8 @@ class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHan
 
         sparkScanModule = SparkScanModule(
             FrameworksSparkScanListener(eventEmitter),
-            FrameworksSparkScanViewUiListener(eventEmitter)
+            FrameworksSparkScanViewUiListener(eventEmitter),
+            FrameworksSparkScanFeedbackDelegate(eventEmitter)
         ).also { module ->
             module.onCreate(binding.applicationContext)
 

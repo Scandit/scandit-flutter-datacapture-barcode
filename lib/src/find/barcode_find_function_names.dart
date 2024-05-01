@@ -22,6 +22,8 @@ abstract class BarcodeFindFunctionNames {
   static const String barcodeFindModePause = 'barcodeFindModePause';
   static const String barcodeFindModeStop = 'barcodeFindModeStop';
   static const String setModeEnabledState = 'setModeEnabledState';
+  static const String setBarcodeTransformer = 'setBarcodeTransformer';
+  static const String submitBarcodeTransformerResult = 'submitBarcodeTransformerResult';
 
   static const String methodsChannelName = 'com.scandit.datacapture.barcode.find/method_channel';
 }

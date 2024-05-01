@@ -72,7 +72,7 @@ class SparkScanViewDefaults {
   final Color? toolbarIconInactiveTintColor;
   final bool zoomSwitchControlVisible;
   final String? targetModeHintText;
-  final bool shouldShowTargetModeHint;
+  final bool previewSizeControlVisible;
 
   final SparkScanViewSettingsDefaults viewSettingsDefaults;
 
@@ -102,8 +102,8 @@ class SparkScanViewDefaults {
       this.viewSettingsDefaults,
       this.zoomSwitchControlVisible,
       this.targetModeHintText,
-      this.shouldShowTargetModeHint,
-      this.hardwareTriggerSupported);
+      this.hardwareTriggerSupported,
+      this.previewSizeControlVisible);
 
   factory SparkScanViewDefaults.fromJSON(Map<String, dynamic> json) {
     final shouldShowScanAreaGuides = json['shouldShowScanAreaGuides'] as bool;
@@ -155,9 +155,10 @@ class SparkScanViewDefaults {
         SparkScanViewSettingsDefaults.fromJSON(jsonDecode(json["SparkScanViewSettings"]));
     final zoomSwitchControlVisible = json['zoomSwitchControlVisible'] as bool;
     final targetModeHintText = json['targetModeHintText'] as String?;
-    final shouldShowTargetModeHint = json['shouldShowTargetModeHint'] as bool;
 
     final hardwareTriggerSupported = json['hardwareTriggerSupported'] as bool;
+
+    final previewSizeControlVisible = json['previewSizeControlVisible'] as bool;
 
     return SparkScanViewDefaults(
         shouldShowScanAreaGuides,
@@ -183,8 +184,8 @@ class SparkScanViewDefaults {
         sparkScanViewSettingsDefaults,
         zoomSwitchControlVisible,
         targetModeHintText,
-        shouldShowTargetModeHint,
-        hardwareTriggerSupported);
+        hardwareTriggerSupported,
+        previewSizeControlVisible);
   }
 }
 
@@ -198,6 +199,11 @@ class SparkScanToastSettingsDefaults {
   final String? continuousModeEnabledMessage;
   final String? continuousModeDisabledMessage;
   final String? cameraTimeoutMessage;
+  final String? scanPausedMessage;
+  final String? zoomedInMessage;
+  final String? zoomedOutMessage;
+  final String? torchEnabledMessage;
+  final String? torchDisabledMessage;
 
   SparkScanToastSettingsDefaults(
       this.toastEnabled,
@@ -207,7 +213,12 @@ class SparkScanToastSettingsDefaults {
       this.targetModeDisabledMessage,
       this.continuousModeEnabledMessage,
       this.continuousModeDisabledMessage,
-      this.cameraTimeoutMessage);
+      this.cameraTimeoutMessage,
+      this.scanPausedMessage,
+      this.zoomedInMessage,
+      this.zoomedOutMessage,
+      this.torchEnabledMessage,
+      this.torchDisabledMessage);
 
   factory SparkScanToastSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     final toastEnabled = json['toastEnabled'] as bool;
@@ -226,9 +237,26 @@ class SparkScanToastSettingsDefaults {
     final continuousModeEnabledMessage = json['continuousModeEnabledMessage'] as String?;
     final continuousModeDisabledMessage = json['continuousModeDisabledMessage'] as String?;
     final cameraTimeoutMessage = json['cameraTimeoutMessage'] as String?;
+    final scanPausedMessage = json['scanPausedMessage'] as String?;
+    final zoomedInMessage = json['zoomedInMessage'] as String?;
+    final zoomedOutMessage = json['zoomedOutMessage'] as String?;
+    final torchEnabledMessage = json['torchEnabledMessage'] as String?;
+    final torchDisabledMessage = json['torchDisabledMessage'] as String?;
 
-    return SparkScanToastSettingsDefaults(toastEnabled, toastBackgroundColor, toastTextColor, targetModeEnabledMessage,
-        targetModeDisabledMessage, continuousModeEnabledMessage, continuousModeDisabledMessage, cameraTimeoutMessage);
+    return SparkScanToastSettingsDefaults(
+        toastEnabled,
+        toastBackgroundColor,
+        toastTextColor,
+        targetModeEnabledMessage,
+        targetModeDisabledMessage,
+        continuousModeEnabledMessage,
+        continuousModeDisabledMessage,
+        cameraTimeoutMessage,
+        scanPausedMessage,
+        zoomedInMessage,
+        zoomedOutMessage,
+        torchEnabledMessage,
+        torchDisabledMessage);
   }
 }
 
@@ -250,15 +278,34 @@ class SparkScanSettingsDefaults {
 
 @immutable
 class SparkScanFeedbackDefaults {
-  final Feedback success;
-  final Feedback error;
+  final SparkScanBarcodeFeedbackDefaults success;
+  final SparkScanBarcodeFeedbackDefaults error;
 
   SparkScanFeedbackDefaults(this.success, this.error);
 
   factory SparkScanFeedbackDefaults.fromJSON(Map<String, dynamic> json) {
-    var success = feedback.FeedbackDeserializer.fromJson(jsonDecode(json['success']) as Map<String, dynamic>);
-    var error = feedback.FeedbackDeserializer.fromJson(jsonDecode(json['error']) as Map<String, dynamic>);
+    var error = SparkScanBarcodeFeedbackDefaults.fromJSON(jsonDecode(json['error'])['barcodeFeedback']);
+    var success = SparkScanBarcodeFeedbackDefaults.fromJSON(jsonDecode(json['success'])['barcodeFeedback']);
     return SparkScanFeedbackDefaults(success, error);
+  }
+}
+
+@immutable
+class SparkScanBarcodeFeedbackDefaults {
+  final Color visualFeedbackColor;
+  final feedback.Feedback? feedbackDefault;
+  final Brush brush;
+
+  SparkScanBarcodeFeedbackDefaults(this.visualFeedbackColor, this.feedbackDefault, this.brush);
+
+  factory SparkScanBarcodeFeedbackDefaults.fromJSON(Map<String, dynamic> json) {
+    var visualFeedbackColor = ColorDeserializer.fromRgbaHex(json['visualFeedbackColor']);
+    feedback.Feedback? feedbackDefault;
+    if (json.containsKey('feedback')) {
+      feedbackDefault = feedback.FeedbackDeserializer.fromJson(json['feedback'] as Map<String, dynamic>);
+    }
+    var brush = NativeBrushDefaults.fromJSON(json['brush'] as Map<String, dynamic>).toBrush();
+    return SparkScanBarcodeFeedbackDefaults(visualFeedbackColor, feedbackDefault, brush);
   }
 }
 
@@ -275,9 +322,10 @@ class SparkScanViewSettingsDefaults {
   final bool hardwareTriggerEnabled;
   final int? hardwareTriggerKeyCode;
   final bool visualFeedbackEnabled;
-  final double targetZoomFactorOut;
-  final double targetZoomFactorIn;
   final SparkScanToastSettingsDefaults toastSettingsDefaults;
+  final double zoomFactorOut;
+  final double zoomFactorIn;
+  final Duration inactiveStateTimeout;
 
   SparkScanViewSettingsDefaults(
       this.triggerButtonCollapseTimeout,
@@ -291,13 +339,15 @@ class SparkScanViewSettingsDefaults {
       this.hardwareTriggerEnabled,
       this.hardwareTriggerKeyCode,
       this.visualFeedbackEnabled,
-      this.targetZoomFactorOut,
-      this.targetZoomFactorIn,
-      this.toastSettingsDefaults);
+      this.toastSettingsDefaults,
+      this.zoomFactorIn,
+      this.zoomFactorOut,
+      this.inactiveStateTimeout);
 
   factory SparkScanViewSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     final triggerButtonCollapseTimeout = Duration(seconds: (json['triggerButtonCollapseTimeout'] as num).toInt());
-    final continuousCaptureTimeout = Duration(seconds: (json['continuousCaptureTimeout'] as num).toInt());
+    // Deprecated field. Is coming null from the native side
+    final continuousCaptureTimeout = Duration(seconds: 0);
     final defaultTorchState = TorchStateDeserializer.fromJSON(json['defaultTorchState'] as String);
     final defaultScanningMode =
         SparkScanScanningModeSerializer.fromJSON(jsonDecode(json['defaultScanningMode']) as Map<String, dynamic>);
@@ -321,10 +371,13 @@ class SparkScanViewSettingsDefaults {
     if (json.containsKey('visualFeedbackEnabled')) {
       visualFeedbackEnabled = json['visualFeedbackEnabled'] as bool;
     }
-    final targetZoomFactorOut = (json['targetZoomFactorOut'] as num).toDouble();
-    final targetZoomFactorIn = (json['targetZoomFactorIn'] as num).toDouble();
 
     final sparkScanToastSettingsDefaults = SparkScanToastSettingsDefaults.fromJSON(jsonDecode(json["toastSettings"]));
+
+    final zoomFactorIn = (json['zoomFactorIn'] as num).toDouble();
+    final zoomFactorOut = (json['zoomFactorOut'] as num).toDouble();
+
+    final Duration inactiveStateTimeout = Duration(seconds: (json['inactiveStateTimeout'] as num).toInt());
 
     return SparkScanViewSettingsDefaults(
         triggerButtonCollapseTimeout,
@@ -338,8 +391,9 @@ class SparkScanViewSettingsDefaults {
         hardwareTriggerEnabled,
         hardwareTriggerKeyCode,
         visualFeedbackEnabled,
-        targetZoomFactorOut,
-        targetZoomFactorIn,
-        sparkScanToastSettingsDefaults);
+        sparkScanToastSettingsDefaults,
+        zoomFactorIn,
+        zoomFactorOut,
+        inactiveStateTimeout);
   }
 }

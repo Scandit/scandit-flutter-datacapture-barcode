@@ -156,7 +156,8 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
         )
         let sparkScanModule = SparkScanModule(
             sparkScanListener: FrameworksSparkScanListener(emitter: sparkScanEmitter),
-            sparkScanViewUIListener: FrameworksSparkScanViewUIListener(emitter: sparkScanEmitter)
+            sparkScanViewUIListener: FrameworksSparkScanViewUIListener(emitter: sparkScanEmitter),
+            feedbackDelegate: FrameworksSparkScanFeedbackDelegate(emitter: sparkScanEmitter)
         )
         sparkScanModule.didStart()
 
@@ -175,7 +176,8 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
         )
         let barcodeFindModule = BarcodeFindModule(
             listener: FrameworksBarcodeFindListener(emitter: barcodeFindEmitter),
-            viewListener: FrameworksBarcodeFindViewUIListener(emitter: barcodeFindEmitter)
+            viewListener: FrameworksBarcodeFindViewUIListener(emitter: barcodeFindEmitter),
+            barcodeTransformer: FrameworksBarcodeFindTransformer(emitter: barcodeFindEmitter)
         )
         barcodeFindModule.didStart()
 
