@@ -53,7 +53,9 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 /** ScanditFlutterDataCaptureBarcodePlugin */
-class ScanditFlutterDataCaptureBarcodeProxyPlugin : FlutterPlugin, MethodCallHandler,
+class ScanditFlutterDataCaptureBarcodeProxyPlugin :
+    FlutterPlugin,
+    MethodCallHandler,
     ActivityAware {
 
     private val barcodeModule: BarcodeModule = BarcodeModule()

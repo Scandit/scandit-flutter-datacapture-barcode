@@ -397,6 +397,17 @@ class SparkScanView extends StatefulWidget implements Serializable {
     _update();
   }
 
+  bool _cameraSwitchButtonVisible = SparkScanDefaults.sparkScanViewDefaults.cameraSwitchButtonVisible;
+
+  bool get cameraSwitchButtonVisible {
+    return _cameraSwitchButtonVisible;
+  }
+
+  set cameraSwitchButtonVisible(bool newValue) {
+    _cameraSwitchButtonVisible = newValue;
+    _update();
+  }
+
   void onPause() {
     _controller.onPause();
   }
@@ -455,6 +466,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
         'targetModeHintText': targetModeHintText,
         'previewSizeControlVisible': previewSizeControlVisible,
         'hasFeedbackDelegate': _feedbackDelegate != null,
+        'cameraSwitchButtonVisible': cameraSwitchButtonVisible,
       },
       'SparkScan': _sparkScan.toMap(),
     };

@@ -4,11 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import com.scandit.datacapture.flutter.core.ui.FlutterBasePlatformView
 import com.scandit.datacapture.frameworks.barcode.count.BarcodeCountModule
-import io.flutter.plugin.platform.PlatformView
-import java.util.UUID
 
 @SuppressLint("ViewConstructor")
 class FlutterBarcodeCountView(

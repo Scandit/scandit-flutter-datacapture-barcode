@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 import 'package:scandit_flutter_datacapture_core/src/battery_saving_mode.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+import 'package:scandit_flutter_datacapture_core/src/camera.dart';
 
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/feedback.dart' as feedback;
@@ -77,6 +78,7 @@ class SparkScanViewDefaults {
   final SparkScanViewSettingsDefaults viewSettingsDefaults;
 
   final bool hardwareTriggerSupported;
+  final bool cameraSwitchButtonVisible;
 
   SparkScanViewDefaults(
       this.shouldShowScanAreaGuides,
@@ -103,7 +105,8 @@ class SparkScanViewDefaults {
       this.zoomSwitchControlVisible,
       this.targetModeHintText,
       this.hardwareTriggerSupported,
-      this.previewSizeControlVisible);
+      this.previewSizeControlVisible,
+      this.cameraSwitchButtonVisible);
 
   factory SparkScanViewDefaults.fromJSON(Map<String, dynamic> json) {
     final shouldShowScanAreaGuides = json['shouldShowScanAreaGuides'] as bool;
@@ -160,6 +163,8 @@ class SparkScanViewDefaults {
 
     final previewSizeControlVisible = json['previewSizeControlVisible'] as bool;
 
+    final cameraSwitchButtonVisible = json['cameraSwitchButtonVisible'] as bool;
+
     return SparkScanViewDefaults(
         shouldShowScanAreaGuides,
         defaultBrush,
@@ -185,7 +190,8 @@ class SparkScanViewDefaults {
         zoomSwitchControlVisible,
         targetModeHintText,
         hardwareTriggerSupported,
-        previewSizeControlVisible);
+        previewSizeControlVisible,
+        cameraSwitchButtonVisible);
   }
 }
 
@@ -204,6 +210,8 @@ class SparkScanToastSettingsDefaults {
   final String? zoomedOutMessage;
   final String? torchEnabledMessage;
   final String? torchDisabledMessage;
+  final String? userFacingCameraEnabledMessage;
+  final String? worldFacingCameraEnabledMessage;
 
   SparkScanToastSettingsDefaults(
       this.toastEnabled,
@@ -218,7 +226,9 @@ class SparkScanToastSettingsDefaults {
       this.zoomedInMessage,
       this.zoomedOutMessage,
       this.torchEnabledMessage,
-      this.torchDisabledMessage);
+      this.torchDisabledMessage,
+      this.userFacingCameraEnabledMessage,
+      this.worldFacingCameraEnabledMessage);
 
   factory SparkScanToastSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     final toastEnabled = json['toastEnabled'] as bool;
@@ -232,6 +242,7 @@ class SparkScanToastSettingsDefaults {
     if (json['toastTextColor'] != null) {
       toastTextColor = ColorDeserializer.fromRgbaHex(json['toastTextColor']);
     }
+
     final targetModeEnabledMessage = json['targetModeEnabledMessage'] as String?;
     final targetModeDisabledMessage = json['targetModeDisabledMessage'] as String?;
     final continuousModeEnabledMessage = json['continuousModeEnabledMessage'] as String?;
@@ -242,6 +253,8 @@ class SparkScanToastSettingsDefaults {
     final zoomedOutMessage = json['zoomedOutMessage'] as String?;
     final torchEnabledMessage = json['torchEnabledMessage'] as String?;
     final torchDisabledMessage = json['torchDisabledMessage'] as String?;
+    final userFacingCameraEnabledMessage = json['userFacingCameraEnabledMessage'] as String?;
+    final worldFacingCameraEnabledMessage = json['worldFacingCameraEnabledMessage'] as String?;
 
     return SparkScanToastSettingsDefaults(
         toastEnabled,
@@ -256,7 +269,9 @@ class SparkScanToastSettingsDefaults {
         zoomedInMessage,
         zoomedOutMessage,
         torchEnabledMessage,
-        torchDisabledMessage);
+        torchDisabledMessage,
+        userFacingCameraEnabledMessage,
+        worldFacingCameraEnabledMessage);
   }
 }
 
@@ -265,14 +280,17 @@ class SparkScanSettingsDefaults {
   final int codeDuplicateFilter;
   final bool singleBarcodeAutoDetection;
   final BatterySavingMode batterySaving;
+  final ScanIntention scanIntention;
 
-  SparkScanSettingsDefaults(this.codeDuplicateFilter, this.singleBarcodeAutoDetection, this.batterySaving);
+  SparkScanSettingsDefaults(
+      this.codeDuplicateFilter, this.singleBarcodeAutoDetection, this.batterySaving, this.scanIntention);
 
   factory SparkScanSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     return SparkScanSettingsDefaults(
         (json['codeDuplicateFilter'] as num).toInt(),
         json['singleBarcodeAutoDetection'] as bool,
-        BatterySavingModeDeserializer.fromJSON(json['batterySaving'] as String));
+        BatterySavingModeDeserializer.fromJSON(json['batterySaving'] as String),
+        ScanIntentionSerializer.fromJSON(json['scanIntention'] as String));
   }
 }
 
@@ -327,6 +345,8 @@ class SparkScanViewSettingsDefaults {
   final double zoomFactorIn;
   final Duration inactiveStateTimeout;
 
+  final CameraPosition defaultCameraPosition;
+
   SparkScanViewSettingsDefaults(
       this.triggerButtonCollapseTimeout,
       this.continuousCaptureTimeout,
@@ -342,7 +362,8 @@ class SparkScanViewSettingsDefaults {
       this.toastSettingsDefaults,
       this.zoomFactorIn,
       this.zoomFactorOut,
-      this.inactiveStateTimeout);
+      this.inactiveStateTimeout,
+      this.defaultCameraPosition);
 
   factory SparkScanViewSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     final triggerButtonCollapseTimeout = Duration(seconds: (json['triggerButtonCollapseTimeout'] as num).toInt());
@@ -379,6 +400,11 @@ class SparkScanViewSettingsDefaults {
 
     final Duration inactiveStateTimeout = Duration(seconds: (json['inactiveStateTimeout'] as num).toInt());
 
+    CameraPosition defaultCameraPosition = CameraPosition.worldFacing;
+    if (json.containsKey('defaultCameraPosition')) {
+      defaultCameraPosition = CameraPositionDeserializer.cameraPositionFromJSON(json['defaultCameraPosition']);
+    }
+
     return SparkScanViewSettingsDefaults(
         triggerButtonCollapseTimeout,
         continuousCaptureTimeout,
@@ -394,6 +420,7 @@ class SparkScanViewSettingsDefaults {
         sparkScanToastSettingsDefaults,
         zoomFactorIn,
         zoomFactorOut,
-        inactiveStateTimeout);
+        inactiveStateTimeout,
+        defaultCameraPosition);
   }
 }

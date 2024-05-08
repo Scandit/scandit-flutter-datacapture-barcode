@@ -30,13 +30,18 @@ public class SparkScanPlatformViewFactory extends PlatformViewFactory {
     @NonNull
     @Override
     public PlatformView create(Context context, int viewId, @Nullable Object args) {
-        HashMap<String, String> creationArgs = (HashMap<String, String>) args;
-        String creationJson = null;
+        HashMap<?, ?>  creationArgs = (HashMap<?, ?>) args;
 
-        if (creationArgs != null) {
-            creationJson = creationArgs.get("SparkScanView");
+        if (creationArgs == null) {
+            throw new IllegalArgumentException("Unable to create the SparkScanView without the json.");
         }
 
-        return new FlutterSparkScanView(context, creationJson, this.sparkScanModule);
+        Object creationJson = creationArgs.get("SparkScanView");
+
+        if (creationJson == null) {
+            throw new IllegalArgumentException("Unable to create the SparkScanView without the json.");
+        }
+
+        return new FlutterSparkScanView(context, creationJson.toString(), this.sparkScanModule);
     }
 }
