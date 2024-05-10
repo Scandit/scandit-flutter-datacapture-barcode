@@ -28,10 +28,6 @@ class BarcodeCaptureSettings implements Serializable {
 
   Set<CompositeType> enabledCompositeTypes = {};
 
-  BatterySavingMode batterySavingMode = BarcodeCaptureDefaults.barcodeCaptureSettingsDefaults.batterySavingMode;
-
-  ScanIntention scanIntention = BarcodeCaptureDefaults.barcodeCaptureSettingsDefaults.scanIntention;
-
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -39,9 +35,7 @@ class BarcodeCaptureSettings implements Serializable {
       'locationSelection': locationSelection == null ? {'type': 'none'} : locationSelection?.toMap(),
       'properties': _properties,
       'symbologies': _symbologies.map<String, Map<String, dynamic>>((key, value) => MapEntry(key, value.toMap())),
-      'enabledCompositeTypes': enabledCompositeTypes.map((e) => e.toString()).toList(),
-      'batterySavingMode': batterySavingMode.toString(),
-      'scanIntention': scanIntention.toString(),
+      'enabledCompositeTypes': enabledCompositeTypes.map((e) => e.toString()).toList()
     };
   }
 

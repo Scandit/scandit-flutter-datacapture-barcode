@@ -40,8 +40,7 @@ enum Symbology {
   uspsIntelligentMail('uspsIntelligentMail'),
   arUco('aruco'),
   upu4State('upu-4state'),
-  australianPost('australian-post-4state'),
-  frenchPost('french-post');
+  australianPost('australian-post-4state');
 
   const Symbology(this._name);
 

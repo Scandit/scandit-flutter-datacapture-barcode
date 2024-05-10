@@ -190,7 +190,7 @@ class BarcodeCountViewDefaults {
 
     var exitButtonContentDescription = '';
     if (json.containsKey('exitButtonContentDescription')) {
-      exitButtonContentDescription = json['exitButtonContentDescription'];
+      exitButtonAccessibilityLabel = json['exitButtonContentDescription'];
     }
 
     var shutterButtonAccessibilityHint = '';

@@ -8,15 +8,10 @@ abstract class BarcodePickFunctionNames {
   static const String getDefaults = 'getDefaults';
   static const String removeScanningListener = 'removeScanningListener';
   static const String addScanningListener = 'addScanningListener';
-  // view actions
   static const String startPickView = 'startPickView';
-  static const String stopPickView = 'stopPickView';
-  static const String freezePickView = 'freezePickView';
   static const String releasePickView = 'releasePickView';
-  // Lifecycle functions (Android Only)
-  static const String pickViewOnPause = 'pickViewOnPause';
-  static const String pickViewOnResume = 'pickViewOnResume';
-
+  static const String freezePickView = 'freezePickView';
+  static const String pausePickView = 'pausePickView';
   static const String addViewUiListener = 'addViewUiListener';
   static const String removeViewUiListener = 'removeViewUiListener';
   static const String addViewListener = 'addViewListener';
