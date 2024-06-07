@@ -29,19 +29,18 @@ public class BarcodeFindPlatformViewFactory extends PlatformViewFactory {
     @NonNull
     @Override
     public PlatformView create(Context context, int viewId, @Nullable Object args) {
-        //noinspection unchecked
-        HashMap<String, String> creationArgs = (HashMap<String, String>) args;
+        HashMap<?, ?>  creationArgs = (HashMap<?, ?>) args;
 
         if (creationArgs == null) {
             throw new IllegalArgumentException("Unable to create the BarcodeFindView without the json.");
         }
 
-        String creationJson = creationArgs.get("BarcodeFindView");
+        Object creationJson = creationArgs.get("BarcodeFindView");
 
         if (creationJson == null) {
             throw new IllegalArgumentException("Unable to create the BarcodeFindView without the json.");
         }
 
-        return new FlutterBarcodeFindView(context, creationJson, barcodeFindModule);
+        return new FlutterBarcodeFindView(context, creationJson.toString(), barcodeFindModule);
     }
 }

@@ -32,19 +32,18 @@ public class BarcodeCountPlatformViewFactory extends PlatformViewFactory {
     @NonNull
     @Override
     public PlatformView create(Context context, int viewId, @Nullable Object args) {
-        //noinspection unchecked
-        HashMap<String, String> creationArgs = (HashMap<String, String>) args;
+        HashMap<?, ?>  creationArgs = (HashMap<?, ?>) args;
 
         if (creationArgs == null) {
             throw new IllegalArgumentException("Unable to create the BarcodeCountView without the json.");
         }
 
-        String creationJson = creationArgs.get("BarcodeCountView");
+        Object creationJson = creationArgs.get("BarcodeCountView");
 
         if (creationJson == null) {
             throw new IllegalArgumentException("Unable to create the BarcodeCountView without the json.");
         }
 
-        return new FlutterBarcodeCountView(context, creationJson, barcodeCountModule);
+        return new FlutterBarcodeCountView(context, creationJson.toString(), barcodeCountModule);
     }
 }

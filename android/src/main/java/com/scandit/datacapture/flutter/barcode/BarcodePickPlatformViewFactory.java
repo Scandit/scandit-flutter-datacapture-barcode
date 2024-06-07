@@ -31,19 +31,18 @@ public class BarcodePickPlatformViewFactory extends PlatformViewFactory {
     @NonNull
     @Override
     public PlatformView create(Context context, int viewId, @Nullable Object args) {
-        //noinspection unchecked
-        HashMap<String, String> creationArgs = (HashMap<String, String>) args;
+        HashMap<?, ?>  creationArgs = (HashMap<?, ?>) args;
 
         if (creationArgs == null) {
             throw new IllegalArgumentException("Unable to create the BarcodePickView without the json.");
         }
 
-        String creationJson = creationArgs.get("BarcodePickView");
+        Object creationJson = creationArgs.get("BarcodePickView");
 
         if (creationJson == null) {
             throw new IllegalArgumentException("Unable to create the BarcodePickView without the json.");
         }
 
-        return new FlutterBarcodePickView(context, creationJson, barcodePickModule);
+        return new FlutterBarcodePickView(context, creationJson.toString(), barcodePickModule);
     }
 }

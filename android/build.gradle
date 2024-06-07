@@ -5,7 +5,6 @@ def safeExtGet(prop, fallback) {
 buildscript {
     ext {
         kotlin_version = "1.7.21"
-        agp_version = "7.2.1"
     }
 
     repositories {
@@ -14,7 +13,6 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:$agp_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -28,7 +26,16 @@ if (file(test_gradle).exists()) {
 }
 
 android {
-    compileSdkVersion safeExtGet("compileSdkVersion", 32)
+    if (project.android.hasProperty("namespace")) {
+        sourceSets {
+            main {
+                manifest.srcFile "src/main/AndroidManifestNew.xml" // no package on it
+            }
+        }
+        namespace "com.scandit.datacapture.flutter.barcode"
+    }
+    compileSdkVersion safeExtGet("compileSdkVersion", 33)
+
 
     defaultConfig {
         minSdkVersion safeExtGet("minSdkVersion", 23)
@@ -43,7 +50,7 @@ android {
 }
 
 dependencies {
-    def sdk_version = "6.23.3"
+    def sdk_version = "6.24.1"
 
     println("Version of the native sdk used in this build: ${safeExtGet('global_sdk_version', sdk_version)}")
     if (findProject(':scandit-datacapture-frameworks-barcode') != null) {
