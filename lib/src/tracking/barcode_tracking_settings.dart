@@ -81,7 +81,7 @@ class BarcodeTrackingSettings implements Serializable {
       'symbologies': _symbologies.map((key, value) => MapEntry(key, value.toMap()))
     };
     if (_scenario != null) {
-      json['scenario'] = _scenario?.toString();
+      json['scenario'] = _scenario.toString();
     }
     return json;
   }

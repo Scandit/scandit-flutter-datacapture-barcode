@@ -35,7 +35,7 @@ abstract class BarcodeFilterHighlightSettings implements Serializable {
 
   @override
   Map<String, dynamic> toMap() {
-    return {'highlightType': _highlightType, 'brush': _brush != null ? _brush?.toMap() : null};
+    return {'highlightType': _highlightType, 'brush': _brush != null ? _brush.toMap() : null};
   }
 }
 

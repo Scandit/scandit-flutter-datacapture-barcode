@@ -44,7 +44,7 @@ class SparkScanViewErrorFeedback implements SparkScanViewFeedback {
       'resumeCapturingDelay': _resumeCapturingDelay.inMilliseconds
     };
     if (_visualFeedbackColor != null) {
-      json['visualFeedbackColor'] = _visualFeedbackColor?.jsonValue;
+      json['visualFeedbackColor'] = _visualFeedbackColor.jsonValue;
     }
     return json;
   }
@@ -69,7 +69,7 @@ class SparkScanViewSuccessFeedback extends SparkScanViewFeedback {
       'type': 'success',
     };
     if (_visualFeedbackColor != null) {
-      json['visualFeedbackColor'] = _visualFeedbackColor?.jsonValue;
+      json['visualFeedbackColor'] = _visualFeedbackColor.jsonValue;
     }
     return json;
   }

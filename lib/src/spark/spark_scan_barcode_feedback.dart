@@ -60,7 +60,7 @@ class SparkScanBarcodeErrorFeedback implements SparkScanBarcodeFeedback {
       }
     };
     if (_feedback != null) {
-      json['barcodeFeedback']['feedback'] = _feedback?.toMap();
+      json['barcodeFeedback']['feedback'] = _feedback.toMap();
     }
     return json;
   }
@@ -98,7 +98,7 @@ class SparkScanBarcodeSuccessFeedback implements SparkScanBarcodeFeedback {
       },
     };
     if (_feedback != null) {
-      json['barcodeFeedback']['feedback'] = _feedback?.toMap();
+      json['barcodeFeedback']['feedback'] = _feedback.toMap();
     }
     return json;
   }

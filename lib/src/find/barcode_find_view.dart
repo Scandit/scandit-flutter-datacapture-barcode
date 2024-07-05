@@ -281,11 +281,11 @@ class BarcodeFindView extends StatefulWidget implements Serializable {
     };
 
     if (_barcodeFindViewSettings != null) {
-      json['View']['viewSettings'] = _barcodeFindViewSettings?.toMap();
+      json['View']['viewSettings'] = _barcodeFindViewSettings.toMap();
     }
 
     if (_cameraSettings != null) {
-      json['View']['cameraSettings'] = _cameraSettings?.toMap();
+      json['View']['cameraSettings'] = _cameraSettings.toMap();
     }
 
     return json;
