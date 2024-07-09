@@ -7,10 +7,9 @@
 import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:flutter/services.dart';
-import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
-import 'package:scandit_flutter_datacapture_core/src/battery_saving_mode.dart';
-
 import 'barcode_capture_overlay.dart';
+import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+
 import 'barcode_capture_function_names.dart';
 
 // ignore: avoid_classes_with_only_static_members
@@ -36,7 +35,8 @@ class BarcodeCaptureDefaults {
     var result = await channel.invokeMethod(BarcodeCaptureFunctionNames.getBarcodeCaptureDefaults);
     var json = jsonDecode(result as String);
     _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(json['RecommendedCameraSettings']);
-    _barcodeCaptureSettingsDefaults = BarcodeCaptureSettingsDefaults.fromJSON(json['BarcodeCaptureSettings']);
+    _barcodeCaptureSettingsDefaults =
+        BarcodeCaptureSettingsDefaults((json['BarcodeCaptureSettings']['codeDuplicateFilter'] as num).toInt());
     _barcodeCaptureOverlayDefaults =
         BarcodeCaptureOverlayDefaults.fromJSON(json['BarcodeCaptureOverlay'] as Map<String, dynamic>);
 
@@ -47,18 +47,8 @@ class BarcodeCaptureDefaults {
 @immutable
 class BarcodeCaptureSettingsDefaults {
   final int codeDuplicateFilter;
-  final BatterySavingMode batterySavingMode;
-  final ScanIntention scanIntention;
 
-  BarcodeCaptureSettingsDefaults(this.codeDuplicateFilter, this.batterySavingMode, this.scanIntention);
-
-  factory BarcodeCaptureSettingsDefaults.fromJSON(Map<String, dynamic> json) {
-    return BarcodeCaptureSettingsDefaults(
-      (json['codeDuplicateFilter'] as num).toInt(),
-      BatterySavingModeDeserializer.fromJSON(json['batterySavingMode'] as String),
-      ScanIntentionSerializer.fromJSON(json['scanIntention'] as String),
-    );
-  }
+  BarcodeCaptureSettingsDefaults(this.codeDuplicateFilter);
 }
 
 @immutable

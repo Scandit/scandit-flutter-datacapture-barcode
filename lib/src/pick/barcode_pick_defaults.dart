@@ -223,21 +223,6 @@ class BrushForState extends Serializable {
   }
 }
 
-class IconForState extends Serializable {
-  final BarcodePickState pickState;
-  final String base64EncodedIcon;
-
-  IconForState(this.pickState, this.base64EncodedIcon);
-
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      'barcodePickState': pickState.toString(),
-      'icon': base64EncodedIcon,
-    };
-  }
-}
-
 class ViewHighlightStyleDefaultsHelper {
   static List<BrushForState> getBrushesForState(Map<String, dynamic> json) {
     return (json['brushesForState'] as List<dynamic>).map((e) => BrushForState.fromJSON(e)).toList();

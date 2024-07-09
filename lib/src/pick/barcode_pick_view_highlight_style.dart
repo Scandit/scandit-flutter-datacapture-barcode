@@ -4,10 +4,6 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-import 'dart:async';
-import 'dart:convert';
-
-import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/pick/barcode_pick_icon_style.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
@@ -47,7 +43,6 @@ class BarcodePickViewHighlightStyleDot implements BarcodePickViewHighlightStyle 
 
 class BarcodePickViewHighlightStyleDotWithIcons implements BarcodePickViewHighlightStyle {
   final List<BrushForState> _brushesForState;
-  final List<IconForState> _iconsForState = [];
 
   BarcodePickIconStyle iconStyle;
 
@@ -65,27 +60,13 @@ class BarcodePickViewHighlightStyleDotWithIcons implements BarcodePickViewHighli
     _brushesForState.firstWhere((element) => element.pickState == state).brush = brush;
   }
 
-  // Need to be async in order to load the asset
-  Future<void> setIconForState(String assetKey, BarcodePickState state) {
-    return rootBundle.load(assetKey).then((value) {
-      var base64EncodedImage = base64Encode(value.buffer.asUint8List());
-      // Remove existing item first
-      _iconsForState.removeWhere((element) => element.pickState == state);
-      _iconsForState.add(new IconForState(state, base64EncodedImage));
-    });
-  }
-
   @override
   Map<String, dynamic> toMap() {
-    var json = {
+    return {
       'type': 'dotWithIcons',
       'brushesForState': _brushesForState.map((e) => e.toMap()).toList(),
       'iconStyle': iconStyle.toString(),
     };
-    if (_iconsForState.isNotEmpty) {
-      json['iconsForState'] = _iconsForState.map((e) => e.toMap()).toList();
-    }
-    return json;
   }
 
   factory BarcodePickViewHighlightStyleDotWithIcons.fromJSON(Map<String, dynamic> json) {
@@ -128,7 +109,6 @@ class BarcodePickViewHighlightStyleRectangular extends BarcodePickViewHighlightS
 class BarcodePickViewHighlightStyleRectangularWithIcons implements BarcodePickViewHighlightStyle {
   final List<BrushForState> _brushesForState;
   BarcodePickIconStyle iconStyle;
-  final List<IconForState> _iconsForState = [];
 
   BarcodePickViewHighlightStyleRectangularWithIcons._(this._brushesForState, this.iconStyle);
 
@@ -144,27 +124,13 @@ class BarcodePickViewHighlightStyleRectangularWithIcons implements BarcodePickVi
     _brushesForState.firstWhere((element) => element.pickState == state).brush = brush;
   }
 
-  // Need to be async in order to load the asset
-  Future<void> setIconForState(String assetKey, BarcodePickState state) {
-    return rootBundle.load(assetKey).then((value) {
-      var base64EncodedImage = base64Encode(value.buffer.asUint8List());
-      // Remove existing item first
-      _iconsForState.removeWhere((element) => element.pickState == state);
-      _iconsForState.add(new IconForState(state, base64EncodedImage));
-    });
-  }
-
   @override
   Map<String, dynamic> toMap() {
-    var json = {
+    return {
       'type': 'rectangularWithIcons',
       'brushesForState': _brushesForState.map((e) => e.toMap()).toList(),
       'iconStyle': iconStyle.toString(),
     };
-    if (_iconsForState.isNotEmpty) {
-      json['iconsForState'] = _iconsForState.map((e) => e.toMap()).toList();
-    }
-    return json;
   }
 
   factory BarcodePickViewHighlightStyleRectangularWithIcons.fromJSON(Map<String, dynamic> json) {

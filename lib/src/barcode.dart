@@ -4,7 +4,6 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
-import 'package:scandit_flutter_datacapture_barcode/src/structured_append.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'symbology.dart';
@@ -49,11 +48,6 @@ class Barcode implements Serializable {
   String? _compositeRawData;
   String? get compositeRawData => _compositeRawData;
 
-  StructuredAppendData? _structuredAppendData;
-  StructuredAppendData? get structuredAppendData => _structuredAppendData;
-
-  bool get isStructuredAppend => _structuredAppendData != null;
-
   Barcode._(
       {required Symbology symbology,
       String? data,
@@ -67,8 +61,7 @@ class Barcode implements Serializable {
       required int symbolCount,
       required int frameID,
       String? compositeData,
-      String? compositeRawData,
-      StructuredAppendData? structuredAppendData}) {
+      String? compositeRawData}) {
     _symbology = symbology;
     _data = data;
     _rawData = rawData;
@@ -82,7 +75,6 @@ class Barcode implements Serializable {
     _frameID = frameID;
     _compositeData = compositeData;
     _compositeRawData = compositeRawData;
-    _structuredAppendData = structuredAppendData;
   }
 
   factory Barcode.fromJSON(Map<String, dynamic> json) {
@@ -100,11 +92,6 @@ class Barcode implements Serializable {
     var frameID = (json['frameId'] as num).toInt();
     var compositeData = json['compositeData'] as String?;
     var compositeRawData = json['compositeRawData'] as String?;
-    StructuredAppendData? structuredAppendData = null;
-    if (json.containsKey('structuredAppendData') && json['structuredAppendData'] != null) {
-      final jsonStructuredAppendData = json['structuredAppendData'] as Map<String, dynamic>;
-      structuredAppendData = StructuredAppendData.fromJSON(jsonStructuredAppendData);
-    }
     return Barcode._(
         symbology: symbology,
         data: data,
@@ -118,8 +105,7 @@ class Barcode implements Serializable {
         symbolCount: symbolCount,
         frameID: frameID,
         compositeData: compositeData,
-        compositeRawData: compositeRawData,
-        structuredAppendData: structuredAppendData);
+        compositeRawData: compositeRawData);
   }
 
   @override
@@ -137,8 +123,7 @@ class Barcode implements Serializable {
       'symbolCount': symbolCount,
       'frameId': frameID,
       'compositeData': compositeData,
-      'compositeRawData': compositeRawData,
-      'structuredAppendData': structuredAppendData?.toMap()
+      'compositeRawData': compositeRawData
     };
   }
 }

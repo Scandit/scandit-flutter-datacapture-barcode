@@ -33,7 +33,7 @@ class ArucoDictionary implements Serializable {
 
     if (_markerSize != null && _markers != null) {
       json['markerSize'] = _markerSize;
-      json['markers'] = _markers.map((e) => e.toMap()).toList();
+      json['markers'] = _markers?.map((e) => e.toMap()).toList();
     }
 
     return json;

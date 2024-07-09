@@ -9,11 +9,8 @@ import 'dart:ui';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 import 'package:scandit_flutter_datacapture_core/src/common.dart';
 
-@Deprecated('This class is not used anymore. Use type SparkScanBarcodeFeedback and property feedbackDelegate instead.')
 abstract class SparkScanViewFeedback extends Serializable {}
 
-@Deprecated(
-    'This class is not used anymore. Use type SparkScanBarcodeErrorFeedback and property feedbackDelegate instead.')
 class SparkScanViewErrorFeedback implements SparkScanViewFeedback {
   final Color? _visualFeedbackColor;
   final String _message;
@@ -44,14 +41,12 @@ class SparkScanViewErrorFeedback implements SparkScanViewFeedback {
       'resumeCapturingDelay': _resumeCapturingDelay.inMilliseconds
     };
     if (_visualFeedbackColor != null) {
-      json['visualFeedbackColor'] = _visualFeedbackColor.jsonValue;
+      json['visualFeedbackColor'] = _visualFeedbackColor?.jsonValue;
     }
     return json;
   }
 }
 
-@Deprecated(
-    'This class is not used anymore. Use type SparkScanBarcodeSuccessFeedback and property feedbackDelegate instead.')
 class SparkScanViewSuccessFeedback extends SparkScanViewFeedback {
   final Color? _visualFeedbackColor;
 
@@ -69,7 +64,7 @@ class SparkScanViewSuccessFeedback extends SparkScanViewFeedback {
       'type': 'success',
     };
     if (_visualFeedbackColor != null) {
-      json['visualFeedbackColor'] = _visualFeedbackColor.jsonValue;
+      json['visualFeedbackColor'] = _visualFeedbackColor?.jsonValue;
     }
     return json;
   }

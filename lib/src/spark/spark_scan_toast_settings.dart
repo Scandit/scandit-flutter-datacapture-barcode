@@ -28,20 +28,6 @@ class SparkScanToastSettings extends Serializable {
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.continuousModeDisabledMessage;
   String? cameraTimeoutMessage =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.cameraTimeoutMessage;
-  String? scanPausedMessage =
-      SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.scanPausedMessage;
-  String? zoomedInMessage =
-      SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.zoomedInMessage;
-  String? zoomedOutMessage =
-      SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.zoomedOutMessage;
-  String? torchEnabledMessage =
-      SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.torchEnabledMessage;
-  String? torchDisabledMessage =
-      SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.torchDisabledMessage;
-  String? userFacingCameraEnabledMessage =
-      SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.userFacingCameraEnabledMessage;
-  String? worldFacingCameraEnabledMessage = SparkScanDefaults
-      .sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.worldFacingCameraEnabledMessage;
 
   @override
   Map<String, dynamic> toMap() {
@@ -54,13 +40,6 @@ class SparkScanToastSettings extends Serializable {
       'continuousModeEnabledMessage': continuousModeEnabledMessage,
       'continuousModeDisabledMessage': continuousModeDisabledMessage,
       'cameraTimeoutMessage': cameraTimeoutMessage,
-      'scanPausedMessage': scanPausedMessage,
-      'zoomedInMessage': zoomedInMessage,
-      'zoomedOutMessage': zoomedOutMessage,
-      'torchEnabledMessage': torchEnabledMessage,
-      'torchDisabledMessage': torchDisabledMessage,
-      'userFacingCameraEnabledMessage': userFacingCameraEnabledMessage,
-      'worldFacingCameraEnabledMessage': worldFacingCameraEnabledMessage,
     };
   }
 }

@@ -27,19 +27,11 @@ abstract class BarcodeFindListener {
   void didStopSearch(Set<BarcodeFindItem> foundItems);
 }
 
-abstract class BarcodeFindTransformer {
-  static const String _onTransformBarcodeData = 'BarcodeFindTransformer.transformBarcodeData';
-
-  String? transformBarcodeData(String? data);
-}
-
 class BarcodeFind extends DataCaptureMode with PrivateBarcodeFind {
   BarcodeFindFeedback _feedback = BarcodeFindFeedback.defaultFeedback;
   bool _enabled = true;
   BarcodeFindSettings _settings;
   final List<BarcodeFindListener> _listeners = [];
-
-  BarcodeFindTransformer? _barcodeTransformer;
 
   late _BarcodeFindController _controller;
 
@@ -117,11 +109,6 @@ class BarcodeFind extends DataCaptureMode with PrivateBarcodeFind {
     return _controller.updateMode();
   }
 
-  void setBarcodeTransformer(BarcodeFindTransformer barcodeTransformer) {
-    _barcodeTransformer = barcodeTransformer;
-    _controller.setBarcodeTransformer();
-  }
-
   @override
   Map<String, dynamic> toMap() {
     var json = <String, dynamic>{
@@ -129,7 +116,6 @@ class BarcodeFind extends DataCaptureMode with PrivateBarcodeFind {
       'feedback': _feedback.toMap(),
       'settings': _settings.toMap(),
       'itemsToFind': jsonEncode(itemsToFind.map((e) => e.toMap()).toList()),
-      'hasBarcodeTransformer': _barcodeTransformer != null
     };
 
     return json;
@@ -153,8 +139,6 @@ class _BarcodeFindController {
   final BarcodeFind _barcodeFind;
   final MethodChannel _methodChannel = MethodChannel(BarcodeFindFunctionNames.methodsChannelName);
   StreamSubscription<dynamic>? _streamSubscription;
-  // ignore: unused_field
-  StreamSubscription<dynamic>? _barcodeTransformerSubscription;
 
   _BarcodeFindController.forBarcodeFind(this._barcodeFind);
 
@@ -185,19 +169,14 @@ class _BarcodeFindController {
   void subscribeListeners() {
     _methodChannel
         .invokeMethod(BarcodeFindFunctionNames.registerBarcodeFindListener)
-        .then((value) => _setupBarcodeFindSubscription())
+        .then((value) => _setupBarcodeCountSubscription())
         .onError(_onError);
   }
 
-  void _setupBarcodeFindSubscription() {
+  void _setupBarcodeCountSubscription() {
     _streamSubscription = BarcodePluginEvents.barcodeFindEventStream.listen((event) {
       var eventJSON = jsonDecode(event) as Map<String, dynamic>;
       var eventName = eventJSON['event'] as String;
-      if (eventName == BarcodeFindTransformer._onTransformBarcodeData) {
-        // handled separately
-        return;
-      }
-
       if (eventName == BarcodeFindListener._onSearchStartedEvent) {
         for (var listener in _barcodeFind._listeners) {
           listener.didStartSearch();
@@ -235,24 +214,6 @@ class _BarcodeFindController {
     _methodChannel
         .invokeMethod(BarcodeFindFunctionNames.unregisterBarcodeFindListener)
         .then((value) => null, onError: _onError);
-  }
-
-  void setBarcodeTransformer() {
-    _methodChannel
-        .invokeMethod(BarcodeFindFunctionNames.setBarcodeTransformer)
-        .then((value) => _setupBarcodeTransformerSubscription(), onError: _onError);
-  }
-
-  void _setupBarcodeTransformerSubscription() {
-    _barcodeTransformerSubscription = BarcodePluginEvents.barcodeFindEventStream.listen((event) {
-      var eventJSON = jsonDecode(event) as Map<String, dynamic>;
-      var eventName = eventJSON['event'] as String;
-      if (eventName == BarcodeFindTransformer._onTransformBarcodeData) {
-        var data = eventJSON['data'] as String?;
-        var result = _barcodeFind._barcodeTransformer?.transformBarcodeData(data);
-        _methodChannel.invokeMethod(BarcodeFindFunctionNames.submitBarcodeTransformerResult, result).onError(_onError);
-      }
-    });
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {

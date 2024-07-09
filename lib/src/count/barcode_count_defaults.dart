@@ -92,7 +92,6 @@ class BarcodeCountViewDefaults {
   final String singleScanButtonAccessibilityHint;
   final String singleScanButtonAccessibilityLabel;
   final String singleScanButtonContentDescription;
-  final bool shouldShowListProgressBar;
 
   BarcodeCountViewDefaults(
       this.style,
@@ -134,8 +133,7 @@ class BarcodeCountViewDefaults {
       this.clearHighlightsButtonContentDescription,
       this.singleScanButtonAccessibilityHint,
       this.singleScanButtonAccessibilityLabel,
-      this.singleScanButtonContentDescription,
-      this.shouldShowListProgressBar);
+      this.singleScanButtonContentDescription);
 
   factory BarcodeCountViewDefaults.fromJSON(Map<String, dynamic> json) {
     final style = BarcodeCountViewStyleSerializer.fromJSON(json['style'] as String);
@@ -192,7 +190,7 @@ class BarcodeCountViewDefaults {
 
     var exitButtonContentDescription = '';
     if (json.containsKey('exitButtonContentDescription')) {
-      exitButtonContentDescription = json['exitButtonContentDescription'];
+      exitButtonAccessibilityLabel = json['exitButtonContentDescription'];
     }
 
     var shutterButtonAccessibilityHint = '';
@@ -255,8 +253,6 @@ class BarcodeCountViewDefaults {
       singleScanButtonContentDescription = json['singleScanButtonContentDescription'];
     }
 
-    final shouldShowListProgressBar = json['shouldShowListProgressBar'] as bool;
-
     return BarcodeCountViewDefaults(
         style,
         shouldShowUserGuidanceView,
@@ -297,8 +293,7 @@ class BarcodeCountViewDefaults {
         clearHighlightsButtonContentDescription,
         singleScanButtonAccessibilityHint,
         singleScanButtonAccessibilityLabel,
-        singleScanButtonContentDescription,
-        shouldShowListProgressBar);
+        singleScanButtonContentDescription);
   }
 }
 

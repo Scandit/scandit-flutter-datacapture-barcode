@@ -68,16 +68,6 @@ class BarcodeFindMethodHandler(
                 call.arguments as Boolean
             )
 
-            METHOD_SET_BF_TRANSFORMER -> barcodeFindModule.setBarcodeFindTransformer(
-                FlutterResult(result)
-            )
-
-            METHOD_SUBMIT_BF_TRANSFORMER_RESULT ->
-                barcodeFindModule.submitBarcodeFindTransformerResult(
-                    call.arguments as String?,
-                    FlutterResult(result)
-                )
-
             else -> throw IllegalArgumentException("Nothing implemented for ${call.method}")
         }
 
@@ -99,9 +89,6 @@ class BarcodeFindMethodHandler(
         private const val METHOD_BF_PAUSE = "barcodeFindModePause"
         private const val METHOD_BF_STOP = "barcodeFindModeStop"
         private const val METHOD_SET_MODE_ENABLED_STATE = "setModeEnabledState"
-        private const val METHOD_SET_BF_TRANSFORMER = "setBarcodeTransformer"
-        private const val METHOD_SUBMIT_BF_TRANSFORMER_RESULT =
-            "submitBarcodeTransformerResult"
 
         const val EVENT_CHANNEL_NAME =
             "com.scandit.datacapture.barcode.find/event_channel"

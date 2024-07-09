@@ -503,15 +503,6 @@ class BarcodeCountView extends StatefulWidget implements Serializable {
     _updateNative();
   }
 
-  bool _shouldShowListProgressBar = BarcodeCountDefaults.viewDefaults.shouldShowListProgressBar;
-
-  bool get shouldShowListProgressBar => _shouldShowListProgressBar;
-
-  set shouldShowListProgressBar(bool newValue) {
-    _shouldShowListProgressBar = newValue;
-    _updateNative();
-  }
-
   Future<void> _updateNative() {
     if (!_isInitialized) {
       return Future.value();
@@ -535,7 +526,6 @@ class BarcodeCountView extends StatefulWidget implements Serializable {
         'shouldShowToolbar': shouldShowToolbar,
         'shouldShowScanAreaGuides': shouldShowScanAreaGuides,
         'toolbarSettings': _toolbarSettings?.toMap(),
-        'shouldShowListProgressBar': _shouldShowListProgressBar,
       },
       'BarcodeCount': _barcodeCount.toMap()
     };
