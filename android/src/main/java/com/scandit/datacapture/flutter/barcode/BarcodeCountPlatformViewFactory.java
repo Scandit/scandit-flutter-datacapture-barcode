@@ -13,6 +13,9 @@ import androidx.annotation.Nullable;
 
 import com.scandit.datacapture.flutter.barcode.count.ui.FlutterBarcodeCountView;
 import com.scandit.datacapture.frameworks.barcode.count.BarcodeCountModule;
+import com.scandit.datacapture.frameworks.core.CoreModule;
+import com.scandit.datacapture.frameworks.core.FrameworkModule;
+import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
 
 import java.util.HashMap;
 
@@ -22,29 +25,33 @@ import io.flutter.plugin.platform.PlatformViewFactory;
 
 public class BarcodeCountPlatformViewFactory extends PlatformViewFactory {
 
-    BarcodeCountModule barcodeCountModule;
+    private final ServiceLocator<FrameworkModule> serviceLocator;
 
-    public BarcodeCountPlatformViewFactory(BarcodeCountModule barcodeCountModule) {
+    public BarcodeCountPlatformViewFactory(ServiceLocator<FrameworkModule> serviceLocator) {
         super(StandardMessageCodec.INSTANCE);
-        this.barcodeCountModule = barcodeCountModule;
+        this.serviceLocator = serviceLocator;
     }
 
     @NonNull
     @Override
     public PlatformView create(Context context, int viewId, @Nullable Object args) {
-        //noinspection unchecked
-        HashMap<String, String> creationArgs = (HashMap<String, String>) args;
+        HashMap<?, ?>  creationArgs = (HashMap<?, ?>) args;
 
         if (creationArgs == null) {
             throw new IllegalArgumentException("Unable to create the BarcodeCountView without the json.");
         }
 
-        String creationJson = creationArgs.get("BarcodeCountView");
+        Object creationJson = creationArgs.get("BarcodeCountView");
 
         if (creationJson == null) {
             throw new IllegalArgumentException("Unable to create the BarcodeCountView without the json.");
         }
 
-        return new FlutterBarcodeCountView(context, creationJson, barcodeCountModule);
+        BarcodeCountModule barcodeCountModule = (BarcodeCountModule) this.serviceLocator.resolve(BarcodeCountModule.class.getName());
+        if (barcodeCountModule == null) {
+            throw new IllegalArgumentException("Unable to create the BarcodeCountView. Barcode Count module not initialized.");
+        }
+
+        return new FlutterBarcodeCountView(context, creationJson.toString(), barcodeCountModule);
     }
 }

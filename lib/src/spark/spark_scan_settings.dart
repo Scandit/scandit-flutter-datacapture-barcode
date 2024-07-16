@@ -25,7 +25,19 @@ class SparkScanSettings implements Serializable {
 
   Set<Symbology> get enabledSymbologies => _enabledSymbologies();
 
-  bool singleBarcodeAutoDetection = SparkScanDefaults.sparkScanSettingsDefaults.singleBarcodeAutoDetection;
+  ScanIntention scanIntention = SparkScanDefaults.sparkScanSettingsDefaults.scanIntention;
+
+  bool _singleBarcodeAutoDetection = SparkScanDefaults.sparkScanSettingsDefaults.singleBarcodeAutoDetection;
+
+  @Deprecated(
+      'With the recent improvements introduced in the target mode, selection of barcodes is easier and more reliable. Given that, this method is outdated and not needed anymore.')
+  bool get singleBarcodeAutoDetection => _singleBarcodeAutoDetection;
+
+  @Deprecated(
+      'With the recent improvements introduced in the target mode, selection of barcodes is easier and more reliable. Given that, this method is outdated and not needed anymore.')
+  set singleBarcodeAutoDetection(bool newValue) {
+    _singleBarcodeAutoDetection = newValue;
+  }
 
   Set<Symbology> _enabledSymbologies() {
     return _symbologies.values.where((element) => element.isEnabled).map((e) => e.symbology).toSet().cast<Symbology>();
@@ -66,6 +78,7 @@ class SparkScanSettings implements Serializable {
       'properties': _properties,
       'batterySaving': batterySaving.toString(),
       'symbologies': _symbologies.map<String, Map<String, dynamic>>((key, value) => MapEntry(key, value.toMap())),
+      'scanIntention': scanIntention.toString(),
     };
   }
 }

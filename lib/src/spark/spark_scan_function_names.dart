@@ -22,6 +22,10 @@ abstract class SparkScanFunctionNames {
   static const String showToast = 'showToast';
   static const String onWidgetPaused = "onWidgetPaused";
   static const String setModeEnabledState = 'setModeEnabledState';
+  static const String addFeedbackDelegate = 'addFeedbackDelegate';
+  static const String removeFeedbackDelegate = 'removeFeedbackDelegate';
+  static const String submitFeedbackForBarcode = 'submitFeedbackForBarcode';
+  static const String bringViewToFront = 'bringViewToFront';
 
   static const String methodsChannelName = 'com.scandit.datacapture.barcode.spark/method_channel';
 }

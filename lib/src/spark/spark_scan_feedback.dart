@@ -6,12 +6,11 @@
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
-import 'spark_scan_defaults.dart';
-
+@Deprecated('This class is not used anymore. Use SparkScanBarcodeFeedback and FeedbackDelegate instead.')
 class SparkScanFeedback implements Serializable {
-  Feedback success = SparkScanDefaults.sparkScanFeedbackDefaults.success;
+  Feedback success = Feedback.defaultFeedback;
 
-  Feedback error = SparkScanDefaults.sparkScanFeedbackDefaults.error;
+  Feedback error = Feedback.defaultFeedback;
 
   static SparkScanFeedback get defaultFeedback {
     return SparkScanFeedback();

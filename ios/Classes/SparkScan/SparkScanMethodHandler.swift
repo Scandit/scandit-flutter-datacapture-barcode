@@ -29,6 +29,10 @@ class SparkScanMethodHandler {
         static let showToast = "showToast"
         static let onWidgetPaused = "onWidgetPaused"
         static let setModeEnabledState = "setModeEnabledState"
+        static let addFeedbackDelegate = "addFeedbackDelegate"
+        static let removeFeedbackDelegate = "removeFeedbackDelegate"
+        static let submitFeedbackForBarcode = "submitFeedbackForBarcode"
+        static let bringSparkScanViewToFront = "bringViewToFront"
     }
 
     private let sparkScanModule: SparkScanModule
@@ -64,7 +68,8 @@ class SparkScanMethodHandler {
                 result($0)
             }
         case FunctionNames.updateSparkScanMode:
-            sparkScanModule.updateMode(modeJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
+            sparkScanModule.updateMode(modeJson: methodCall.arguments as! String, 
+                                       result: FlutterFrameworkResult(reply: result))
         case FunctionNames.addSparkScanViewUiListener:
             sparkScanModule.addSparkScanViewUiListener()
             result(nil)
@@ -77,13 +82,39 @@ class SparkScanMethodHandler {
             sparkScanModule.pauseScanning()
             result(nil)
         case FunctionNames.sparkScanViewEmitFeedback:
-            sparkScanModule.emitFeedback(feedbackJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
+            sparkScanModule.emitFeedback(feedbackJson: methodCall.arguments as! String, 
+                                         result: FlutterFrameworkResult(reply: result))
         case FunctionNames.showToast:
-            sparkScanModule.showToast(text: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
+            sparkScanModule.showToast(text: methodCall.arguments as! String, 
+                                      result: FlutterFrameworkResult(reply: result))
         case FunctionNames.onWidgetPaused:
             sparkScanModule.onPause(result: FlutterFrameworkResult(reply: result))
         case FunctionNames.setModeEnabledState:
             sparkScanModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
+            result(nil)
+        case FunctionNames.addFeedbackDelegate:
+            sparkScanModule.addFeedbackDelegate(result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.removeFeedbackDelegate:
+            sparkScanModule.removeFeedbackDelegate(result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.submitFeedbackForBarcode:
+            sparkScanModule.submitFeedbackForBarcode(feedbackJson: methodCall.arguments as? String,
+                                                     result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.bringSparkScanViewToFront:
+            guard sparkScanModule.shouldBringSparkScanViewToFront else {
+                result(nil)
+                return
+            }
+            guard let sparkScanView = sparkScanModule.sparkScanView else {
+                result(SparkScanError.nilView)
+                return
+            }
+            guard let parent = sparkScanView.superview else {
+                result(SparkScanError.nilParent)
+                return
+            }
+            dispatchMainSync {
+                parent.bringSubviewToFront(sparkScanView)
+            }
             result(nil)
         default:
             result(FlutterMethodNotImplemented)

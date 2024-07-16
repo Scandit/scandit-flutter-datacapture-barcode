@@ -16,8 +16,16 @@ class SparkScanViewSettings extends Serializable {
 
   Duration triggerButtonCollapseTimeout =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.triggerButtonCollapseTimeout;
-  Duration continuousCaptureTimeout =
+  Duration _continuousCaptureTimeout =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.continuousCaptureTimeout;
+
+  @Deprecated('Use inactiveStateTimeout instead.')
+  Duration get continuousCaptureTimeout => _continuousCaptureTimeout;
+
+  @Deprecated('Use inactiveStateTimeout instead.')
+  set continuousCaptureTimeout(Duration newValue) {
+    _continuousCaptureTimeout = newValue;
+  }
 
   TorchState defaultTorchState = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.defaultTorchState;
   SparkScanScanningMode defaultScanningMode =
@@ -43,15 +51,46 @@ class SparkScanViewSettings extends Serializable {
     _ignoreDragLimits = true;
   }
 
-  double targetZoomFactorOut = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.targetZoomFactorOut;
-  double targetZoomFactorIn = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.targetZoomFactorIn;
+  double _targetZoomFactorOut = 0.0;
+
+  @Deprecated('Use zoomFactorOut instead')
+  double get targetZoomFactorOut => _targetZoomFactorOut;
+
+  @Deprecated('Use zoomFactorOut instead')
+  set targetZoomFactorOut(double newValue) {
+    // ignore set
+    _targetZoomFactorOut = 0.0;
+  }
+
+  double _targetZoomFactorIn = 0.0;
+
+  @Deprecated('Use zoomFactorIn instead')
+  double get targetZoomFactorIn => _targetZoomFactorIn;
+
+  @Deprecated('Use zoomFactorIn instead')
+  set targetZoomFactorIn(double newValue) {
+    // ignore set
+    _targetZoomFactorIn = 0.0;
+  }
+
+  double zoomFactorIn = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.zoomFactorIn;
+
+  double zoomFactorOut = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.zoomFactorOut;
+
+  Duration inactiveStateTimeout = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.inactiveStateTimeout;
+
   SparkScanToastSettings toastSettings = SparkScanToastSettings(); // defaults are loaded automatically
+
+  bool shouldShowOnTopAlways = true;
+
+  CameraPosition defaultCameraPosition =
+      SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.defaultCameraPosition;
 
   @override
   Map<String, dynamic> toMap() {
     return {
       'triggerButtonCollapseTimeout': triggerButtonCollapseTimeout.inSeconds,
-      'continuousCaptureTimeout': continuousCaptureTimeout.inSeconds,
+      'continuousCaptureTimeout': _continuousCaptureTimeout.inSeconds,
       'defaultTorchState': defaultTorchState.toString(),
       'defaultScanningMode': defaultScanningMode.toMap(),
       'holdToScanEnabled': holdToScanEnabled,
@@ -61,8 +100,11 @@ class SparkScanViewSettings extends Serializable {
       'hardwareTriggerEnabled': hardwareTriggerEnabled,
       'hardwareTriggerKeyCode': hardwareTriggerKeyCode,
       'visualFeedbackEnabled': visualFeedbackEnabled,
-      'targetZoomFactorOut': targetZoomFactorOut,
-      'targetZoomFactorIn': targetZoomFactorIn
+      'zoomFactorIn': zoomFactorIn,
+      'zoomFactorOut': zoomFactorOut,
+      'inactiveStateTimeout': inactiveStateTimeout.inSeconds,
+      'shouldShowOnTopAlways': shouldShowOnTopAlways,
+      'defaultCameraPosition': defaultCameraPosition.toString(),
     };
   }
 }

@@ -8,12 +8,10 @@ package com.scandit.datacapture.flutter.barcode.spark.ui
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
-import android.widget.FrameLayout
 import com.scandit.datacapture.flutter.core.ui.FlutterBasePlatformView
 import com.scandit.datacapture.flutter.core.utils.FlutterLogInsteadOfResult
 import com.scandit.datacapture.frameworks.barcode.spark.SparkScanModule
 import io.flutter.embedding.android.FlutterView
-import io.flutter.plugin.platform.PlatformView
 
 @SuppressLint("ViewConstructor")
 class FlutterSparkScanView(
