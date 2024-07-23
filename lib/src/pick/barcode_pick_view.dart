@@ -101,21 +101,13 @@ class BarcodePickView extends StatefulWidget implements Serializable {
     return _controller.freeze();
   }
 
-  Future<void> stop() {
+  Future<void> pause() {
     _isViewStarted = false;
-    return _controller.stop();
+    return _controller.pause();
   }
 
   Future<void> release() {
     return _controller.release();
-  }
-
-  Future<void> pause() {
-    return _controller.pause();
-  }
-
-  Future<void> resume() {
-    return _controller.resume();
   }
 
   void addActionListener(BarcodePickActionListener listener) {
@@ -220,28 +212,20 @@ class _BarcodePickViewController {
     });
   }
 
-  Future<void> start() {
-    return _methodChannel.invokeMethod(BarcodePickFunctionNames.startPickView);
+  Future<void> release() {
+    return _methodChannel.invokeMethod(BarcodePickFunctionNames.releasePickView);
   }
 
-  Future<void> stop() {
-    return _methodChannel.invokeMethod(BarcodePickFunctionNames.stopPickView);
+  Future<void> start() {
+    return _methodChannel.invokeMethod(BarcodePickFunctionNames.startPickView);
   }
 
   Future<void> freeze() {
     return _methodChannel.invokeMethod(BarcodePickFunctionNames.freezePickView);
   }
 
-  Future<void> release() {
-    return _methodChannel.invokeMethod(BarcodePickFunctionNames.releasePickView);
-  }
-
   Future<void> pause() {
-    return _methodChannel.invokeMethod(BarcodePickFunctionNames.pickViewOnPause);
-  }
-
-  Future<void> resume() {
-    return _methodChannel.invokeMethod(BarcodePickFunctionNames.pickViewOnResume);
+    return _methodChannel.invokeMethod(BarcodePickFunctionNames.pausePickView);
   }
 
   void addRemoveUiListener(bool add) {

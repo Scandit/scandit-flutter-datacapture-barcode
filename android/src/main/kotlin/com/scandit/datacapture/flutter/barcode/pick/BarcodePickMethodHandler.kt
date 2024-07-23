@@ -33,27 +33,16 @@ class BarcodePickMethodHandler(
                 result.success(null)
             }
 
-            METHOD_STOP_PICK_VIEW -> {
-                barcodePickModule.viewStop()
-                result.success(null)
-            }
+            METHOD_RELEASE_PICK_VIEW -> barcodePickModule.viewRelease(
+                FlutterResult(result)
+            )
 
             METHOD_FREEZE_PICK_VIEW -> barcodePickModule.viewFreeze(
                 FlutterResult(result)
             )
 
-            METHOD_RELEASE_PICK_VIEW -> {
-                barcodePickModule.viewOnDestroy()
-                result.success(null)
-            }
-
-            METHOD_RESUME_PICK_VIEW -> {
-                barcodePickModule.viewOnResume()
-                result.success(null)
-            }
-
             METHOD_PAUSE_PICK_VIEW -> {
-                barcodePickModule.viewOnPause()
+                barcodePickModule.viewPause()
                 result.success(null)
             }
 
@@ -101,13 +90,9 @@ class BarcodePickMethodHandler(
         private const val METHOD_REMOVE_SCANNING_LISTENER = "removeScanningListener"
         private const val METHOD_ADD_SCANNING_LISTENER = "addScanningListener"
         private const val METHOD_START_PICK_VIEW = "startPickView"
-        private const val METHOD_STOP_PICK_VIEW = "stopPickView"
-        private const val METHOD_FREEZE_PICK_VIEW = "freezePickView"
         private const val METHOD_RELEASE_PICK_VIEW = "releasePickView"
-
-        private const val METHOD_PAUSE_PICK_VIEW = "pickViewOnPause"
-        private const val METHOD_RESUME_PICK_VIEW = "pickViewOnResume"
-
+        private const val METHOD_FREEZE_PICK_VIEW = "freezePickView"
+        private const val METHOD_PAUSE_PICK_VIEW = "pausePickView"
         private const val METHOD_ADD_VIEW_UI_LISTENER = "addViewUiListener"
         private const val METHOD_REMOVE_VIEW_UI_LISTENER = "removeViewUiListener"
         private const val METHOD_ADD_VIEW_LISTENER = "addViewListener"

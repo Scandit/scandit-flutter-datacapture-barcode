@@ -9,9 +9,11 @@ package com.scandit.datacapture.flutter.barcode.pick.ui
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
+import android.widget.FrameLayout
 import com.scandit.datacapture.flutter.core.ui.FlutterBasePlatformView
 import com.scandit.datacapture.flutter.core.utils.FlutterLogInsteadOfResult
 import com.scandit.datacapture.frameworks.barcode.pick.BarcodePickModule
+import io.flutter.plugin.platform.PlatformView
 
 @SuppressLint("ViewConstructor")
 class FlutterBarcodePickView(
@@ -28,7 +30,7 @@ class FlutterBarcodePickView(
 
     override fun dispose() {
         super.dispose()
-        barcodePickModule.viewOnDestroy()
+        barcodePickModule.viewDisposed()
         removeAllViews()
     }
 

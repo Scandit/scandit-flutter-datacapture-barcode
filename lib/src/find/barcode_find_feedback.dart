@@ -10,15 +10,11 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 
 class BarcodeFindFeedback implements Serializable {
   Feedback found = BarcodeFindDefaults.barcodeFindFeedbackDefaults.found;
-  Feedback itemListUpdated = BarcodeFindDefaults.barcodeFindFeedbackDefaults.itemListUpdated;
 
   static BarcodeFindFeedback get defaultFeedback => BarcodeFindFeedback();
 
   @override
   Map<String, dynamic> toMap() {
-    return {
-      'found': found.toMap(),
-      'itemListUpdated': itemListUpdated.toMap(),
-    };
+    return {'found': found.toMap()};
   }
 }

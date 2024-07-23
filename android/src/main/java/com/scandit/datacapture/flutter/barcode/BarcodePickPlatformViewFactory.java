@@ -15,8 +15,6 @@ import com.scandit.datacapture.flutter.barcode.find.ui.FlutterBarcodeFindView;
 import com.scandit.datacapture.flutter.barcode.pick.ui.FlutterBarcodePickView;
 import com.scandit.datacapture.frameworks.barcode.find.BarcodeFindModule;
 import com.scandit.datacapture.frameworks.barcode.pick.BarcodePickModule;
-import com.scandit.datacapture.frameworks.core.FrameworkModule;
-import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
 
 import java.util.HashMap;
 
@@ -25,34 +23,27 @@ import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
 
 public class BarcodePickPlatformViewFactory extends PlatformViewFactory {
-
-    private final ServiceLocator<FrameworkModule> serviceLocator;
-
-    public BarcodePickPlatformViewFactory(ServiceLocator<FrameworkModule> serviceLocator) {
+    BarcodePickModule barcodePickModule;
+    public BarcodePickPlatformViewFactory(BarcodePickModule barcodePickModule) {
         super(StandardMessageCodec.INSTANCE);
-        this.serviceLocator = serviceLocator;
+        this.barcodePickModule = barcodePickModule;
     }
-
     @NonNull
     @Override
     public PlatformView create(Context context, int viewId, @Nullable Object args) {
-        HashMap<?, ?>  creationArgs = (HashMap<?, ?>) args;
+        //noinspection unchecked
+        HashMap<String, String> creationArgs = (HashMap<String, String>) args;
 
         if (creationArgs == null) {
             throw new IllegalArgumentException("Unable to create the BarcodePickView without the json.");
         }
 
-        Object creationJson = creationArgs.get("BarcodePickView");
+        String creationJson = creationArgs.get("BarcodePickView");
 
         if (creationJson == null) {
             throw new IllegalArgumentException("Unable to create the BarcodePickView without the json.");
         }
 
-        BarcodePickModule barcodePickModule = (BarcodePickModule) this.serviceLocator.resolve(BarcodePickModule.class.getName());
-        if (barcodePickModule == null) {
-            throw new IllegalArgumentException("Unable to create the BarcodePickView. Barcode Pick module not initialized.");
-        }
-
-        return new FlutterBarcodePickView(context, creationJson.toString(), barcodePickModule);
+        return new FlutterBarcodePickView(context, creationJson, barcodePickModule);
     }
 }

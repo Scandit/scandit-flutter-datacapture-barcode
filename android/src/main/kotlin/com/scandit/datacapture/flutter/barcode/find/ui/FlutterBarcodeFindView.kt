@@ -18,7 +18,7 @@ class FlutterBarcodeFindView(
     context: Context,
     jsonString: String,
     private val barcodeFindModule: BarcodeFindModule
-) : FlutterBasePlatformView(context) {
+) :  FlutterBasePlatformView(context){
 
     init {
         barcodeFindModule.addViewToContainer(this, jsonString, FlutterLogInsteadOfResult())

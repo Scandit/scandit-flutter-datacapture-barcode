@@ -38,10 +38,6 @@ class SparkScanToastSettings extends Serializable {
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.torchEnabledMessage;
   String? torchDisabledMessage =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.torchDisabledMessage;
-  String? userFacingCameraEnabledMessage =
-      SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.userFacingCameraEnabledMessage;
-  String? worldFacingCameraEnabledMessage = SparkScanDefaults
-      .sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.worldFacingCameraEnabledMessage;
 
   @override
   Map<String, dynamic> toMap() {
@@ -58,9 +54,7 @@ class SparkScanToastSettings extends Serializable {
       'zoomedInMessage': zoomedInMessage,
       'zoomedOutMessage': zoomedOutMessage,
       'torchEnabledMessage': torchEnabledMessage,
-      'torchDisabledMessage': torchDisabledMessage,
-      'userFacingCameraEnabledMessage': userFacingCameraEnabledMessage,
-      'worldFacingCameraEnabledMessage': worldFacingCameraEnabledMessage,
+      'torchDisabledMessage': torchDisabledMessage
     };
   }
 }
