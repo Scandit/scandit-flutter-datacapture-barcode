@@ -16,6 +16,7 @@ abstract class BarcodeCaptureFunctionNames {
   static const String updateBarcodeCaptureMode = 'updateBarcodeCaptureMode';
   static const String applyBarcodeCaptureModeSettings = 'applyBarcodeCaptureModeSettings';
   static const String updateBarcodeCaptureOverlay = 'updateBarcodeCaptureOverlay';
+  static const String updateFeedback = 'updateFeedback';
 
   static const String methodsChannelName = 'com.scandit.datacapture.barcode.capture/method_channel';
 }

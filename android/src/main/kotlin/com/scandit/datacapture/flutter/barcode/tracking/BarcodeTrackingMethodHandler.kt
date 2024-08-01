@@ -5,7 +5,6 @@
  */
 package com.scandit.datacapture.flutter.barcode.tracking
 
-import com.scandit.datacapture.flutter.barcode.capture.BarcodeCaptureMethodHandler
 import com.scandit.datacapture.flutter.core.utils.FlutterResult
 import com.scandit.datacapture.flutter.core.utils.rejectKotlinError
 import com.scandit.datacapture.frameworks.barcode.tracking.BarcodeTrackingModule

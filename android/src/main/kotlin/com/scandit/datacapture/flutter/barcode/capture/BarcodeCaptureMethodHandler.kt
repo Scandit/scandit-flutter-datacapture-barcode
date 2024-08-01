@@ -78,6 +78,11 @@ class BarcodeCaptureMethodHandler(
                 FlutterResult(result)
             )
 
+            METHOD_UPDATE_FEEDBACK -> barcodeCaptureModule.updateFeedback(
+                call.arguments as String,
+                FlutterResult(result)
+            )
+
             else -> result.notImplemented()
         }
     }
@@ -99,6 +104,7 @@ class BarcodeCaptureMethodHandler(
         private const val METHOD_UPDATE_MODE_FROM_JSON = "updateBarcodeCaptureMode"
         private const val METHOD_APPLY_MODE_SETTINGS = "applyBarcodeCaptureModeSettings"
         private const val METHOD_UPDATE_OVERLAY = "updateBarcodeCaptureOverlay"
+        private const val METHOD_UPDATE_FEEDBACK = "updateFeedback"
 
         const val EVENT_CHANNEL_NAME =
             "com.scandit.datacapture.barcode.capture/event_channel"

@@ -13,6 +13,8 @@ import androidx.annotation.Nullable;
 
 import com.scandit.datacapture.flutter.barcode.find.ui.FlutterBarcodeFindView;
 import com.scandit.datacapture.frameworks.barcode.find.BarcodeFindModule;
+import com.scandit.datacapture.frameworks.core.FrameworkModule;
+import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
 
 import java.util.HashMap;
 
@@ -21,27 +23,34 @@ import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
 
 public class BarcodeFindPlatformViewFactory extends PlatformViewFactory {
-    BarcodeFindModule barcodeFindModule;
-    public BarcodeFindPlatformViewFactory(BarcodeFindModule barcodeFindModule) {
+
+    private final ServiceLocator<FrameworkModule> serviceLocator;
+
+    public BarcodeFindPlatformViewFactory(ServiceLocator<FrameworkModule> serviceLocator) {
         super(StandardMessageCodec.INSTANCE);
-        this.barcodeFindModule = barcodeFindModule;
+        this.serviceLocator = serviceLocator;
     }
+
     @NonNull
     @Override
     public PlatformView create(Context context, int viewId, @Nullable Object args) {
-        //noinspection unchecked
-        HashMap<String, String> creationArgs = (HashMap<String, String>) args;
+        HashMap<?, ?>  creationArgs = (HashMap<?, ?>) args;
 
         if (creationArgs == null) {
             throw new IllegalArgumentException("Unable to create the BarcodeFindView without the json.");
         }
 
-        String creationJson = creationArgs.get("BarcodeFindView");
+        Object creationJson = creationArgs.get("BarcodeFindView");
 
         if (creationJson == null) {
             throw new IllegalArgumentException("Unable to create the BarcodeFindView without the json.");
         }
 
-        return new FlutterBarcodeFindView(context, creationJson, barcodeFindModule);
+        BarcodeFindModule barcodeFindModule = (BarcodeFindModule) this.serviceLocator.resolve(BarcodeFindModule.class.getName());
+        if (barcodeFindModule == null) {
+            throw new IllegalArgumentException("Unable to create the BarcodeFindView. Barcode Find module not initialized.");
+        }
+
+        return new FlutterBarcodeFindView(context, creationJson.toString(), barcodeFindModule);
     }
 }

@@ -12,6 +12,8 @@ import androidx.annotation.Nullable;
 
 import com.scandit.datacapture.flutter.barcode.spark.ui.FlutterSparkScanView;
 import com.scandit.datacapture.frameworks.barcode.spark.SparkScanModule;
+import com.scandit.datacapture.frameworks.core.FrameworkModule;
+import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
 
 import java.util.HashMap;
 
@@ -20,23 +22,34 @@ import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
 
 public class SparkScanPlatformViewFactory extends PlatformViewFactory {
-    SparkScanModule sparkScanModule;
 
-    public SparkScanPlatformViewFactory(SparkScanModule sparkScanModule) {
+    private final ServiceLocator<FrameworkModule> serviceLocator;
+
+    public SparkScanPlatformViewFactory(ServiceLocator<FrameworkModule> serviceLocator) {
         super(StandardMessageCodec.INSTANCE);
-        this.sparkScanModule = sparkScanModule;
+        this.serviceLocator = serviceLocator;
     }
 
     @NonNull
     @Override
     public PlatformView create(Context context, int viewId, @Nullable Object args) {
-        HashMap<String, String> creationArgs = (HashMap<String, String>) args;
-        String creationJson = null;
+        HashMap<?, ?>  creationArgs = (HashMap<?, ?>) args;
 
-        if (creationArgs != null) {
-            creationJson = creationArgs.get("SparkScanView");
+        if (creationArgs == null) {
+            throw new IllegalArgumentException("Unable to create the SparkScanView without the json.");
         }
 
-        return new FlutterSparkScanView(context, creationJson, this.sparkScanModule);
+        Object creationJson = creationArgs.get("SparkScanView");
+
+        if (creationJson == null) {
+            throw new IllegalArgumentException("Unable to create the SparkScanView without the json.");
+        }
+
+        SparkScanModule sparkScanModule = (SparkScanModule) this.serviceLocator.resolve(SparkScanModule.class.getName());
+        if (sparkScanModule == null) {
+            throw new IllegalArgumentException("Unable to create the SparkScanView. SparkScan module not initialized.");
+        }
+
+        return new FlutterSparkScanView(context, creationJson.toString(), sparkScanModule);
     }
 }

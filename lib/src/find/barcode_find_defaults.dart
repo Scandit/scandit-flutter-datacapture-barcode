@@ -58,6 +58,8 @@ class BarcodeFindViewDefaults {
   final String? textForTapShutterToPauseScreenHint;
   final String? textForTapShutterToResumeSearchHint;
   final Anchor torchControlPosition;
+  final String? textForItemListUpdatedHint;
+  final String? textForItemListUpdatedWhenPausedHint;
 
   BarcodeFindViewDefaults(
       this.shouldShowCarousel,
@@ -73,7 +75,9 @@ class BarcodeFindViewDefaults {
       this.textForPointAtBarcodesToSearchHint,
       this.textForTapShutterToPauseScreenHint,
       this.textForTapShutterToResumeSearchHint,
-      this.torchControlPosition);
+      this.torchControlPosition,
+      this.textForItemListUpdatedHint,
+      this.textForItemListUpdatedWhenPausedHint);
 
   factory BarcodeFindViewDefaults.fromJSON(Map<String, dynamic> json) {
     var torchControlPosition = Anchor.topLeft;
@@ -87,28 +91,32 @@ class BarcodeFindViewDefaults {
     }
 
     return BarcodeFindViewDefaults(
-        json["shouldShowCarousel"] as bool,
-        json["shouldShowFinishButton"] as bool,
-        json["shouldShowHints"] as bool,
-        json["shouldShowPauseButton"] as bool,
-        json["shouldShowProgressBar"] as bool,
-        json["shouldShowUserGuidanceView"] as bool,
-        shouldShowTorchControl,
-        json["textForAllItemsFoundSuccessfullyHint"] as String?,
-        json["textForCollapseCardsButton"] as String?,
-        json["textForMoveCloserToBarcodesHint"] as String?,
-        json["textForPointAtBarcodesToSearchHint"] as String?,
-        json["textForTapShutterToPauseScreenHint"] as String?,
-        json["textForTapShutterToResumeSearchHint"] as String?,
-        torchControlPosition);
+      json["shouldShowCarousel"] as bool,
+      json["shouldShowFinishButton"] as bool,
+      json["shouldShowHints"] as bool,
+      json["shouldShowPauseButton"] as bool,
+      json["shouldShowProgressBar"] as bool,
+      json["shouldShowUserGuidanceView"] as bool,
+      shouldShowTorchControl,
+      json["textForAllItemsFoundSuccessfullyHint"] as String?,
+      json["textForCollapseCardsButton"] as String?,
+      json["textForMoveCloserToBarcodesHint"] as String?,
+      json["textForPointAtBarcodesToSearchHint"] as String?,
+      json["textForTapShutterToPauseScreenHint"] as String?,
+      json["textForTapShutterToResumeSearchHint"] as String?,
+      torchControlPosition,
+      json["textForItemListUpdatedHint"] as String?,
+      json["textForItemListUpdatedWhenPausedHint"] as String?,
+    );
   }
 }
 
 @immutable
 class BarcodeFindFeedbackDefaults {
   final Feedback found;
+  final Feedback itemListUpdated;
 
-  BarcodeFindFeedbackDefaults(this.found);
+  BarcodeFindFeedbackDefaults(this.found, this.itemListUpdated);
 
   factory BarcodeFindFeedbackDefaults.fromJSON(Map<String, dynamic> json) {
     var foundJson = json['found'];
@@ -145,6 +153,44 @@ class BarcodeFindFeedbackDefaults {
         foundVibration = Vibration.defaultVibration;
       }
     }
-    return BarcodeFindFeedbackDefaults(Feedback(foundVibration, foundSound));
+
+    var itemListUpdatedJson = json['itemListUpdated'];
+
+    Sound? itemListUpdatedSound;
+    Vibration? itemListUpdatedVibration;
+
+    if (itemListUpdatedJson.containsKey('sound')) {
+      var soundMap = itemListUpdatedJson['sound'] as Map;
+      if (soundMap.isNotEmpty && soundMap.containsKey('resource')) {
+        itemListUpdatedSound = Sound(soundMap['resource']);
+      } else {
+        itemListUpdatedSound = Sound(null);
+      }
+    }
+    if (itemListUpdatedJson.containsKey('vibration')) {
+      var vibrationMap = itemListUpdatedJson['vibration'] as Map;
+      if (vibrationMap.isNotEmpty && vibrationMap.containsKey('type')) {
+        var vibrationType = vibrationMap['type'];
+        switch (vibrationType) {
+          case 'selectionHaptic':
+            itemListUpdatedVibration = Vibration.selectionHapticFeedback;
+            break;
+          case 'successHaptic':
+            itemListUpdatedVibration = Vibration.successHapticFeedback;
+            break;
+          case 'impactHaptic':
+            itemListUpdatedVibration = Vibration.impactHapticFeedback;
+            break;
+          default:
+            itemListUpdatedVibration = Vibration.defaultVibration;
+        }
+      } else {
+        itemListUpdatedVibration = Vibration.defaultVibration;
+      }
+    }
+    return BarcodeFindFeedbackDefaults(
+      Feedback(foundVibration, foundSound),
+      Feedback(itemListUpdatedVibration, itemListUpdatedSound),
+    );
   }
 }

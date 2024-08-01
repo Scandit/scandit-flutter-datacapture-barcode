@@ -229,6 +229,25 @@ class BarcodeFindView extends StatefulWidget implements Serializable {
     _updateNative();
   }
 
+  String? _textForItemListUpdatedHint = BarcodeFindDefaults.barcodeFindViewDefaults.textForItemListUpdatedHint;
+
+  String? get textForItemListUpdatedHint => _textForItemListUpdatedHint;
+
+  set textForItemListUpdatedHint(String? newValue) {
+    _textForItemListUpdatedHint = newValue;
+    _updateNative();
+  }
+
+  String? _textForItemListUpdatedWhenPausedHint =
+      BarcodeFindDefaults.barcodeFindViewDefaults.textForItemListUpdatedWhenPausedHint;
+
+  String? get textForItemListUpdatedWhenPausedHint => _textForItemListUpdatedWhenPausedHint;
+
+  set textForItemListUpdatedWhenPausedHint(String? newValue) {
+    _textForItemListUpdatedWhenPausedHint = newValue;
+    _updateNative();
+  }
+
   Future<void> _updateNative() {
     if (!_isInitialized) {
       return Future.value();
@@ -255,16 +274,18 @@ class BarcodeFindView extends StatefulWidget implements Serializable {
         'textForTapShutterToPauseScreenHint': textForTapShutterToPauseScreenHint,
         'textForTapShutterToResumeSearchHint': textForTapShutterToResumeSearchHint,
         'startSearching': _startSearching,
+        'textForItemListUpdatedHint': textForItemListUpdatedHint,
+        'textForItemListUpdatedWhenPausedHint': textForItemListUpdatedWhenPausedHint,
       },
       'BarcodeFind': _barcodeFind.toMap()
     };
 
     if (_barcodeFindViewSettings != null) {
-      json['View']['viewSettings'] = _barcodeFindViewSettings?.toMap();
+      json['View']['viewSettings'] = _barcodeFindViewSettings.toMap();
     }
 
     if (_cameraSettings != null) {
-      json['View']['cameraSettings'] = _cameraSettings?.toMap();
+      json['View']['cameraSettings'] = _cameraSettings.toMap();
     }
 
     return json;

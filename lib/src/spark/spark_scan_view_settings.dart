@@ -83,6 +83,9 @@ class SparkScanViewSettings extends Serializable {
 
   bool shouldShowOnTopAlways = true;
 
+  CameraPosition defaultCameraPosition =
+      SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.defaultCameraPosition;
+
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -101,6 +104,7 @@ class SparkScanViewSettings extends Serializable {
       'zoomFactorOut': zoomFactorOut,
       'inactiveStateTimeout': inactiveStateTimeout.inSeconds,
       'shouldShowOnTopAlways': shouldShowOnTopAlways,
+      'defaultCameraPosition': defaultCameraPosition.toString(),
     };
   }
 }
