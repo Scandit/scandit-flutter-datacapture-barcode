@@ -4,16 +4,13 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-package com.scandit.datacapture.flutter.barcode;
+package com.scandit.datacapture.flutter.barcode.pick.ui;
 
 import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.scandit.datacapture.flutter.barcode.find.ui.FlutterBarcodeFindView;
-import com.scandit.datacapture.flutter.barcode.pick.ui.FlutterBarcodePickView;
-import com.scandit.datacapture.frameworks.barcode.find.BarcodeFindModule;
 import com.scandit.datacapture.frameworks.barcode.pick.BarcodePickModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
 import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
@@ -36,7 +33,7 @@ public class BarcodePickPlatformViewFactory extends PlatformViewFactory {
     @NonNull
     @Override
     public PlatformView create(Context context, int viewId, @Nullable Object args) {
-        HashMap<?, ?>  creationArgs = (HashMap<?, ?>) args;
+        HashMap<?, ?> creationArgs = (HashMap<?, ?>) args;
 
         if (creationArgs == null) {
             throw new IllegalArgumentException("Unable to create the BarcodePickView without the json.");

@@ -47,15 +47,15 @@ class BarcodeCaptureDefaults {
 @immutable
 class BarcodeCaptureSettingsDefaults {
   final int codeDuplicateFilter;
-  final BatterySavingMode batterySavingMode;
+  final BatterySavingMode batterySaving;
   final ScanIntention scanIntention;
 
-  BarcodeCaptureSettingsDefaults(this.codeDuplicateFilter, this.batterySavingMode, this.scanIntention);
+  BarcodeCaptureSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention);
 
   factory BarcodeCaptureSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     return BarcodeCaptureSettingsDefaults(
       (json['codeDuplicateFilter'] as num).toInt(),
-      BatterySavingModeDeserializer.fromJSON(json['batterySavingMode'] as String),
+      BatterySavingModeDeserializer.fromJSON(json['batterySaving'] as String),
       ScanIntentionSerializer.fromJSON(json['scanIntention'] as String),
     );
   }

@@ -14,6 +14,7 @@ import '../capture/barcode_capture.dart';
 import 'barcode_capture_function_names.dart';
 
 enum BarcodeCaptureOverlayStyle {
+  @Deprecated('The legacy style is deprecated.')
   legacy('legacy'),
   frame('frame');
 

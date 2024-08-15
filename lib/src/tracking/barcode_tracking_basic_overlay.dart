@@ -17,6 +17,7 @@ import 'barcode_tracking_function_names.dart';
 import 'tracked_barcode.dart';
 
 enum BarcodeTrackingBasicOverlayStyle {
+  @Deprecated('The legacy style of the BarcodeTrackingBasicOverlay is deprecated.')
   legacy('legacy'),
   frame('frame'),
   dot('dot');

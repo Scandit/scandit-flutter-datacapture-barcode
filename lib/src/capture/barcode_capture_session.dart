@@ -14,7 +14,12 @@ class BarcodeCaptureSession {
   final _BarcodeCaptureSessionController _controller = _BarcodeCaptureSessionController();
 
   final List<Barcode> _newlyRecognizedBarcodes;
+
+  @Deprecated('Prefer use of the property `newlyRecognizedBarcode` instead.')
   List<Barcode> get newlyRecognizedBarcodes => _newlyRecognizedBarcodes;
+
+  final Barcode? _newlyRecognizedBarcode;
+  Barcode? get newlyRecognizedBarcode => _newlyRecognizedBarcode;
 
   final List<LocalizedOnlyBarcode> _newlyLocalizedBarcodes;
   List<LocalizedOnlyBarcode> get newlyLocalizedBarcodes => _newlyLocalizedBarcodes;
@@ -22,10 +27,12 @@ class BarcodeCaptureSession {
   final int _frameSequenceId;
   int get frameSequenceId => _frameSequenceId;
 
-  BarcodeCaptureSession._(this._newlyRecognizedBarcodes, this._newlyLocalizedBarcodes, this._frameSequenceId);
+  BarcodeCaptureSession._(
+      this._newlyRecognizedBarcode, this._newlyRecognizedBarcodes, this._newlyLocalizedBarcodes, this._frameSequenceId);
 
   BarcodeCaptureSession.fromJSON(Map<String, dynamic> json)
       : this._(
+            json['newlyRecognizedBarcode'] != null ? Barcode.fromJSON(json['newlyRecognizedBarcode']) : null,
             (json['newlyRecognizedBarcodes'] as List<dynamic>)
                 .cast<Map<String, dynamic>>()
                 .map((e) => Barcode.fromJSON(e))
