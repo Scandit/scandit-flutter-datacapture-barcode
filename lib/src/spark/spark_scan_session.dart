@@ -14,20 +14,15 @@ class SparkScanSession {
   final _SparkScanSessionController _controller = _SparkScanSessionController();
 
   final List<Barcode> _newlyRecognizedBarcodes;
-  @Deprecated('Prefer use of the property `newlyRecognizedBarcode` instead.')
   List<Barcode> get newlyRecognizedBarcodes => _newlyRecognizedBarcodes;
-
-  final Barcode? _newlyRecognizedBarcode;
-  Barcode? get newlyRecognizedBarcode => _newlyRecognizedBarcode;
 
   final int _frameSequenceId;
   int get frameSequenceId => _frameSequenceId;
 
-  SparkScanSession._(this._newlyRecognizedBarcode, this._newlyRecognizedBarcodes, this._frameSequenceId);
+  SparkScanSession._(this._newlyRecognizedBarcodes, this._frameSequenceId);
 
   SparkScanSession.fromJSON(Map<String, dynamic> json)
       : this._(
-            json['newlyRecognizedBarcode'] != null ? Barcode.fromJSON(json['newlyRecognizedBarcode']) : null,
             (json['newlyRecognizedBarcodes'] as List<dynamic>)
                 .cast<Map<String, dynamic>>()
                 .map((e) => Barcode.fromJSON(e))

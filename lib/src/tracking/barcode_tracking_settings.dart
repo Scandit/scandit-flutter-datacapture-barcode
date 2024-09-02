@@ -9,7 +9,6 @@ import '../symbology.dart';
 import '../symbology_settings.dart';
 import '../barcode_defaults.dart';
 
-@Deprecated('Setting a scenario is no longer recommended, use the BarcodeTrackingSettings empty constructor instead.')
 enum BarcodeTrackingScenario {
   a('A'),
   b('B');
@@ -37,7 +36,6 @@ class BarcodeTrackingSettings implements Serializable {
 
   BarcodeTrackingSettings() : this.forScenario(null);
   BarcodeTrackingSettings._(this._scenario);
-  @Deprecated('Setting a scenario is no longer recommended, use the BarcodeTrackingSettings empty constructor instead.')
   BarcodeTrackingSettings.forScenario(BarcodeTrackingScenario? scenario) : this._(scenario);
 
   SymbologySettings settingsForSymbology(Symbology symbology) {

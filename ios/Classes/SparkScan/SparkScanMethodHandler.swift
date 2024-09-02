@@ -33,7 +33,6 @@ class SparkScanMethodHandler {
         static let removeFeedbackDelegate = "removeFeedbackDelegate"
         static let submitFeedbackForBarcode = "submitFeedbackForBarcode"
         static let bringSparkScanViewToFront = "bringViewToFront"
-        static let updateSparkScanView = "sparkScanViewUpdate"
     }
 
     private let sparkScanModule: SparkScanModule
@@ -117,9 +116,6 @@ class SparkScanMethodHandler {
                 parent.bringSubviewToFront(sparkScanView)
             }
             result(nil)
-        case FunctionNames.updateSparkScanView:
-            sparkScanModule.updateView(viewJson: methodCall.arguments as! String,
-                                       result: FlutterFrameworkResult(reply: result))
         default:
             result(FlutterMethodNotImplemented)
         }

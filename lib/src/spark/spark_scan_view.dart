@@ -30,7 +30,6 @@ import 'spark_scan_function_names.dart';
 
 abstract class SparkScanViewUiListener {
   static const String _didTapFastFindButtonEventName = 'SparkScanViewUiListener.fastFindButtonTapped';
-  static const String _didTapBarcodeFindButtonEventName = 'SparkScanViewUiListener.barcodeFindButtonTapped';
   static const String _didTapBarcodeCountButtonEventName = 'SparkScanViewUiListener.barcodeCountButtonTapped';
 
   void didTapFastFindButton(SparkScanView view);
@@ -129,10 +128,8 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   bool _shouldShowScanAreaGuides = false;
 
-  @Deprecated('This property is deprecated as it\'s no longer needed.')
   bool get shouldShowScanAreaGuides => _shouldShowScanAreaGuides;
 
-  @Deprecated('This property is deprecated as it\'s no longer needed.')
   set shouldShowScanAreaGuides(bool newValue) {
     _shouldShowScanAreaGuides = newValue;
     _update();
@@ -293,26 +290,14 @@ class SparkScanView extends StatefulWidget implements Serializable {
     _update();
   }
 
-  bool _fastFindButtonVisible = false;
+  bool _fastFindButtonVisible = SparkScanDefaults.sparkScanViewDefaults.fastFindButtonVisible;
 
-  @Deprecated('This property was renamed. Use the property `barcodeFindButtonVisible` instead.')
   bool get fastFindButtonVisible {
     return _fastFindButtonVisible;
   }
 
-  @Deprecated('This property was renamed. Use the property `barcodeFindButtonVisible` instead.')
   set fastFindButtonVisible(bool newValue) {
-    // NOOP
-  }
-
-  bool _barcodeFindButtonVisible = SparkScanDefaults.sparkScanViewDefaults.barcodeFindButtonVisible;
-
-  bool get barcodeFindButtonVisible {
-    return _barcodeFindButtonVisible;
-  }
-
-  set barcodeFindButtonVisible(bool newValue) {
-    _barcodeFindButtonVisible = newValue;
+    _fastFindButtonVisible = newValue;
     _update();
   }
 
@@ -352,12 +337,10 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   bool _soundModeButtonVisible = SparkScanDefaults.sparkScanViewDefaults.soundModeButtonVisible;
 
-  @Deprecated('This property is deprecated as sound mode button will be removed in the future.')
   bool get soundModeButtonVisible {
     return _soundModeButtonVisible;
   }
 
-  @Deprecated('This property is deprecated as sound mode button will be removed in the future.')
   set soundModeButtonVisible(bool newValue) {
     _soundModeButtonVisible = newValue;
     _update();
@@ -365,12 +348,10 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   bool _hapticModeButtonVisible = SparkScanDefaults.sparkScanViewDefaults.hapticModeButtonVisible;
 
-  @Deprecated('This property is deprecated as haptic mode button will be removed in the future.')
   bool get hapticModeButtonVisible {
     return _hapticModeButtonVisible;
   }
 
-  @Deprecated('This property is deprecated as haptic mode button will be removed in the future.')
   set hapticModeButtonVisible(bool newValue) {
     _hapticModeButtonVisible = newValue;
     _update();
@@ -474,7 +455,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
         'captureButtonActiveBackgroundColor': captureButtonActiveBackgroundColor?.jsonValue,
         'toolbarBackgroundColor': toolbarBackgroundColor?.jsonValue,
         'barcodeCountButtonVisible': barcodeCountButtonVisible,
-        'barcodeFindButtonVisible': barcodeFindButtonVisible,
+        'fastFindButtonVisible': fastFindButtonVisible,
         'targetModeButtonVisible': targetModeButtonVisible,
         'toolbarIconActiveTintColor': toolbarIconActiveTintColor?.jsonValue,
         'toolbarIconInactiveTintColor': toolbarIconInactiveTintColor?.jsonValue,
@@ -584,8 +565,6 @@ class _SparkScanViewController {
       if (eventName == SparkScanViewUiListener._didTapBarcodeCountButtonEventName) {
         _sparkScanView._uiListener?.didTapBarcodeCountButton(_sparkScanView);
       } else if (eventName == SparkScanViewUiListener._didTapFastFindButtonEventName) {
-        _sparkScanView._uiListener?.didTapFastFindButton(_sparkScanView);
-      } else if (eventName == SparkScanViewUiListener._didTapBarcodeFindButtonEventName) {
         _sparkScanView._uiListener?.didTapFastFindButton(_sparkScanView);
       }
     });
