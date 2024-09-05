@@ -57,7 +57,7 @@ class SparkScanViewDefaults {
   final bool scanningBehaviorButtonVisible;
   final bool handModeButtonVisible;
   final bool barcodeCountButtonVisible;
-  final bool fastFindButtonVisible;
+  final bool barcodeFindButtonVisible;
   final bool targetModeButtonVisible;
   final bool soundModeButtonVisible;
   final bool hapticModeButtonVisible;
@@ -87,7 +87,7 @@ class SparkScanViewDefaults {
       this.scanningBehaviorButtonVisible,
       this.handModeButtonVisible,
       this.barcodeCountButtonVisible,
-      this.fastFindButtonVisible,
+      this.barcodeFindButtonVisible,
       this.targetModeButtonVisible,
       this.soundModeButtonVisible,
       this.hapticModeButtonVisible,
@@ -115,10 +115,8 @@ class SparkScanViewDefaults {
     final scanningBehaviorButtonVisible = json['scanningBehaviorButtonVisible'] as bool;
     final handModeButtonVisible = json['handModeButtonVisible'] as bool;
     final barcodeCountButtonVisible = json['barcodeCountButtonVisible'] as bool;
-    final fastFindButtonVisible = json['fastFindButtonVisible'] as bool;
+    final barcodeFindButtonVisible = json['barcodeFindButtonVisible'] as bool;
     final targetModeButtonVisible = json['targetModeButtonVisible'] as bool;
-    final soundModeButtonVisible = json['soundModeButtonVisible'] as bool;
-    final hapticModeButtonVisible = json['hapticModeButtonVisible'] as bool;
     final stopCapturingText = json['stopCapturingText'] as String?;
     final startCapturingText = json['startCapturingText'] as String?;
     final resumeCapturingText = json['resumeCapturingText'] as String?;
@@ -172,10 +170,10 @@ class SparkScanViewDefaults {
         scanningBehaviorButtonVisible,
         handModeButtonVisible,
         barcodeCountButtonVisible,
-        fastFindButtonVisible,
+        barcodeFindButtonVisible,
         targetModeButtonVisible,
-        soundModeButtonVisible,
-        hapticModeButtonVisible,
+        false, // Deprecated and will be removed in the future
+        false, // Deprecated and will be removed in the future
         stopCapturingText,
         startCapturingText,
         resumeCapturingText,

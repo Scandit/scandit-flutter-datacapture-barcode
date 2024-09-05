@@ -1,4 +1,4 @@
 
-# 6.25.3
+# 6.27.0
 
 Find the release notes for a specific version in our documentation: https://docs.scandit.com/data-capture-sdk/flutter/release-notes.html

@@ -3,15 +3,13 @@
  *
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
-
-package com.scandit.datacapture.flutter.barcode;
+package com.scandit.datacapture.flutter.barcode.count.ui;
 
 import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.scandit.datacapture.flutter.barcode.count.ui.FlutterBarcodeCountView;
 import com.scandit.datacapture.frameworks.barcode.count.BarcodeCountModule;
 import com.scandit.datacapture.frameworks.core.CoreModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
