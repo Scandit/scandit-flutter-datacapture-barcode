@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart' as m;
 import 'package:flutter/widgets.dart';
 import 'package:flutter/widgets.dart' as w;
+import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 class BarcodeTrackingAdvancedOverlayContainer extends Container {
   BarcodeTrackingAdvancedOverlayContainer({
@@ -41,7 +42,13 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
     final containerChild = child;
     if (containerChild == null) return super.build(context);
 
-    final filteredChild = _hideImages(containerChild);
+    Widget? filteredChild;
+
+    if (DataCaptureContextFeatures.getFeature<bool?>('barcode-ar-full') == true) {
+      filteredChild = containerChild;
+    } else {
+      filteredChild = _filterChildren(containerChild);
+    }
 
     return Container(
       key: key,
@@ -59,7 +66,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
     );
   }
 
-  Widget _hideImages(Widget child) {
+  Widget _filterChildren(Widget child) {
     if (child is Image) {
       log("The advanced overlay no longer supports rendering any kind of images. For further details about this backwards incompatible change, contact support@scandit.com.");
       return const SizedBox.shrink();
@@ -163,10 +170,10 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       mainAxisAlignment: widget.mainAxisAlignment,
       crossAxisAlignment: widget.crossAxisAlignment,
       mainAxisSize: widget.mainAxisSize,
-      children: widget.children.map(_hideImages).toList(),
       textBaseline: widget.textBaseline,
       textDirection: widget.textDirection,
       verticalDirection: widget.verticalDirection,
+      children: widget.children.map(_filterChildren).toList(),
     );
   }
 
@@ -176,10 +183,10 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       mainAxisAlignment: widget.mainAxisAlignment,
       crossAxisAlignment: widget.crossAxisAlignment,
       mainAxisSize: widget.mainAxisSize,
-      children: widget.children.map(_hideImages).toList(),
       textBaseline: widget.textBaseline,
       textDirection: widget.textDirection,
       verticalDirection: widget.verticalDirection,
+      children: widget.children.map(_filterChildren).toList(),
     );
   }
 
@@ -190,7 +197,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       textDirection: widget.textDirection,
       fit: widget.fit,
       clipBehavior: widget.clipBehavior,
-      children: widget.children.map(_hideImages).toList(),
+      children: widget.children.map(_filterChildren).toList(),
     );
   }
 
@@ -199,7 +206,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       key: widget.key,
       mainAxis: widget.mainAxis,
       reverse: widget.reverse,
-      children: widget.children.map(_hideImages).toList(),
+      children: widget.children.map(_filterChildren).toList(),
     );
   }
 
@@ -215,7 +222,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       textDirection: widget.textDirection,
       verticalDirection: widget.verticalDirection,
       clipBehavior: widget.clipBehavior,
-      children: widget.children.map(_hideImages).toList(),
+      children: widget.children.map(_filterChildren).toList(),
     );
   }
 
@@ -226,7 +233,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
         return TableRow(
           key: row.key,
           decoration: row.decoration,
-          children: row.children.map(_hideImages).toList(),
+          children: row.children.map(_filterChildren).toList(),
         );
       }).toList(),
       border: widget.border,
@@ -242,7 +249,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
     return CustomMultiChildLayout(
       key: widget.key,
       delegate: widget.delegate,
-      children: widget.children.map(_hideImages).toList(),
+      children: widget.children.map(_filterChildren).toList(),
     );
   }
 
@@ -251,7 +258,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       key: widget.key,
       delegate: widget.delegate,
       clipBehavior: widget.clipBehavior,
-      children: widget.children.map(_hideImages).toList(),
+      children: widget.children.map(_filterChildren).toList(),
     );
   }
 
@@ -266,7 +273,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       textDirection: widget.textDirection,
       clipBehavior: widget.clipBehavior,
       textBaseline: widget.textBaseline,
-      children: widget.children.map(_hideImages).toList(),
+      children: widget.children.map(_filterChildren).toList(),
     );
   }
 
@@ -282,11 +289,11 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       foregroundDecoration: widget.foregroundDecoration,
       padding: widget.padding,
       constraints: widget.constraints,
-      child: _hideImages(containerChild),
       margin: widget.margin,
       transform: widget.transform,
       transformAlignment: widget.transformAlignment,
       clipBehavior: widget.clipBehavior,
+      child: _filterChildren(containerChild),
     );
   }
 
@@ -297,7 +304,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
     return Padding(
       key: widget.key,
       padding: widget.padding,
-      child: _hideImages(paddingChild),
+      child: _filterChildren(paddingChild),
     );
   }
 
@@ -310,7 +317,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       alignment: widget.alignment,
       heightFactor: widget.heightFactor,
       widthFactor: widget.widthFactor,
-      child: _hideImages(alignChild),
+      child: _filterChildren(alignChild),
     );
   }
 
@@ -322,7 +329,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       key: widget.key,
       heightFactor: widget.heightFactor,
       widthFactor: widget.widthFactor,
-      child: _hideImages(centerChild),
+      child: _filterChildren(centerChild),
     );
   }
 
@@ -334,7 +341,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       key: widget.key,
       width: widget.width,
       height: widget.height,
-      child: _hideImages(sizeBoxChild),
+      child: _filterChildren(sizeBoxChild),
     );
   }
 
@@ -347,7 +354,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       fit: widget.fit,
       alignment: widget.alignment,
       clipBehavior: widget.clipBehavior,
-      child: _hideImages(fitteBoxChild),
+      child: _filterChildren(fitteBoxChild),
     );
   }
 
@@ -360,7 +367,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       alignment: widget.alignment,
       widthFactor: widget.widthFactor,
       heightFactor: widget.heightFactor,
-      child: _hideImages(fractionallySizedBoxChild),
+      child: _filterChildren(fractionallySizedBoxChild),
     );
   }
 
@@ -372,7 +379,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       key: widget.key,
       decoration: widget.decoration,
       position: widget.position,
-      child: _hideImages(decoratedBoxChild),
+      child: _filterChildren(decoratedBoxChild),
     );
   }
 
@@ -387,7 +394,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       origin: widget.origin,
       filterQuality: widget.filterQuality,
       transformHitTests: widget.transformHitTests,
-      child: _hideImages(transformChild),
+      child: _filterChildren(transformChild),
     );
   }
 
@@ -398,7 +405,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
     return CustomSingleChildLayout(
       key: widget.key,
       delegate: widget.delegate,
-      child: _hideImages(customSingleChildLayoutChild),
+      child: _filterChildren(customSingleChildLayoutChild),
     );
   }
 
@@ -410,7 +417,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       key: widget.key,
       filter: widget.filter,
       blendMode: widget.blendMode,
-      child: _hideImages(backdropFilterChild),
+      child: _filterChildren(backdropFilterChild),
     );
   }
 
@@ -422,7 +429,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       key: widget.key,
       clipBehavior: widget.clipBehavior,
       clipper: widget.clipper,
-      child: _hideImages(clipRectChild),
+      child: _filterChildren(clipRectChild),
     );
   }
 
@@ -433,7 +440,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
     return ClipRRect(
       key: widget.key,
       borderRadius: widget.borderRadius,
-      child: _hideImages(clipRectChild),
+      child: _filterChildren(clipRectChild),
     );
   }
 
@@ -445,7 +452,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       key: widget.key,
       clipBehavior: widget.clipBehavior,
       clipper: widget.clipper,
-      child: _hideImages(clipOvalChild),
+      child: _filterChildren(clipOvalChild),
     );
   }
 
@@ -456,7 +463,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
     return ConstrainedBox(
       key: widget.key,
       constraints: widget.constraints,
-      child: _hideImages(constrainedBoxChild),
+      child: _filterChildren(constrainedBoxChild),
     );
   }
 
@@ -466,7 +473,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
 
     return RepaintBoundary(
       key: widget.key,
-      child: _hideImages(repaintBoundaryChild),
+      child: _filterChildren(repaintBoundaryChild),
     );
   }
 
@@ -474,15 +481,15 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
     return Expanded(
       key: widget.key,
       flex: widget.flex,
-      child: _hideImages(widget.child),
+      child: _filterChildren(widget.child),
     );
   }
 
   Widget _rebuildDirectionalityChild(Directionality widget) {
     return Directionality(
       textDirection: widget.textDirection,
-      child: _hideImages(widget.child),
       key: widget.key,
+      child: _filterChildren(widget.child),
     );
   }
 

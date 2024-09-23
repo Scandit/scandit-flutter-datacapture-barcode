@@ -559,6 +559,12 @@ class _SparkScanViewState extends State<SparkScanView> {
     super.didUpdateWidget(oldWidget);
     oldWidget._bringViewToFront();
   }
+
+  @override
+  void dispose() {
+    widget._controller.dispose();
+    super.dispose();
+  }
 }
 
 class _SparkScanViewController {
@@ -663,5 +669,12 @@ class _SparkScanViewController {
       return _methodChannel.invokeMethod(SparkScanFunctionNames.bringViewToFront).onError(_onError);
     }
     return Future.value();
+  }
+
+  void dispose() {
+    _sparkScanDelegateFeedbackSubscription?.cancel();
+    _sparkScanDelegateFeedbackSubscription = null;
+    _sparkScanViewSubscription?.cancel();
+    _sparkScanViewSubscription = null;
   }
 }
