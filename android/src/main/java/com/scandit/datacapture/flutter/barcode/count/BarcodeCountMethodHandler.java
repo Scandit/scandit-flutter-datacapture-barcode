@@ -8,6 +8,7 @@ package com.scandit.datacapture.flutter.barcode.count;
 import androidx.annotation.NonNull;
 
 import com.scandit.datacapture.core.ui.style.BrushDeserializer;
+import com.scandit.datacapture.flutter.core.utils.FlutterResult;
 import com.scandit.datacapture.flutter.core.utils.ResultUtils;
 import com.scandit.datacapture.frameworks.barcode.count.BarcodeCountModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
@@ -156,6 +157,11 @@ public class BarcodeCountMethodHandler implements MethodChannel.MethodCallHandle
 
             case "setModeEnabledState":
                 getSharedModule().setModeEnabled(Boolean.TRUE.equals(call.arguments()));
+                break;
+
+            case "updateFeedback":
+                assert call.arguments() != null;
+                getSharedModule().updateFeedback(call.arguments(), new FlutterResult(result));
                 break;
 
             default:

@@ -25,7 +25,7 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 import 'barcode_find_view_settings.dart';
 
 abstract class BarcodeFindViewUiListener {
-  static const String _onFinishButtonTappedEventName = 'FrameworksBarcodeFindViewUiListener.onFinishButtonTapped';
+  static const String _onFinishButtonTappedEventName = 'BarcodeFindViewUiListener.onFinishButtonTapped';
 
   void didTapFinishButton(Set<BarcodeFindItem> foundItems);
 }

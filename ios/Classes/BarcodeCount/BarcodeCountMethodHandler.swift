@@ -38,6 +38,7 @@ class BarcodeCountMethodHandler {
 
         static let getBarcodeCountDefaults = "getBarcodeCountDefaults"
         static let setModeEnabledState = "setModeEnabledState"
+        static let updateFeedback = "updateFeedback"
     }
 
     private let barcodeCountModule: BarcodeCountModule
@@ -140,6 +141,8 @@ class BarcodeCountMethodHandler {
         case FunctionNames.setModeEnabledState:
             barcodeCountModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
             result(nil)
+        case FunctionNames.updateFeedback:
+            barcodeCountModule.updateFeedback(feedbackJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
         default:
             result(FlutterMethodNotImplemented)
         }

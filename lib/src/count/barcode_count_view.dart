@@ -512,6 +512,24 @@ class BarcodeCountView extends StatefulWidget implements Serializable {
     _updateNative();
   }
 
+  bool _shouldShowTorchControl = BarcodeCountDefaults.viewDefaults.shouldShowTorchControl;
+
+  bool get shouldShowTorchControl => _shouldShowTorchControl;
+
+  set shouldShowTorchControl(bool newValue) {
+    _shouldShowTorchControl = newValue;
+    _updateNative();
+  }
+
+  Anchor _torchControlPosition = BarcodeCountDefaults.viewDefaults.torchControlPosition;
+
+  Anchor get torchControlPosition => _torchControlPosition;
+
+  set torchControlPosition(Anchor newValue) {
+    _torchControlPosition = newValue;
+    _updateNative();
+  }
+
   Future<void> _updateNative() {
     if (!_isInitialized) {
       return Future.value();
@@ -535,7 +553,9 @@ class BarcodeCountView extends StatefulWidget implements Serializable {
         'shouldShowToolbar': shouldShowToolbar,
         'shouldShowScanAreaGuides': shouldShowScanAreaGuides,
         'toolbarSettings': _toolbarSettings?.toMap(),
-        'shouldShowListProgressBar': _shouldShowListProgressBar,
+        'shouldShowListProgressBar': shouldShowListProgressBar,
+        'shouldShowTorchControl': shouldShowTorchControl,
+        'torchControlPosition': torchControlPosition.toString()
       },
       'BarcodeCount': _barcodeCount.toMap()
     };

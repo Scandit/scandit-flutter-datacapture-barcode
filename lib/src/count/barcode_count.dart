@@ -43,7 +43,7 @@ class BarcodeCount extends DataCaptureMode {
 
   set feedback(BarcodeCountFeedback newValue) {
     _feedback = newValue;
-    didChange();
+    _controller.updateFeedback();
   }
 
   static CameraSettings get recommendedCameraSettings => _recommendedCameraSettings();
@@ -228,6 +228,11 @@ class _BarcodeCountController {
   Future<void> updateMode() {
     return _methodChannel.invokeMethod(
         BarcodeCountFunctionNames.updateBarcodeCountMode, jsonEncode(_barcodeCount.toMap()));
+  }
+
+  Future<void> updateFeedback() {
+    return _methodChannel.invokeMethod(
+        BarcodeCountFunctionNames.updateFeedback, jsonEncode(_barcodeCount.feedback.toMap()));
   }
 
   void setModeEnabledState(bool newValue) {

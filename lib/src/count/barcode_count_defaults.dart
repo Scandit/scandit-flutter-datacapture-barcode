@@ -93,6 +93,8 @@ class BarcodeCountViewDefaults {
   final String singleScanButtonAccessibilityLabel;
   final String singleScanButtonContentDescription;
   final bool shouldShowListProgressBar;
+  final bool shouldShowTorchControl;
+  final Anchor torchControlPosition;
 
   BarcodeCountViewDefaults(
       this.style,
@@ -135,7 +137,9 @@ class BarcodeCountViewDefaults {
       this.singleScanButtonAccessibilityHint,
       this.singleScanButtonAccessibilityLabel,
       this.singleScanButtonContentDescription,
-      this.shouldShowListProgressBar);
+      this.shouldShowListProgressBar,
+      this.shouldShowTorchControl,
+      this.torchControlPosition);
 
   factory BarcodeCountViewDefaults.fromJSON(Map<String, dynamic> json) {
     final style = BarcodeCountViewStyleSerializer.fromJSON(json['style'] as String);
@@ -256,6 +260,8 @@ class BarcodeCountViewDefaults {
     }
 
     final shouldShowListProgressBar = json['shouldShowListProgressBar'] as bool;
+    final shouldShowTorchControl = json['shouldShowTorchControl'] as bool;
+    final torchControlPosition = AnchorDeserializer.fromJSON(json['torchControlPosition']);
 
     return BarcodeCountViewDefaults(
         style,
@@ -298,7 +304,9 @@ class BarcodeCountViewDefaults {
         singleScanButtonAccessibilityHint,
         singleScanButtonAccessibilityLabel,
         singleScanButtonContentDescription,
-        shouldShowListProgressBar);
+        shouldShowListProgressBar,
+        shouldShowTorchControl,
+        torchControlPosition);
   }
 }
 
@@ -311,7 +319,7 @@ class BarcodeCountSettingsDefaults {
 
   factory BarcodeCountSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     return BarcodeCountSettingsDefaults(
-        BarcodeFilterSettings.fromJSON(json['BarcodeFilterSettings']), json['expectsOnlyUniqueBarcodes'] as bool);
+        BarcodeFilterSettings.fromJSON(json['barcodeFilterSettings']), json['expectOnlyUniqueBarcodes'] as bool);
   }
 }
 
