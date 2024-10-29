@@ -367,7 +367,7 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin implements
     }
 
     private void setupBarcodePick(@NonNull FlutterPluginBinding binding) {
-        BarcodePickModule barcodePickModule = (BarcodePickModule) serviceLocator.remove(BarcodePickModule.class.getName());
+        BarcodePickModule barcodePickModule = (BarcodePickModule) serviceLocator.resolve(BarcodePickModule.class.getName());
         if (barcodePickModule != null) return;
 
         barcodePickModule = BarcodePickModule.create(barcodePickEmitter);
@@ -377,7 +377,7 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin implements
     }
 
     private void setupBarcodeFind(@NonNull FlutterPluginBinding binding) {
-        BarcodeFindModule barcodeFindModule = (BarcodeFindModule) serviceLocator.remove(BarcodeFindModule.class.getName());
+        BarcodeFindModule barcodeFindModule = (BarcodeFindModule) serviceLocator.resolve(BarcodeFindModule.class.getName());
         if (barcodeFindModule != null) return;
 
         barcodeFindModule = BarcodeFindModule.create(
@@ -391,7 +391,7 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin implements
     }
 
     private void setupBarcodeTracking(@NonNull FlutterPluginBinding binding) {
-        BarcodeTrackingModule barcodeTrackingModule = (BarcodeTrackingModule) serviceLocator.remove(BarcodeTrackingModule.class.getName());
+        BarcodeTrackingModule barcodeTrackingModule = (BarcodeTrackingModule) serviceLocator.resolve(BarcodeTrackingModule.class.getName());
         if (barcodeTrackingModule != null) return;
 
         barcodeTrackingModule = BarcodeTrackingModule.create(
@@ -405,7 +405,7 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin implements
     }
 
     private void setupSparkScan(@NonNull FlutterPluginBinding binding) {
-        SparkScanModule sparkScanModule = (SparkScanModule) serviceLocator.remove(SparkScanModule.class.getName());
+        SparkScanModule sparkScanModule = (SparkScanModule) serviceLocator.resolve(SparkScanModule.class.getName());
         if (sparkScanModule != null) return;
 
         sparkScanModule = SparkScanModule.create(
@@ -419,7 +419,7 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin implements
     }
 
     private void setupBarcodeSelection(@NonNull FlutterPluginBinding binding) {
-        BarcodeSelectionModule barcodeSelectionModule = (BarcodeSelectionModule) serviceLocator.remove(BarcodeSelectionModule.class.getName());
+        BarcodeSelectionModule barcodeSelectionModule = (BarcodeSelectionModule) serviceLocator.resolve(BarcodeSelectionModule.class.getName());
         if (barcodeSelectionModule != null) return;
 
         barcodeSelectionModule = BarcodeSelectionModule.create(
@@ -433,7 +433,7 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin implements
     }
 
     private void setupBarcodeCount(@NonNull FlutterPluginBinding binding) {
-        BarcodeCountModule barcodeCountModule = (BarcodeCountModule) serviceLocator.remove(BarcodeCountModule.class.getName());
+        BarcodeCountModule barcodeCountModule = (BarcodeCountModule) serviceLocator.resolve(BarcodeCountModule.class.getName());
         if (barcodeCountModule != null) return;
 
         barcodeCountModule = BarcodeCountModule.create(
@@ -448,7 +448,7 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin implements
     }
 
     private void setupBarcodeCapture(@NonNull FlutterPluginBinding binding) {
-        BarcodeCaptureModule barcodeCaptureModule = (BarcodeCaptureModule) serviceLocator.remove(BarcodeCaptureModule.class.getName());
+        BarcodeCaptureModule barcodeCaptureModule = (BarcodeCaptureModule) serviceLocator.resolve(BarcodeCaptureModule.class.getName());
         if (barcodeCaptureModule != null) return;
 
         barcodeCaptureModule = BarcodeCaptureModule.create(
@@ -459,7 +459,7 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin implements
     }
 
     private void setupBarcodeModule(@NonNull FlutterPluginBinding binding) {
-        BarcodeModule barcodeModule = (BarcodeModule) serviceLocator.remove(BarcodeModule.class.getName());
+        BarcodeModule barcodeModule = (BarcodeModule) serviceLocator.resolve(BarcodeModule.class.getName());
         if (barcodeModule != null) return;
 
         barcodeModule = new BarcodeModule();
