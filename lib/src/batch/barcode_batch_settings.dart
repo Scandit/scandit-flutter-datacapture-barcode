@@ -9,12 +9,12 @@ import '../symbology.dart';
 import '../symbology_settings.dart';
 import '../barcode_defaults.dart';
 
-@Deprecated('Setting a scenario is no longer recommended, use the BarcodeTrackingSettings empty constructor instead.')
-enum BarcodeTrackingScenario {
+@Deprecated('Setting a scenario is no longer recommended, use the BarcodeBatchSettings empty constructor instead.')
+enum BarcodeBatchScenario {
   a('A'),
   b('B');
 
-  const BarcodeTrackingScenario(this._name);
+  const BarcodeBatchScenario(this._name);
 
   @override
   String toString() => _name;
@@ -22,23 +22,28 @@ enum BarcodeTrackingScenario {
   final String _name;
 }
 
-extension BarcodeTrackingScenarioSerializer on BarcodeTrackingScenario {
-  static BarcodeTrackingScenario fromJSON(String jsonValue) {
-    return BarcodeTrackingScenario.values.firstWhere((element) => element.toString() == jsonValue);
+// ignore: deprecated_member_use_from_same_package
+extension BarcodeBatchScenarioSerializer on BarcodeBatchScenario {
+  // ignore: deprecated_member_use_from_same_package
+  static BarcodeBatchScenario fromJSON(String jsonValue) {
+    // ignore: deprecated_member_use_from_same_package
+    return BarcodeBatchScenario.values.firstWhere((element) => element.toString() == jsonValue);
   }
 }
 
-class BarcodeTrackingSettings implements Serializable {
-  final BarcodeTrackingScenario? _scenario;
+class BarcodeBatchSettings implements Serializable {
+  // ignore: deprecated_member_use_from_same_package
+  final BarcodeBatchScenario? _scenario;
   final Map<String, dynamic> _properties = {};
   final Map<String, SymbologySettings> _symbologies = {};
 
   Set<Symbology> get enabledSymbologies => _enabledSymbologies();
 
-  BarcodeTrackingSettings() : this.forScenario(null);
-  BarcodeTrackingSettings._(this._scenario);
-  @Deprecated('Setting a scenario is no longer recommended, use the BarcodeTrackingSettings empty constructor instead.')
-  BarcodeTrackingSettings.forScenario(BarcodeTrackingScenario? scenario) : this._(scenario);
+// ignore: deprecated_member_use_from_same_package
+  BarcodeBatchSettings() : this.forScenario(null);
+  BarcodeBatchSettings._(this._scenario);
+  @Deprecated('Setting a scenario is no longer recommended, use the BarcodeBatchSettings empty constructor instead.')
+  BarcodeBatchSettings.forScenario(BarcodeBatchScenario? scenario) : this._(scenario);
 
   SymbologySettings settingsForSymbology(Symbology symbology) {
     var identifier = symbology.toString();

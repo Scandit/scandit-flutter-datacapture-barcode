@@ -42,7 +42,7 @@ class BarcodePick with PrivateBarcodePick implements Serializable {
     BarcodePickProductProvider productProvider,
   ) : this._(dataCaptureContext, settings, productProvider);
 
-  List<BarcodePickScanningListener> _listeners = [];
+  final List<BarcodePickScanningListener> _listeners = [];
 
   static CameraSettings get recommendedCameraSettings => _recommendedCameraSettings();
 
@@ -101,7 +101,7 @@ mixin PrivateBarcodePick {
 class _BarcodePickController {
   final BarcodePick barcodePick;
 
-  final MethodChannel _methodChannel = MethodChannel(BarcodePickFunctionNames.methodsChannelName);
+  final MethodChannel _methodChannel = const MethodChannel(BarcodePickFunctionNames.methodsChannelName);
   StreamSubscription<dynamic>? _subscription;
 
   _BarcodePickController(this.barcodePick);
@@ -145,12 +145,6 @@ class _BarcodePickController {
 
   void _onError(Object? error, StackTrace? stackTrace) {
     if (error == null) return;
-    print(error);
-
-    if (stackTrace != null) {
-      print(stackTrace);
-    }
-
     throw error;
   }
 }
