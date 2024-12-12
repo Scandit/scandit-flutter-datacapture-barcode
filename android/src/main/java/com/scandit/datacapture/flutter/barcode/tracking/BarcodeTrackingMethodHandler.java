@@ -3,14 +3,18 @@
  *
  * Copyright (C) 2024- Scandit AG. All rights reserved.
  */
-package com.scandit.datacapture.flutter.barcode.batch;
+package com.scandit.datacapture.flutter.barcode.tracking;
 
 import androidx.annotation.NonNull;
 
 import com.scandit.datacapture.flutter.core.utils.FlutterResult;
-import com.scandit.datacapture.frameworks.barcode.batch.BarcodeBatchModule;
+import com.scandit.datacapture.flutter.core.utils.ResultUtils;
+import com.scandit.datacapture.frameworks.barcode.tracking.BarcodeTrackingModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
+import com.scandit.datacapture.frameworks.core.errors.FrameDataNullError;
 import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
+import com.scandit.datacapture.frameworks.core.utils.DefaultLastFrameData;
+import com.scandit.datacapture.frameworks.core.utils.LastFrameData;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -19,50 +23,62 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
-public class BarcodeBatchMethodHandler implements MethodChannel.MethodCallHandler {
+public class BarcodeTrackingMethodHandler implements MethodChannel.MethodCallHandler {
 
-    public static final String EVENT_CHANNEL_NAME = "com.scandit.datacapture.barcode.batch/event_channel";
-    public static final String METHOD_CHANNEL_NAME = "com.scandit.datacapture.barcode.batch/method_channel";
+    public static final String EVENT_CHANNEL_NAME = "com.scandit.datacapture.barcode.tracking/event_channel";
+    public static final String METHOD_CHANNEL_NAME = "com.scandit.datacapture.barcode.tracking/method_channel";
 
     private final ServiceLocator<FrameworkModule> serviceLocator;
+    private final LastFrameData lastFrameData;
 
-    public BarcodeBatchMethodHandler(ServiceLocator<FrameworkModule> serviceLocator) {
+    public BarcodeTrackingMethodHandler(ServiceLocator<FrameworkModule> serviceLocator) {
+        this(serviceLocator, DefaultLastFrameData.getInstance());
+    }
+
+    public BarcodeTrackingMethodHandler(ServiceLocator<FrameworkModule> serviceLocator, LastFrameData lastFrameData) {
         this.serviceLocator = serviceLocator;
+        this.lastFrameData = lastFrameData;
     }
 
     @Override
     public void onMethodCall(MethodCall call, @NonNull MethodChannel.Result result) {
         switch (call.method) {
-            case "getBarcodeBatchDefaults":
+            case "getBarcodeTrackingDefaults":
                 result.success(new JSONObject(getSharedModule().getDefaults()).toString());
                 break;
-            case "addBarcodeBatchListener":
-                getSharedModule().addAsyncBarcodeBatchListener();
+            case "addBarcodeTrackingListener":
+                getSharedModule().addBarcodeTrackingListener();
                 result.success(null);
                 break;
-            case "removeBarcodeBatchListener":
-                getSharedModule().removeAsyncBarcodeBatchListener();
+            case "removeBarcodeTrackingListener":
+                getSharedModule().removeBarcodeTrackingListener();
                 result.success(null);
                 break;
-            case "barcodeBatchFinishDidUpdateSession":
+            case "barcodeTrackingFinishDidUpdateSession":
                 getSharedModule().finishDidUpdateSession(Boolean.TRUE.equals(call.arguments));
                 result.success(true);
                 break;
-            case "resetBarcodeBatchSession":
+            case "resetBarcodeTrackingSession":
                 getSharedModule().resetSession(
                         call.arguments instanceof Long ? (Long) call.arguments : null
                 );
                 result.success(null);
                 break;
             case "getLastFrameData":
-                assert call.arguments() != null;
-                getSharedModule().getFrameDataBytes(call.arguments(), new FlutterResult(result));
+                lastFrameData.getLastFrameDataBytes((bytes) -> {
+                    if (bytes == null) {
+                        ResultUtils.rejectKotlinError(result, new FrameDataNullError());
+                        return null;
+                    }
+                    result.success(bytes);
+                    return null;
+                });
                 break;
-            case "addBarcodeBatchAdvancedOverlayDelegate":
+            case "addBarcodeTrackingAdvancedOverlayDelegate":
                 getSharedModule().addAdvancedOverlayListener();
                 result.success(null);
                 break;
-            case "removeBarcodeBatchAdvancedOverlayDelegate":
+            case "removeBarcodeTrackingAdvancedOverlayDelegate":
                 getSharedModule().removeAdvancedOverlayListener();
                 result.success(null);
                 break;
@@ -98,11 +114,11 @@ public class BarcodeBatchMethodHandler implements MethodChannel.MethodCallHandle
                 getSharedModule().setOffsetForTrackedBarcode((HashMap<String, Object>) call.arguments);
                 result.success(null);
                 break;
-            case "subscribeBarcodeBatchBasicOverlayListener":
+            case "subscribeBarcodeTrackingBasicOverlayListener":
                 getSharedModule().addBasicOverlayListener();
                 result.success(null);
                 break;
-            case "unsubscribeBarcodeBatchBasicOverlayListener":
+            case "unsubscribeBarcodeTrackingBasicOverlayListener":
                 getSharedModule().removeBasicOverlayListener();
                 result.success(null);
                 break;
@@ -119,28 +135,28 @@ public class BarcodeBatchMethodHandler implements MethodChannel.MethodCallHandle
             case "setModeEnabledState":
                 getSharedModule().setModeEnabled(Boolean.TRUE.equals(call.arguments()));
                 break;
-            case "updateBarcodeBatchMode":
+            case "updateBarcodeTrackingMode":
                 assert call.arguments() != null;
                 getSharedModule().updateModeFromJson(
                         call.arguments(),
                         new FlutterResult(result)
                 );
                 break;
-            case "applyBarcodeBatchModeSettings":
+            case "applyBarcodeTrackingModeSettings":
                 assert call.arguments() != null;
                 getSharedModule().applyModeSettings(
                         call.arguments(),
                         new FlutterResult(result)
                 );
                 break;
-            case "updateBarcodeBatchBasicOverlay":
+            case "updateBarcodeTrackingBasicOverlay":
                 assert call.arguments() != null;
                 getSharedModule().updateBasicOverlay(
                         call.arguments(),
                         new FlutterResult(result)
                 );
                 break;
-            case "updateBarcodeBatchAdvancedOverlay":
+            case "updateBarcodeTrackingAdvancedOverlay":
                 assert call.arguments() != null;
                 getSharedModule().updateAdvancedOverlay(
                         call.arguments(),
@@ -152,13 +168,13 @@ public class BarcodeBatchMethodHandler implements MethodChannel.MethodCallHandle
         }
     }
 
-    private volatile BarcodeBatchModule sharedModuleInstance;
+    private volatile BarcodeTrackingModule sharedModuleInstance;
 
-    private BarcodeBatchModule getSharedModule() {
+    private BarcodeTrackingModule getSharedModule() {
         if (sharedModuleInstance == null) {
             synchronized (this) {
                 if (sharedModuleInstance == null) {
-                    sharedModuleInstance = (BarcodeBatchModule)this.serviceLocator.resolve(BarcodeBatchModule.class.getName());
+                    sharedModuleInstance = (BarcodeTrackingModule)this.serviceLocator.resolve(BarcodeTrackingModule.class.getName());
                 }
             }
         }

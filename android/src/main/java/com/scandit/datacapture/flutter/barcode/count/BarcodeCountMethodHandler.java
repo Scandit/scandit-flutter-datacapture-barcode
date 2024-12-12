@@ -9,9 +9,13 @@ import androidx.annotation.NonNull;
 
 import com.scandit.datacapture.core.ui.style.BrushDeserializer;
 import com.scandit.datacapture.flutter.core.utils.FlutterResult;
+import com.scandit.datacapture.flutter.core.utils.ResultUtils;
 import com.scandit.datacapture.frameworks.barcode.count.BarcodeCountModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
+import com.scandit.datacapture.frameworks.core.errors.FrameDataNullError;
 import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
+import com.scandit.datacapture.frameworks.core.utils.DefaultLastFrameData;
+import com.scandit.datacapture.frameworks.core.utils.LastFrameData;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -28,9 +32,15 @@ public class BarcodeCountMethodHandler implements MethodChannel.MethodCallHandle
     public static final String METHOD_CHANNEL_NAME = "com.scandit.datacapture.barcode.count/method_channel";
 
     private final ServiceLocator<FrameworkModule> serviceLocator;
+    private final LastFrameData lastFrameData;
 
     public BarcodeCountMethodHandler(ServiceLocator<FrameworkModule> serviceLocator) {
+        this(serviceLocator, DefaultLastFrameData.getInstance());
+    }
+
+    public BarcodeCountMethodHandler(ServiceLocator<FrameworkModule> serviceLocator, LastFrameData lastFrameData) {
         this.serviceLocator = serviceLocator;
+        this.lastFrameData = lastFrameData;
     }
 
     @Override
@@ -98,18 +108,24 @@ public class BarcodeCountMethodHandler implements MethodChannel.MethodCallHandle
                 break;
 
             case "addBarcodeCountListener":
-                getSharedModule().addAsyncBarcodeCountListener();
+                getSharedModule().addBarcodeCountListener();
                 result.success(null);
                 break;
 
             case "removeBarcodeCountListener":
-                getSharedModule().removeAsyncBarcodeCountListener();
+                getSharedModule().removeBarcodeCountListener();
                 result.success(null);
                 break;
 
             case "getBarcodeCountLastFrameData":
-                assert call.arguments() != null;
-                getSharedModule().getFrameDataBytes(call.arguments(), new FlutterResult(result));
+                lastFrameData.getLastFrameDataBytes(bytes -> {
+                    if (bytes == null) {
+                        ResultUtils.rejectKotlinError(result, new FrameDataNullError());
+                        return null;
+                    }
+                    result.success(bytes);
+                    return null;
+                });
                 break;
 
             case "resetBarcodeCount":
@@ -146,15 +162,6 @@ public class BarcodeCountMethodHandler implements MethodChannel.MethodCallHandle
             case "updateFeedback":
                 assert call.arguments() != null;
                 getSharedModule().updateFeedback(call.arguments(), new FlutterResult(result));
-                break;
-            case "submitBarcodeCountStatusProviderCallback":
-                assert call.arguments() != null;
-                getSharedModule().submitBarcodeCountStatusProviderCallbackResult(call.arguments(),
-                        new FlutterResult(result)
-                );
-                break;
-            case "addBarcodeCountStatusProvider":
-                getSharedModule().addBarcodeCountStatusProvider(new FlutterResult(result));
                 break;
 
             default:
@@ -210,7 +217,7 @@ public class BarcodeCountMethodHandler implements MethodChannel.MethodCallHandle
         if (sharedModuleInstance == null) {
             synchronized (this) {
                 if (sharedModuleInstance == null) {
-                    sharedModuleInstance = (BarcodeCountModule) this.serviceLocator.resolve(BarcodeCountModule.class.getName());
+                    sharedModuleInstance = (BarcodeCountModule)this.serviceLocator.resolve(BarcodeCountModule.class.getName());
                 }
             }
         }

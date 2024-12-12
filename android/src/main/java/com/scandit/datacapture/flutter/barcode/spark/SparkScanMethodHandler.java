@@ -11,6 +11,8 @@ import com.scandit.datacapture.flutter.core.utils.FlutterResult;
 import com.scandit.datacapture.frameworks.barcode.spark.SparkScanModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
 import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
+import com.scandit.datacapture.frameworks.core.utils.DefaultLastFrameData;
+import com.scandit.datacapture.frameworks.core.utils.LastFrameData;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -23,9 +25,15 @@ public class SparkScanMethodHandler implements MethodChannel.MethodCallHandler {
     public static final String METHOD_CHANNEL_NAME = "com.scandit.datacapture.barcode.spark/method_channel";
 
     private final ServiceLocator<FrameworkModule> serviceLocator;
+    private final LastFrameData lastFrameData;
 
     public SparkScanMethodHandler(ServiceLocator<FrameworkModule> serviceLocator) {
+        this(serviceLocator, DefaultLastFrameData.getInstance());
+    }
+
+    public SparkScanMethodHandler(ServiceLocator<FrameworkModule> serviceLocator, LastFrameData lastFrameData) {
         this.serviceLocator = serviceLocator;
+        this.lastFrameData = lastFrameData;
     }
 
     @Override
@@ -48,12 +56,12 @@ public class SparkScanMethodHandler implements MethodChannel.MethodCallHandler {
                 break;
 
             case "addSparkScanListener":
-                getSharedModule().addAsyncSparkScanListener();
+                getSharedModule().addSparkScanListener();
                 result.success(null);
                 break;
 
             case "removeSparkScanListener":
-                getSharedModule().removeAsyncSparkScanListener();
+                getSharedModule().removeSparkScanListener();
                 result.success(null);
                 break;
 
@@ -63,8 +71,10 @@ public class SparkScanMethodHandler implements MethodChannel.MethodCallHandler {
                 break;
 
             case "getLastFrameData":
-                assert call.arguments() != null;
-                getSharedModule().getFrameDataBytes(call.arguments(), new FlutterResult(result));
+                lastFrameData.getLastFrameDataBytes((bytes) -> {
+                    result.success(bytes);
+                    return null;
+                });
                 break;
 
             case "updateSparkScanMode":
@@ -91,9 +101,19 @@ public class SparkScanMethodHandler implements MethodChannel.MethodCallHandler {
                 result.success(null);
                 break;
 
+            case "sparkScanViewEmitFeedback":
+                assert call.arguments() != null;
+                getSharedModule().emitFeedback(call.arguments(), new FlutterResult(result));
+                break;
+
             case "showToast":
                 assert call.arguments() != null;
                 getSharedModule().showToast(call.arguments(), new FlutterResult(result));
+                break;
+
+            case "onWidgetPaused":
+                getSharedModule().onPause();
+                result.success(null);
                 break;
 
             case "setModeEnabledState":

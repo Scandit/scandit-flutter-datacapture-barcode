@@ -20,6 +20,7 @@ abstract class SparkScanFunctionNames {
   static const String sparkScanViewEmitFeedback = 'sparkScanViewEmitFeedback';
   static const String updateView = 'sparkScanViewUpdate';
   static const String showToast = 'showToast';
+  static const String onWidgetPaused = "onWidgetPaused";
   static const String setModeEnabledState = 'setModeEnabledState';
   static const String addFeedbackDelegate = 'addFeedbackDelegate';
   static const String removeFeedbackDelegate = 'removeFeedbackDelegate';
