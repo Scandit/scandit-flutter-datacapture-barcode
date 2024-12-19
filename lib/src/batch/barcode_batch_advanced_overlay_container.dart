@@ -5,37 +5,23 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/widgets.dart' as w;
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
-class BarcodeTrackingAdvancedOverlayContainer extends Container {
-  BarcodeTrackingAdvancedOverlayContainer({
-    Key? key,
-    AlignmentGeometry? alignment,
-    EdgeInsetsGeometry? padding,
-    Color? color,
-    Decoration? decoration,
-    Decoration? foregroundDecoration,
-    double? width,
-    double? height,
-    BoxConstraints? constraints,
-    EdgeInsetsGeometry? margin,
-    Matrix4? transform,
-    AlignmentGeometry? transformAlignment,
-    Widget? child,
-    Clip clipBehavior = Clip.none,
-  }) : super(
-            key: key,
-            alignment: alignment,
-            padding: padding,
-            color: color,
-            decoration: decoration,
-            foregroundDecoration: foregroundDecoration,
-            width: width,
-            height: height,
-            constraints: constraints,
-            margin: margin,
-            transform: transform,
-            transformAlignment: transformAlignment,
-            child: child,
-            clipBehavior: clipBehavior);
+class BarcodeBatchAdvancedOverlayContainer extends Container {
+  BarcodeBatchAdvancedOverlayContainer({
+    super.key,
+    super.alignment,
+    super.padding,
+    super.color,
+    super.decoration,
+    super.foregroundDecoration,
+    super.width,
+    super.height,
+    super.constraints,
+    super.margin,
+    super.transform,
+    super.transformAlignment,
+    super.child,
+    super.clipBehavior,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -58,11 +44,11 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       foregroundDecoration: foregroundDecoration,
       padding: padding,
       constraints: constraints,
-      child: filteredChild,
       margin: margin,
       transform: transform,
       transformAlignment: transformAlignment,
       clipBehavior: clipBehavior,
+      child: filteredChild,
     );
   }
 
@@ -494,7 +480,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
   }
 
   Widget _rebuildListViewChildren(ListView widget) {
-    if (!(widget.childrenDelegate is SliverChildListDelegate)) {
+    if (widget.childrenDelegate is! SliverChildListDelegate) {
       return Text(
         "Unsupported ${widget.runtimeType.toString()} widget used in the overlay.",
         textDirection: TextDirection.ltr,
@@ -504,7 +490,6 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
     var delegate = widget.childrenDelegate as SliverChildListDelegate;
 
     return ListView(
-      children: delegate.children,
       addAutomaticKeepAlives: delegate.addAutomaticKeepAlives,
       addRepaintBoundaries: delegate.addRepaintBoundaries,
       addSemanticIndexes: delegate.addSemanticIndexes,
@@ -525,6 +510,7 @@ class BarcodeTrackingAdvancedOverlayContainer extends Container {
       semanticChildCount: widget.semanticChildCount,
       shrinkWrap: widget.shrinkWrap,
       key: widget.key,
+      children: delegate.children,
     );
   }
 }

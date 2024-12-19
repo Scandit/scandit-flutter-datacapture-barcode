@@ -14,7 +14,7 @@ import 'barcode_count_view.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeCountDefaults {
-  static MethodChannel channel = MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
+  static MethodChannel channel = const MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
 
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
@@ -95,8 +95,11 @@ class BarcodeCountViewDefaults {
   final bool shouldShowListProgressBar;
   final bool shouldShowTorchControl;
   final Anchor torchControlPosition;
+  final bool tapToUncountEnabled;
+  final String textForTapToUncountHint;
+  final bool shouldShowStatusModeButton;
 
-  BarcodeCountViewDefaults(
+  const BarcodeCountViewDefaults(
       this.style,
       this.shouldShowUserGuidanceView,
       this.shouldShowListButton,
@@ -139,7 +142,10 @@ class BarcodeCountViewDefaults {
       this.singleScanButtonContentDescription,
       this.shouldShowListProgressBar,
       this.shouldShowTorchControl,
-      this.torchControlPosition);
+      this.torchControlPosition,
+      this.tapToUncountEnabled,
+      this.textForTapToUncountHint,
+      this.shouldShowStatusModeButton);
 
   factory BarcodeCountViewDefaults.fromJSON(Map<String, dynamic> json) {
     final style = BarcodeCountViewStyleSerializer.fromJSON(json['style'] as String);
@@ -262,6 +268,9 @@ class BarcodeCountViewDefaults {
     final shouldShowListProgressBar = json['shouldShowListProgressBar'] as bool;
     final shouldShowTorchControl = json['shouldShowTorchControl'] as bool;
     final torchControlPosition = AnchorDeserializer.fromJSON(json['torchControlPosition']);
+    final tapToUncountEnabled = json['tapToUncountEnabled'] as bool;
+    final textForTapToUncountHint = json['textForTapToUncountHint'] as String;
+    final shouldShowStatusModeButton = json['shouldShowStatusModeButton'] as bool? ?? false;
 
     return BarcodeCountViewDefaults(
         style,
@@ -306,7 +315,10 @@ class BarcodeCountViewDefaults {
         singleScanButtonContentDescription,
         shouldShowListProgressBar,
         shouldShowTorchControl,
-        torchControlPosition);
+        torchControlPosition,
+        tapToUncountEnabled,
+        textForTapToUncountHint,
+        shouldShowStatusModeButton);
   }
 }
 
@@ -315,7 +327,7 @@ class BarcodeCountSettingsDefaults {
   final BarcodeFilterSettings barcodeFilterSettings;
   final bool expectsOnlyUniqueBarcodes;
 
-  BarcodeCountSettingsDefaults(this.barcodeFilterSettings, this.expectsOnlyUniqueBarcodes);
+  const BarcodeCountSettingsDefaults(this.barcodeFilterSettings, this.expectsOnlyUniqueBarcodes);
 
   factory BarcodeCountSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     return BarcodeCountSettingsDefaults(
@@ -346,7 +358,7 @@ class BarcodeCountToolbarSettingsDefaults {
   final String? colorSchemeButtonAccessibilityHint;
   final String? colorSchemeButtonAccessibilityLabel;
 
-  BarcodeCountToolbarSettingsDefaults._(
+  const BarcodeCountToolbarSettingsDefaults._(
       this.audioOnButtonText,
       this.audioOffButtonText,
       this.audioButtonContentDescription,
@@ -464,7 +476,7 @@ class BarcodeCountFeedbackDefaults {
   final Feedback success;
   final Feedback failure;
 
-  BarcodeCountFeedbackDefaults(this.success, this.failure);
+  const BarcodeCountFeedbackDefaults(this.success, this.failure);
 
   factory BarcodeCountFeedbackDefaults.fromJSON(Map<String, dynamic> json) {
     var successJson = json['success'];

@@ -50,7 +50,7 @@ class BarcodeFindFeedback implements Serializable {
 }
 
 class _BarcodeFindFeedbackController {
-  final MethodChannel _methodChannel = MethodChannel(BarcodeFindFunctionNames.methodsChannelName);
+  final MethodChannel _methodChannel = const MethodChannel(BarcodeFindFunctionNames.methodsChannelName);
   final BarcodeFindFeedback _feedback;
 
   _BarcodeFindFeedbackController(this._feedback);

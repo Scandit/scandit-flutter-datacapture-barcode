@@ -4,12 +4,14 @@
  * Copyright (C) 2021- Scandit AG. All rights reserved.
  */
 
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
 
 import 'barcode_selection_function_names.dart';
 import '../../scandit_flutter_datacapture_barcode.dart';
 
-class BarcodeSelectionSession {
+class BarcodeSelectionSession with _PrivateBarcodeSelectionSession {
   final List<Barcode> _selectedBarcodes;
   final List<Barcode> _newlySelectedBarcodes;
   final List<Barcode> _newlyUnselectedBarcodes;
@@ -24,8 +26,10 @@ class BarcodeSelectionSession {
   final int _frameSequenceId;
   int get frameSequenceId => _frameSequenceId;
 
-  BarcodeSelectionSession._(
-      this._newlySelectedBarcodes, this._newlyUnselectedBarcodes, this._selectedBarcodes, this._frameSequenceId);
+  BarcodeSelectionSession._(this._newlySelectedBarcodes, this._newlyUnselectedBarcodes, this._selectedBarcodes,
+      this._frameSequenceId, String? frameId) {
+    _frameId = frameId;
+  }
 
   Future<void> reset() {
     return _controller.reset(_frameSequenceId);
@@ -35,24 +39,35 @@ class BarcodeSelectionSession {
     return _controller.getCount(barcode);
   }
 
-  BarcodeSelectionSession.fromJSON(Map<String, dynamic> json)
-      : this._(
-            (json['newlySelectedBarcodes'] as List<dynamic>)
-                .cast<Map<String, dynamic>>()
-                .map((e) => Barcode.fromJSON(e))
-                .toList()
-                .cast<Barcode>(),
-            (json['newlyUnselectedBarcodes'] as List<dynamic>)
-                .cast<Map<String, dynamic>>()
-                .map((e) => LocalizedOnlyBarcode.fromJSON(e))
-                .toList()
-                .cast<Barcode>(),
-            (json['selectedBarcodes'] as List<dynamic>)
-                .cast<Map<String, dynamic>>()
-                .map((e) => LocalizedOnlyBarcode.fromJSON(e))
-                .toList()
-                .cast<Barcode>(),
-            (json['frameSequenceId'] as num).toInt());
+  factory BarcodeSelectionSession.fromJSON(Map<String, dynamic> event) {
+    var json = jsonDecode(event['session']);
+
+    return BarcodeSelectionSession._(
+      (json['newlySelectedBarcodes'] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .map((e) => Barcode.fromJSON(e))
+          .toList()
+          .cast<Barcode>(),
+      (json['newlyUnselectedBarcodes'] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .map((e) => LocalizedOnlyBarcode.fromJSON(e))
+          .toList()
+          .cast<Barcode>(),
+      (json['selectedBarcodes'] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .map((e) => LocalizedOnlyBarcode.fromJSON(e))
+          .toList()
+          .cast<Barcode>(),
+      (json['frameSequenceId'] as num).toInt(),
+      event['frameId'] as String?,
+    );
+  }
+}
+
+mixin _PrivateBarcodeSelectionSession {
+  String? _frameId;
+
+  String? get frameId => _frameId;
 }
 
 class _BarcodeSelectionSessionController {
@@ -70,6 +85,6 @@ class _BarcodeSelectionSessionController {
   }
 
   MethodChannel _getChannel() {
-    return MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
+    return const MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
   }
 }

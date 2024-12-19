@@ -12,7 +12,7 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 import 'barcode_find_function_names.dart';
 
 class BarcodeFindDefaults {
-  static MethodChannel mainChannel = MethodChannel(BarcodeFindFunctionNames.methodsChannelName);
+  static MethodChannel mainChannel = const MethodChannel(BarcodeFindFunctionNames.methodsChannelName);
 
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
@@ -61,7 +61,7 @@ class BarcodeFindViewDefaults {
   final String? textForItemListUpdatedHint;
   final String? textForItemListUpdatedWhenPausedHint;
 
-  BarcodeFindViewDefaults(
+  const BarcodeFindViewDefaults(
       this.shouldShowCarousel,
       this.shouldShowFinishButton,
       this.shouldShowHints,
@@ -116,7 +116,7 @@ class BarcodeFindFeedbackDefaults {
   final Feedback found;
   final Feedback itemListUpdated;
 
-  BarcodeFindFeedbackDefaults(this.found, this.itemListUpdated);
+  const BarcodeFindFeedbackDefaults(this.found, this.itemListUpdated);
 
   factory BarcodeFindFeedbackDefaults.fromJSON(Map<String, dynamic> json) {
     var foundJson = json['found'];

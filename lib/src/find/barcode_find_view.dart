@@ -293,7 +293,7 @@ class BarcodeFindView extends StatefulWidget implements Serializable {
 }
 
 class _BarcodeFindViewController {
-  final MethodChannel _methodChannel = MethodChannel(BarcodeFindFunctionNames.methodsChannelName);
+  final MethodChannel _methodChannel = const MethodChannel(BarcodeFindFunctionNames.methodsChannelName);
 
   StreamSubscription<dynamic>? _viewEventsSubscription;
 
@@ -358,12 +358,6 @@ class _BarcodeFindViewController {
 
   void _onError(Object? error, StackTrace? stackTrace) {
     if (error == null) return;
-    print(error);
-
-    if (stackTrace != null) {
-      print(stackTrace);
-    }
-
     throw error;
   }
 
