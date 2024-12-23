@@ -93,10 +93,6 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
     _controller.update();
   }
 
-  void _handleViewfinderChanged() {
-    _controller.update();
-  }
-
   final Viewfinder _viewfinder = AimerViewfinder();
 
   Viewfinder get viewfinder => _viewfinder;
@@ -111,8 +107,6 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
     _trackedBrush = brushDefaultsForCurrentStyle.trackedBrush;
     view?.addOverlay(this);
     _controller = _BarcodeSelectionBasicOverlayController(this);
-
-    viewfinder.addListener(_handleViewfinderChanged);
   }
 
   Color _frozenBackgroundColor = BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.frozenBackgroundColor;
@@ -156,7 +150,7 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
 class _BarcodeSelectionBasicOverlayController {
   late final MethodChannel _methodChannel = _getChannel();
 
-  final BarcodeSelectionBasicOverlay _overlay;
+  BarcodeSelectionBasicOverlay _overlay;
 
   _BarcodeSelectionBasicOverlayController(this._overlay);
 
@@ -166,6 +160,6 @@ class _BarcodeSelectionBasicOverlayController {
   }
 
   MethodChannel _getChannel() {
-    return const MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
+    return MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
   }
 }

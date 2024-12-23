@@ -6,35 +6,38 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/batch/barcode_batch_advanced_overlay_widget.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/tracking/barcode_tracking_advanced_overlay_widget.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
-import 'barcode_batch.dart';
+import 'barcode_tracking.dart';
 import 'tracked_barcode.dart';
-import 'barcode_batch_function_names.dart';
+import 'package:scandit_flutter_datacapture_core/src/widget_to_base64_converter.dart';
+import 'barcode_tracking_function_names.dart';
 
-abstract class BarcodeBatchAdvancedOverlayListener {
-  static const String _widgetForTrackedBarcodeEventName = 'BarcodeBatchAdvancedOverlayListener.viewForTrackedBarcode';
-  static const String _anchorForTrackedBarcodeEventName = 'BarcodeBatchAdvancedOverlayListener.anchorForTrackedBarcode';
-  static const String _offsetForTrackedBarcodeEventName = 'BarcodeBatchAdvancedOverlayListener.offsetForTrackedBarcode';
+abstract class BarcodeTrackingAdvancedOverlayListener {
+  static const String _widgetForTrackedBarcodeEventName =
+      'BarcodeTrackingAdvancedOverlayListener.viewForTrackedBarcode';
+  static const String _anchorForTrackedBarcodeEventName =
+      'BarcodeTrackingAdvancedOverlayListener.anchorForTrackedBarcode';
+  static const String _offsetForTrackedBarcodeEventName =
+      'BarcodeTrackingAdvancedOverlayListener.offsetForTrackedBarcode';
   static const String _didTapViewForTrackedBarcodeEventName =
-      'BarcodeBatchAdvancedOverlayListener.didTapViewForTrackedBarcode';
+      'BarcodeTrackingAdvancedOverlayListener.didTapViewForTrackedBarcode';
 
-  BarcodeBatchAdvancedOverlayWidget? widgetForTrackedBarcode(
-      BarcodeBatchAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
-  Anchor anchorForTrackedBarcode(BarcodeBatchAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
-  PointWithUnit offsetForTrackedBarcode(BarcodeBatchAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
-  void didTapViewForTrackedBarcode(BarcodeBatchAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
+  BarcodeTrackingAdvancedOverlayWidget? widgetForTrackedBarcode(
+      BarcodeTrackingAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
+  Anchor anchorForTrackedBarcode(BarcodeTrackingAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
+  PointWithUnit offsetForTrackedBarcode(BarcodeTrackingAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
+  void didTapViewForTrackedBarcode(BarcodeTrackingAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
 }
 
-class BarcodeBatchAdvancedOverlay extends DataCaptureOverlay {
+class BarcodeTrackingAdvancedOverlay extends DataCaptureOverlay {
   // ignore: unused_field
-  final BarcodeBatch _barcodeBatch;
-  late _BarcodeBatchAdvancedOverlayController _controller;
+  final BarcodeTracking _barcodeTracking;
+  late _BarcodeTrackingAdvancedOverlayController _controller;
   DataCaptureView? _view;
 
   @override
@@ -48,21 +51,22 @@ class BarcodeBatchAdvancedOverlay extends DataCaptureOverlay {
     _view = newValue;
   }
 
-  BarcodeBatchAdvancedOverlay._(this._barcodeBatch) : super('barcodeTrackingAdvanced') {
-    _controller = _BarcodeBatchAdvancedOverlayController(this);
+  BarcodeTrackingAdvancedOverlay._(this._barcodeTracking) : super('barcodeTrackingAdvanced') {
+    _controller = _BarcodeTrackingAdvancedOverlayController(this);
   }
 
-  factory BarcodeBatchAdvancedOverlay.withBarcodeBatchForView(BarcodeBatch barcodeBatch, DataCaptureView? view) {
-    var overlay = BarcodeBatchAdvancedOverlay._(barcodeBatch);
+  factory BarcodeTrackingAdvancedOverlay.withBarcodeTrackingForView(
+      BarcodeTracking barcodeTracking, DataCaptureView? view) {
+    var overlay = BarcodeTrackingAdvancedOverlay._(barcodeTracking);
     overlay.view = view;
     return overlay;
   }
 
-  BarcodeBatchAdvancedOverlayListener? _listener;
+  BarcodeTrackingAdvancedOverlayListener? _listener;
 
-  BarcodeBatchAdvancedOverlayListener? get listener => _listener;
+  BarcodeTrackingAdvancedOverlayListener? get listener => _listener;
 
-  set listener(BarcodeBatchAdvancedOverlayListener? newValue) {
+  set listener(BarcodeTrackingAdvancedOverlayListener? newValue) {
     _controller.unsubscribeListener(); // cleanup first
     if (newValue != null) {
       _controller.subscribeListener();
@@ -71,7 +75,7 @@ class BarcodeBatchAdvancedOverlay extends DataCaptureOverlay {
     _listener = newValue;
   }
 
-  Future<void> setWidgetForTrackedBarcode(BarcodeBatchAdvancedOverlayWidget? widget, TrackedBarcode trackedBarcode) {
+  Future<void> setWidgetForTrackedBarcode(BarcodeTrackingAdvancedOverlayWidget? widget, TrackedBarcode trackedBarcode) {
     return _controller.setWidgetForTrackedBarcode(widget, trackedBarcode);
   }
 
@@ -103,16 +107,16 @@ class BarcodeBatchAdvancedOverlay extends DataCaptureOverlay {
   }
 }
 
-class _BarcodeBatchAdvancedOverlayController {
-  final BarcodeBatchAdvancedOverlay _overlay;
+class _BarcodeTrackingAdvancedOverlayController {
+  final BarcodeTrackingAdvancedOverlay _overlay;
 
-  final MethodChannel _methodChannel = const MethodChannel(BarcodeBatchFunctionNames.methodsChannelName);
+  final MethodChannel _methodChannel = MethodChannel(BarcodeTrackingFunctionNames.methodsChannelName);
 
   StreamSubscription<dynamic>? _overlaySubscription;
 
   final List<int> _widgetRequestsCache = [];
 
-  _BarcodeBatchAdvancedOverlayController(this._overlay);
+  _BarcodeTrackingAdvancedOverlayController(this._overlay);
 
   Future<void> setWidgetForTrackedBarcode(Widget? widget, TrackedBarcode trackedBarcode) async {
     var arguments = <String, dynamic>{'identifier': trackedBarcode.identifier};
@@ -127,7 +131,7 @@ class _BarcodeBatchAdvancedOverlayController {
     }
 
     return _methodChannel
-        .invokeMethod(BarcodeBatchFunctionNames.setWidgetForTrackedBarcode, arguments)
+        .invokeMethod(BarcodeTrackingFunctionNames.setWidgetForTrackedBarcode, arguments)
         // once the widget is sent we do remove the request from the cache
         .then((value) => _widgetRequestsCache.remove(trackedBarcode.identifier));
   }
@@ -137,7 +141,7 @@ class _BarcodeBatchAdvancedOverlayController {
     if (trackedBarcode.sessionFrameSequenceId != null) {
       arguments['sessionFrameSequenceID'] = trackedBarcode.sessionFrameSequenceId!;
     }
-    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.setAnchorForTrackedBarcode, arguments);
+    return _methodChannel.invokeMethod(BarcodeTrackingFunctionNames.setAnchorForTrackedBarcode, arguments);
   }
 
   Future<void> setOffsetForTrackedBarcode(PointWithUnit offset, TrackedBarcode trackedBarcode) {
@@ -145,62 +149,64 @@ class _BarcodeBatchAdvancedOverlayController {
     if (trackedBarcode.sessionFrameSequenceId != null) {
       arguments['sessionFrameSequenceID'] = trackedBarcode.sessionFrameSequenceId!;
     }
-    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.setOffsetForTrackedBarcode, arguments);
+    return _methodChannel.invokeMethod(BarcodeTrackingFunctionNames.setOffsetForTrackedBarcode, arguments);
   }
 
   Future<void> clearTrackedBarcodeWidgets() {
-    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.clearTrackedBarcodeWidgets);
+    return _methodChannel.invokeMethod(BarcodeTrackingFunctionNames.clearTrackedBarcodeWidgets);
   }
 
   Future<void> update() {
     return _methodChannel
-        .invokeMethod(BarcodeBatchFunctionNames.updateBarcodeBatchAdvancedOverlay, jsonEncode(_overlay.toMap()))
+        .invokeMethod(BarcodeTrackingFunctionNames.updateBarcodeTrackingAdvancedOverlay, jsonEncode(_overlay.toMap()))
         .then((value) => null, onError: _onError);
   }
 
   void subscribeListener() {
     _methodChannel
-        .invokeMethod(BarcodeBatchFunctionNames.addBarcodeBatchAdvancedOverlayDelegate)
+        .invokeMethod(BarcodeTrackingFunctionNames.addBarcodeTrackingAdvancedOverlayDelegate)
         .then((value) => _listenToEvents(), onError: _onError);
   }
 
   void _listenToEvents() {
-    _overlaySubscription = BarcodePluginEvents.barcodeBatchEventStream.listen((event) async {
+    _overlaySubscription = BarcodePluginEvents.barcodeTrackingEventStream.listen((event) async {
       if (_overlay._listener == null) return;
 
       var json = jsonDecode(event as String);
       switch (json['event'] as String) {
-        case BarcodeBatchAdvancedOverlayListener._widgetForTrackedBarcodeEventName:
+        case BarcodeTrackingAdvancedOverlayListener._widgetForTrackedBarcodeEventName:
           var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
+          print(trackedBarcode);
           // this is to avoid processing multiple requests for the same
           // barcode at the same time.
           if (_widgetRequestsCache.contains(trackedBarcode.identifier)) return;
           _widgetRequestsCache.add(trackedBarcode.identifier);
 
           var widget = _overlay._listener?.widgetForTrackedBarcode(_overlay, trackedBarcode);
+          print(widget);
           if (widget == null) return;
           // ignore: unnecessary_lambdas
-          setWidgetForTrackedBarcode(widget, trackedBarcode).catchError((error) => log(error));
+          setWidgetForTrackedBarcode(widget, trackedBarcode).catchError((error) => print(error));
           break;
-        case BarcodeBatchAdvancedOverlayListener._anchorForTrackedBarcodeEventName:
+        case BarcodeTrackingAdvancedOverlayListener._anchorForTrackedBarcodeEventName:
           var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
           var anchor = _overlay._listener?.anchorForTrackedBarcode(_overlay, trackedBarcode);
           if (anchor == null) {
             break;
           }
           // ignore: unnecessary_lambdas
-          setAnchorForTrackedBarcode(anchor, trackedBarcode).catchError((error) => log(error));
+          setAnchorForTrackedBarcode(anchor, trackedBarcode).catchError((error) => print(error));
           break;
-        case BarcodeBatchAdvancedOverlayListener._offsetForTrackedBarcodeEventName:
+        case BarcodeTrackingAdvancedOverlayListener._offsetForTrackedBarcodeEventName:
           var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
           var offset = _overlay._listener?.offsetForTrackedBarcode(_overlay, trackedBarcode);
           if (offset == null) {
             break;
           }
           // ignore: unnecessary_lambdas
-          setOffsetForTrackedBarcode(offset, trackedBarcode).catchError((error) => log(error));
+          setOffsetForTrackedBarcode(offset, trackedBarcode).catchError((error) => print(error));
           break;
-        case BarcodeBatchAdvancedOverlayListener._didTapViewForTrackedBarcodeEventName:
+        case BarcodeTrackingAdvancedOverlayListener._didTapViewForTrackedBarcodeEventName:
           var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
           _overlay._listener?.didTapViewForTrackedBarcode(_overlay, trackedBarcode);
           break;
@@ -211,12 +217,18 @@ class _BarcodeBatchAdvancedOverlayController {
   void unsubscribeListener() {
     _overlaySubscription?.cancel();
     _methodChannel
-        .invokeMethod(BarcodeBatchFunctionNames.removeBarcodeBatchAdvancedOverlayDelegate)
+        .invokeMethod(BarcodeTrackingFunctionNames.removeBarcodeTrackingAdvancedOverlayDelegate)
         .then((value) => null, onError: _onError);
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {
     if (error == null) return;
+    print(error);
+
+    if (stackTrace != null) {
+      print(stackTrace);
+    }
+
     throw error;
   }
 }

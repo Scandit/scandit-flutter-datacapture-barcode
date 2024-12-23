@@ -14,15 +14,13 @@ import androidx.annotation.Nullable;
 
 import com.scandit.datacapture.barcode.spark.ui.SparkScanView;
 import com.scandit.datacapture.flutter.core.ui.FlutterBasePlatformView;
-import com.scandit.datacapture.flutter.core.utils.DefaultActivityLifecycleObserver;
 import com.scandit.datacapture.flutter.core.utils.FlutterLogInsteadOfResult;
 import com.scandit.datacapture.frameworks.barcode.spark.SparkScanModule;
-import com.scandit.datacapture.frameworks.core.result.NoopFrameworksResult;
 
 import io.flutter.embedding.android.FlutterView;
 
 @SuppressLint("ViewConstructor")
-public class FlutterSparkScanView extends FlutterBasePlatformView implements DefaultActivityLifecycleObserver.ViewObserver {
+public class FlutterSparkScanView extends FlutterBasePlatformView {
 
     private final SparkScanModule sparkScanModule;
     private final String jsonString;
@@ -31,7 +29,6 @@ public class FlutterSparkScanView extends FlutterBasePlatformView implements Def
         super(context);
         this.sparkScanModule = sparkScanModule;
         this.jsonString = jsonString;
-        DefaultActivityLifecycleObserver.getInstance().addObserver(this);
     }
 
     @Override
@@ -69,7 +66,6 @@ public class FlutterSparkScanView extends FlutterBasePlatformView implements Def
     @Override
     public void dispose() {
         sparkScanModule.disposeView();
-        DefaultActivityLifecycleObserver.getInstance().removeObserver(this);
         super.dispose();
     }
 
@@ -79,35 +75,5 @@ public class FlutterSparkScanView extends FlutterBasePlatformView implements Def
         }
 
         return getFlutterView(parent.getParent());
-    }
-
-    @Override
-    public void onCreate() {
-        // no callback on SparkScanView
-    }
-
-    @Override
-    public void onStart() {
-        // no callback on SparkScanView
-    }
-
-    @Override
-    public void onResume() {
-        sparkScanModule.onResume(new NoopFrameworksResult());
-    }
-
-    @Override
-    public void onPause() {
-        sparkScanModule.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        // no callback on SparkScanView
-    }
-
-    @Override
-    public void onDestroy() {
-        // no callback on SparkScanView
     }
 }

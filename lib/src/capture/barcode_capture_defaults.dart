@@ -8,13 +8,14 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+import 'package:scandit_flutter_datacapture_core/src/battery_saving_mode.dart';
 
 import 'barcode_capture_overlay.dart';
 import 'barcode_capture_function_names.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeCaptureDefaults {
-  static MethodChannel channel = const MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
+  static MethodChannel channel = MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
 
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
@@ -49,7 +50,7 @@ class BarcodeCaptureSettingsDefaults {
   final BatterySavingMode batterySaving;
   final ScanIntention scanIntention;
 
-  const BarcodeCaptureSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention);
+  BarcodeCaptureSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention);
 
   factory BarcodeCaptureSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     return BarcodeCaptureSettingsDefaults(
@@ -65,7 +66,7 @@ class BarcodeCaptureOverlayDefaults {
   final BarcodeCaptureOverlayStyle defaultStyle;
   final Map<BarcodeCaptureOverlayStyle, Brush> brushes;
 
-  const BarcodeCaptureOverlayDefaults(this.defaultStyle, this.brushes);
+  BarcodeCaptureOverlayDefaults(this.defaultStyle, this.brushes);
 
   factory BarcodeCaptureOverlayDefaults.fromJSON(Map<String, dynamic> json) {
     var defaultStyle = BarcodeCaptureOverlayStyleSerializer.fromJSON(json['defaultStyle'] as String);
