@@ -19,23 +19,13 @@ class TrackedBarcode {
 
   int? sessionFrameSequenceId;
 
-  TrackedBarcode._(this._barcode, this._location, this._identifier, this.sessionFrameSequenceId,
-      {required bool shouldAnimateFromPreviousToNextState}) {}
-
-  @Deprecated('shouldAnimateFromPreviousToNextState is deprecated and returns "false" when accessed.')
-  bool get shouldAnimateFromPreviousToNextState => false;
+  TrackedBarcode._(this._barcode, this._location, this._identifier, this.sessionFrameSequenceId);
 
   factory TrackedBarcode.fromJSON(Map<String, dynamic> json, {int? sessionFrameSequenceId}) {
     var barcode = Barcode.fromJSON(json['barcode']);
     var location = Quadrilateral.fromJSON(json['location']);
     var identifier = int.parse(json['identifier'] as String);
-    var shouldAnimateFromPreviousToNextState = false;
 
-    if (json.containsKey('shouldAnimateFromPreviousToNextState')) {
-      shouldAnimateFromPreviousToNextState = json['shouldAnimateFromPreviousToNextState'] as bool;
-    }
-
-    return TrackedBarcode._(barcode, location, identifier, sessionFrameSequenceId,
-        shouldAnimateFromPreviousToNextState: shouldAnimateFromPreviousToNextState);
+    return TrackedBarcode._(barcode, location, identifier, sessionFrameSequenceId);
   }
 }

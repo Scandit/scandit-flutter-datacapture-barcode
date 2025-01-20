@@ -117,9 +117,9 @@ class BarcodeFind extends DataCaptureMode with PrivateBarcodeFind {
     return _controller.updateMode();
   }
 
-  void setBarcodeTransformer(BarcodeFindTransformer barcodeTransformer) {
+  Future<void> setBarcodeTransformer(BarcodeFindTransformer barcodeTransformer) {
     _barcodeTransformer = barcodeTransformer;
-    _controller.setBarcodeTransformer();
+    return _controller.setBarcodeTransformer();
   }
 
   @override
@@ -151,7 +151,7 @@ mixin PrivateBarcodeFind {
 
 class _BarcodeFindController {
   final BarcodeFind _barcodeFind;
-  final MethodChannel _methodChannel = MethodChannel(BarcodeFindFunctionNames.methodsChannelName);
+  final MethodChannel _methodChannel = const MethodChannel(BarcodeFindFunctionNames.methodsChannelName);
   StreamSubscription<dynamic>? _streamSubscription;
   // ignore: unused_field
   StreamSubscription<dynamic>? _barcodeTransformerSubscription;
@@ -237,8 +237,8 @@ class _BarcodeFindController {
         .then((value) => null, onError: _onError);
   }
 
-  void setBarcodeTransformer() {
-    _methodChannel
+  Future<void> setBarcodeTransformer() {
+    return _methodChannel
         .invokeMethod(BarcodeFindFunctionNames.setBarcodeTransformer)
         .then((value) => _setupBarcodeTransformerSubscription(), onError: _onError);
   }
@@ -257,12 +257,6 @@ class _BarcodeFindController {
 
   void _onError(Object? error, StackTrace? stackTrace) {
     if (error == null) return;
-    print(error);
-
-    if (stackTrace != null) {
-      print(stackTrace);
-    }
-
     throw error;
   }
 }

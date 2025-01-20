@@ -68,7 +68,7 @@ class BarcodePickView extends StatefulWidget implements Serializable {
   final CameraSettings? _cameraSettings;
   final List<BarcodePickActionListener> _actionListeners = [];
   final List<BarcodePickViewListener> _viewListeners = [];
-  BarcodePickViewUiListener? _uiListener = null;
+  BarcodePickViewUiListener? _uiListener;
   bool _isViewStarted = false;
 
   late _BarcodePickViewController _controller;
@@ -76,7 +76,7 @@ class BarcodePickView extends StatefulWidget implements Serializable {
   BarcodePickView._(this._dataCaptureContext, this._barcodePick, this._barcodPickViewSettings, this._cameraSettings)
       : super() {
     _controller = _BarcodePickViewController(this);
-    this._barcodePick.productProvider.subscribeEvents();
+    _barcodePick.productProvider.subscribeEvents();
   }
 
   factory BarcodePickView.forModeWithViewSettings(
@@ -180,7 +180,7 @@ class BarcodePickView extends StatefulWidget implements Serializable {
 }
 
 class _BarcodePickViewController {
-  final MethodChannel _methodChannel = MethodChannel(BarcodePickFunctionNames.methodsChannelName);
+  final MethodChannel _methodChannel = const MethodChannel(BarcodePickFunctionNames.methodsChannelName);
 
   StreamSubscription<dynamic>? _viewEventsSubscription;
 
@@ -311,12 +311,6 @@ class _BarcodePickViewController {
 
   void _onError(Object? error, StackTrace? stackTrace) {
     if (error == null) return;
-    print(error);
-
-    if (stackTrace != null) {
-      print(stackTrace);
-    }
-
     throw error;
   }
 
