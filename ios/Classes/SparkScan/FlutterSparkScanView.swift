@@ -32,19 +32,16 @@ class FlutterSparkScanView: UIView, FlutterPlatformView {
         guard let _ = superview, let _ = window else { return }
         let flutterAppDelegate = (UIApplication.shared.delegate as! FlutterAppDelegate)
         let flutterView = flutterAppDelegate.window.rootViewController!.view!
-        let parent = flutterView.superview!
-        
-        sparkScanModule.addViewToContainer(parent,
+        sparkScanModule.addViewToContainer(flutterView,
                                            jsonString: creationJson,
                                            result: FlutterLogInsteadOfResult())
         let sparkScanView = sparkScanModule.sparkScanView!
-        parent.bringSubviewToFront(sparkScanView)
-        
-        let sparkScanViewConstraints = parent.constraints.filter {
+        flutterView.bringSubviewToFront(sparkScanView)
+        let sparkScanViewConstraints = flutterView.constraints.filter {
             $0.firstItem === sparkScanView
         }
-        parent.removeConstraints(sparkScanViewConstraints)
-        parent.addConstraints([
+        flutterView.removeConstraints(sparkScanViewConstraints)
+        flutterView.addConstraints([
             sparkScanView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             sparkScanView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
             sparkScanView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),

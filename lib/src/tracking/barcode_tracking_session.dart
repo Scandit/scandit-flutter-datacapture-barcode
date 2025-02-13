@@ -4,15 +4,15 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
-import 'dart:convert';
-
 import 'package:flutter/services.dart';
-import 'barcode_batch_function_names.dart';
+import 'package:meta/meta.dart';
+import 'barcode_tracking_function_names.dart';
 
 import 'tracked_barcode.dart';
 
-class BarcodeBatchSession with _PrivatecBarcodeBatchSession {
-  final _BarcodeBatchSessionController _controller = _BarcodeBatchSessionController();
+@immutable
+class BarcodeTrackingSession {
+  final _BarcodeTrackingSessionController _controller = _BarcodeTrackingSessionController();
 
   final List<TrackedBarcode> _addedTrackedBarcodes;
   List<TrackedBarcode> get addedTrackedBarcodes => _addedTrackedBarcodes;
@@ -29,13 +29,10 @@ class BarcodeBatchSession with _PrivatecBarcodeBatchSession {
   final int _frameSequenceId;
   int get frameSequenceId => _frameSequenceId;
 
-  BarcodeBatchSession._(this._addedTrackedBarcodes, this._removedTrackedBarcodes, this._updatedTrackedBarcodes,
-      this._trackedBarcodes, this._frameSequenceId, String frameId) {
-    _frameId = frameId;
-  }
+  BarcodeTrackingSession._(this._addedTrackedBarcodes, this._removedTrackedBarcodes, this._updatedTrackedBarcodes,
+      this._trackedBarcodes, this._frameSequenceId);
 
-  factory BarcodeBatchSession.fromJSON(Map<String, dynamic> eventJson) {
-    var json = jsonDecode(eventJson['session']);
+  factory BarcodeTrackingSession.fromJSON(Map<String, dynamic> json) {
     var frameSequenceId = json['frameSequenceId'] as int;
     var addedTrackedCodes = (json['addedTrackedBarcodes'] as List)
         .map((trackedCodeJSON) => TrackedBarcode.fromJSON(trackedCodeJSON, sessionFrameSequenceId: frameSequenceId))
@@ -50,15 +47,8 @@ class BarcodeBatchSession with _PrivatecBarcodeBatchSession {
     var trackedCodes = (json['trackedBarcodes'] as Map).cast<String, Map<String, dynamic>>().map<int, TrackedBarcode>(
         (key, value) =>
             MapEntry(int.parse(key), TrackedBarcode.fromJSON(value, sessionFrameSequenceId: frameSequenceId)));
-
-    return BarcodeBatchSession._(
-      addedTrackedCodes,
-      removedTrackedCodes,
-      updatedTrackedCodes,
-      trackedCodes,
-      frameSequenceId,
-      eventJson['frameId'],
-    );
+    return BarcodeTrackingSession._(
+        addedTrackedCodes, removedTrackedCodes, updatedTrackedCodes, trackedCodes, frameSequenceId);
   }
 
   Future<void> reset() {
@@ -66,20 +56,14 @@ class BarcodeBatchSession with _PrivatecBarcodeBatchSession {
   }
 }
 
-mixin _PrivatecBarcodeBatchSession {
-  String _frameId = "";
-
-  String get frameId => _frameId;
-}
-
-class _BarcodeBatchSessionController {
+class _BarcodeTrackingSessionController {
   late final MethodChannel _methodChannel = _getChannel();
 
   Future<void> reset(int frameSequenceId) {
-    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.resetBarcodeBatchSession, frameSequenceId);
+    return _methodChannel.invokeMethod(BarcodeTrackingFunctionNames.resetBarcodeTrackingSession, frameSequenceId);
   }
 
   MethodChannel _getChannel() {
-    return const MethodChannel(BarcodeBatchFunctionNames.methodsChannelName);
+    return MethodChannel(BarcodeTrackingFunctionNames.methodsChannelName);
   }
 }

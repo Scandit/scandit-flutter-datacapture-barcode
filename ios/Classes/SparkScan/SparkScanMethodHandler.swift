@@ -25,6 +25,7 @@ class SparkScanMethodHandler {
         static let removeSparkScanViewUiListener = "removeSparkScanViewUiListener"
         static let sparkScanViewStartScanning = "sparkScanViewStartScanning"
         static let sparkScanViewPauseScanning = "sparkScanViewPauseScanning"
+        static let sparkScanViewEmitFeedback = "sparkScanViewEmitFeedback"
         static let showToast = "showToast"
         static let onWidgetPaused = "onWidgetPaused"
         static let setModeEnabledState = "setModeEnabledState"
@@ -55,21 +56,20 @@ class SparkScanMethodHandler {
             sparkScanModule.finishDidUpdateSession(enabled: enabled)
             result(nil)
         case FunctionNames.addSparkScanListener:
-            sparkScanModule.addAsyncSparkScanListener()
+            sparkScanModule.addSparkScanListener()
             result(nil)
         case FunctionNames.removeSparkScanListener:
-            sparkScanModule.removeasyncSparkScanListener()
+            sparkScanModule.removeSparkScanListener()
             result(nil)
         case FunctionNames.resetSparkScanSession:
             sparkScanModule.resetSession()
             result(nil)
         case FunctionNames.getLastFrameData:
-            sparkScanModule.getLastFrameDataBytes(
-                frameId: methodCall.arguments as! String,
-                result: FlutterFrameworkResult(reply: result)
-            )
+            LastFrameData.shared.getLastFrameDataBytes {
+                result($0)
+            }
         case FunctionNames.updateSparkScanMode:
-            sparkScanModule.updateMode(modeJson: methodCall.arguments as! String,
+            sparkScanModule.updateMode(modeJson: methodCall.arguments as! String, 
                                        result: FlutterFrameworkResult(reply: result))
         case FunctionNames.addSparkScanViewUiListener:
             sparkScanModule.addSparkScanViewUiListener()
@@ -82,9 +82,14 @@ class SparkScanMethodHandler {
         case FunctionNames.sparkScanViewPauseScanning:
             sparkScanModule.pauseScanning()
             result(nil)
+        case FunctionNames.sparkScanViewEmitFeedback:
+            sparkScanModule.emitFeedback(feedbackJson: methodCall.arguments as! String, 
+                                         result: FlutterFrameworkResult(reply: result))
         case FunctionNames.showToast:
-            sparkScanModule.showToast(text: methodCall.arguments as! String,
+            sparkScanModule.showToast(text: methodCall.arguments as! String, 
                                       result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.onWidgetPaused:
+            sparkScanModule.onPause(result: FlutterFrameworkResult(reply: result))
         case FunctionNames.setModeEnabledState:
             sparkScanModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
             result(nil)
@@ -101,11 +106,11 @@ class SparkScanMethodHandler {
                 return
             }
             guard let sparkScanView = sparkScanModule.sparkScanView else {
-                result(nil)
+                result(SparkScanError.nilView)
                 return
             }
             guard let parent = sparkScanView.superview else {
-                result(nil)
+                result(SparkScanError.nilParent)
                 return
             }
             dispatchMainSync {

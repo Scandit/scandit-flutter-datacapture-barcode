@@ -6,12 +6,12 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import '../barcode_plugin_events.dart';
+import 'spark_scan_feedback.dart';
 import 'spark_scan_function_names.dart';
 import 'spark_scan_session.dart';
 import 'spark_scan_settings.dart';
@@ -22,6 +22,8 @@ class SparkScan extends DataCaptureMode {
   late _SparkScanController _controller;
   SparkScanSettings _settings;
   final List<SparkScanListener> _listeners = [];
+  // ignore: deprecated_member_use_from_same_package
+  SparkScanFeedback _feedback = SparkScanFeedback.defaultFeedback;
 
   SparkScan._(this._settings) {
     _controller = _SparkScanController.forSparkScan(this);
@@ -32,10 +34,8 @@ class SparkScan extends DataCaptureMode {
 
   SparkScan.withSettings(SparkScanSettings settings) : this._(settings);
 
-  @override
   bool get isEnabled => _enabled;
 
-  @override
   set isEnabled(bool newValue) {
     _enabled = newValue;
     if (_isInCallback) {
@@ -66,13 +66,24 @@ class SparkScan extends DataCaptureMode {
     }
   }
 
+  @Deprecated(
+      'The feedback emitted is now specified for each detected barcode. See the feedbackDelegate property of the SparkScanView.')
+  SparkScanFeedback get feedback => _feedback;
+
+  @Deprecated(
+      'The feedback emitted is now specified for each detected barcode. See the feedbackDelegate property of the SparkScanView.')
+  set feedback(SparkScanFeedback newValue) {
+    _feedback = newValue;
+    _didChange();
+  }
+
   Future<void> _didChange() {
     return _controller.updateSparkScanMode();
   }
 
   @override
   Map<String, dynamic> toMap() {
-    return {'type': 'sparkScan', 'enabled': _enabled, 'settings': _settings.toMap()};
+    return {'type': 'sparkScan', 'enabled': _enabled, 'feedback': _feedback.toMap(), 'settings': _settings.toMap()};
   }
 }
 
@@ -80,12 +91,12 @@ abstract class SparkScanListener {
   static const String _didUpdateSessionEventName = 'SparkScanListener.didUpdateSession';
   static const String _didScanEventName = 'SparkScanListener.didScan';
 
-  Future<void> didUpdateSession(SparkScan sparkScan, SparkScanSession session, Future<FrameData> getFrameData());
-  Future<void> didScan(SparkScan sparkScan, SparkScanSession session, Future<FrameData> getFrameData());
+  void didUpdateSession(SparkScan sparkScan, SparkScanSession session, Future<FrameData> getFrameData());
+  void didScan(SparkScan sparkScan, SparkScanSession session, Future<FrameData> getFrameData());
 }
 
 class _SparkScanController {
-  final MethodChannel _methodChannel = const MethodChannel(SparkScanFunctionNames.methodsChannelName);
+  final MethodChannel _methodChannel = MethodChannel(SparkScanFunctionNames.methodsChannelName);
   final SparkScan _sparkScan;
   StreamSubscription<dynamic>? _sparkScanSubscription;
 
@@ -98,26 +109,26 @@ class _SparkScanController {
   }
 
   void _setupBarcodeCaptureSubscription() {
-    _sparkScanSubscription = BarcodePluginEvents.sparkScanEventStream.listen((event) async {
+    _sparkScanSubscription = BarcodePluginEvents.sparkScanEventStream.listen((event) {
       if (_sparkScan._listeners.isEmpty) return;
 
       var eventJSON = jsonDecode(event);
       var eventName = eventJSON['event'] as String;
 
       if (eventName == SparkScanListener._didScanEventName) {
-        var session = SparkScanSession.fromJSON(eventJSON);
-        await _notifyListenersOfDidScan(session);
+        var session = SparkScanSession.fromJSON(jsonDecode(eventJSON['session']));
+        _notifyListenersOfDidScan(session);
         _methodChannel
             .invokeMethod(SparkScanFunctionNames.sparkScanFinishDidScan, _sparkScan.isEnabled)
             // ignore: unnecessary_lambdas
-            .then((value) => null, onError: (error) => log(error));
+            .then((value) => null, onError: (error) => print(error));
       } else if (eventName == SparkScanListener._didUpdateSessionEventName) {
-        var session = SparkScanSession.fromJSON(eventJSON);
-        await _notifyListenersOfDidUpateSession(session);
+        var session = SparkScanSession.fromJSON(jsonDecode(eventJSON['session']));
+        _notifyListenersOfDidUpateSession(session);
         _methodChannel
             .invokeMethod(SparkScanFunctionNames.sparkScanFinishDidUpdateSession, _sparkScan.isEnabled)
             // ignore: unnecessary_lambdas
-            .then((value) => null, onError: (error) => log(error));
+            .then((value) => null, onError: (error) => print(error));
       }
     });
   }
@@ -141,30 +152,36 @@ class _SparkScanController {
         .then((value) => null, onError: _onError);
   }
 
-  Future<void> _notifyListenersOfDidUpateSession(SparkScanSession session) async {
+  void _notifyListenersOfDidUpateSession(SparkScanSession session) {
     _sparkScan._isInCallback = true;
     for (var listener in _sparkScan._listeners) {
-      await listener.didUpdateSession(_sparkScan, session, () => _getLastFrameData(session));
+      listener.didUpdateSession(_sparkScan, session, _getLastFrameData);
     }
     _sparkScan._isInCallback = false;
   }
 
-  Future<FrameData> _getLastFrameData(SparkScanSession session) {
+  Future<FrameData> _getLastFrameData() {
     return _methodChannel
-        .invokeMethod(SparkScanFunctionNames.getLastFrameData, session.frameId)
+        .invokeMethod(SparkScanFunctionNames.getLastFrameData)
         .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: _onError);
   }
 
-  Future<void> _notifyListenersOfDidScan(SparkScanSession session) async {
+  void _notifyListenersOfDidScan(SparkScanSession session) {
     _sparkScan._isInCallback = true;
     for (var listener in _sparkScan._listeners) {
-      await listener.didScan(_sparkScan, session, () => _getLastFrameData(session));
+      listener.didScan(_sparkScan, session, _getLastFrameData);
     }
     _sparkScan._isInCallback = false;
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {
     if (error == null) return;
+    print(error);
+
+    if (stackTrace != null) {
+      print(stackTrace);
+    }
+
     throw error;
   }
 }

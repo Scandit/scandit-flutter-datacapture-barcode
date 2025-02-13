@@ -8,18 +8,20 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_mini_preview_size.dart';
+import 'package:scandit_flutter_datacapture_core/src/battery_saving_mode.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+import 'package:scandit_flutter_datacapture_core/src/camera.dart';
 
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/feedback.dart' as feedback;
 
 import 'spark_scan_function_names.dart';
 import 'spark_scan_view_capture_mode.dart';
+import 'spark_scan_view_hand_mode.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class SparkScanDefaults {
-  static MethodChannel mainChannel = const MethodChannel(SparkScanFunctionNames.methodsChannelName);
+  static MethodChannel mainChannel = MethodChannel(SparkScanFunctionNames.methodsChannelName);
 
   static late SparkScanSettingsDefaults _sparkScanSettingsDefaults;
 
@@ -50,17 +52,27 @@ class SparkScanDefaults {
 @immutable
 class SparkScanViewDefaults {
   final Brush defaultBrush;
-  final bool torchControlVisible;
+  final bool shouldShowScanAreaGuides;
+  final bool torchButtonVisible;
   final bool scanningBehaviorButtonVisible;
+  final bool handModeButtonVisible;
   final bool barcodeCountButtonVisible;
   final bool barcodeFindButtonVisible;
   final bool targetModeButtonVisible;
   final bool soundModeButtonVisible;
   final bool hapticModeButtonVisible;
+  final String? stopCapturingText;
+  final String? startCapturingText;
+  final String? resumeCapturingText;
+  final String? scanningCapturingText;
+  final Color? captureButtonBackgroundColor;
+  final Color? captureButtonTintColor;
+  final Color? captureButtonActiveBackgroundColor;
   final Color? toolbarBackgroundColor;
   final Color? toolbarIconActiveTintColor;
   final Color? toolbarIconInactiveTintColor;
   final bool zoomSwitchControlVisible;
+  final String? targetModeHintText;
   final bool previewSizeControlVisible;
 
   final SparkScanViewSettingsDefaults viewSettingsDefaults;
@@ -68,47 +80,62 @@ class SparkScanViewDefaults {
   final bool hardwareTriggerSupported;
   final bool cameraSwitchButtonVisible;
 
-  final bool previewCloseControlVisible;
-  final String? triggerButtonImage;
-
-  final Color? triggerButtonCollapsedColor;
-  final Color? triggerButtonExpandedColor;
-  final Color? triggerButtonAnimationColor;
-  final Color? triggerButtonTintColor;
-  final bool triggerButtonVisible;
-
-  const SparkScanViewDefaults(
+  SparkScanViewDefaults(
+      this.shouldShowScanAreaGuides,
       this.defaultBrush,
-      this.torchControlVisible,
+      this.torchButtonVisible,
       this.scanningBehaviorButtonVisible,
+      this.handModeButtonVisible,
       this.barcodeCountButtonVisible,
       this.barcodeFindButtonVisible,
       this.targetModeButtonVisible,
       this.soundModeButtonVisible,
       this.hapticModeButtonVisible,
+      this.stopCapturingText,
+      this.startCapturingText,
+      this.resumeCapturingText,
+      this.scanningCapturingText,
+      this.captureButtonBackgroundColor,
+      this.captureButtonTintColor,
+      this.captureButtonActiveBackgroundColor,
       this.toolbarBackgroundColor,
       this.toolbarIconActiveTintColor,
       this.toolbarIconInactiveTintColor,
       this.viewSettingsDefaults,
       this.zoomSwitchControlVisible,
+      this.targetModeHintText,
       this.hardwareTriggerSupported,
       this.previewSizeControlVisible,
-      this.cameraSwitchButtonVisible,
-      this.previewCloseControlVisible,
-      this.triggerButtonImage,
-      this.triggerButtonCollapsedColor,
-      this.triggerButtonExpandedColor,
-      this.triggerButtonAnimationColor,
-      this.triggerButtonTintColor,
-      this.triggerButtonVisible);
+      this.cameraSwitchButtonVisible);
 
   factory SparkScanViewDefaults.fromJSON(Map<String, dynamic> json) {
+    final shouldShowScanAreaGuides = json['shouldShowScanAreaGuides'] as bool;
     final defaultBrush = BrushDefaults.fromJSON(json['brush'] as Map<String, dynamic>).toBrush();
-    final torchControlVisible = json['torchControlVisible'] as bool;
+    final torchButtonVisible = json['torchButtonVisible'] as bool;
     final scanningBehaviorButtonVisible = json['scanningBehaviorButtonVisible'] as bool;
+    final handModeButtonVisible = json['handModeButtonVisible'] as bool;
     final barcodeCountButtonVisible = json['barcodeCountButtonVisible'] as bool;
     final barcodeFindButtonVisible = json['barcodeFindButtonVisible'] as bool;
     final targetModeButtonVisible = json['targetModeButtonVisible'] as bool;
+    final stopCapturingText = json['stopCapturingText'] as String?;
+    final startCapturingText = json['startCapturingText'] as String?;
+    final resumeCapturingText = json['resumeCapturingText'] as String?;
+    final scanningCapturingText = json['scanningCapturingText'] as String?;
+
+    Color? captureButtonBackgroundColor;
+    if (json['captureButtonBackgroundColor'] != null) {
+      captureButtonBackgroundColor = ColorDeserializer.fromRgbaHex(json['captureButtonBackgroundColor']);
+    }
+
+    Color? captureButtonTintColor;
+    if (json['captureButtonTintColor'] != null) {
+      captureButtonTintColor = ColorDeserializer.fromRgbaHex(json['captureButtonTintColor']);
+    }
+
+    Color? captureButtonActiveBackgroundColor;
+    if (json['captureButtonActiveBackgroundColor'] != null) {
+      captureButtonActiveBackgroundColor = ColorDeserializer.fromRgbaHex(json['captureButtonActiveBackgroundColor']);
+    }
 
     Color? toolbarBackgroundColor;
     if (json['toolbarBackgroundColor'] != null) {
@@ -128,6 +155,7 @@ class SparkScanViewDefaults {
     final sparkScanViewSettingsDefaults =
         SparkScanViewSettingsDefaults.fromJSON(jsonDecode(json["SparkScanViewSettings"]));
     final zoomSwitchControlVisible = json['zoomSwitchControlVisible'] as bool;
+    final targetModeHintText = json['targetModeHintText'] as String?;
 
     final hardwareTriggerSupported = json['hardwareTriggerSupported'] as bool;
 
@@ -135,56 +163,33 @@ class SparkScanViewDefaults {
 
     final cameraSwitchButtonVisible = json['cameraSwitchButtonVisible'] as bool;
 
-    final previewCloseControlVisible = json['previewCloseControlVisible'] as bool;
-
-    final triggerButtonImage = json['triggerButtonImage'] as String?;
-
-    Color? triggerButtonCollapsedColor;
-    if (json['triggerButtonCollapsedColor'] != null) {
-      triggerButtonCollapsedColor = ColorDeserializer.fromRgbaHex(json['triggerButtonCollapsedColor']);
-    }
-
-    Color? triggerButtonExpandedColor;
-    if (json['triggerButtonExpandedColor'] != null) {
-      triggerButtonExpandedColor = ColorDeserializer.fromRgbaHex(json['triggerButtonExpandedColor']);
-    }
-
-    Color? triggerButtonAnimationColor;
-    if (json['triggerButtonAnimationColor'] != null) {
-      triggerButtonAnimationColor = ColorDeserializer.fromRgbaHex(json['triggerButtonAnimationColor']);
-    }
-
-    Color? triggerButtonTintColor;
-    if (json['triggerButtonTintColor'] != null) {
-      triggerButtonTintColor = ColorDeserializer.fromRgbaHex(json['triggerButtonTintColor']);
-    }
-
-    final triggerButtonVisible = json['triggerButtonVisible'] as bool;
-
     return SparkScanViewDefaults(
+        shouldShowScanAreaGuides,
         defaultBrush,
-        torchControlVisible,
+        torchButtonVisible,
         scanningBehaviorButtonVisible,
+        handModeButtonVisible,
         barcodeCountButtonVisible,
         barcodeFindButtonVisible,
         targetModeButtonVisible,
-        false,
-        false,
+        false, // Deprecated and will be removed in the future
+        false, // Deprecated and will be removed in the future
+        stopCapturingText,
+        startCapturingText,
+        resumeCapturingText,
+        scanningCapturingText,
+        captureButtonBackgroundColor,
+        captureButtonTintColor,
+        captureButtonActiveBackgroundColor,
         toolbarBackgroundColor,
         toolbarIconActiveTintColor,
         toolbarIconInactiveTintColor,
         sparkScanViewSettingsDefaults,
         zoomSwitchControlVisible,
+        targetModeHintText,
         hardwareTriggerSupported,
         previewSizeControlVisible,
-        cameraSwitchButtonVisible,
-        previewCloseControlVisible,
-        triggerButtonImage,
-        triggerButtonCollapsedColor,
-        triggerButtonExpandedColor,
-        triggerButtonAnimationColor,
-        triggerButtonTintColor,
-        triggerButtonVisible);
+        cameraSwitchButtonVisible);
   }
 }
 
@@ -197,6 +202,7 @@ class SparkScanToastSettingsDefaults {
   final String? targetModeDisabledMessage;
   final String? continuousModeEnabledMessage;
   final String? continuousModeDisabledMessage;
+  final String? cameraTimeoutMessage;
   final String? scanPausedMessage;
   final String? zoomedInMessage;
   final String? zoomedOutMessage;
@@ -205,7 +211,7 @@ class SparkScanToastSettingsDefaults {
   final String? userFacingCameraEnabledMessage;
   final String? worldFacingCameraEnabledMessage;
 
-  const SparkScanToastSettingsDefaults(
+  SparkScanToastSettingsDefaults(
       this.toastEnabled,
       this.toastBackgroundColor,
       this.toastTextColor,
@@ -213,6 +219,7 @@ class SparkScanToastSettingsDefaults {
       this.targetModeDisabledMessage,
       this.continuousModeEnabledMessage,
       this.continuousModeDisabledMessage,
+      this.cameraTimeoutMessage,
       this.scanPausedMessage,
       this.zoomedInMessage,
       this.zoomedOutMessage,
@@ -238,6 +245,7 @@ class SparkScanToastSettingsDefaults {
     final targetModeDisabledMessage = json['targetModeDisabledMessage'] as String?;
     final continuousModeEnabledMessage = json['continuousModeEnabledMessage'] as String?;
     final continuousModeDisabledMessage = json['continuousModeDisabledMessage'] as String?;
+    final cameraTimeoutMessage = json['cameraTimeoutMessage'] as String?;
     final scanPausedMessage = json['scanPausedMessage'] as String?;
     final zoomedInMessage = json['zoomedInMessage'] as String?;
     final zoomedOutMessage = json['zoomedOutMessage'] as String?;
@@ -254,6 +262,7 @@ class SparkScanToastSettingsDefaults {
         targetModeDisabledMessage,
         continuousModeEnabledMessage,
         continuousModeDisabledMessage,
+        cameraTimeoutMessage,
         scanPausedMessage,
         zoomedInMessage,
         zoomedOutMessage,
@@ -267,14 +276,17 @@ class SparkScanToastSettingsDefaults {
 @immutable
 class SparkScanSettingsDefaults {
   final int codeDuplicateFilter;
+  final bool singleBarcodeAutoDetection;
   final BatterySavingMode batterySaving;
   final ScanIntention scanIntention;
 
-  const SparkScanSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention);
+  SparkScanSettingsDefaults(
+      this.codeDuplicateFilter, this.singleBarcodeAutoDetection, this.batterySaving, this.scanIntention);
 
   factory SparkScanSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     return SparkScanSettingsDefaults(
         (json['codeDuplicateFilter'] as num).toInt(),
+        json['singleBarcodeAutoDetection'] as bool,
         BatterySavingModeDeserializer.fromJSON(json['batterySaving'] as String),
         ScanIntentionSerializer.fromJSON(json['scanIntention'] as String));
   }
@@ -285,7 +297,7 @@ class SparkScanFeedbackDefaults {
   final SparkScanBarcodeFeedbackDefaults success;
   final SparkScanBarcodeFeedbackDefaults error;
 
-  const SparkScanFeedbackDefaults(this.success, this.error);
+  SparkScanFeedbackDefaults(this.success, this.error);
 
   factory SparkScanFeedbackDefaults.fromJSON(Map<String, dynamic> json) {
     var error = SparkScanBarcodeFeedbackDefaults.fromJSON(jsonDecode(json['error'])['barcodeFeedback']);
@@ -300,7 +312,7 @@ class SparkScanBarcodeFeedbackDefaults {
   final feedback.Feedback? feedbackDefault;
   final Brush brush;
 
-  const SparkScanBarcodeFeedbackDefaults(this.visualFeedbackColor, this.feedbackDefault, this.brush);
+  SparkScanBarcodeFeedbackDefaults(this.visualFeedbackColor, this.feedbackDefault, this.brush);
 
   factory SparkScanBarcodeFeedbackDefaults.fromJSON(Map<String, dynamic> json) {
     var visualFeedbackColor = ColorDeserializer.fromRgbaHex(json['visualFeedbackColor']);
@@ -315,9 +327,10 @@ class SparkScanBarcodeFeedbackDefaults {
 
 class SparkScanViewSettingsDefaults {
   final Duration triggerButtonCollapseTimeout;
+  final Duration continuousCaptureTimeout;
   final TorchState defaultTorchState;
   final SparkScanScanningMode defaultScanningMode;
-
+  final SparkScanViewHandMode defaultHandMode;
   final bool holdToScanEnabled;
   final bool soundEnabled;
   final bool hapticEnabled;
@@ -332,12 +345,12 @@ class SparkScanViewSettingsDefaults {
 
   final CameraPosition defaultCameraPosition;
 
-  final SparkScanMiniPreviewSize defaultMiniPreviewSize;
-
   SparkScanViewSettingsDefaults(
       this.triggerButtonCollapseTimeout,
+      this.continuousCaptureTimeout,
       this.defaultTorchState,
       this.defaultScanningMode,
+      this.defaultHandMode,
       this.holdToScanEnabled,
       this.soundEnabled,
       this.hapticEnabled,
@@ -348,15 +361,16 @@ class SparkScanViewSettingsDefaults {
       this.zoomFactorIn,
       this.zoomFactorOut,
       this.inactiveStateTimeout,
-      this.defaultCameraPosition,
-      this.defaultMiniPreviewSize);
+      this.defaultCameraPosition);
 
   factory SparkScanViewSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     final triggerButtonCollapseTimeout = Duration(seconds: (json['triggerButtonCollapseTimeout'] as num).toInt());
+    // Deprecated field. Is coming null from the native side
+    final continuousCaptureTimeout = Duration(seconds: 0);
     final defaultTorchState = TorchStateDeserializer.fromJSON(json['defaultTorchState'] as String);
     final defaultScanningMode =
         SparkScanScanningModeSerializer.fromJSON(jsonDecode(json['defaultScanningMode']) as Map<String, dynamic>);
-
+    final defaultHandMode = SparkScanViewHandModeSerializer.fromJSON(json['defaultHandMode'] as String);
     var holdToScanEnabled = false;
     if (json.containsKey('holdToScanEnabled')) {
       holdToScanEnabled = json['holdToScanEnabled'] as bool;
@@ -389,13 +403,12 @@ class SparkScanViewSettingsDefaults {
       defaultCameraPosition = CameraPositionDeserializer.cameraPositionFromJSON(json['defaultCameraPosition']);
     }
 
-    final defaultMiniPreviewSize =
-        SparkScanMiniPreviewSizeSerializer.fromJSON(json['defaultMiniPreviewSize'] as String);
-
     return SparkScanViewSettingsDefaults(
         triggerButtonCollapseTimeout,
+        continuousCaptureTimeout,
         defaultTorchState,
         defaultScanningMode,
+        defaultHandMode,
         holdToScanEnabled,
         soundEnabled,
         hapticEnabled,
@@ -406,7 +419,6 @@ class SparkScanViewSettingsDefaults {
         zoomFactorIn,
         zoomFactorOut,
         inactiveStateTimeout,
-        defaultCameraPosition,
-        defaultMiniPreviewSize);
+        defaultCameraPosition);
   }
 }
