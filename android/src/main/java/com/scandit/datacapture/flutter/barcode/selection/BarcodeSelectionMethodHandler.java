@@ -13,8 +13,8 @@ import com.scandit.datacapture.frameworks.barcode.selection.BarcodeSelectionModu
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
 import com.scandit.datacapture.frameworks.core.errors.FrameDataNullError;
 import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
-import com.scandit.datacapture.frameworks.core.utils.DefaultLastFrameData;
-import com.scandit.datacapture.frameworks.core.utils.LastFrameData;
+import com.scandit.datacapture.frameworks.core.frames.DefaultFrameDataHandler;
+import com.scandit.datacapture.frameworks.core.frames.FrameDataHandler;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -27,15 +27,9 @@ public class BarcodeSelectionMethodHandler implements MethodChannel.MethodCallHa
     public static final String METHOD_CHANNEL_NAME = "com.scandit.datacapture.barcode.selection/method_channel";
 
     private final ServiceLocator<FrameworkModule> serviceLocator;
-    private final LastFrameData lastFrameData;
 
     public BarcodeSelectionMethodHandler(ServiceLocator<FrameworkModule> serviceLocator) {
-        this(serviceLocator, DefaultLastFrameData.getInstance());
-    }
-
-    public BarcodeSelectionMethodHandler(ServiceLocator<FrameworkModule> serviceLocator, LastFrameData lastFrameData) {
         this.serviceLocator = serviceLocator;
-        this.lastFrameData = lastFrameData;
     }
 
     @Override
@@ -47,7 +41,10 @@ public class BarcodeSelectionMethodHandler implements MethodChannel.MethodCallHa
 
             case "getBarcodeSelectionSessionCount":
                 assert call.arguments() != null;
-                result.success(getSharedModule().getBarcodeCount(call.arguments()));
+                getSharedModule().submitBarcodeCountForIdentifier(
+                        call.arguments(),
+                        new FlutterResult(result)
+                );
                 break;
 
             case "resetBarcodeSelectionSession":
@@ -56,12 +53,12 @@ public class BarcodeSelectionMethodHandler implements MethodChannel.MethodCallHa
                 break;
 
             case "addBarcodeSelectionListener":
-                getSharedModule().addListener();
+                getSharedModule().addAsyncListener();
                 result.success(null);
                 break;
 
             case "removeBarcodeSelectionListener":
-                getSharedModule().removeListener();
+                getSharedModule().removeAsyncListener();
                 result.success(null);
                 break;
 
@@ -88,14 +85,8 @@ public class BarcodeSelectionMethodHandler implements MethodChannel.MethodCallHa
                 break;
 
             case "getLastFrameData":
-                lastFrameData.getLastFrameDataBytes(bytes -> {
-                    if (bytes == null) {
-                        ResultUtils.rejectKotlinError(result, new FrameDataNullError());
-                        return null;
-                    }
-                    result.success(result);
-                    return null;
-                });
+                assert call.arguments() != null;
+                getSharedModule().getFrameDataBytes(call.arguments(), new FlutterResult(result));
                 break;
 
             case "setModeEnabledState":
@@ -121,6 +112,13 @@ public class BarcodeSelectionMethodHandler implements MethodChannel.MethodCallHa
             case "updateBarcodeSelectionBasicOverlay":
                 assert call.arguments() != null;
                 getSharedModule().updateBasicOverlay(
+                        call.arguments(),
+                        new FlutterResult(result)
+                );
+                break;
+            case "updateFeedback":
+                assert call.arguments() != null;
+                getSharedModule().updateFeedback(
                         call.arguments(),
                         new FlutterResult(result)
                 );

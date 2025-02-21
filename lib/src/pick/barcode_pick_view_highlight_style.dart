@@ -71,7 +71,7 @@ class BarcodePickViewHighlightStyleDotWithIcons implements BarcodePickViewHighli
       var base64EncodedImage = base64Encode(value.buffer.asUint8List());
       // Remove existing item first
       _iconsForState.removeWhere((element) => element.pickState == state);
-      _iconsForState.add(new IconForState(state, base64EncodedImage));
+      _iconsForState.add(IconForState(state, base64EncodedImage));
     });
   }
 
@@ -150,7 +150,7 @@ class BarcodePickViewHighlightStyleRectangularWithIcons implements BarcodePickVi
       var base64EncodedImage = base64Encode(value.buffer.asUint8List());
       // Remove existing item first
       _iconsForState.removeWhere((element) => element.pickState == state);
-      _iconsForState.add(new IconForState(state, base64EncodedImage));
+      _iconsForState.add(IconForState(state, base64EncodedImage));
     });
   }
 
