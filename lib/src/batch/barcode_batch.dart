@@ -112,9 +112,6 @@ class _BarcodeBatchListenerController {
       if (payload['event'] as String == BarcodeBatchListener._barcodeBatchListenerDidUpdateSession) {
         if (_barcodeBatch._listeners.isNotEmpty && payload.containsKey('session')) {
           var session = BarcodeBatchSession.fromJSON(payload);
-          var isFullArEnabled = payload['isBarcodeArFull'] as bool?;
-          BarcodeBatchFeatures._setFeature('barcode-ar-full', isFullArEnabled);
-
           await _notifyDidUpdateListeners(session);
         }
         _methodChannel
@@ -166,17 +163,5 @@ class _BarcodeBatchListenerController {
   void _onError(Object? error, StackTrace? stackTrace) {
     if (error == null) return;
     throw error;
-  }
-}
-
-class BarcodeBatchFeatures {
-  static final Map<String, dynamic> _features = {};
-
-  static T getFeature<T>(String name) {
-    return _features[name] as T;
-  }
-
-  static void _setFeature<T>(String name, T value) {
-    _features[name] = value;
   }
 }

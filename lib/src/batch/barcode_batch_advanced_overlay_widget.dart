@@ -1,3 +1,9 @@
+/*
+ * This file is part of the Scandit Data Capture SDK
+ *
+ * Copyright (C) 2024- Scandit AG. All rights reserved.
+ */
+
 import 'package:flutter/widgets.dart';
 import 'barcode_batch_advanced_overlay_container.dart';
 
