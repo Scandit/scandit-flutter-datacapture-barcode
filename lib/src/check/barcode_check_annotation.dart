@@ -37,11 +37,18 @@ abstract class BarcodeCheckPopoverAnnotationListener {
 }
 
 abstract class BarcodeCheckAnnotation extends Serializable with PrivateBarcodeCheckAnnotation {
-  BarcodeCheckAnnotationTrigger annotationTrigger;
-
   final String _type;
 
-  BarcodeCheckAnnotation._(this.annotationTrigger, this._type);
+  BarcodeCheckAnnotationTrigger _annotationTrigger;
+
+  BarcodeCheckAnnotation._(this._annotationTrigger, this._type);
+
+  BarcodeCheckAnnotationTrigger get annotationTrigger => _annotationTrigger;
+
+  set annotationTrigger(BarcodeCheckAnnotationTrigger value) {
+    _annotationTrigger = value;
+    controller?.updateAnnotation(this);
+  }
 
   @override
   Map<String, dynamic> toMap() {

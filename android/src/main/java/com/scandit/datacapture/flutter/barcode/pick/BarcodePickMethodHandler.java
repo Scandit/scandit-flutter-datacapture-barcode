@@ -58,17 +58,7 @@ public class BarcodePickMethodHandler implements MethodChannel.MethodCallHandler
                 break;
 
             case "releasePickView":
-                getSharedModule().viewOnDestroy();
-                result.success(null);
-                break;
-
-            case "pickViewOnResume":
-                getSharedModule().viewOnResume();
-                result.success(null);
-                break;
-
-            case "pickViewOnPause":
-                getSharedModule().viewOnPause();
+                getSharedModule().viewDisposed();
                 result.success(null);
                 break;
 

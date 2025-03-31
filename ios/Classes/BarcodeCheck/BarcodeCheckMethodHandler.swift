@@ -29,6 +29,7 @@ class BarcodeCheckMethodHandler {
         static let viewStart = "viewStart"
         static let viewStop = "viewStop"
         static let viewPause = "viewPause"
+        static let viewReset = "viewReset"
         static let finishHighlightForBarcode = "finishHighlightForBarcode"
         static let finishAnnotationForBarcode = "finishAnnotationForBarcode"
         static let updateAnnotation = "updateAnnotation"
@@ -46,7 +47,7 @@ class BarcodeCheckMethodHandler {
         switch methodCall.method {
         case FunctionNames.getBarcodeCheckDefaults:
             let defaults = barcodeCheck.defaults
-                
+
             result(defaults.stringValue)
         case FunctionNames.updateFeedback:
             barcodeCheck.updateFeedback(feedbackJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
@@ -84,6 +85,8 @@ class BarcodeCheckMethodHandler {
             barcodeCheck.viewStop(result: FlutterFrameworkResult(reply: result))
         case FunctionNames.viewPause:
             barcodeCheck.viewPause(result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.viewReset:
+            barcodeCheck.viewReset(result: FlutterFrameworkResult(reply: result))
         case FunctionNames.finishHighlightForBarcode:
             barcodeCheck.finishHighlightForBarcode(highlightJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.finishAnnotationForBarcode:

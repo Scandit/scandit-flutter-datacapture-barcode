@@ -23,6 +23,7 @@ abstract class BarcodeCheckFunctionNames {
   static const String viewStart = 'viewStart';
   static const String viewStop = 'viewStop';
   static const String viewPause = 'viewPause';
+  static const String viewReset = 'viewReset';
   static const String finishHighlightForBarcode = 'finishHighlightForBarcode';
   static const String finishAnnotationForBarcode = 'finishAnnotationForBarcode';
   static const String updateAnnotation = 'updateAnnotation';

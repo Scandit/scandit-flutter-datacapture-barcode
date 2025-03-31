@@ -181,6 +181,10 @@ class BarcodeCheckView extends StatefulWidget implements Serializable {
     return _controller.pause();
   }
 
+  Future<void> reset() {
+    return _controller.reset();
+  }
+
   @override
   State<StatefulWidget> createState() {
     return _BarcodeCheckViewState();
@@ -405,6 +409,12 @@ class _BarcodeCheckViewController implements BarcodeCheckViewController {
     _highlightCache.clear();
     _annotationsCache.clear();
     return _methodChannel.invokeMethod(BarcodeCheckFunctionNames.viewPause);
+  }
+
+  Future<void> reset() {
+    _highlightCache.clear();
+    _annotationsCache.clear();
+    return _methodChannel.invokeMethod(BarcodeCheckFunctionNames.viewReset);
   }
 
   @override

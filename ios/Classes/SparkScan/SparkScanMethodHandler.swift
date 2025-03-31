@@ -108,7 +108,7 @@ class SparkScanMethodHandler {
                 result(nil)
                 return
             }
-            dispatchMainSync {
+            dispatchMain {
                 parent.bringSubviewToFront(sparkScanView)
             }
             result(nil)

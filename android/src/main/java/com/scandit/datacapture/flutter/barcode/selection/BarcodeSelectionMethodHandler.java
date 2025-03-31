@@ -8,13 +8,9 @@ package com.scandit.datacapture.flutter.barcode.selection;
 import androidx.annotation.NonNull;
 
 import com.scandit.datacapture.flutter.core.utils.FlutterResult;
-import com.scandit.datacapture.flutter.core.utils.ResultUtils;
 import com.scandit.datacapture.frameworks.barcode.selection.BarcodeSelectionModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
-import com.scandit.datacapture.frameworks.core.errors.FrameDataNullError;
 import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
-import com.scandit.datacapture.frameworks.core.frames.DefaultFrameDataHandler;
-import com.scandit.datacapture.frameworks.core.frames.FrameDataHandler;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;

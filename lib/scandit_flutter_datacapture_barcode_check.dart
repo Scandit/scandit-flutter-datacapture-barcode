@@ -17,7 +17,8 @@ export 'src/check/barcode_check_highlight.dart'
         BarcodeCheckHighlight,
         BarcodeCheckCircleHighlight,
         BarcodeCheckRectangleHighlight,
-        BarcodeCheckCircleHighlightPreset;
+        BarcodeCheckCircleHighlightPreset,
+        BarcodeCheckCircleHighlightPresetSerializer;
 export 'src/check/barcode_check_annotation.dart'
     show
         BarcodeCheckAnnotation,
@@ -27,9 +28,12 @@ export 'src/check/barcode_check_annotation.dart'
         BarcodeCheckPopoverAnnotationButton,
         BarcodeCheckPopoverAnnotationListener,
         BarcodeCheckStatusIconAnnotation;
-export 'src/check/barcode_check_annotation_trigger.dart' show BarcodeCheckAnnotationTrigger;
-export 'src/check/barcode_check_info_annotation_width_preset.dart' show BarcodeCheckInfoAnnotationWidthPreset;
-export 'src/check/barcode_check_info_annotation_anchor.dart' show BarcodeCheckInfoAnnotationAnchor;
+export 'src/check/barcode_check_annotation_trigger.dart'
+    show BarcodeCheckAnnotationTrigger, BarcodeCheckAnnotationTriggerSerializer;
+export 'src/check/barcode_check_info_annotation_width_preset.dart'
+    show BarcodeCheckInfoAnnotationWidthPreset, BarcodeCheckInfoAnnotationWidthPresetSerializer;
+export 'src/check/barcode_check_info_annotation_anchor.dart'
+    show BarcodeCheckInfoAnnotationAnchor, BarcodeCheckInfoAnnotationAnchorSerializer;
 export 'src/check/barcode_check_annotation_provider.dart' show BarcodeCheckAnnotationProvider;
 export 'src/check/barcode_check_info_annotation_body_component.dart' show BarcodeCheckInfoAnnotationBodyComponent;
 export 'src/check/barcode_check_info_annotation_header.dart' show BarcodeCheckInfoAnnotationHeader;

@@ -19,7 +19,7 @@ import com.scandit.datacapture.frameworks.barcode.find.BarcodeFindModule;
 import com.scandit.datacapture.frameworks.core.result.NoopFrameworksResult;
 
 @SuppressLint("ViewConstructor")
-public class FlutterBarcodeCheckView extends FlutterBasePlatformView implements DefaultActivityLifecycleObserver.ViewObserver {
+public class FlutterBarcodeCheckView extends FlutterBasePlatformView {
 
     private final BarcodeCheckModule module;
 
@@ -28,8 +28,6 @@ public class FlutterBarcodeCheckView extends FlutterBasePlatformView implements 
                                    BarcodeCheckModule module) {
         super(context);
         this.module = module;
-        DefaultActivityLifecycleObserver.getInstance().addObserver(this);
-
         module.addViewToContainer(this, jsonString, new FlutterLogInsteadOfResult());
     }
 
@@ -48,39 +46,8 @@ public class FlutterBarcodeCheckView extends FlutterBasePlatformView implements 
 
     @Override
     public void dispose() {
-        DefaultActivityLifecycleObserver.getInstance().removeObserver(this);
         module.viewDisposed();
         removeAllViews();
         super.dispose();
-    }
-
-    @Override
-    public void onCreate() {
-        // no callback on BarcodeCheckView
-    }
-
-    @Override
-    public void onStart() {
-        // no callback on BarcodeCheckView
-    }
-
-    @Override
-    public void onResume() {
-        module.onResume(new NoopFrameworksResult());
-    }
-
-    @Override
-    public void onPause() {
-        module.onPause(new NoopFrameworksResult());
-    }
-
-    @Override
-    public void onStop() {
-        // no callback on BarcodeCheckView
-    }
-
-    @Override
-    public void onDestroy() {
-        // no callback on BarcodeCheckView
     }
 }

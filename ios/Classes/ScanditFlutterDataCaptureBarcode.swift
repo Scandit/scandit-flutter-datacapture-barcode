@@ -36,6 +36,9 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
     
     private let barcodeCheckModule: BarcodeCheckModule
     private let barcodeCheckMethodChannel: FlutterMethodChannel
+    
+    private let barcodeGeneratorModule: BarcodeGeneratorModule
+    private let barcodeGeneratorMethodChannel: FlutterMethodChannel
 
     init(barcodeModule: BarcodeModule,
          barcodeMethodChannel: FlutterMethodChannel,
@@ -54,7 +57,9 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
          barcodePickModule: BarcodePickModule,
          barcodePickMethodChannel: FlutterMethodChannel,
          barcodeCheckModule: BarcodeCheckModule,
-         barcodeCheckMethodChannel: FlutterMethodChannel) {
+         barcodeCheckMethodChannel: FlutterMethodChannel,
+         barcodeGeneratorModule: BarcodeGeneratorModule,
+         barcodeGeneratorMethodChannel: FlutterMethodChannel) {
         self.barcodeModule = barcodeModule
         self.barcodeMethodChannel = barcodeMethodChannel
         self.barcodeCaptureModule = barcodeCaptureModule
@@ -73,6 +78,8 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
         self.barcodePickMethodChannel = barcodePickMethodChannel
         self.barcodeCheckModule = barcodeCheckModule
         self.barcodeCheckMethodChannel = barcodeCheckMethodChannel
+        self.barcodeGeneratorModule = barcodeGeneratorModule
+        self.barcodeGeneratorMethodChannel = barcodeGeneratorMethodChannel
 
         super.init()
     }
@@ -226,7 +233,15 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
         barcodeCheckMethodChannel.setMethodCallHandler(barcodeCheckMethodHandler.methodCallHandler(methodCall:result:))
         let barcodeCheckViewFactory = FlutterBarcodeCheckViewFactory(barcodeCheckModule: barcodeCheckModule)
         registrar.register(barcodeCheckViewFactory, withId: "com.scandit.BarcodeCheckView")
-
+        
+        // Generator
+        let barcodeGeneratorModule = BarcodeGeneratorModule()
+        barcodeGeneratorModule.didStart()
+        
+        let barcodeGeneratorMethodChannel = FlutterMethodChannel(name: "com.scandit.datacapture.barcode.generator/method_channel",
+                                                                binaryMessenger: registrar.messenger())
+        let barcodeGeneratorMethodHandler = BarcodeGeneratorHandler(barcodeGeneratorModule: barcodeGeneratorModule)
+        barcodeGeneratorMethodChannel.setMethodCallHandler(barcodeGeneratorMethodHandler.methodCallHandler(methodCall:result:))
 
         let plugin = ScanditFlutterDataCaptureBarcode(barcodeModule: barcodeModule,
                                                       barcodeMethodChannel: barcodeMethodChannel,
@@ -245,7 +260,9 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
                                                       barcodePickModule: barcodePickModule,
                                                       barcodePickMethodChannel: barcdePickMethodChannel,
                                                       barcodeCheckModule: barcodeCheckModule,
-                                                      barcodeCheckMethodChannel: barcodeCheckMethodChannel
+                                                      barcodeCheckMethodChannel: barcodeCheckMethodChannel,
+                                                      barcodeGeneratorModule: barcodeGeneratorModule,
+                                                      barcodeGeneratorMethodChannel: barcodeGeneratorMethodChannel
         )
         registrar.publish(plugin)
     }

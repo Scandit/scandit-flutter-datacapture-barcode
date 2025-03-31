@@ -80,6 +80,7 @@ class BarcodeCheckInfoAnnotationBodyComponent with ChangeNotifier implements Ser
       'text': text,
       'textColor': textColor.jsonValue,
       'textAlign': textAlign.toString(),
+      'fontFamily': fontFamily.toString(),
       'isLeftIconTappable': isLeftIconTappable,
       'leftIcon': (leftIcon != null ? jsonEncode(leftIcon!.toMap()) : null),
       'isRightIconTappable': isRightIconTappable,

@@ -65,7 +65,6 @@ extension SparkScanPreviewBehaviorDeserializer on SparkScanPreviewBehavior {
 // ignore: must_be_immutable
 class SparkScanView extends StatefulWidget implements Serializable {
   final Widget _child;
-  final DataCaptureContext _dataCaptureContext;
   final SparkScan _sparkScan;
   SparkScanViewSettings _settings;
   SparkScanViewUiListener? _uiListener;
@@ -73,14 +72,14 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   late _SparkScanViewController _controller;
 
-  SparkScanView._(this._child, this._dataCaptureContext, this._sparkScan, this._settings) : super() {
-    _dataCaptureContext.initialize();
+  SparkScanView._(this._child, this._sparkScan, this._settings) : super() {
     _controller = _SparkScanViewController._(this);
   }
 
   SparkScanView.forContext(
       Widget child, DataCaptureContext dataCaptureContext, SparkScan sparkScan, SparkScanViewSettings? settings)
-      : this._(child, dataCaptureContext, sparkScan, settings ?? SparkScanViewSettings());
+      // we require the DCContext only to make sure the user created/initialized it
+      : this._(child, sparkScan, settings ?? SparkScanViewSettings());
 
   @override
   State<StatefulWidget> createState() {
