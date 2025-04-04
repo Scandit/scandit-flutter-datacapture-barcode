@@ -4,14 +4,18 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-import 'dart:convert';
-
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 import '../../scandit_flutter_datacapture_barcode.dart';
 import 'spark_scan_function_names.dart';
 
-class SparkScanSession with _PrivateSparkScanSession {
+@immutable
+class SparkScanSession {
   final _SparkScanSessionController _controller = _SparkScanSessionController();
+
+  final List<Barcode> _newlyRecognizedBarcodes;
+  @Deprecated('Prefer use of the property `newlyRecognizedBarcode` instead.')
+  List<Barcode> get newlyRecognizedBarcodes => _newlyRecognizedBarcodes;
 
   final Barcode? _newlyRecognizedBarcode;
   Barcode? get newlyRecognizedBarcode => _newlyRecognizedBarcode;
@@ -19,28 +23,21 @@ class SparkScanSession with _PrivateSparkScanSession {
   final int _frameSequenceId;
   int get frameSequenceId => _frameSequenceId;
 
-  SparkScanSession._(this._newlyRecognizedBarcode, this._frameSequenceId, String frameId) {
-    _frameId = frameId;
-  }
+  SparkScanSession._(this._newlyRecognizedBarcode, this._newlyRecognizedBarcodes, this._frameSequenceId);
 
-  factory SparkScanSession.fromJSON(Map<String, dynamic> event) {
-    var json = jsonDecode(event['session']);
-    return SparkScanSession._(
-      json['newlyRecognizedBarcode'] != null ? Barcode.fromJSON(json['newlyRecognizedBarcode']) : null,
-      (json['frameSequenceId'] as num).toInt(),
-      event['frameId'],
-    );
-  }
+  SparkScanSession.fromJSON(Map<String, dynamic> json)
+      : this._(
+            json['newlyRecognizedBarcode'] != null ? Barcode.fromJSON(json['newlyRecognizedBarcode']) : null,
+            (json['newlyRecognizedBarcodes'] as List<dynamic>)
+                .cast<Map<String, dynamic>>()
+                .map((e) => Barcode.fromJSON(e))
+                .toList()
+                .cast<Barcode>(),
+            (json['frameSequenceId'] as num).toInt());
 
   Future<void> reset() {
     return _controller.reset(_frameSequenceId);
   }
-}
-
-mixin _PrivateSparkScanSession {
-  String _frameId = "";
-
-  String get frameId => _frameId;
 }
 
 class _SparkScanSessionController {
@@ -51,6 +48,6 @@ class _SparkScanSessionController {
   }
 
   MethodChannel _getChannel() {
-    return const MethodChannel(SparkScanFunctionNames.methodsChannelName);
+    return MethodChannel(SparkScanFunctionNames.methodsChannelName);
   }
 }

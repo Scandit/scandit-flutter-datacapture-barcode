@@ -14,6 +14,8 @@ import '../capture/barcode_capture.dart';
 import 'barcode_capture_function_names.dart';
 
 enum BarcodeCaptureOverlayStyle {
+  @Deprecated('The legacy style is deprecated.')
+  legacy('legacy'),
   frame('frame');
 
   const BarcodeCaptureOverlayStyle(this._name);
@@ -64,14 +66,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
   Viewfinder? get viewfinder => _viewfinder;
 
   set viewfinder(Viewfinder? newValue) {
-    _viewfinder?.removeListener(_handleViewfinderChanged);
     _viewfinder = newValue;
-    _viewfinder?.addListener(_handleViewfinderChanged);
-
-    _controller.update();
-  }
-
-  void _handleViewfinderChanged() {
     _controller.update();
   }
 
@@ -116,7 +111,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
 class _BarcodeCaptureOverlayController {
   late final MethodChannel _methodChannel = _getChannel();
 
-  final BarcodeCaptureOverlay _overlay;
+  BarcodeCaptureOverlay _overlay;
 
   _BarcodeCaptureOverlayController(this._overlay);
 
@@ -126,6 +121,6 @@ class _BarcodeCaptureOverlayController {
   }
 
   MethodChannel _getChannel() {
-    return const MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
+    return MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
   }
 }

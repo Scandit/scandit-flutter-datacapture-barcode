@@ -15,7 +15,8 @@ import '../composite_type.dart';
 class BarcodeCaptureSettings implements Serializable {
   BarcodeCaptureSettings();
 
-  Duration codeDuplicateFilter = BarcodeCaptureDefaults.barcodeCaptureSettingsDefaults.codeDuplicateFilter;
+  Duration codeDuplicateFilter =
+      Duration(milliseconds: BarcodeCaptureDefaults.barcodeCaptureSettingsDefaults.codeDuplicateFilter);
 
   LocationSelection? locationSelection;
 

@@ -68,7 +68,7 @@ class BarcodePickView extends StatefulWidget implements Serializable {
   final CameraSettings? _cameraSettings;
   final List<BarcodePickActionListener> _actionListeners = [];
   final List<BarcodePickViewListener> _viewListeners = [];
-  BarcodePickViewUiListener? _uiListener;
+  BarcodePickViewUiListener? _uiListener = null;
   bool _isViewStarted = false;
 
   late _BarcodePickViewController _controller;
@@ -76,7 +76,7 @@ class BarcodePickView extends StatefulWidget implements Serializable {
   BarcodePickView._(this._dataCaptureContext, this._barcodePick, this._barcodPickViewSettings, this._cameraSettings)
       : super() {
     _controller = _BarcodePickViewController(this);
-    _barcodePick.productProvider.subscribeEvents();
+    this._barcodePick.productProvider.subscribeEvents();
   }
 
   factory BarcodePickView.forModeWithViewSettings(
@@ -110,16 +110,12 @@ class BarcodePickView extends StatefulWidget implements Serializable {
     return _controller.release();
   }
 
-  @Deprecated(
-      'There is no longer a need to manually call the pause function. This function will be removed in future SDK versions.')
   Future<void> pause() {
-    return Future.value(null);
+    return _controller.pause();
   }
 
-  @Deprecated(
-      'There is no longer a need to manually call the resume function. This function will be removed in future SDK versions.')
   Future<void> resume() {
-    return Future.value(null);
+    return _controller.resume();
   }
 
   void addActionListener(BarcodePickActionListener listener) {
@@ -184,7 +180,7 @@ class BarcodePickView extends StatefulWidget implements Serializable {
 }
 
 class _BarcodePickViewController {
-  final MethodChannel _methodChannel = const MethodChannel(BarcodePickFunctionNames.methodsChannelName);
+  final MethodChannel _methodChannel = MethodChannel(BarcodePickFunctionNames.methodsChannelName);
 
   StreamSubscription<dynamic>? _viewEventsSubscription;
 
@@ -238,6 +234,14 @@ class _BarcodePickViewController {
 
   Future<void> release() {
     return _methodChannel.invokeMethod(BarcodePickFunctionNames.releasePickView);
+  }
+
+  Future<void> pause() {
+    return _methodChannel.invokeMethod(BarcodePickFunctionNames.pickViewOnPause);
+  }
+
+  Future<void> resume() {
+    return _methodChannel.invokeMethod(BarcodePickFunctionNames.pickViewOnResume);
   }
 
   void addRemoveUiListener(bool add) {
@@ -307,6 +311,12 @@ class _BarcodePickViewController {
 
   void _onError(Object? error, StackTrace? stackTrace) {
     if (error == null) return;
+    print(error);
+
+    if (stackTrace != null) {
+      print(stackTrace);
+    }
+
     throw error;
   }
 
