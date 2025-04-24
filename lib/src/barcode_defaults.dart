@@ -19,7 +19,7 @@ class BarcodeDefaults {
   static late Map<String, SymbologySettings> _symbologySettingsDefaults;
   static late List<CompositeTypeDescription> _compositeTypeDescriptionsDefaults;
 
-  static MethodChannel channel = MethodChannel(BarcodeFunctionNames.methodsChannelName);
+  static MethodChannel channel = const MethodChannel(BarcodeFunctionNames.methodsChannelName);
 
   static bool _isInitialized = false;
 

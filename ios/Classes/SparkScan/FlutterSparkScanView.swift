@@ -12,10 +12,12 @@ class FlutterSparkScanView: UIView, FlutterPlatformView {
     weak var factory: FlutterSparkScanViewFactory?
     let creationJson: String
     let sparkScanModule: SparkScanModule
+    var isViewCreated: Bool
 
     init(frame: CGRect, creationJson: String, sparkScanModule: SparkScanModule) {
         self.creationJson = creationJson
         self.sparkScanModule = sparkScanModule
+        self.isViewCreated = false
         super.init(frame: frame)
     }
 
@@ -29,24 +31,32 @@ class FlutterSparkScanView: UIView, FlutterPlatformView {
 
     override func didMoveToWindow() {
         super.didMoveToWindow()
+        if isViewCreated {
+            return
+        }
+        
         guard let _ = superview, let _ = window else { return }
         let flutterAppDelegate = (UIApplication.shared.delegate as! FlutterAppDelegate)
         let flutterView = flutterAppDelegate.window.rootViewController!.view!
-        sparkScanModule.addViewToContainer(flutterView,
+        let parent = flutterView.superview!
+  
+        sparkScanModule.addViewToContainer(parent,
                                            jsonString: creationJson,
                                            result: FlutterLogInsteadOfResult())
         let sparkScanView = sparkScanModule.sparkScanView!
-        flutterView.bringSubviewToFront(sparkScanView)
-        let sparkScanViewConstraints = flutterView.constraints.filter {
+        parent.bringSubviewToFront(sparkScanView)
+        
+        let sparkScanViewConstraints = parent.constraints.filter {
             $0.firstItem === sparkScanView
         }
-        flutterView.removeConstraints(sparkScanViewConstraints)
-        flutterView.addConstraints([
-            sparkScanView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            sparkScanView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
-            sparkScanView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
-            sparkScanView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+        parent.removeConstraints(sparkScanViewConstraints)
+        parent.addConstraints([
+            sparkScanView.topAnchor.constraint(equalTo: flutterView.topAnchor),
+            sparkScanView.leadingAnchor.constraint(equalTo: flutterView.leadingAnchor),
+            sparkScanView.trailingAnchor.constraint(equalTo: flutterView.trailingAnchor),
+            sparkScanView.bottomAnchor.constraint(equalTo: flutterView.bottomAnchor),
         ])
+        isViewCreated = true
     }
 
     override func removeFromSuperview() {

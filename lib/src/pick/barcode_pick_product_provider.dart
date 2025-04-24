@@ -65,7 +65,7 @@ class BarcodePickAsyncMapperProductProvider
 class _BarcodePickAsyncMapperProductProviderController {
   final BarcodePickAsyncMapperProductProvider _provider;
   StreamSubscription<dynamic>? _providerEventsSubscription;
-  final MethodChannel _methodChannel = MethodChannel(BarcodePickFunctionNames.methodsChannelName);
+  final MethodChannel _methodChannel = const MethodChannel(BarcodePickFunctionNames.methodsChannelName);
 
   _BarcodePickAsyncMapperProductProviderController(this._provider);
 

@@ -7,7 +7,7 @@
 import 'package:meta/meta.dart';
 import '../../scandit_flutter_datacapture_barcode.dart';
 import 'target_barcode.dart';
-import '../../scandit_flutter_datacapture_barcode_tracking.dart';
+import '../../scandit_flutter_datacapture_barcode_batch.dart';
 
 @immutable
 class BarcodeCountCaptureListSession {
@@ -27,7 +27,7 @@ class BarcodeCountCaptureListSession {
 
   List<Barcode> get additionalBarcodes => _additionalBarcodes;
 
-  BarcodeCountCaptureListSession._(
+  const BarcodeCountCaptureListSession._(
       this._correctBarcodes, this._wrongBarcodes, this._missingBarcodes, this._additionalBarcodes);
 
   factory BarcodeCountCaptureListSession.fromJSON(Map<String, dynamic> json) {

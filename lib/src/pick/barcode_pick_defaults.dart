@@ -12,7 +12,7 @@ import '../symbology_settings.dart';
 import 'barcode_pick_state.dart';
 
 class BarcodePickDefaults {
-  static MethodChannel channel = MethodChannel(BarcodePickFunctionNames.methodsChannelName);
+  static MethodChannel channel = const MethodChannel(BarcodePickFunctionNames.methodsChannelName);
 
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
@@ -68,7 +68,7 @@ class ViewSettingsDefaults {
   final bool showFinishButton;
   final bool showPauseButton;
 
-  ViewSettingsDefaults(
+  const ViewSettingsDefaults(
       this.initialGuidelineText,
       this.moveCloserGuidelineText,
       this.loadingDialogText,
@@ -108,7 +108,7 @@ class BarcodePickSettingsDefaults {
   final bool soundEnabled;
   final bool cachingEnabled;
 
-  BarcodePickSettingsDefaults(this.hapticsEnabled, this.soundEnabled, this.cachingEnabled);
+  const BarcodePickSettingsDefaults(this.hapticsEnabled, this.soundEnabled, this.cachingEnabled);
 
   factory BarcodePickSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     return BarcodePickSettingsDefaults(
@@ -126,7 +126,7 @@ class ViewHighlightStyleDefaults {
   final DotRectangularViewHighlightStyleDefaults dot;
   final DotWithIconsViewHighlightStyleDefaults dotWithIcons;
 
-  ViewHighlightStyleDefaults(
+  const ViewHighlightStyleDefaults(
     this.rectangular,
     this.rectangularWithIcons,
     this.dot,
@@ -146,7 +146,7 @@ class ViewHighlightStyleDefaults {
 @immutable
 class RectangularViewHighlightStyleDefaults {
   final List<BrushForState> brushesForState;
-  RectangularViewHighlightStyleDefaults(this.brushesForState);
+  const RectangularViewHighlightStyleDefaults(this.brushesForState);
 
   factory RectangularViewHighlightStyleDefaults.fromJSON(Map<String, dynamic> json) {
     var rectangularJson = jsonDecode(json['Rectangular'] as String);
@@ -159,7 +159,7 @@ class RectangularViewHighlightStyleDefaults {
 class RectangularWithIconsViewHighlightStyleDefaults {
   final List<BrushForState> brushesForState;
   final BarcodePickIconStyle iconStyle;
-  RectangularWithIconsViewHighlightStyleDefaults(this.brushesForState, this.iconStyle);
+  const RectangularWithIconsViewHighlightStyleDefaults(this.brushesForState, this.iconStyle);
 
   factory RectangularWithIconsViewHighlightStyleDefaults.fromJSON(Map<String, dynamic> json) {
     var rectangularWithIconsJson = jsonDecode(json['RectangularWithIcons'] as String);
@@ -172,7 +172,7 @@ class RectangularWithIconsViewHighlightStyleDefaults {
 @immutable
 class DotRectangularViewHighlightStyleDefaults {
   final List<BrushForState> brushesForState;
-  DotRectangularViewHighlightStyleDefaults(this.brushesForState);
+  const DotRectangularViewHighlightStyleDefaults(this.brushesForState);
 
   factory DotRectangularViewHighlightStyleDefaults.fromJSON(Map<String, dynamic> json) {
     var dotJson = jsonDecode(json['Dot'] as String);
@@ -185,7 +185,7 @@ class DotRectangularViewHighlightStyleDefaults {
 class DotWithIconsViewHighlightStyleDefaults {
   final List<BrushForState> brushesForState;
   final BarcodePickIconStyle iconStyle;
-  DotWithIconsViewHighlightStyleDefaults(this.brushesForState, this.iconStyle);
+  const DotWithIconsViewHighlightStyleDefaults(this.brushesForState, this.iconStyle);
 
   factory DotWithIconsViewHighlightStyleDefaults.fromJSON(Map<String, dynamic> json) {
     var dotWithIconsJson = jsonDecode(json['DotWithIcons'] as String);

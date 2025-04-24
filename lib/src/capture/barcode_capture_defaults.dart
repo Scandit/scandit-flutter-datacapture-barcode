@@ -8,14 +8,13 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
-import 'package:scandit_flutter_datacapture_core/src/battery_saving_mode.dart';
 
 import 'barcode_capture_overlay.dart';
 import 'barcode_capture_function_names.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeCaptureDefaults {
-  static MethodChannel channel = MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
+  static MethodChannel channel = const MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
 
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
@@ -46,15 +45,19 @@ class BarcodeCaptureDefaults {
 
 @immutable
 class BarcodeCaptureSettingsDefaults {
-  final int codeDuplicateFilter;
+  final Duration codeDuplicateFilter;
   final BatterySavingMode batterySaving;
   final ScanIntention scanIntention;
 
-  BarcodeCaptureSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention);
+  const BarcodeCaptureSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention);
 
   factory BarcodeCaptureSettingsDefaults.fromJSON(Map<String, dynamic> json) {
+    var durationInMillis = (json['codeDuplicateFilter'] as num).toInt();
+
+    var duration = const Duration(milliseconds: 1) * durationInMillis;
+
     return BarcodeCaptureSettingsDefaults(
-      (json['codeDuplicateFilter'] as num).toInt(),
+      duration,
       BatterySavingModeDeserializer.fromJSON(json['batterySaving'] as String),
       ScanIntentionSerializer.fromJSON(json['scanIntention'] as String),
     );
@@ -66,7 +69,7 @@ class BarcodeCaptureOverlayDefaults {
   final BarcodeCaptureOverlayStyle defaultStyle;
   final Map<BarcodeCaptureOverlayStyle, Brush> brushes;
 
-  BarcodeCaptureOverlayDefaults(this.defaultStyle, this.brushes);
+  const BarcodeCaptureOverlayDefaults(this.defaultStyle, this.brushes);
 
   factory BarcodeCaptureOverlayDefaults.fromJSON(Map<String, dynamic> json) {
     var defaultStyle = BarcodeCaptureOverlayStyleSerializer.fromJSON(json['defaultStyle'] as String);

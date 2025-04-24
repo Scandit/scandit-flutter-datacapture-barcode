@@ -19,9 +19,6 @@ class BarcodePickMethodHandler {
         static let freezePickView = "freezePickView"
         static let releasePickView = "releasePickView"
         
-        static let pausePickView = "pickViewOnPause"
-        static let resumePickView = "pickViewOnResume"
-        
         static let addViewUiListener = "addViewUiListener"
         static let removeViewUiListener = "removeViewUiListener"
         static let addViewListener = "addViewListener"
@@ -57,12 +54,6 @@ class BarcodePickMethodHandler {
             result(nil)
         case FunctionNames.releasePickView:
             barcodePickModule.viewStop()
-            result(nil)
-        case FunctionNames.pausePickView:
-            // Nothing to call on iOS for this event
-            result(nil)
-        case FunctionNames.resumePickView:
-            // Nothing to call on iOS for this event
             result(nil)
         case FunctionNames.stopPickView:
             barcodePickModule.viewPause()
