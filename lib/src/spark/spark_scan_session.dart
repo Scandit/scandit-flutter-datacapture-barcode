@@ -19,21 +19,24 @@ class SparkScanSession with _PrivateSparkScanSession {
   final int _frameSequenceId;
   int get frameSequenceId => _frameSequenceId;
 
-  SparkScanSession._(this._newlyRecognizedBarcode, this._frameSequenceId, String frameId) {
+  final int _viewId;
+
+  SparkScanSession._(this._newlyRecognizedBarcode, this._frameSequenceId, String frameId, this._viewId) {
     _frameId = frameId;
   }
 
-  factory SparkScanSession.fromJSON(Map<String, dynamic> event) {
+  factory SparkScanSession.fromJSON(Map<String, dynamic> event, int viewId) {
     var json = jsonDecode(event['session']);
     return SparkScanSession._(
       json['newlyRecognizedBarcode'] != null ? Barcode.fromJSON(json['newlyRecognizedBarcode']) : null,
       (json['frameSequenceId'] as num).toInt(),
       event['frameId'],
+      viewId,
     );
   }
 
   Future<void> reset() {
-    return _controller.reset(_frameSequenceId);
+    return _controller.reset(_frameSequenceId, _viewId);
   }
 }
 
@@ -46,8 +49,9 @@ mixin _PrivateSparkScanSession {
 class _SparkScanSessionController {
   late final MethodChannel _methodChannel = _getChannel();
 
-  Future<void> reset(int frameSequenceId) {
-    return _methodChannel.invokeMethod(SparkScanFunctionNames.resetSparkScanSession, frameSequenceId);
+  Future<void> reset(int frameSequenceId, int viewId) {
+    return _methodChannel.invokeMethod(
+        SparkScanFunctionNames.resetSparkScanSession, {'viewId': viewId, 'frameSequenceId': frameSequenceId});
   }
 
   MethodChannel _getChannel() {
