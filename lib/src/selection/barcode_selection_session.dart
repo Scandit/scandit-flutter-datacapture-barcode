@@ -50,12 +50,12 @@ class BarcodeSelectionSession with _PrivateBarcodeSelectionSession {
           .cast<Barcode>(),
       (json['newlyUnselectedBarcodes'] as List<dynamic>)
           .cast<Map<String, dynamic>>()
-          .map((e) => LocalizedOnlyBarcode.fromJSON(e))
+          .map((e) => Barcode.fromJSON(e))
           .toList()
           .cast<Barcode>(),
       (json['selectedBarcodes'] as List<dynamic>)
           .cast<Map<String, dynamic>>()
-          .map((e) => LocalizedOnlyBarcode.fromJSON(e))
+          .map((e) => Barcode.fromJSON(e))
           .toList()
           .cast<Barcode>(),
       (json['frameSequenceId'] as num).toInt(),
