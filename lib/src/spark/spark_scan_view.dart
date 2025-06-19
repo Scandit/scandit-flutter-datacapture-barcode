@@ -99,6 +99,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
   final SparkScan _sparkScan;
   SparkScanViewSettings _settings;
   SparkScanViewUiListener? _uiListener;
+  ExtendedSparkScanViewUiListener? _extendedUiListener;
   SparkScanFeedbackDelegate? _feedbackDelegate;
 
   bool _viewWasCreated = false;
@@ -304,6 +305,17 @@ class SparkScanView extends StatefulWidget implements Serializable {
     _update();
   }
 
+  bool _labelCaptureButtonVisible = SparkScanDefaults.sparkScanViewDefaults.labelCaptureButtonVisible;
+
+  bool get labelCaptureButtonVisible {
+    return _labelCaptureButtonVisible;
+  }
+
+  set labelCaptureButtonVisible(bool newValue) {
+    _labelCaptureButtonVisible = newValue;
+    _update();
+  }
+
   bool _zoomSwitchControlVisible = SparkScanDefaults.sparkScanViewDefaults.zoomSwitchControlVisible;
 
   bool get zoomSwitchControlVisible {
@@ -322,6 +334,16 @@ class SparkScanView extends StatefulWidget implements Serializable {
       _controller?.unsubscribeUiListeners();
     }
     _uiListener = listener;
+    _update();
+  }
+
+  void setExtendedListener(ExtendedSparkScanViewUiListener? listener) {
+    if (listener != null) {
+      _controller?.subscribeUiListeners();
+    } else {
+      _controller?.unsubscribeUiListeners();
+    }
+    _extendedUiListener = listener;
     _update();
   }
 
@@ -476,6 +498,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
         'toolbarBackgroundColor': toolbarBackgroundColor?.jsonValue,
         'barcodeCountButtonVisible': barcodeCountButtonVisible,
         'barcodeFindButtonVisible': barcodeFindButtonVisible,
+        'labelCaptureButtonVisible': labelCaptureButtonVisible,
         'targetModeButtonVisible': targetModeButtonVisible,
         'toolbarIconActiveTintColor': toolbarIconActiveTintColor?.jsonValue,
         'toolbarIconInactiveTintColor': toolbarIconInactiveTintColor?.jsonValue,
@@ -491,6 +514,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
         'triggerButtonTintColor': triggerButtonTintColor?.jsonValue,
         'hasFeedbackDelegate': _feedbackDelegate != null,
         'hasUiListener': _uiListener != null,
+        'hasExtendedUiListener': _extendedUiListener != null,
         'viewId': _controller?._viewId ?? 0,
       },
       'SparkScan': _sparkScan.toMap(),
@@ -620,7 +644,7 @@ class _SparkScanViewController {
       subscribeToFeedbackDelegateEvents();
     }
 
-    if (view._uiListener != null) {
+    if (view._uiListener != null || view._extendedUiListener != null) {
       subscribeUiListeners();
     }
   }
@@ -636,12 +660,17 @@ class _SparkScanViewController {
 
       if (eventName == 'SparkScanViewUiListener.barcodeCountButtonTapped') {
         view._uiListener?.didTapBarcodeCountButton(view);
+        view._extendedUiListener?.didTapBarcodeCountButton(view);
       } else if (eventName == 'SparkScanViewUiListener.barcodeFindButtonTapped') {
         view._uiListener?.didTapBarcodeFindButton(view);
+        view._extendedUiListener?.didTapBarcodeFindButton(view);
       } else if (eventName == 'SparkScanViewUiListener.didChangeViewState') {
         final stateJson = json['state'] as String;
         final newState = SparkScanViewStateSerializer.fromJSON(stateJson);
         view._uiListener?.didChangeViewState(newState);
+        view._extendedUiListener?.didChangeViewState(newState);
+      } else if (eventName == 'SparkScanViewUiListener.labelCaptureButtonTapped') {
+        view._extendedUiListener?.didTapLabelCaptureButton(view);
       }
     });
   }
