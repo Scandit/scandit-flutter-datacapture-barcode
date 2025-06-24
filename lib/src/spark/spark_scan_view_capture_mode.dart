@@ -4,8 +4,9 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_preview_behavior.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+
+import 'spark_scan_view.dart';
 
 enum SparkScanScanningBehavior {
   single('single'),

@@ -20,4 +20,3 @@ export 'src/aruco_dictionary.dart' show ArucoDictionary;
 export 'src/aruco_dictionary_preset.dart' show ArucoDictionaryPreset;
 export 'src/aruco_marker.dart' show ArucoMarker;
 export 'src/structured_append.dart' show StructuredAppendData;
-export 'src/tracked_object.dart' show TrackedObject;

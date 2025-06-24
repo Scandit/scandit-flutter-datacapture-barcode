@@ -13,7 +13,6 @@ class FlutterSparkScanView: UIView, FlutterPlatformView {
     let creationJson: String
     let sparkScanModule: SparkScanModule
     var isViewCreated: Bool
-    var viewId: Int = 0
 
     init(frame: CGRect, creationJson: String, sparkScanModule: SparkScanModule) {
         self.creationJson = creationJson
@@ -41,22 +40,33 @@ class FlutterSparkScanView: UIView, FlutterPlatformView {
         let flutterView = flutterAppDelegate.window.rootViewController!.view!
         let parent = flutterView.superview!
   
-        self.viewId = sparkScanModule.addViewToContainer(parent,
+        sparkScanModule.addViewToContainer(parent,
                                            jsonString: creationJson,
                                            result: FlutterLogInsteadOfResult())
+        let sparkScanView = sparkScanModule.sparkScanView!
+        parent.bringSubviewToFront(sparkScanView)
         
-        sparkScanModule.bringSparkScanViewToFront(viewId: self.viewId)
-        sparkScanModule.setupViewConstraints(viewId: self.viewId, referenceView: flutterView)
-        
+        let sparkScanViewConstraints = parent.constraints.filter {
+            $0.firstItem === sparkScanView
+        }
+        parent.removeConstraints(sparkScanViewConstraints)
+        parent.addConstraints([
+            sparkScanView.topAnchor.constraint(equalTo: flutterView.topAnchor),
+            sparkScanView.leadingAnchor.constraint(equalTo: flutterView.leadingAnchor),
+            sparkScanView.trailingAnchor.constraint(equalTo: flutterView.trailingAnchor),
+            sparkScanView.bottomAnchor.constraint(equalTo: flutterView.bottomAnchor),
+        ])
         isViewCreated = true
     }
 
     override func removeFromSuperview() {
-        sparkScanModule.disposeView(viewId: self.viewId)
         super.removeFromSuperview()
+        guard let index = factory?.views.firstIndex(of: self) else { return }
+        factory?.views.remove(at: index)
+        sparkScanModule.sparkScanView?.removeFromSuperview()
     }
 
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        return sparkScanModule.hitTest(viewId: self.viewId, point: point, with: event)
+        sparkScanModule.sparkScanView?.hitTest(point, with: event)
     }
 }
