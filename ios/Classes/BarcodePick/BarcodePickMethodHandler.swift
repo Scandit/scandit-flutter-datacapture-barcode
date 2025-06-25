@@ -27,6 +27,12 @@ class BarcodePickMethodHandler {
         static let removeActionListener = "removeActionListener"
         static let finishOnProductIdentifierForItems = "finishOnProductIdentifierForItems"
         static let finishPickAction = "finishPickAction"
+        static let addBarcodePickListener = "addBarcodePickListener"
+        static let removeBarcodePickListener = "removeBarcodePickListener"
+        static let finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest 
+        = "finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest"
+        static let finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest
+        = "finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest"
     }
 
     private let barcodePickModule: BarcodePickModule
@@ -82,6 +88,34 @@ class BarcodePickMethodHandler {
         case FunctionNames.finishPickAction:
             let data = methodCall.arguments as! String
             barcodePickModule.finishPickAction(data: data, result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.addBarcodePickListener:
+            barcodePickModule.addBarcodePickListener(result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.removeBarcodePickListener:
+            barcodePickModule.removeBarcodePickListener(result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest:
+            guard let args = methodCall.arguments as? [String: Any?] else {
+                result(FlutterError(
+                    code: "-1",
+                    message: "Invalid argument for \(FunctionNames.finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest)",
+                    details: methodCall.arguments)
+                )
+                return
+            }
+            barcodePickModule.finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest(
+                response: args, result: FlutterFrameworkResult(reply: result)
+            )
+        case FunctionNames.finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest:
+            guard let args = methodCall.arguments as? [String: Any?] else {
+                result(FlutterError(
+                    code: "-1",
+                    message: "Invalid argument for \(FunctionNames.finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest)",
+                    details: methodCall.arguments)
+                )
+                return
+            }
+            barcodePickModule.finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest(
+                response: args, result: FlutterFrameworkResult(reply: result)
+            )
         default:
             result(FlutterMethodNotImplemented)
         }

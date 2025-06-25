@@ -21,7 +21,7 @@ class BarcodePluginEvents {
 
   static Stream barcodePickEventStream = _getBarcodePickStream();
 
-  static Stream barcodeCheckEventStream = _getBarcodeCheckStream();
+  static Stream barcodeArEventStream = _getBarcodeArStream();
 
   static Stream _getBarcodeCountStream() {
     return const EventChannel('com.scandit.datacapture.barcode.count/event_channel').receiveBroadcastStream();
@@ -51,7 +51,7 @@ class BarcodePluginEvents {
     return const EventChannel('com.scandit.datacapture.barcode.pick/event_channel').receiveBroadcastStream();
   }
 
-  static Stream _getBarcodeCheckStream() {
-    return const EventChannel('com.scandit.datacapture.barcode.check/event_channel').receiveBroadcastStream();
+  static Stream _getBarcodeArStream() {
+    return const EventChannel('com.scandit.datacapture.barcode.ar/event_channel').receiveBroadcastStream();
   }
 }
