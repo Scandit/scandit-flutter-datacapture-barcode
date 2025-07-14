@@ -54,6 +54,7 @@ class SparkScanViewDefaults {
   final bool scanningBehaviorButtonVisible;
   final bool barcodeCountButtonVisible;
   final bool barcodeFindButtonVisible;
+  final bool labelCaptureButtonVisible;
   final bool targetModeButtonVisible;
   final bool soundModeButtonVisible;
   final bool hapticModeButtonVisible;
@@ -83,6 +84,7 @@ class SparkScanViewDefaults {
       this.scanningBehaviorButtonVisible,
       this.barcodeCountButtonVisible,
       this.barcodeFindButtonVisible,
+      this.labelCaptureButtonVisible,
       this.targetModeButtonVisible,
       this.soundModeButtonVisible,
       this.hapticModeButtonVisible,
@@ -108,6 +110,7 @@ class SparkScanViewDefaults {
     final scanningBehaviorButtonVisible = json['scanningBehaviorButtonVisible'] as bool;
     final barcodeCountButtonVisible = json['barcodeCountButtonVisible'] as bool;
     final barcodeFindButtonVisible = json['barcodeFindButtonVisible'] as bool;
+    final labelCaptureButtonVisible = json['labelCaptureButtonVisible'] as bool;
     final targetModeButtonVisible = json['targetModeButtonVisible'] as bool;
 
     Color? toolbarBackgroundColor;
@@ -167,6 +170,7 @@ class SparkScanViewDefaults {
         scanningBehaviorButtonVisible,
         barcodeCountButtonVisible,
         barcodeFindButtonVisible,
+        labelCaptureButtonVisible,
         targetModeButtonVisible,
         false,
         false,
