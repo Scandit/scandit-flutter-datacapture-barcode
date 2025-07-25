@@ -66,16 +66,12 @@ class BarcodeFindView extends StatefulWidget implements Serializable {
   @override
   State<StatefulWidget> createState() => _BarcodeFindViewState();
 
-  @Deprecated(
-      'There is no longer a need to manually call the widgetPaused function. This function will be removed in future SDK versions.')
   Future<void> widgetPaused() {
-    return Future.value(null);
+    return _controller.widgetPaused();
   }
 
-  @Deprecated(
-      'There is no longer a need to manually call the widgetResumed function. This function will be removed in future SDK versions.')
   Future<void> widgetResumed() {
-    return Future.value(null);
+    return _controller.widgetResumed();
   }
 
   Future<void> stopSearching() {
@@ -297,7 +293,7 @@ class BarcodeFindView extends StatefulWidget implements Serializable {
 }
 
 class _BarcodeFindViewController {
-  final MethodChannel _methodChannel = const MethodChannel(BarcodeFindFunctionNames.methodsChannelName);
+  final MethodChannel _methodChannel = MethodChannel(BarcodeFindFunctionNames.methodsChannelName);
 
   StreamSubscription<dynamic>? _viewEventsSubscription;
 
@@ -332,6 +328,14 @@ class _BarcodeFindViewController {
     return _methodChannel.invokeMethod(BarcodeFindFunctionNames.updateFindView, jsonEncode(_barcodeFindView.toMap()));
   }
 
+  Future<void> widgetPaused() {
+    return _methodChannel.invokeMethod(BarcodeFindFunctionNames.barcodeFindViewOnPause);
+  }
+
+  Future<void> widgetResumed() {
+    return _methodChannel.invokeMethod(BarcodeFindFunctionNames.barcodeFindViewOnResume);
+  }
+
   Future<void> stopSearching() {
     return _methodChannel.invokeMethod(BarcodeFindFunctionNames.barcodeFindViewStopSearching);
   }
@@ -354,6 +358,12 @@ class _BarcodeFindViewController {
 
   void _onError(Object? error, StackTrace? stackTrace) {
     if (error == null) return;
+    print(error);
+
+    if (stackTrace != null) {
+      print(stackTrace);
+    }
+
     throw error;
   }
 

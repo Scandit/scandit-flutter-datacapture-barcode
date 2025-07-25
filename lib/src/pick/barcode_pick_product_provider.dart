@@ -8,10 +8,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/pick/internal/barcode_pick_consts.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import '../barcode_plugin_events.dart';
+import 'barcode_pick_function_names.dart';
 import 'barcode_pick_product.dart';
 import 'barcode_pick_product_provider_callback_item.dart';
 
@@ -65,7 +65,7 @@ class BarcodePickAsyncMapperProductProvider
 class _BarcodePickAsyncMapperProductProviderController {
   final BarcodePickAsyncMapperProductProvider _provider;
   StreamSubscription<dynamic>? _providerEventsSubscription;
-  final MethodChannel _methodChannel = const MethodChannel(BarcodePickFunctionNames.methodsChannelName);
+  final MethodChannel _methodChannel = MethodChannel(BarcodePickFunctionNames.methodsChannelName);
 
   _BarcodePickAsyncMapperProductProviderController(this._provider);
 
