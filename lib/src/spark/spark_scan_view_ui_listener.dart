@@ -14,7 +14,3 @@ abstract class SparkScanViewUiListener {
 
   void didChangeViewState(SparkScanViewState newState);
 }
-
-abstract class ExtendedSparkScanViewUiListener extends SparkScanViewUiListener {
-  void didTapLabelCaptureButton(SparkScanView view);
-}
