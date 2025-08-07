@@ -8,13 +8,9 @@ package com.scandit.datacapture.flutter.barcode.capture;
 import androidx.annotation.NonNull;
 
 import com.scandit.datacapture.flutter.core.utils.FlutterResult;
-import com.scandit.datacapture.flutter.core.utils.ResultUtils;
 import com.scandit.datacapture.frameworks.barcode.capture.BarcodeCaptureModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
-import com.scandit.datacapture.frameworks.core.errors.FrameDataNullError;
 import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
-import com.scandit.datacapture.frameworks.core.utils.DefaultLastFrameData;
-import com.scandit.datacapture.frameworks.core.utils.LastFrameData;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -27,15 +23,9 @@ public class BarcodeCaptureMethodHandler implements MethodChannel.MethodCallHand
     public static final String METHOD_CHANNEL_NAME = "com.scandit.datacapture.barcode.capture/method_channel";
 
     private final ServiceLocator<FrameworkModule> serviceLocator;
-    private final LastFrameData lastFrameData;
 
     public BarcodeCaptureMethodHandler(ServiceLocator<FrameworkModule> serviceLocator) {
-        this(serviceLocator, DefaultLastFrameData.getInstance());
-    }
-
-    public BarcodeCaptureMethodHandler(ServiceLocator<FrameworkModule> serviceLocator, LastFrameData lastFrameData) {
         this.serviceLocator = serviceLocator;
-        this.lastFrameData = lastFrameData;
     }
 
     @Override
@@ -53,11 +43,11 @@ public class BarcodeCaptureMethodHandler implements MethodChannel.MethodCallHand
                 result.success(null);
                 break;
             case "addBarcodeCaptureListener":
-                getSharedModule().addListener();
+                getSharedModule().addAsyncListener();
                 result.success(null);
                 break;
             case "removeBarcodeCaptureListener":
-                getSharedModule().removeListener();
+                getSharedModule().removeAsyncListener();
                 result.success(null);
                 break;
             case "resetBarcodeCaptureSession":
@@ -67,14 +57,11 @@ public class BarcodeCaptureMethodHandler implements MethodChannel.MethodCallHand
                 result.success(null);
                 break;
             case "getLastFrameData":
-                lastFrameData.getLastFrameDataBytes(bytes -> {
-                    if (bytes == null) {
-                        ResultUtils.rejectKotlinError(result, new FrameDataNullError());
-                        return null;
-                    }
-                    result.success(bytes);
-                    return null;
-                });
+                assert call.arguments() != null;
+                getSharedModule().getFrameDataBytes(
+                        call.arguments(),
+                        new FlutterResult(result)
+                );
                 break;
             case "setModeEnabledState":
                 getSharedModule().setModeEnabled(Boolean.TRUE.equals(call.arguments()));

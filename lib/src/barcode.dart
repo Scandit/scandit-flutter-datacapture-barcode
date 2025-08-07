@@ -100,7 +100,7 @@ class Barcode implements Serializable {
     var frameID = (json['frameId'] as num).toInt();
     var compositeData = json['compositeData'] as String?;
     var compositeRawData = json['compositeRawData'] as String?;
-    StructuredAppendData? structuredAppendData = null;
+    StructuredAppendData? structuredAppendData;
     if (json.containsKey('structuredAppendData') && json['structuredAppendData'] != null) {
       final jsonStructuredAppendData = json['structuredAppendData'] as Map<String, dynamic>;
       structuredAppendData = StructuredAppendData.fromJSON(jsonStructuredAppendData);

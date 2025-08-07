@@ -4,6 +4,8 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
+import 'dart:developer';
+
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -28,6 +30,7 @@ class BarcodeCount extends DataCaptureMode {
   late _BarcodeCountController _controller;
 
   @override
+  // ignore: unnecessary_overrides
   DataCaptureContext? get context => super.context;
 
   @override
@@ -140,7 +143,7 @@ class BarcodeCount extends DataCaptureMode {
 abstract class BarcodeCountListener {
   static const String _onScanEventName = 'BarcodeCountListener.onScan';
 
-  void didScan(BarcodeCount barcodeCount, BarcodeCountSession session, Future<FrameData> getFrameData());
+  Future<void> didScan(BarcodeCount barcodeCount, BarcodeCountSession session, Future<FrameData> getFrameData());
 }
 
 abstract class BarcodeCountCaptureListListener {
@@ -161,7 +164,7 @@ class BarcodeCountCaptureList {
 }
 
 class _BarcodeCountController {
-  final MethodChannel _methodChannel = MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
+  final MethodChannel _methodChannel = const MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
   final BarcodeCount _barcodeCount;
   StreamSubscription<dynamic>? _streamSubscription;
   BarcodeCountCaptureList? _barcodeCountCaptureList;
@@ -176,16 +179,16 @@ class _BarcodeCountController {
   }
 
   void _setupBarcodeCountSubscription() {
-    _streamSubscription = BarcodePluginEvents.barcodeCountEventStream.listen((event) {
+    _streamSubscription = BarcodePluginEvents.barcodeCountEventStream.listen((event) async {
       var eventJSON = jsonDecode(event);
       var eventName = eventJSON['event'] as String;
       if (eventName == BarcodeCountListener._onScanEventName) {
-        var session = BarcodeCountSession.fromJSON(jsonDecode(eventJSON['session']));
-        _notifyListenersOfOnScan(session);
+        var session = BarcodeCountSession.fromJSON(eventJSON);
+        await _notifyListenersOfOnScan(session);
         _methodChannel
             .invokeMethod(BarcodeCountFunctionNames.barcodeCountFinishOnScan, _barcodeCount.isEnabled)
             // ignore: unnecessary_lambdas
-            .then((value) => null, onError: (error) => print(error));
+            .then((value) => null, onError: (error) => log(error));
       } else if (eventName == BarcodeCountCaptureListListener._didUpdateSessionEventName) {
         var session = BarcodeCountCaptureListSession.fromJSON(jsonDecode(eventJSON['session']));
         _notifyBarcodeCountCaptureList(session);
@@ -219,9 +222,9 @@ class _BarcodeCountController {
         jsonEncode(list._targetBarcodes.map((e) => e.toMap()).toList()));
   }
 
-  Future<FrameData> _getLastFrameData() {
+  Future<FrameData> _getLastFrameData(BarcodeCountSession session) {
     return _methodChannel
-        .invokeMethod(BarcodeCountFunctionNames.getBarcodeCountLastFrameData)
+        .invokeMethod(BarcodeCountFunctionNames.getBarcodeCountLastFrameData, session.frameId)
         .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: _onError);
   }
 
@@ -241,9 +244,9 @@ class _BarcodeCountController {
         .then((value) => null, onError: _onError);
   }
 
-  void _notifyListenersOfOnScan(BarcodeCountSession session) {
+  Future<void> _notifyListenersOfOnScan(BarcodeCountSession session) async {
     for (var listener in _barcodeCount._listeners) {
-      listener.didScan(_barcodeCount, session, _getLastFrameData);
+      await listener.didScan(_barcodeCount, session, () => _getLastFrameData(session));
     }
   }
 
@@ -256,12 +259,6 @@ class _BarcodeCountController {
 
   void _onError(Object? error, StackTrace? stackTrace) {
     if (error == null) return;
-    print(error);
-
-    if (stackTrace != null) {
-      print(stackTrace);
-    }
-
     throw error;
   }
 }

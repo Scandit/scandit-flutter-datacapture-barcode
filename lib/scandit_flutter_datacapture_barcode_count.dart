@@ -14,4 +14,18 @@ export 'src/count/barcode_count_session.dart' show BarcodeCountSession;
 export 'src/count/barcode_count_settings.dart' show BarcodeCountSettings;
 export 'src/count/target_barcode.dart' show TargetBarcode;
 export 'src/count/barcode_count_view.dart'
-    show BarcodeCountView, BarcodeCountViewListener, BarcodeCountViewUiListener, BarcodeCountViewStyle;
+    show
+        BarcodeCountView,
+        BarcodeCountViewListener,
+        BarcodeCountViewUiListener,
+        BarcodeCountViewStyle,
+        BarcodeCountStatusProvider,
+        BarcodeCountStatusProviderCallback;
+export 'src/count/barcode_count_status.dart' show BarcodeCountStatus;
+export 'src/count/barcode_count_status_item.dart' show BarcodeCountStatusItem;
+export 'src/count/barcode_count_status_result.dart'
+    show
+        BarcodeCountStatusResult,
+        BarcodeCountStatusResultAbort,
+        BarcodeCountStatusResultError,
+        BarcodeCountStatusResultSuccess;
