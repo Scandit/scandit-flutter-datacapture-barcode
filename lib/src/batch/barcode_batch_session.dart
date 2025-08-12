@@ -51,14 +51,8 @@ class BarcodeBatchSession with _PrivatecBarcodeBatchSession {
         (key, value) =>
             MapEntry(int.parse(key), TrackedBarcode.fromJSON(value, sessionFrameSequenceId: frameSequenceId)));
 
-    return BarcodeBatchSession._(
-      addedTrackedCodes,
-      removedTrackedCodes,
-      updatedTrackedCodes,
-      trackedCodes,
-      frameSequenceId,
-      eventJson['frameId'],
-    );
+    return BarcodeBatchSession._(addedTrackedCodes, removedTrackedCodes, updatedTrackedCodes, trackedCodes,
+        frameSequenceId, eventJson['frameId']);
   }
 
   Future<void> reset() {
@@ -76,7 +70,9 @@ class _BarcodeBatchSessionController {
   late final MethodChannel _methodChannel = _getChannel();
 
   Future<void> reset(int frameSequenceId) {
-    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.resetBarcodeBatchSession, frameSequenceId);
+    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.resetBarcodeBatchSession, {
+      'frameSequenceId': frameSequenceId,
+    });
   }
 
   MethodChannel _getChannel() {

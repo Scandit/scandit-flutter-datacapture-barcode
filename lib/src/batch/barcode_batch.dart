@@ -6,7 +6,8 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:developer' as developer;
+import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
@@ -21,6 +22,8 @@ class BarcodeBatch extends DataCaptureMode {
   bool _enabled = true;
   BarcodeBatchSettings _settings;
   final List<BarcodeBatchListener> _listeners = [];
+  final _modeId = Random().nextInt(0x7FFFFFFF);
+
   late _BarcodeBatchListenerController _controller;
 
   @override
@@ -81,7 +84,13 @@ class BarcodeBatch extends DataCaptureMode {
 
   @override
   Map<String, dynamic> toMap() {
-    return {'type': 'barcodeTracking', 'settings': _settings.toMap()};
+    return {
+      'type': 'barcodeTracking',
+      'settings': _settings.toMap(),
+      'modeId': _modeId,
+      'hasListeners': _listeners.isNotEmpty,
+      'enabled': _enabled,
+    };
   }
 }
 
@@ -101,22 +110,26 @@ class _BarcodeBatchListenerController {
   void subscribeListeners() {
     if (_barcodeBatchSubscription != null) return;
 
-    _methodChannel
-        .invokeMethod(BarcodeBatchFunctionNames.addBarcodeBatchListener)
-        .then((value) => _listenForEvents(), onError: _onError);
+    _methodChannel.invokeMethod(BarcodeBatchFunctionNames.addBarcodeBatchListener,
+        {'modeId': _barcodeBatch._modeId}).then((value) => _listenForEvents(), onError: _onError);
   }
 
   StreamSubscription _listenForEvents() {
     return _barcodeBatchSubscription = BarcodePluginEvents.barcodeBatchEventStream.listen((event) async {
       var payload = jsonDecode(event as String);
       if (payload['event'] as String == BarcodeBatchListener._barcodeBatchListenerDidUpdateSession) {
+        if (payload['modeId'] != _barcodeBatch._modeId) {
+          return;
+        }
+
         if (_barcodeBatch._listeners.isNotEmpty && payload.containsKey('session')) {
           var session = BarcodeBatchSession.fromJSON(payload);
           await _notifyDidUpdateListeners(session);
         }
-        _methodChannel
-            .invokeMethod(BarcodeBatchFunctionNames.barcodeBatchFinishDidUpdateSession, _barcodeBatch.isEnabled)
-            .then((value) => null, onError: (error, stack) => log(error));
+        _methodChannel.invokeMethod(BarcodeBatchFunctionNames.barcodeBatchFinishDidUpdateSession, {
+          'modeId': _barcodeBatch._modeId,
+          'enabled': _barcodeBatch.isEnabled
+        }).then((value) => null, onError: (error, stack) => developer.log(error.toString()));
       }
     });
   }
@@ -128,16 +141,16 @@ class _BarcodeBatchListenerController {
   }
 
   Future<void> applyNewSettings(BarcodeBatchSettings settings) {
+    final arguments = {'modeId': _barcodeBatch._modeId, 'modeSettingsJson': jsonEncode(settings.toMap())};
     return _methodChannel
-        .invokeMethod(BarcodeBatchFunctionNames.applyBarcodeBatchModeSettings, jsonEncode(settings.toMap()))
+        .invokeMethod(BarcodeBatchFunctionNames.applyBarcodeBatchModeSettings, arguments)
         .then((value) => null, onError: _onError);
   }
 
   void unsubscribeListeners() {
     _barcodeBatchSubscription?.cancel();
-    _methodChannel
-        .invokeMethod(BarcodeBatchFunctionNames.removeBarcodeBatchListener)
-        .then((value) => null, onError: _onError);
+    _methodChannel.invokeMethod(BarcodeBatchFunctionNames.removeBarcodeBatchListener,
+        {'modeId': _barcodeBatch._modeId}).then((value) => null, onError: _onError);
 
     _barcodeBatchSubscription = null;
   }
@@ -155,13 +168,13 @@ class _BarcodeBatchListenerController {
   }
 
   void setModeEnabledState(bool newValue) {
-    _methodChannel
-        .invokeMethod(BarcodeBatchFunctionNames.setModeEnabledState, newValue)
-        .then((value) => null, onError: _onError);
+    _methodChannel.invokeMethod(BarcodeBatchFunctionNames.setModeEnabledState,
+        {'modeId': _barcodeBatch._modeId, 'enabled': newValue}).then((value) => null, onError: _onError);
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {
     if (error == null) return;
+    developer.log(error.toString());
     throw error;
   }
 }

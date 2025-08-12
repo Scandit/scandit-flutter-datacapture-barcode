@@ -10,8 +10,7 @@ import ScanditFrameworksCore
 import scandit_flutter_datacapture_core
 
 class FlutterSparkScanViewFactory: NSObject, FlutterPlatformViewFactory {
-    var views: [FlutterSparkScanView] = []
-
+    
     let sparkScanModule: SparkScanModule
 
     init(sparkScanModule: SparkScanModule) {
@@ -33,20 +32,11 @@ class FlutterSparkScanViewFactory: NSObject, FlutterPlatformViewFactory {
         let view = FlutterSparkScanView(frame: frame, 
                                         creationJson: creationJson,
                                         sparkScanModule: sparkScanModule)
-        views.append(view)
         view.factory = self
         return view
     }
 
     func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
         FlutterStandardMessageCodec.sharedInstance()
-    }
-
-    func addSparkScanViewToLastContainer() {
-        guard let view = views.last, let sparkScanView = sparkScanModule.sparkScanView else { return }
-        if sparkScanView.superview != nil {
-            sparkScanView.removeFromSuperview()
-        }
-        view.addSubview(sparkScanView)
     }
 }

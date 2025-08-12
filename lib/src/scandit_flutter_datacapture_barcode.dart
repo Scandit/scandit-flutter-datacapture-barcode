@@ -4,7 +4,7 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
-import 'package:scandit_flutter_datacapture_barcode/src/check/barcode_check_defaults.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/ar/barcode_ar_defaults.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_defaults.dart';
 
 import 'capture/barcode_capture_defaults.dart';
@@ -28,6 +28,6 @@ class ScanditFlutterDataCaptureBarcode {
     await SparkScanDefaults.initializeDefaults();
     await BarcodeFindDefaults.initializeDefaults();
     await BarcodePickDefaults.initializeDefaults();
-    await BarcodeCheckDefaults.initializeDefaults();
+    await BarcodeArDefaults.initializeDefaults();
   }
 }
