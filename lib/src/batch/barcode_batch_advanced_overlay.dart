@@ -37,8 +37,6 @@ class BarcodeBatchAdvancedOverlay extends DataCaptureOverlay {
   late _BarcodeBatchAdvancedOverlayController _controller;
   DataCaptureView? _view;
 
-  int get _dataCaptureViewId => _view?.viewId ?? -1;
-
   @override
   DataCaptureView? get view => _view;
 
@@ -101,7 +99,6 @@ class BarcodeBatchAdvancedOverlay extends DataCaptureOverlay {
   Map<String, dynamic> toMap() {
     var json = super.toMap();
     json['shouldShowScanAreaGuides'] = _shouldShowScanAreaGuides;
-    json['hasListener'] = _listener != null;
     return json;
   }
 }
@@ -118,10 +115,7 @@ class _BarcodeBatchAdvancedOverlayController {
   _BarcodeBatchAdvancedOverlayController(this._overlay);
 
   Future<void> setWidgetForTrackedBarcode(Widget? widget, TrackedBarcode trackedBarcode) async {
-    var arguments = <String, dynamic>{
-      'trackedBarcodeIdentifier': trackedBarcode.identifier,
-      'dataCaptureViewId': _overlay._dataCaptureViewId,
-    };
+    var arguments = <String, dynamic>{'identifier': trackedBarcode.identifier};
 
     if (widget != null) {
       arguments['widget'] = await widget.toImage;
@@ -139,11 +133,7 @@ class _BarcodeBatchAdvancedOverlayController {
   }
 
   Future<void> setAnchorForTrackedBarcode(Anchor anchor, TrackedBarcode trackedBarcode) {
-    var arguments = {
-      'anchor': anchor.toString(),
-      'trackedBarcodeIdentifier': trackedBarcode.identifier,
-      'dataCaptureViewId': _overlay._dataCaptureViewId,
-    };
+    var arguments = {'anchor': anchor.toString(), 'identifier': trackedBarcode.identifier};
     if (trackedBarcode.sessionFrameSequenceId != null) {
       arguments['sessionFrameSequenceID'] = trackedBarcode.sessionFrameSequenceId!;
     }
@@ -151,11 +141,7 @@ class _BarcodeBatchAdvancedOverlayController {
   }
 
   Future<void> setOffsetForTrackedBarcode(PointWithUnit offset, TrackedBarcode trackedBarcode) {
-    var arguments = {
-      'offsetJson': jsonEncode(offset.toMap()),
-      'trackedBarcodeIdentifier': trackedBarcode.identifier,
-      'dataCaptureViewId': _overlay._dataCaptureViewId,
-    };
+    var arguments = {'offset': jsonEncode(offset.toMap()), 'identifier': trackedBarcode.identifier};
     if (trackedBarcode.sessionFrameSequenceId != null) {
       arguments['sessionFrameSequenceID'] = trackedBarcode.sessionFrameSequenceId!;
     }
@@ -163,22 +149,19 @@ class _BarcodeBatchAdvancedOverlayController {
   }
 
   Future<void> clearTrackedBarcodeWidgets() {
-    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.clearTrackedBarcodeWidgets, {
-      'dataCaptureViewId': _overlay._dataCaptureViewId,
-    });
+    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.clearTrackedBarcodeWidgets);
   }
 
   Future<void> update() {
-    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.updateBarcodeBatchAdvancedOverlay, {
-      'dataCaptureViewId': _overlay._dataCaptureViewId,
-      'overlayJson': jsonEncode(_overlay.toMap()),
-    }).then((value) => null, onError: _onError);
+    return _methodChannel
+        .invokeMethod(BarcodeBatchFunctionNames.updateBarcodeBatchAdvancedOverlay, jsonEncode(_overlay.toMap()))
+        .then((value) => null, onError: _onError);
   }
 
   void subscribeListener() {
-    _methodChannel.invokeMethod(BarcodeBatchFunctionNames.addBarcodeBatchAdvancedOverlayDelegate, {
-      'dataCaptureViewId': _overlay._dataCaptureViewId,
-    }).then((value) => _listenToEvents(), onError: _onError);
+    _methodChannel
+        .invokeMethod(BarcodeBatchFunctionNames.addBarcodeBatchAdvancedOverlayDelegate)
+        .then((value) => _listenToEvents(), onError: _onError);
   }
 
   void _listenToEvents() {
@@ -227,9 +210,9 @@ class _BarcodeBatchAdvancedOverlayController {
 
   void unsubscribeListener() {
     _overlaySubscription?.cancel();
-    _methodChannel.invokeMethod(BarcodeBatchFunctionNames.removeBarcodeBatchAdvancedOverlayDelegate, {
-      'dataCaptureViewId': _overlay._dataCaptureViewId,
-    }).then((value) => null, onError: _onError);
+    _methodChannel
+        .invokeMethod(BarcodeBatchFunctionNames.removeBarcodeBatchAdvancedOverlayDelegate)
+        .then((value) => null, onError: _onError);
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {

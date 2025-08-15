@@ -113,6 +113,9 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
                                               binaryMessenger: registrar.messenger())
         )
         let barcodeBatchModule = BarcodeBatchModule(
+            barcodeBatchListener: FrameworksBarcodeBatchListener(emitter: barcodeBatchEmitter),
+            barcodeBatchBasicOverlayListener: FrameworksBarcodeBatchBasicOverlayListener(emitter: barcodeBatchEmitter),
+            barcodeBatchAdvancedOverlayListener: FrameworksBarcodeBatchAdvancedOverlayListener(emitter: barcodeBatchEmitter),
             emitter: barcodeBatchEmitter
         )
         barcodeBatchModule.didStart()
@@ -144,7 +147,13 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
             eventChannel: FlutterEventChannel(name: "com.scandit.datacapture.barcode.count/event_channel",
                                               binaryMessenger: registrar.messenger())
         )
-        let barcodeCountModule = BarcodeCountModule(emitter: barcodeCountEmitter)
+        let barcodeCountModule = BarcodeCountModule(
+            barcodeCountListener: FrameworksBarcodeCountListener(emitter: barcodeCountEmitter),
+            captureListListener: FrameworksBarcodeCountCaptureListListener(emitter: barcodeCountEmitter),
+            viewListener: FrameworksBarcodeCountViewListener(emitter: barcodeCountEmitter),
+            viewUiListener: FrameworksBarcodeCountViewUIListener(emitter: barcodeCountEmitter),
+            statusProvider: FrameworksBarcodeCountStatusProvider(emitter: barcodeCountEmitter)
+        )
         barcodeCountModule.didStart()
 
         let barcodeCountMethodChannel = FlutterMethodChannel(name: "com.scandit.datacapture.barcode.count/method_channel",
@@ -176,7 +185,11 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
             eventChannel: FlutterEventChannel(name: "com.scandit.datacapture.barcode.find/event_channel",
                                               binaryMessenger: registrar.messenger())
         )
-        let barcodeFindModule = BarcodeFindModule(emitter: barcodeFindEmitter)
+        let barcodeFindModule = BarcodeFindModule(
+            listener: FrameworksBarcodeFindListener(emitter: barcodeFindEmitter),
+            viewListener: FrameworksBarcodeFindViewUIListener(emitter: barcodeFindEmitter),
+            barcodeTransformer: FrameworksBarcodeFindTransformer(emitter: barcodeFindEmitter)
+        )
         barcodeFindModule.didStart()
 
         let barcodeFindMethodChannel = FlutterMethodChannel(name: "com.scandit.datacapture.barcode.find/method_channel",

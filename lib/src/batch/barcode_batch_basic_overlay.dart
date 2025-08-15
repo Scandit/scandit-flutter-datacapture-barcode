@@ -38,20 +38,15 @@ extension BarcodeBatchBasicOverlayStyleSerializer on BarcodeBatchBasicOverlaySty
 class BarcodeBatchBasicOverlay extends DataCaptureOverlay {
   DataCaptureView? _view;
 
-  int get _dataCaptureViewId => _view?.viewId ?? -1;
-
   @override
   DataCaptureView? get view => _view;
 
   @override
   set view(DataCaptureView? newValue) {
-    if (newValue != null && newValue != _view) {
+    if (newValue != null) {
       newValue.addOverlay(this);
     }
     _view = newValue;
-    if (_listener != null) {
-      _controller.subscribeListener();
-    }
   }
 
   // ignore: unused_field
@@ -131,8 +126,7 @@ class BarcodeBatchBasicOverlay extends DataCaptureOverlay {
     json.addAll({
       'defaultBrush': _brush.toMap(),
       'shouldShowScanAreaGuides': _shouldShowScanAreaGuides,
-      'style': style.toString(),
-      'hasListener': _listener != null,
+      'style': style.toString()
     });
     return json;
   }
@@ -155,38 +149,33 @@ class _BarcodeBatchBasicOverlayController {
 
   Future<void> setBrushForTrackedBarcode(Brush brush, TrackedBarcode trackedBarcode) {
     var arguments = {
-      'brushJson': jsonEncode(brush.toMap()),
+      'brush': jsonEncode(brush.toMap()),
       'sessionFrameSequenceID': trackedBarcode.sessionFrameSequenceId,
-      'trackedBarcodeIdentifier': trackedBarcode.identifier,
-      'dataCaptureViewId': _overlay._dataCaptureViewId,
+      'trackedBarcodeID': trackedBarcode.identifier
     };
-    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.setBrushForTrackedBarcode, arguments);
+    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.setBrushForTrackedBarcode, jsonEncode(arguments));
   }
 
   Future<void> clearTrackedBarcodeBrushes() {
-    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.clearTrackedBarcodeBrushes, {
-      'dataCaptureViewId': _overlay._dataCaptureViewId,
-    });
+    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.clearTrackedBarcodeBrushes);
   }
 
   Future<void> update() {
-    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.updateBarcodeBatchBasicOverlay, {
-      'dataCaptureViewId': _overlay._dataCaptureViewId,
-      'overlayJson': jsonEncode(_overlay.toMap()),
-    });
+    return _methodChannel.invokeMethod(
+        BarcodeBatchFunctionNames.updateBarcodeBatchBasicOverlay, jsonEncode(_overlay.toMap()));
   }
 
   void unsubscribeListener() {
     _overlaySubscription?.cancel();
-    _methodChannel.invokeMethod(BarcodeBatchFunctionNames.unsubscribeBTBasicOverlayListener, {
-      'dataCaptureViewId': _overlay._dataCaptureViewId,
-    }).then((value) => null, onError: (error, stacktrace) => null);
+    _methodChannel
+        .invokeMethod(BarcodeBatchFunctionNames.unsubscribeBTBasicOverlayListener)
+        .then((value) => null, onError: (error, stacktrace) => null);
   }
 
   void subscribeListener() {
-    _methodChannel.invokeMethod(BarcodeBatchFunctionNames.subscribeBTBasicOverlayListener, {
-      'dataCaptureViewId': _overlay._dataCaptureViewId,
-    }).then((value) => _registerEventChannelStreamListener(), onError: (error, stacktrace) => log(error));
+    _methodChannel
+        .invokeMethod(BarcodeBatchFunctionNames.subscribeBTBasicOverlayListener)
+        .then((value) => _registerEventChannelStreamListener(), onError: (error, stacktrace) => log(error));
   }
 
   void _registerEventChannelStreamListener() {
@@ -201,12 +190,13 @@ class _BarcodeBatchBasicOverlayController {
           if (brush == null) {
             break;
           }
-          await _methodChannel.invokeMethod(BarcodeBatchFunctionNames.setBrushForTrackedBarcode, {
-            'brushJson': jsonEncode(brush.toMap()),
-            'trackedBarcodeIdentifier': trackedBarcode.identifier,
-            'sessionFrameSequenceID': trackedBarcode.sessionFrameSequenceId,
-            'dataCaptureViewId': _overlay._dataCaptureViewId,
-          });
+          await _methodChannel.invokeMethod(
+              BarcodeBatchFunctionNames.setBrushForTrackedBarcode,
+              jsonEncode({
+                'brush': jsonEncode(brush.toMap()),
+                'trackedBarcodeID': trackedBarcode.identifier,
+                'sessionFrameSequenceID': trackedBarcode.sessionFrameSequenceId
+              }));
           break;
         case BarcodeBatchBasicOverlayListener._didTapTrackedBarcodeEventName:
           _overlay._listener
