@@ -27,6 +27,10 @@ mixin PrivateBarcodePickProductProvider {
   void unsubscribeEvents() {
     _controller.unsubscribeFromEvents();
   }
+
+  void setViewId(int viewId) {
+    _controller._viewId = viewId;
+  }
 }
 
 abstract class BarcodePickAsyncMapperProductProviderCallback {
@@ -66,12 +70,18 @@ class _BarcodePickAsyncMapperProductProviderController {
   final BarcodePickAsyncMapperProductProvider _provider;
   StreamSubscription<dynamic>? _providerEventsSubscription;
   final MethodChannel _methodChannel = const MethodChannel(BarcodePickFunctionNames.methodsChannelName);
+  int _viewId = 0;
 
   _BarcodePickAsyncMapperProductProviderController(this._provider);
 
   void subsribeForEvents() {
     _providerEventsSubscription = BarcodePluginEvents.barcodePickEventStream.listen((event) {
       var eventJSON = jsonDecode(event) as Map<String, dynamic>;
+
+      // Filter events by viewId
+      final viewId = eventJSON['viewId'] as int?;
+      if (viewId != null && viewId != _viewId) return;
+
       var eventName = eventJSON['event'] as String;
 
       if (eventName == BarcodePickAsyncMapperProductProviderCallback._onProductIdentifierForItems) {
@@ -84,7 +94,11 @@ class _BarcodePickAsyncMapperProductProviderController {
 
   void finishOnProductIdentifierForItems(List<BarcodePickProductProviderCallbackItem> data) {
     var result = data.map((e) => e.toMap()).toList();
-    _methodChannel.invokeMethod(BarcodePickFunctionNames.finishOnProductIdentifierForItems, jsonEncode(result));
+    var params = <String, dynamic>{
+      'data': jsonEncode(result),
+    };
+    params['viewId'] = _viewId;
+    _methodChannel.invokeMethod(BarcodePickFunctionNames.finishOnProductIdentifierForItems, params);
   }
 
   void unsubscribeFromEvents() {

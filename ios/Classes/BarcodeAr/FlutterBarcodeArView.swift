@@ -9,21 +9,20 @@ import ScanditFrameworksBarcode
 import scandit_flutter_datacapture_core
 
 class FlutterBarcodeArView: UIView, FlutterPlatformView {
-    weak var factory: FlutterBarcodeArViewFactory?
+    weak var barcodeArModule: BarcodeArModule?
 
     func view() -> UIView {
         self
     }
 
     override func removeFromSuperview() {
+        barcodeArModule?.removeView(viewId: self.tag, result: FlutterLogInsteadOfResult())
         super.removeFromSuperview()
-        guard let index = factory?.views.firstIndex(of: self) else { return }
-        factory?.views.remove(at: index)
-        factory?.addBarcodeArViewToLastContainer()
     }
 
     override func didAddSubview(_ subview: UIView) {
-        if let subview = subview as? BarcodePickView {
+        super.didAddSubview(subview)
+        if let subview = subview as? BarcodeArView {
             subview.translatesAutoresizingMaskIntoConstraints = false
             addConstraints([
                 subview.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -32,6 +31,5 @@ class FlutterBarcodeArView: UIView, FlutterPlatformView {
                 subview.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
             ])
         }
-        super.didAddSubview(subview)
     }
 }

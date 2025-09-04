@@ -4,7 +4,7 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-abstract class BarcodeFindFunctionNames {
+abstract class BarcodeFindConstants {
   static const String getBarcodeFindDefaults = 'getBarcodeFindDefaults';
   static const String updateFindView = 'updateFindView';
   static const String updateFindMode = 'updateFindMode';
@@ -25,6 +25,12 @@ abstract class BarcodeFindFunctionNames {
   static const String setBarcodeTransformer = 'setBarcodeTransformer';
   static const String submitBarcodeTransformerResult = 'submitBarcodeTransformerResult';
   static const String updateFeedback = 'updateFeedback';
+
+  static const String onSearchStartedEvent = 'BarcodeFindListener.onSearchStarted';
+  static const String onSearchPausedEvent = 'BarcodeFindListener.onSearchPaused';
+  static const String onSearchStoppedEvent = 'BarcodeFindListener.onSearchStopped';
+  static const String onTransformBarcodeData = 'BarcodeFindTransformer.transformBarcodeData';
+  static const String onFinishButtonTappedEventName = 'BarcodeFindViewUiListener.onFinishButtonTapped';
 
   static const String methodsChannelName = 'com.scandit.datacapture.barcode.find/method_channel';
 }
