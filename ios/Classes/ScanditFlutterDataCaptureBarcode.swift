@@ -99,7 +99,7 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
                                               binaryMessenger: registrar.messenger())
         )
         let barcodeCaptureModule = BarcodeCaptureModule(
-            barcodeCaptureListener: FrameworksBarcodeCaptureListener(emitter: barcodeCaptureEmitter)
+            emitter: barcodeCaptureEmitter
         )
         barcodeCaptureModule.didStart()
         let barcodeCaptureMethodChannel = FlutterMethodChannel(name: "com.scandit.datacapture.barcode.capture/method_channel",

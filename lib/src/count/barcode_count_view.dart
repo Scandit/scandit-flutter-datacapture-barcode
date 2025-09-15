@@ -24,6 +24,8 @@ import 'package:scandit_flutter_datacapture_barcode/src/count/requests/barcode_c
 import 'package:scandit_flutter_datacapture_barcode/src/count/requests/barcode_count_status_provider_result.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/tracked_barcode.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
 
 enum BarcodeCountViewStyle {
   icon('icon'),
@@ -731,18 +733,22 @@ class BarcodeCount extends DataCaptureMode {
     _controller?.updateFeedback();
   }
 
-  static CameraSettings get recommendedCameraSettings => _recommendedCameraSettings();
-
-  static CameraSettings _recommendedCameraSettings() {
+  static CameraSettings createRecommendedCameraSettings() {
     var defaults = BarcodeCountDefaults.cameraSettingsDefaults;
     return CameraSettings(defaults.preferredResolution, defaults.zoomFactor, defaults.focusRange,
         defaults.focusGestureStrategy, defaults.zoomGestureZoomFactor,
         shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus, properties: defaults.properties);
   }
 
-  BarcodeCount._(DataCaptureContext context, this._settings);
+  @Deprecated('Use createRecommendedCameraSettings() instead.')
+  static CameraSettings get recommendedCameraSettings => createRecommendedCameraSettings();
 
-  BarcodeCount.forContext(DataCaptureContext context, BarcodeCountSettings settings) : this._(context, settings);
+  BarcodeCount._(this._settings);
+
+  BarcodeCount(BarcodeCountSettings settings) : this._(settings);
+
+  @Deprecated('Use constructor BarcodeCount(BarcodeCountSettings settings) instead.')
+  BarcodeCount.forContext(DataCaptureContext context, BarcodeCountSettings settings) : this._(settings);
 
   Future<void> applySettings(BarcodeCountSettings settings) {
     _settings = settings;
@@ -832,14 +838,12 @@ class BarcodeCountCaptureList {
   }
 }
 
-class _BarcodeCountViewController {
-  final MethodChannel _methodChannel = const MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
-
+class _BarcodeCountViewController extends BaseController {
   StreamSubscription<dynamic>? _viewEventsSubscription;
 
   final BarcodeCountView view;
 
-  _BarcodeCountViewController(this.view) {
+  _BarcodeCountViewController(this.view) : super(BarcodeCountFunctionNames.methodsChannelName) {
     _initialize();
   }
 
@@ -855,10 +859,12 @@ class _BarcodeCountViewController {
         ? BarcodeCountFunctionNames.addBarcodeCountViewUiListener
         : BarcodeCountFunctionNames.removeBarcodeCountViewUiListener;
 
-    _methodChannel.invokeMethod(methodToInvoke).then((value) => null, onError: _onError);
+    methodChannel.invokeMethod(methodToInvoke).then((value) => null, onError: onError);
   }
 
   void _subscribeToEvents() {
+    if (_viewEventsSubscription != null) return;
+
     _viewEventsSubscription = BarcodePluginEvents.barcodeCountEventStream.listen((event) {
       var eventJSON = jsonDecode(event);
 
@@ -918,12 +924,12 @@ class _BarcodeCountViewController {
 
   Future<void> submitBarcodeCountStatusProviderCallback(BarcodeCountStatusResult statusResult, String requestId) {
     final result = BarcodeCountStatusProviderResult.create(requestId, statusResult);
-    return _methodChannel.invokeMethod(BarcodeCountFunctionNames.submitBarcodeCountStatusProviderCallback,
+    return methodChannel.invokeMethod(BarcodeCountFunctionNames.submitBarcodeCountStatusProviderCallback,
         {'viewId': view._viewId, 'statusJson': jsonEncode(result.toMap())});
   }
 
   Future<void> addBarcodeCountStatusProvider() {
-    return _methodChannel
+    return methodChannel
         .invokeMethod(BarcodeCountFunctionNames.addBarcodeCountStatusProvider, {'viewId': view._viewId});
   }
 
@@ -939,7 +945,7 @@ class _BarcodeCountViewController {
       argument['brush'] = jsonEncode(brush.toMap());
     }
 
-    _methodChannel.invokeMethod(BarcodeCountFunctionNames.finishBrushForRecognizedBarcodeEvent, argument);
+    methodChannel.invokeMethod(BarcodeCountFunctionNames.finishBrushForRecognizedBarcodeEvent, argument);
   }
 
   void _handleBrushForRecognizedBarcodeNotInListEvent(dynamic json) {
@@ -954,12 +960,12 @@ class _BarcodeCountViewController {
       argument['brush'] = jsonEncode(brush.toMap());
     }
 
-    _methodChannel.invokeMethod(BarcodeCountFunctionNames.finishBrushForRecognizedBarcodeNotInListEvent, argument);
+    methodChannel.invokeMethod(BarcodeCountFunctionNames.finishBrushForRecognizedBarcodeNotInListEvent, argument);
   }
 
   Future<void> clearHighlights() {
-    return _methodChannel.invokeMethod(
-        BarcodeCountFunctionNames.clearHighlights, {'viewId': view._viewId}).then((value) => null, onError: _onError);
+    return methodChannel.invokeMethod(
+        BarcodeCountFunctionNames.clearHighlights, {'viewId': view._viewId}).then((value) => null, onError: onError);
   }
 
   void setListener(BarcodeCountViewListener? listener) {
@@ -967,12 +973,12 @@ class _BarcodeCountViewController {
         ? BarcodeCountFunctionNames.addBarcodeCountViewListener
         : BarcodeCountFunctionNames.removeBarcodeCountViewListener;
 
-    _methodChannel.invokeMethod(methodToInvoke, {'viewId': view._viewId}).then((value) => null, onError: _onError);
+    methodChannel.invokeMethod(methodToInvoke, {'viewId': view._viewId}).then((value) => null, onError: onError);
   }
 
   Future<void> updateView() {
     final viewMap = view.toMap()['View'];
-    return _methodChannel.invokeMethod(
+    return methodChannel.invokeMethod(
         BarcodeCountFunctionNames.updateBarcodeCountView, {'viewId': view._viewId, 'viewJson': jsonEncode(viewMap)});
   }
 
@@ -980,10 +986,10 @@ class _BarcodeCountViewController {
   BarcodeCountCaptureList? _barcodeCountCaptureList;
 
   void subscribeModeListeners() {
-    _methodChannel
+    methodChannel
         .invokeMethod(BarcodeCountFunctionNames.addBarcodeCountListener, {'viewId': view._viewId})
         .then((value) => _setupBarcodeCountSubscription())
-        .onError(_onError);
+        .onError(onError);
   }
 
   void _setupBarcodeCountSubscription() {
@@ -996,7 +1002,7 @@ class _BarcodeCountViewController {
       if (eventName == 'BarcodeCountListener.onScan') {
         var session = BarcodeCountSession.fromJSON(eventJSON);
         await _notifyListenersOfOnScan(session);
-        _methodChannel.invokeMethod(BarcodeCountFunctionNames.barcodeCountFinishOnScan, {
+        methodChannel.invokeMethod(BarcodeCountFunctionNames.barcodeCountFinishOnScan, {
           'viewId': view._viewId,
           'enabled': view._barcodeCount.isEnabled,
         })
@@ -1012,26 +1018,26 @@ class _BarcodeCountViewController {
   void unsubscribeModeListeners() {
     _streamModeSubscription?.cancel();
     _streamModeSubscription = null;
-    _methodChannel.invokeMethod(BarcodeCountFunctionNames.removeBarcodeCountListener, {'viewId': view._viewId}).then(
+    methodChannel.invokeMethod(BarcodeCountFunctionNames.removeBarcodeCountListener, {'viewId': view._viewId}).then(
         (value) => null,
-        onError: _onError);
+        onError: onError);
   }
 
   Future<void> reset() {
-    return _methodChannel.invokeMethod(BarcodeCountFunctionNames.resetMode, {'viewId': view._viewId});
+    return methodChannel.invokeMethod(BarcodeCountFunctionNames.resetMode, {'viewId': view._viewId});
   }
 
   Future<void> startScanningPhase() {
-    return _methodChannel.invokeMethod(BarcodeCountFunctionNames.startScanningPhase, {'viewId': view._viewId});
+    return methodChannel.invokeMethod(BarcodeCountFunctionNames.startScanningPhase, {'viewId': view._viewId});
   }
 
   Future<void> endScanningPhase() {
-    return _methodChannel.invokeMethod(BarcodeCountFunctionNames.endScanningPhase, {'viewId': view._viewId});
+    return methodChannel.invokeMethod(BarcodeCountFunctionNames.endScanningPhase, {'viewId': view._viewId});
   }
 
   Future<void> setBarcodeCountCaptureList(BarcodeCountCaptureList list) {
     _barcodeCountCaptureList = list;
-    return _methodChannel.invokeMethod(
+    return methodChannel.invokeMethod(
       BarcodeCountFunctionNames.setBarcodeCountCaptureList,
       {
         'viewId': view._viewId,
@@ -1041,24 +1047,24 @@ class _BarcodeCountViewController {
   }
 
   Future<FrameData> _getLastFrameData(BarcodeCountSession session) {
-    return _methodChannel
+    return methodChannel
         .invokeMethod(BarcodeCountFunctionNames.getBarcodeCountLastFrameData, session.frameId)
-        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: _onError);
+        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: onError);
   }
 
   Future<void> updateMode() {
-    return _methodChannel.invokeMethod(BarcodeCountFunctionNames.updateBarcodeCountMode,
+    return methodChannel.invokeMethod(BarcodeCountFunctionNames.updateBarcodeCountMode,
         {'viewId': view._viewId, 'modeJson': jsonEncode(view._barcodeCount.toMap())});
   }
 
   Future<void> updateFeedback() {
-    return _methodChannel.invokeMethod(BarcodeCountFunctionNames.updateFeedback,
+    return methodChannel.invokeMethod(BarcodeCountFunctionNames.updateFeedback,
         {'viewId': view._viewId, 'feedbackJson': jsonEncode(view._barcodeCount.feedback.toMap())});
   }
 
   void setModeEnabledState(bool newValue) {
-    _methodChannel.invokeMethod(BarcodeCountFunctionNames.setModeEnabledState,
-        {'viewId': view._viewId, 'enabled': newValue}).then((value) => null, onError: _onError);
+    methodChannel.invokeMethod(BarcodeCountFunctionNames.setModeEnabledState,
+        {'viewId': view._viewId, 'enabled': newValue}).then((value) => null, onError: onError);
   }
 
   Future<void> _notifyListenersOfOnScan(BarcodeCountSession session) async {
@@ -1074,24 +1080,20 @@ class _BarcodeCountViewController {
     }
   }
 
-  void _onError(Object? error, StackTrace? stackTrace) {
-    if (error == null) return;
-    throw error;
-  }
-
+  @override
   void dispose() {
+    unsubscribeModeListeners();
+
     _viewEventsSubscription?.cancel();
     _viewEventsSubscription = null;
-
-    _streamModeSubscription?.cancel();
-    _streamModeSubscription = null;
+    super.dispose();
   }
 }
 
 class _BarcodeCountViewState extends State<BarcodeCountView> {
   final int _viewId = Random().nextInt(0x7FFFFFFF);
 
-  late _BarcodeCountViewController _controller;
+  _BarcodeCountViewController? _controller;
 
   _BarcodeCountViewState();
 
@@ -1152,7 +1154,7 @@ class _BarcodeCountViewState extends State<BarcodeCountView> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 }

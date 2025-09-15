@@ -9,9 +9,10 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math';
 
-import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
 
 import 'barcode_batch_defaults.dart';
 import 'barcode_batch_function_names.dart';
@@ -39,23 +40,31 @@ class BarcodeBatch extends DataCaptureMode {
     _controller.setModeEnabledState(newValue);
   }
 
-  static CameraSettings get recommendedCameraSettings => CameraSettings(
-        BarcodeBatchDefaults.recommendedCameraSettings.preferredResolution,
-        BarcodeBatchDefaults.recommendedCameraSettings.zoomFactor,
-        BarcodeBatchDefaults.recommendedCameraSettings.focusRange,
-        BarcodeBatchDefaults.recommendedCameraSettings.focusGestureStrategy,
-        BarcodeBatchDefaults.recommendedCameraSettings.zoomGestureZoomFactor,
-        properties: BarcodeBatchDefaults.recommendedCameraSettings.properties,
-        shouldPreferSmoothAutoFocus: BarcodeBatchDefaults.recommendedCameraSettings.shouldPreferSmoothAutoFocus,
-      );
+  static CameraSettings createRecommendedCameraSettings() {
+    return CameraSettings(
+      BarcodeBatchDefaults.recommendedCameraSettings.preferredResolution,
+      BarcodeBatchDefaults.recommendedCameraSettings.zoomFactor,
+      BarcodeBatchDefaults.recommendedCameraSettings.focusRange,
+      BarcodeBatchDefaults.recommendedCameraSettings.focusGestureStrategy,
+      BarcodeBatchDefaults.recommendedCameraSettings.zoomGestureZoomFactor,
+      properties: BarcodeBatchDefaults.recommendedCameraSettings.properties,
+      shouldPreferSmoothAutoFocus: BarcodeBatchDefaults.recommendedCameraSettings.shouldPreferSmoothAutoFocus,
+    );
+  }
+
+  @Deprecated('Use createRecommendedCameraSettings() instead.')
+  static CameraSettings get recommendedCameraSettings => createRecommendedCameraSettings();
 
   BarcodeBatch._(DataCaptureContext? context, this._settings) {
-    _controller = _BarcodeBatchListenerController.forBarcodeBatch(this);
+    _controller = _BarcodeBatchListenerController(this);
     if (context != null) {
-      context.addMode(this);
+      context.setMode(this);
     }
   }
 
+  BarcodeBatch(BarcodeBatchSettings settings) : this._(null, settings);
+
+  @Deprecated('Use constructor BarcodeBatch(BarcodeBatchSettings settings) instead.')
   BarcodeBatch.forContext(DataCaptureContext context, BarcodeBatchSettings settings) : this._(context, settings);
 
   Future<void> applySettings(BarcodeBatchSettings settings) {
@@ -97,84 +106,84 @@ class BarcodeBatch extends DataCaptureMode {
 abstract class BarcodeBatchListener {
   static const String _barcodeBatchListenerDidUpdateSession = 'BarcodeBatchListener.didUpdateSession';
   Future<void> didUpdateSession(
-      BarcodeBatch barcodeBatch, BarcodeBatchSession session, Future<FrameData> getFrameData());
+    BarcodeBatch barcodeBatch,
+    BarcodeBatchSession session,
+    Future<FrameData> getFrameData(),
+  );
 }
 
-class _BarcodeBatchListenerController {
-  final MethodChannel _methodChannel = const MethodChannel(BarcodeBatchFunctionNames.methodsChannelName);
-  final BarcodeBatch _barcodeBatch;
-  StreamSubscription<dynamic>? _barcodeBatchSubscription;
+class _BarcodeBatchListenerController extends BaseController {
+  final BarcodeBatch mode;
 
-  _BarcodeBatchListenerController.forBarcodeBatch(this._barcodeBatch);
+  StreamSubscription<dynamic>? subscription;
+
+  _BarcodeBatchListenerController(this.mode) : super(BarcodeBatchFunctionNames.methodsChannelName);
 
   void subscribeListeners() {
-    if (_barcodeBatchSubscription != null) return;
+    if (subscription == null) {
+      _listenForEvents();
+    }
 
-    _methodChannel.invokeMethod(BarcodeBatchFunctionNames.addBarcodeBatchListener,
-        {'modeId': _barcodeBatch._modeId}).then((value) => _listenForEvents(), onError: _onError);
+    methodChannel
+        .invokeMethod(BarcodeBatchFunctionNames.addBarcodeBatchListener, {'modeId': mode._modeId}).onError(onError);
   }
 
-  StreamSubscription _listenForEvents() {
-    return _barcodeBatchSubscription = BarcodePluginEvents.barcodeBatchEventStream.listen((event) async {
+  void _listenForEvents() {
+    subscription = BarcodePluginEvents.barcodeBatchEventStream.listen((event) async {
       var payload = jsonDecode(event as String);
       if (payload['event'] as String == BarcodeBatchListener._barcodeBatchListenerDidUpdateSession) {
-        if (payload['modeId'] != _barcodeBatch._modeId) {
+        if (payload['modeId'] != mode._modeId) {
           return;
         }
 
-        if (_barcodeBatch._listeners.isNotEmpty && payload.containsKey('session')) {
+        if (mode._listeners.isNotEmpty && payload.containsKey('session')) {
           var session = BarcodeBatchSession.fromJSON(payload);
           await _notifyDidUpdateListeners(session);
         }
-        _methodChannel.invokeMethod(BarcodeBatchFunctionNames.barcodeBatchFinishDidUpdateSession, {
-          'modeId': _barcodeBatch._modeId,
-          'enabled': _barcodeBatch.isEnabled
+        methodChannel.invokeMethod(BarcodeBatchFunctionNames.barcodeBatchFinishDidUpdateSession, {
+          'modeId': mode._modeId,
+          'enabled': mode.isEnabled,
         }).then((value) => null, onError: (error, stack) => developer.log(error.toString()));
       }
     });
   }
 
   Future<void> updateMode() {
-    return _methodChannel
-        .invokeMethod(BarcodeBatchFunctionNames.updateBarcodeBatchMode, jsonEncode(_barcodeBatch.toMap()))
-        .then((value) => null, onError: _onError);
+    return methodChannel
+        .invokeMethod(BarcodeBatchFunctionNames.updateBarcodeBatchMode, jsonEncode(mode.toMap()))
+        .then((value) => null, onError: onError);
   }
 
   Future<void> applyNewSettings(BarcodeBatchSettings settings) {
-    final arguments = {'modeId': _barcodeBatch._modeId, 'modeSettingsJson': jsonEncode(settings.toMap())};
-    return _methodChannel
+    final arguments = {'modeId': mode._modeId, 'modeSettingsJson': jsonEncode(settings.toMap())};
+    return methodChannel
         .invokeMethod(BarcodeBatchFunctionNames.applyBarcodeBatchModeSettings, arguments)
-        .then((value) => null, onError: _onError);
+        .then((value) => null, onError: onError);
   }
 
   void unsubscribeListeners() {
-    _barcodeBatchSubscription?.cancel();
-    _methodChannel.invokeMethod(BarcodeBatchFunctionNames.removeBarcodeBatchListener,
-        {'modeId': _barcodeBatch._modeId}).then((value) => null, onError: _onError);
-
-    _barcodeBatchSubscription = null;
+    methodChannel
+        .invokeMethod(BarcodeBatchFunctionNames.removeBarcodeBatchListener, {'modeId': mode._modeId}).onError(onError);
+    subscription?.cancel();
+    subscription = null;
   }
 
   Future<void> _notifyDidUpdateListeners(BarcodeBatchSession session) async {
-    for (var listener in _barcodeBatch._listeners) {
-      await listener.didUpdateSession(_barcodeBatch, session, () => _getLastFrameData(session));
+    for (var listener in mode._listeners) {
+      await listener.didUpdateSession(mode, session, () => _getLastFrameData(session));
     }
   }
 
   Future<FrameData> _getLastFrameData(BarcodeBatchSession session) {
-    return _methodChannel
+    return methodChannel
         .invokeMethod(BarcodeBatchFunctionNames.getLastFrameData, session.frameId)
-        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: _onError);
+        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: onError);
   }
 
   void setModeEnabledState(bool newValue) {
-    _methodChannel.invokeMethod(BarcodeBatchFunctionNames.setModeEnabledState,
-        {'modeId': _barcodeBatch._modeId, 'enabled': newValue}).then((value) => null, onError: _onError);
-  }
-
-  void _onError(Object? error, StackTrace? stackTrace) {
-    if (error == null) return;
-    developer.log(error.toString());
-    throw error;
+    methodChannel.invokeMethod(BarcodeBatchFunctionNames.setModeEnabledState, {
+      'modeId': mode._modeId,
+      'enabled': newValue,
+    }).then((value) => null, onError: onError);
   }
 }

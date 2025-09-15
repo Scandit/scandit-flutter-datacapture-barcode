@@ -7,10 +7,12 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/selection/barcode_selection.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/selection/barcode_selection_function_names.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
 import 'barcode_selection_defaults.dart';
-import 'barcode_selection.dart';
 
 enum BarcodeSelectionBasicOverlayStyle {
   frame('frame'),
@@ -31,13 +33,56 @@ extension BarcodeSelectionBasicOverlayStyleSerializer on BarcodeSelectionBasicOv
 }
 
 class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
+  _BarcodeSelectionBasicOverlayController? _controller;
+
+  final BarcodeSelectionBasicOverlayStyle style;
+
+  final BarcodeSelection _mode;
+
+  BarcodeSelectionBasicOverlay._(this._mode, this._view, this.style) : super('barcodeSelectionBasic') {
+    var brushDefaultsForCurrentStyle = BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.brushes[style]!;
+    _aimedBrush = brushDefaultsForCurrentStyle.aimedBrush;
+    _selectedBrush = brushDefaultsForCurrentStyle.selectedBrush;
+    _selectingBrush = brushDefaultsForCurrentStyle.selectingBrush;
+    _trackedBrush = brushDefaultsForCurrentStyle.trackedBrush;
+
+    view?.addOverlay(this);
+    viewfinder.addListener(_handleViewfinderChanged);
+  }
+
+  BarcodeSelectionBasicOverlay(BarcodeSelection mode, {BarcodeSelectionBasicOverlayStyle? style})
+      : this._(mode, null, style ?? BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.defaultStyle);
+
+  @Deprecated('Use BarcodeSelectionBasicOverlay({BarcodeSelectionBasicOverlayStyle? style})')
+  BarcodeSelectionBasicOverlay.withBarcodeSelection(BarcodeSelection barcodeSelection)
+      : this.withBarcodeSelectionForView(barcodeSelection, null);
+
+  @Deprecated('Use BarcodeSelectionBasicOverlay({BarcodeSelectionBasicOverlayStyle? style})')
+  BarcodeSelectionBasicOverlay.withBarcodeSelectionForView(BarcodeSelection barcodeSelection, DataCaptureView? view)
+      : this.withBarcodeSelectionForViewWithStyle(
+            barcodeSelection, view, BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.defaultStyle);
+
+  @Deprecated('Use BarcodeSelectionBasicOverlay({BarcodeSelectionBasicOverlayStyle? style})')
+  BarcodeSelectionBasicOverlay.withBarcodeSelectionForViewWithStyle(
+      BarcodeSelection barcodeSelection, DataCaptureView? view, BarcodeSelectionBasicOverlayStyle style)
+      : this._(barcodeSelection, view, style);
+
+  DataCaptureView? _view;
+
   @override
-  DataCaptureView? view;
+  DataCaptureView? get view => _view;
 
-  late _BarcodeSelectionBasicOverlayController _controller;
+  @override
+  set view(DataCaptureView? newValue) {
+    if (newValue == null) {
+      _view = null;
+      _controller = null;
+      return;
+    }
 
-  // ignore: unused_field
-  final BarcodeSelection _barcodeSelection;
+    _view = newValue;
+    _controller ??= _BarcodeSelectionBasicOverlayController(this);
+  }
 
   late Brush _trackedBrush;
 
@@ -45,7 +90,7 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
 
   set trackedBrush(Brush newValue) {
     _trackedBrush = newValue;
-    _controller.update();
+    _controller?.update();
   }
 
   late Brush _aimedBrush;
@@ -54,7 +99,7 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
 
   set aimedBrush(Brush newValue) {
     _aimedBrush = newValue;
-    _controller.update();
+    _controller?.update();
   }
 
   late Brush _selectedBrush;
@@ -63,7 +108,7 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
 
   set selectedBrush(Brush newValue) {
     _selectedBrush = newValue;
-    _controller.update();
+    _controller?.update();
   }
 
   late Brush _selectingBrush;
@@ -72,7 +117,7 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
 
   set selectingBrush(Brush newValue) {
     _selectingBrush = newValue;
-    _controller.update();
+    _controller?.update();
   }
 
   bool _shouldShowScanAreaGuides = false;
@@ -81,7 +126,7 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
 
   set shouldShowScanAreaGuides(bool newValue) {
     _shouldShowScanAreaGuides = newValue;
-    _controller.update();
+    _controller?.update();
   }
 
   bool _shouldShowHints = BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.shouldShowHints;
@@ -90,30 +135,16 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
 
   set shouldShowHints(bool newValue) {
     _shouldShowHints = newValue;
-    _controller.update();
+    _controller?.update();
   }
 
   void _handleViewfinderChanged() {
-    _controller.update();
+    _controller?.update();
   }
 
   final Viewfinder _viewfinder = AimerViewfinder();
 
   Viewfinder get viewfinder => _viewfinder;
-
-  final BarcodeSelectionBasicOverlayStyle style;
-
-  BarcodeSelectionBasicOverlay._(this._barcodeSelection, this.view, this.style) : super('barcodeSelectionBasic') {
-    var brushDefaultsForCurrentStyle = BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.brushes[style]!;
-    _aimedBrush = brushDefaultsForCurrentStyle.aimedBrush;
-    _selectedBrush = brushDefaultsForCurrentStyle.selectedBrush;
-    _selectingBrush = brushDefaultsForCurrentStyle.selectingBrush;
-    _trackedBrush = brushDefaultsForCurrentStyle.trackedBrush;
-    view?.addOverlay(this);
-    _controller = _BarcodeSelectionBasicOverlayController(this);
-
-    viewfinder.addListener(_handleViewfinderChanged);
-  }
 
   Color _frozenBackgroundColor = BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.frozenBackgroundColor;
 
@@ -121,54 +152,43 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
 
   set frozenBackgroundColor(Color newValue) {
     _frozenBackgroundColor = newValue;
-    _controller.update();
+    _controller?.update();
   }
 
   String? _textForSelectOrDoubleTapToFreezeHint;
 
   Future<void> setTextForSelectOrDoubleTapToFreezeHint(String text) {
     _textForSelectOrDoubleTapToFreezeHint = text;
-    return _controller.update();
+    return _controller?.update() ?? Future.value();
   }
 
   String? _textForTapToSelectHint;
 
   Future<void> setTextForTapToSelectHint(String text) {
     _textForTapToSelectHint = text;
-    return _controller.update();
+    return _controller?.update() ?? Future.value();
   }
 
   String? _textForDoubleTapToUnfreezeHint;
 
   Future<void> setTextForDoubleTapToUnfreezeHint(String text) {
     _textForDoubleTapToUnfreezeHint = text;
-    return _controller.update();
+    return _controller?.update() ?? Future.value();
   }
 
   String? _textForTapAnywhereToSelectHint;
 
   Future<void> setTextForTapAnywhereToSelectHint(String text) {
     _textForTapAnywhereToSelectHint = text;
-    return _controller.update();
+    return _controller?.update() ?? Future.value();
   }
 
   String? _textForAimToSelectAutoHint;
 
   Future<void> setTextForAimToSelectAutoHint(String text) {
     _textForAimToSelectAutoHint = text;
-    return _controller.update();
+    return _controller?.update() ?? Future.value();
   }
-
-  BarcodeSelectionBasicOverlay.withBarcodeSelection(BarcodeSelection barcodeSelection)
-      : this.withBarcodeSelectionForView(barcodeSelection, null);
-
-  BarcodeSelectionBasicOverlay.withBarcodeSelectionForView(BarcodeSelection barcodeSelection, DataCaptureView? view)
-      : this.withBarcodeSelectionForViewWithStyle(
-            barcodeSelection, view, BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.defaultStyle);
-
-  BarcodeSelectionBasicOverlay.withBarcodeSelectionForViewWithStyle(
-      BarcodeSelection barcodeSelection, DataCaptureView? view, BarcodeSelectionBasicOverlayStyle style)
-      : this._(barcodeSelection, view, style);
 
   @override
   Map<String, dynamic> toMap() {
@@ -199,23 +219,20 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
     if (_textForAimToSelectAutoHint != null) {
       json['textForAimToSelectAutoHint'] = _textForAimToSelectAutoHint;
     }
+    json['modeId'] = _mode.toMap()['modeId'];
     return json;
   }
 }
 
-class _BarcodeSelectionBasicOverlayController {
-  late final MethodChannel _methodChannel = _getChannel();
-
+class _BarcodeSelectionBasicOverlayController extends BaseController {
   final BarcodeSelectionBasicOverlay _overlay;
 
-  _BarcodeSelectionBasicOverlayController(this._overlay);
+  _BarcodeSelectionBasicOverlayController(this._overlay) : super(BarcodeSelectionFunctionNames.methodsChannelName);
 
   Future<void> update() {
-    return _methodChannel.invokeMethod(
-        BarcodeSelectionFunctionNames.updateBarcodeSelectionBasicOverlay, jsonEncode(_overlay.toMap()));
-  }
-
-  MethodChannel _getChannel() {
-    return const MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
+    return methodChannel.invokeMethod(
+      BarcodeSelectionFunctionNames.updateBarcodeSelectionBasicOverlay,
+      jsonEncode(_overlay.toMap()),
+    );
   }
 }

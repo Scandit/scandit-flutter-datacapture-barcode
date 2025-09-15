@@ -33,6 +33,8 @@ class SparkScanMethodHandler {
         static let submitFeedbackForBarcode = "submitFeedbackForBarcode"
         static let bringSparkScanViewToFront = "bringViewToFront"
         static let updateSparkScanView = "sparkScanViewUpdate"
+        static let showSparkScanView = "showSparkScanView"
+        static let hideSparkScanView = "hideSparkScanView"
     }
 
     private let sparkScanModule: SparkScanModule
@@ -62,11 +64,11 @@ class SparkScanMethodHandler {
             result(nil)
         case FunctionNames.addSparkScanListener:
             let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.addAsyncSparkScanListener(viewId: params["viewId"] as! Int)
+            sparkScanModule.addSparkScanListener(viewId: params["viewId"] as! Int)
             result(nil)
         case FunctionNames.removeSparkScanListener:
             let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.removeAsyncSparkScanListener(viewId: params["viewId"] as! Int)
+            sparkScanModule.removeSparkScanListener(viewId: params["viewId"] as! Int)
             result(nil)
         case FunctionNames.resetSparkScanSession:
             let params = methodCall.arguments as! [String: Any]
@@ -136,6 +138,14 @@ class SparkScanMethodHandler {
                 viewJson: params["updateJson"] as! String,
                 result: FlutterFrameworkResult(reply: result)
             )
+        case FunctionNames.showSparkScanView:
+            let params = methodCall.arguments as! [String: Any]
+            sparkScanModule.showView(params["viewId"] as! Int)
+            result(nil)
+        case FunctionNames.hideSparkScanView:
+            let params = methodCall.arguments as! [String: Any]
+            sparkScanModule.hideView(params["viewId"] as! Int)
+            result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }

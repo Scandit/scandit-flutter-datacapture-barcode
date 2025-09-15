@@ -15,6 +15,7 @@ class BarcodeArMethodHandler {
         static let updateFeedback = "updateFeedback"
         static let resetLatestBarcodeArSession = "resetLatestBarcodeArSession"
         static let applyBarcodeArModeSettings = "applyBarcodeArModeSettings"
+        static let updateBarcodeArMode = "updateBarcodeArMode"
         static let addBarcodeArListener = "addBarcodeArListener"
         static let removeBarcodeArListener = "removeBarcodeArListener"
         static let barcodeArFinishDidUpdateSession = "barcodeArFinishDidUpdateSession"
@@ -54,6 +55,8 @@ class BarcodeArMethodHandler {
             barcodeAr.resetLatestBarcodeArSession(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
         case FunctionNames.applyBarcodeArModeSettings:
             barcodeAr.applyBarcodeArModeSettings(viewId: extractViewId(methodCall), modeSettingsJson: extractArgument(methodCall, key: "settings"), result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.updateBarcodeArMode:
+            barcodeAr.updateMode(viewId: extractViewId(methodCall), modeJson: extractArgument(methodCall, key: "modeJson"), result: FlutterFrameworkResult(reply: result))
         case FunctionNames.addBarcodeArListener:
             barcodeAr.addModeListener(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
         case FunctionNames.removeBarcodeArListener:

@@ -25,6 +25,8 @@ import 'package:scandit_flutter_datacapture_barcode/src/find/barcode_find_transf
 import 'package:scandit_flutter_datacapture_barcode/src/find/barcode_find_view_ui_listener.dart';
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
 
 import 'barcode_find_view_settings.dart';
 
@@ -326,9 +328,10 @@ class BarcodeFind extends DataCaptureMode {
 
   BarcodeFind(BarcodeFindSettings settings) : this._(settings);
 
-  static CameraSettings get recommendedCameraSettings => _recommendedCameraSettings();
+  @Deprecated('Use createRecommendedCameraSettings() instead.')
+  static CameraSettings get recommendedCameraSettings => createRecommendedCameraSettings();
 
-  static CameraSettings _recommendedCameraSettings() {
+  static CameraSettings createRecommendedCameraSettings() {
     var defaults = BarcodeFindDefaults.cameraSettingsDefaults;
     return CameraSettings(
       defaults.preferredResolution,
@@ -433,14 +436,12 @@ class BarcodeFind extends DataCaptureMode {
   }
 }
 
-class _BarcodeFindViewController {
-  final MethodChannel _methodChannel = const MethodChannel(BarcodeFindConstants.methodsChannelName);
-
+class _BarcodeFindViewController extends BaseController {
   StreamSubscription<dynamic>? _viewEventsSubscription;
 
   final BarcodeFindView view;
 
-  _BarcodeFindViewController(this.view) {
+  _BarcodeFindViewController(this.view) : super(BarcodeFindConstants.methodsChannelName) {
     initialize();
   }
 
@@ -488,29 +489,29 @@ class _BarcodeFindViewController {
   }
 
   Future<void> updateView() {
-    return _methodChannel.invokeMethod(BarcodeFindConstants.updateFindView, {
+    return methodChannel.invokeMethod(BarcodeFindConstants.updateFindView, {
       'viewId': view._viewId,
       'barcodeFindViewJson': jsonEncode(view.toMap()),
     });
   }
 
   Future<void> stopViewSearching() {
-    return _methodChannel.invokeMethod(BarcodeFindConstants.barcodeFindViewStopSearching, {'viewId': view._viewId});
+    return methodChannel.invokeMethod(BarcodeFindConstants.barcodeFindViewStopSearching, {'viewId': view._viewId});
   }
 
   Future<void> setItemList(Set<BarcodeFindItem> items) {
-    return _methodChannel.invokeMethod(BarcodeFindConstants.barcodeFindSetItemList, {
+    return methodChannel.invokeMethod(BarcodeFindConstants.barcodeFindSetItemList, {
       'viewId': view._viewId,
       'itemsJson': jsonEncode(items.map((e) => e.toMap()).toList()),
     });
   }
 
   Future<void> startViewSearching() {
-    return _methodChannel.invokeMethod(BarcodeFindConstants.barcodeFindViewStartSearching, {'viewId': view._viewId});
+    return methodChannel.invokeMethod(BarcodeFindConstants.barcodeFindViewStartSearching, {'viewId': view._viewId});
   }
 
   Future<void> pauseViewSearching() {
-    return _methodChannel.invokeMethod(BarcodeFindConstants.barcodeFindViewPauseSearching);
+    return methodChannel.invokeMethod(BarcodeFindConstants.barcodeFindViewPauseSearching);
   }
 
   void setUiListener(BarcodeFindViewUiListener? listener) {
@@ -524,7 +525,7 @@ class _BarcodeFindViewController {
       unsubscribeFromViewEvents();
     }
 
-    _methodChannel.invokeMethod(methodToInvoke, {'viewId': view._viewId}).then((value) => null, onError: _onError);
+    methodChannel.invokeMethod(methodToInvoke, {'viewId': view._viewId}).then((value) => null, onError: onError);
   }
 
   // Mode
@@ -533,32 +534,32 @@ class _BarcodeFindViewController {
   StreamSubscription<dynamic>? _barcodeTransformerSubscription;
 
   Future<void> updateMode() {
-    return _methodChannel.invokeMethod(BarcodeFindConstants.updateFindMode, {
+    return methodChannel.invokeMethod(BarcodeFindConstants.updateFindMode, {
       'viewId': view._viewId,
       'barcodeFindJson': jsonEncode(view._barcodeFind.toMap()),
-    }).then((value) => null, onError: _onError);
+    }).then((value) => null, onError: onError);
   }
 
   Future<void> modeStart() {
-    return _methodChannel.invokeMethod(
-        BarcodeFindConstants.barcodeFindModeStart, {'viewId': view._viewId}).then((value) => null, onError: _onError);
+    return methodChannel.invokeMethod(
+        BarcodeFindConstants.barcodeFindModeStart, {'viewId': view._viewId}).then((value) => null, onError: onError);
   }
 
   Future<void> modePause() {
-    return _methodChannel.invokeMethod(
-        BarcodeFindConstants.barcodeFindModePause, {'viewId': view._viewId}).then((value) => null, onError: _onError);
+    return methodChannel.invokeMethod(
+        BarcodeFindConstants.barcodeFindModePause, {'viewId': view._viewId}).then((value) => null, onError: onError);
   }
 
   Future<void> modeStop() {
-    return _methodChannel.invokeMethod(
-        BarcodeFindConstants.barcodeFindModeStop, {'viewId': view._viewId}).then((value) => null, onError: _onError);
+    return methodChannel.invokeMethod(
+        BarcodeFindConstants.barcodeFindModeStop, {'viewId': view._viewId}).then((value) => null, onError: onError);
   }
 
   void subscribeModeListeners() {
-    _methodChannel
+    methodChannel
         .invokeMethod(BarcodeFindConstants.registerBarcodeFindListener, {'viewId': view._viewId})
         .then((value) => subscribeModeListenersEvents())
-        .onError(_onError);
+        .onError(onError);
   }
 
   void subscribeModeListenersEvents() {
@@ -601,12 +602,12 @@ class _BarcodeFindViewController {
   }
 
   void setModeEnabledState(bool newValue) {
-    _methodChannel.invokeMethod(BarcodeFindConstants.setModeEnabledState,
-        {'viewId': view._viewId, 'enabled': newValue}).then((value) => null, onError: _onError);
+    methodChannel.invokeMethod(BarcodeFindConstants.setModeEnabledState,
+        {'viewId': view._viewId, 'enabled': newValue}).then((value) => null, onError: onError);
   }
 
   Future<void> updateFeedback() {
-    return _methodChannel.invokeMethod(BarcodeFindConstants.updateFeedback, {
+    return methodChannel.invokeMethod(BarcodeFindConstants.updateFeedback, {
       'viewId': view._viewId,
       'feedbackJson': jsonEncode(view._barcodeFind.feedback.toMap()),
     });
@@ -614,15 +615,16 @@ class _BarcodeFindViewController {
 
   void unsubscribeModeListeners() {
     _modeEventsSubscription?.cancel();
-    _methodChannel.invokeMethod(BarcodeFindConstants.unregisterBarcodeFindListener, {'viewId': view._viewId}).then(
+    _modeEventsSubscription = null;
+    methodChannel.invokeMethod(BarcodeFindConstants.unregisterBarcodeFindListener, {'viewId': view._viewId}).then(
         (value) => null,
-        onError: _onError);
+        onError: onError);
   }
 
   Future<void> setBarcodeTransformer() {
-    return _methodChannel.invokeMethod(BarcodeFindConstants.setBarcodeTransformer, {'viewId': view._viewId}).then(
+    return methodChannel.invokeMethod(BarcodeFindConstants.setBarcodeTransformer, {'viewId': view._viewId}).then(
         (value) => subscribeBarcodeTransformerEvents(),
-        onError: _onError);
+        onError: onError);
   }
 
   void subscribeBarcodeTransformerEvents() {
@@ -636,26 +638,21 @@ class _BarcodeFindViewController {
       if (eventName == BarcodeFindConstants.onTransformBarcodeData) {
         var data = eventJSON['data'] as String?;
         var result = view._barcodeFind._barcodeTransformer?.transformBarcodeData(data);
-        _methodChannel.invokeMethod(BarcodeFindConstants.submitBarcodeTransformerResult, {
+        methodChannel.invokeMethod(BarcodeFindConstants.submitBarcodeTransformerResult, {
           'viewId': view._viewId,
           'transformedBarcode': result,
-        }).onError(_onError);
+        }).onError(onError);
       }
     });
   }
 
-  void _onError(Object? error, StackTrace? stackTrace) {
-    if (error == null) return;
-    throw error;
-  }
-
+  @override
   void dispose() {
-    _viewEventsSubscription?.cancel();
-    _viewEventsSubscription = null;
-    _modeEventsSubscription?.cancel();
-    _modeEventsSubscription = null;
+    unsubscribeModeListeners();
+    unsubscribeFromViewEvents();
     _barcodeTransformerSubscription?.cancel();
     _barcodeTransformerSubscription = null;
+    super.dispose();
   }
 }
 

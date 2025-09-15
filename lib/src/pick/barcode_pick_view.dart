@@ -34,6 +34,8 @@ import 'package:scandit_flutter_datacapture_barcode/src/pick/ui/barcode_pick_vie
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/map_helper.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
 
 class BarcodePickActionCallback {
   final _BarcodePickViewController _controller;
@@ -64,9 +66,11 @@ class BarcodePick implements Serializable {
 
   final List<BarcodePickScanningListener> _scanningListeners = [];
   final List<BarcodePickListener> _listeners = [];
-  static CameraSettings get recommendedCameraSettings => _recommendedCameraSettings();
 
-  static CameraSettings _recommendedCameraSettings() {
+  @Deprecated('Use createRecommendedCameraSettings() instead.')
+  static CameraSettings get recommendedCameraSettings => createRecommendedCameraSettings();
+
+  static CameraSettings createRecommendedCameraSettings() {
     var defaults = BarcodePickDefaults.cameraSettingsDefaults;
     return CameraSettings(
       defaults.preferredResolution,
@@ -339,14 +343,12 @@ class _BarcodePickViewState extends State<BarcodePickView> {
   }
 }
 
-class _BarcodePickViewController {
-  final MethodChannel channel = const MethodChannel(BarcodePickFunctionNames.methodsChannelName);
-
+class _BarcodePickViewController extends BaseController {
   StreamSubscription<dynamic>? viewEventsSubscription;
 
   final BarcodePickView view;
 
-  _BarcodePickViewController(this.view) {
+  _BarcodePickViewController(this.view) : super(BarcodePickFunctionNames.methodsChannelName) {
     _initialize();
   }
 
@@ -375,6 +377,8 @@ class _BarcodePickViewController {
   }
 
   void subscribeToEvents() {
+    if (viewEventsSubscription != null) return;
+
     viewEventsSubscription = BarcodePluginEvents.barcodePickEventStream.listen((event) {
       var eventJSON = jsonDecode(event) as Map<String, dynamic>;
 
@@ -419,7 +423,7 @@ class _BarcodePickViewController {
     final customView = view._barcodPickViewSettings.highlightStyle as BarcodePickViewHighlightStyleCustomView?;
     final response = await customView?.asyncCustomViewProvider
         ?.customViewForRequest(BarcodePickViewHighlightStyleRequest.fromJSON(json));
-    channel.invokeMethod(BarcodePickFunctionNames.finishViewForRequest,
+    methodChannel.invokeMethod(BarcodePickFunctionNames.finishViewForRequest,
         {'viewId': view._viewId, 'requestId': requestId, 'response': response?.toMap()});
   }
 
@@ -428,46 +432,47 @@ class _BarcodePickViewController {
     final dotWithIcons = view._barcodPickViewSettings.highlightStyle as BarcodePickViewHighlightStyleDotWithIcons?;
     final response =
         await dotWithIcons?.asyncStyleProvider?.styleForRequest(BarcodePickViewHighlightStyleRequest.fromJSON(json));
-    channel.invokeMethod(BarcodePickFunctionNames.finishStyleForRequest,
+    methodChannel.invokeMethod(BarcodePickFunctionNames.finishStyleForRequest,
         {'viewId': view._viewId, 'requestId': requestId, 'response': jsonEncodeOrNull(response)});
   }
 
   Future<void> start() {
-    return channel.invokeMethod(BarcodePickFunctionNames.startPickView, {'viewId': view._viewId});
+    return methodChannel.invokeMethod(BarcodePickFunctionNames.startPickView, {'viewId': view._viewId});
   }
 
   Future<void> stop() {
-    return channel.invokeMethod(BarcodePickFunctionNames.stopPickView, {'viewId': view._viewId});
+    return methodChannel.invokeMethod(BarcodePickFunctionNames.stopPickView, {'viewId': view._viewId});
   }
 
   Future<void> freeze() {
-    return channel.invokeMethod(BarcodePickFunctionNames.freezePickView, {'viewId': view._viewId});
+    return methodChannel.invokeMethod(BarcodePickFunctionNames.freezePickView, {'viewId': view._viewId});
   }
 
   Future<void> release() {
-    return channel.invokeMethod(BarcodePickFunctionNames.releasePickView, {'viewId': view._viewId});
+    return methodChannel.invokeMethod(BarcodePickFunctionNames.releasePickView, {'viewId': view._viewId});
   }
 
   void addRemoveUiListener(bool add) {
-    channel.invokeMethod(
+    methodChannel.invokeMethod(
         add ? BarcodePickFunctionNames.addViewUiListener : BarcodePickFunctionNames.removeViewUiListener,
         {'viewId': view._viewId}).onError(onError);
   }
 
   void addViewListener() {
-    channel.invokeMethod(BarcodePickFunctionNames.addViewListener, {'viewId': view._viewId}).onError(onError);
+    methodChannel.invokeMethod(BarcodePickFunctionNames.addViewListener, {'viewId': view._viewId}).onError(onError);
   }
 
   void removeViewListener() {
-    channel.invokeMethod(BarcodePickFunctionNames.removeViewListener, {'viewId': view._viewId}).onError(onError);
+    methodChannel.invokeMethod(BarcodePickFunctionNames.removeViewListener, {'viewId': view._viewId}).onError(onError);
   }
 
   void addActionListener() {
-    channel.invokeMethod(BarcodePickFunctionNames.addActionListener, {'viewId': view._viewId}).onError(onError);
+    methodChannel.invokeMethod(BarcodePickFunctionNames.addActionListener, {'viewId': view._viewId}).onError(onError);
   }
 
   void removeActionListener() {
-    channel.invokeMethod(BarcodePickFunctionNames.removeActionListener, {'viewId': view._viewId}).onError(onError);
+    methodChannel
+        .invokeMethod(BarcodePickFunctionNames.removeActionListener, {'viewId': view._viewId}).onError(onError);
   }
 
   void handleDidPick(Map<String, dynamic> eventJson) {
@@ -485,7 +490,7 @@ class _BarcodePickViewController {
   }
 
   Future<void> finishPickAction(String itemData, bool result) {
-    return channel.invokeMethod(
+    return methodChannel.invokeMethod(
         BarcodePickFunctionNames.finishPickAction, {'viewId': view._viewId, 'itemData': itemData, 'result': result});
   }
 
@@ -519,7 +524,7 @@ class _BarcodePickViewController {
 
   StreamSubscription<dynamic>? subscriptionBarcodePickListener;
   void subscribeScanningListener() {
-    channel
+    methodChannel
         .invokeMethod(BarcodePickFunctionNames.addScanningListener, {'viewId': view._viewId})
         .then((value) => setupBarcodePickScanningListenerSubscription())
         .onError(onError);
@@ -528,7 +533,8 @@ class _BarcodePickViewController {
   void unsubscribeScanningListener() {
     subscriptionScanningListener?.cancel();
     subscriptionScanningListener = null;
-    channel.invokeMethod(BarcodePickFunctionNames.removeScanningListener, {'viewId': view._viewId}).onError(onError);
+    methodChannel
+        .invokeMethod(BarcodePickFunctionNames.removeScanningListener, {'viewId': view._viewId}).onError(onError);
   }
 
   void setupBarcodePickScanningListenerSubscription() {
@@ -559,7 +565,7 @@ class _BarcodePickViewController {
   }
 
   void subscribeBarcodePickListener() {
-    channel
+    methodChannel
         .invokeMethod(BarcodePickFunctionNames.addBarcodePickListener, {'viewId': view._viewId})
         .then((value) => setupBarcodePickListenerSubscription())
         .onError(onError);
@@ -568,7 +574,8 @@ class _BarcodePickViewController {
   void unsubscribeBarcodePickListener() {
     subscriptionBarcodePickListener?.cancel();
     subscriptionBarcodePickListener = null;
-    channel.invokeMethod(BarcodePickFunctionNames.removeBarcodePickListener, {'viewId': view._viewId}).onError(onError);
+    methodChannel
+        .invokeMethod(BarcodePickFunctionNames.removeBarcodePickListener, {'viewId': view._viewId}).onError(onError);
   }
 
   void setupBarcodePickListenerSubscription() {
@@ -591,18 +598,13 @@ class _BarcodePickViewController {
     });
   }
 
-  void onError(Object? error, StackTrace? stackTrace) {
-    if (error == null) return;
-    throw error;
-  }
-
+  @override
   void dispose() {
     viewEventsSubscription?.cancel();
     viewEventsSubscription = null;
-    subscriptionScanningListener?.cancel();
-    subscriptionScanningListener = null;
-    subscriptionBarcodePickListener?.cancel();
-    subscriptionBarcodePickListener = null;
+    unsubscribeScanningListener();
+    unsubscribeBarcodePickListener();
     view._barcodePick._dispose();
+    super.dispose();
   }
 }

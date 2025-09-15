@@ -15,6 +15,17 @@ abstract class SparkScanViewUiListener {
   void didChangeViewState(SparkScanViewState newState);
 }
 
+/// @deprecated This class is deprecated.
+/// Starting from version 8.0 of the plugins, the `didTapLabelCaptureButton`
+/// method will be included directly in [SparkScanViewUiListener].
+@Deprecated('This class is deprecated. '
+    'Starting from version 8.0 of the plugins, the didTapLabelCaptureButton '
+    'method will be included directly in SparkScanViewUiListener.')
 abstract class ExtendedSparkScanViewUiListener extends SparkScanViewUiListener {
+  /// Called when the label capture button is tapped.
+  ///
+  /// @deprecated This method will be moved to [SparkScanViewUiListener] in version 8.0.
+  /// Continue using this method for now, but prepare to migrate to [SparkScanViewUiListener]
+  /// in the next major version.
   void didTapLabelCaptureButton(SparkScanView view);
 }

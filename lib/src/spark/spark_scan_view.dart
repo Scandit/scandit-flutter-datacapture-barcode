@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_feedback_delegate.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_listener.dart';
@@ -21,6 +22,8 @@ import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_setting
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_view_ui_listener.dart';
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
 
 import '../barcode.dart';
 import '../barcode_plugin_events.dart';
@@ -40,8 +43,9 @@ class SparkScan extends DataCaptureMode {
 
   SparkScan._(this._settings);
 
-  SparkScan() : this._(SparkScanSettings());
+  SparkScan({SparkScanSettings? settings}) : this._(settings ?? SparkScanSettings());
 
+  @Deprecated('Use constructor SparkScan({SparkScanSettings? settings}) instead.')
   SparkScan.withSettings(SparkScanSettings settings) : this._(settings);
 
   @override
@@ -99,6 +103,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
   final SparkScan _sparkScan;
   SparkScanViewSettings _settings;
   SparkScanViewUiListener? _uiListener;
+  // ignore: deprecated_member_use_from_same_package
   ExtendedSparkScanViewUiListener? _extendedUiListener;
   SparkScanFeedbackDelegate? _feedbackDelegate;
 
@@ -337,6 +342,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
     _update();
   }
 
+  // ignore: deprecated_member_use_from_same_package
   void setExtendedListener(ExtendedSparkScanViewUiListener? listener) {
     if (listener != null) {
       _controller?.subscribeUiListeners();
@@ -526,6 +532,7 @@ class _SparkScanViewState extends State<SparkScanView> {
   late Widget platformView;
   final int _viewId = (DateTime.now().millisecondsSinceEpoch ~/ 1000).toInt();
   late _SparkScanViewController _controller;
+  bool _isRouteActive = true;
 
   _SparkScanViewState();
 
@@ -539,6 +546,31 @@ class _SparkScanViewState extends State<SparkScanView> {
     widget._controller = _controller;
     widget._sparkScan._controller = _controller;
     _initializePlatformView();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _checkRouteStatus();
+  }
+
+  void _checkRouteStatus() {
+    // Detect route changes and manage native view visibility accordingly.
+    // When the user navigates to another screen, this route becomes non-current
+    // and we hide the native SparkScanView. When navigating back, the route
+    // becomes current again and we show the native view to sync visibility
+    // between the Dart widget and the underlying native platform view.
+    final route = ModalRoute.of(context);
+    final wasActive = _isRouteActive;
+    _isRouteActive = route?.isCurrent == true;
+
+    if (wasActive != _isRouteActive) {
+      if (_isRouteActive) {
+        _controller.showView();
+      } else {
+        _controller.hideView();
+      }
+    }
   }
 
   void _initializePlatformView() {
@@ -590,6 +622,9 @@ class _SparkScanViewState extends State<SparkScanView> {
   @override
   Widget build(BuildContext context) {
     widget._bringViewToFront();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _checkRouteStatus();
+    });
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -623,15 +658,14 @@ class _SparkScanViewState extends State<SparkScanView> {
   }
 }
 
-class _SparkScanViewController {
-  final MethodChannel _methodChannel = const MethodChannel(SparkScanFunctionNames.methodsChannelName);
+class _SparkScanViewController extends BaseController {
   StreamSubscription<dynamic>? _sparkScanViewSubscription;
   StreamSubscription<dynamic>? _sparkScanDelegateFeedbackSubscription;
   StreamSubscription<dynamic>? _sparkScanListenerSubscription;
   final SparkScanView view;
   final int _viewId;
 
-  _SparkScanViewController._(this.view, this._viewId) {
+  _SparkScanViewController._(this.view, this._viewId) : super(SparkScanFunctionNames.methodsChannelName) {
     _initialize();
   }
 
@@ -681,7 +715,7 @@ class _SparkScanViewController {
   }
 
   Future<void> startScanning() {
-    return _methodChannel.invokeMethod(SparkScanFunctionNames.startScanning, {'viewId': _viewId}).onError(_onError);
+    return methodChannel.invokeMethod(SparkScanFunctionNames.startScanning, {'viewId': _viewId}).onError(onError);
   }
 
   Future<void> updateView() {
@@ -691,21 +725,16 @@ class _SparkScanViewController {
       'viewId': _viewId,
       'updateJson': jsonEncode(view.toMap()),
     };
-    return _methodChannel.invokeMethod(SparkScanFunctionNames.updateView, updateArgs).onError(_onError);
+    return methodChannel.invokeMethod(SparkScanFunctionNames.updateView, updateArgs).onError(onError);
   }
 
   Future<void> pauseScanning() {
-    return _methodChannel.invokeMethod(SparkScanFunctionNames.pauseScanning, {'viewId': _viewId}).onError(_onError);
-  }
-
-  void _onError(Object? error, StackTrace? stackTrace) {
-    if (error == null) return;
-    throw error;
+    return methodChannel.invokeMethod(SparkScanFunctionNames.pauseScanning, {'viewId': _viewId}).onError(onError);
   }
 
   Future<void> showToast(String text) {
-    return _methodChannel
-        .invokeMethod(SparkScanFunctionNames.showToast, {'viewId': _viewId, 'text': text}).onError(_onError);
+    return methodChannel
+        .invokeMethod(SparkScanFunctionNames.showToast, {'viewId': _viewId, 'text': text}).onError(onError);
   }
 
   void subscribeToFeedbackDelegateEvents() {
@@ -724,8 +753,8 @@ class _SparkScanViewController {
       if (feedback != null) {
         feedbackJson = jsonEncode(feedback.toMap());
       }
-      _methodChannel.invokeMethod(SparkScanFunctionNames.submitFeedbackForBarcode,
-          {'viewId': _viewId, 'feedbackJson': feedbackJson}).onError(_onError);
+      methodChannel.invokeMethod(SparkScanFunctionNames.submitFeedbackForBarcode,
+          {'viewId': _viewId, 'feedbackJson': feedbackJson}).onError(onError);
     });
   }
 
@@ -736,22 +765,21 @@ class _SparkScanViewController {
 
   Future<void> _bringViewToFront() {
     if (Platform.isIOS) {
-      return _methodChannel
-          .invokeMethod(SparkScanFunctionNames.bringViewToFront, {'viewId': _viewId}).onError(_onError);
+      return methodChannel.invokeMethod(SparkScanFunctionNames.bringViewToFront, {'viewId': _viewId}).onError(onError);
     }
     return Future.value();
   }
 
   void setModeEnabledState(bool newValue) {
-    _methodChannel.invokeMethod(SparkScanFunctionNames.setModeEnabledState, {
+    methodChannel.invokeMethod(SparkScanFunctionNames.setModeEnabledState, {
       'viewId': _viewId,
       'enabled': newValue,
-    }).then((value) => null, onError: _onError);
+    }).then((value) => null, onError: onError);
   }
 
   void subscribeSparkScanListener() {
     _setupModeListenerSubscription();
-    _methodChannel.invokeMethod(SparkScanFunctionNames.addSparkScanListener, {'viewId': _viewId}).onError(_onError);
+    methodChannel.invokeMethod(SparkScanFunctionNames.addSparkScanListener, {'viewId': _viewId}).onError(onError);
   }
 
   void _setupModeListenerSubscription() {
@@ -768,14 +796,14 @@ class _SparkScanViewController {
       if (eventName == 'SparkScanListener.didScan') {
         var session = SparkScanSession.fromJSON(json, _viewId);
         await _notifyListenersOfDidScan(session);
-        _methodChannel.invokeMethod(SparkScanFunctionNames.sparkScanFinishDidScan,
+        methodChannel.invokeMethod(SparkScanFunctionNames.sparkScanFinishDidScan,
                 {'viewId': _viewId, 'enabled': view._sparkScan.isEnabled})
             // ignore: unnecessary_lambdas
             .then((value) => null, onError: (error) => log(error));
       } else if (eventName == 'SparkScanListener.didUpdateSession') {
         var session = SparkScanSession.fromJSON(json, _viewId);
         await _notifyListenersOfDidUpateSession(session);
-        _methodChannel.invokeMethod(SparkScanFunctionNames.sparkScanFinishDidUpdateSession,
+        methodChannel.invokeMethod(SparkScanFunctionNames.sparkScanFinishDidUpdateSession,
                 {'viewId': _viewId, 'enabled': view._sparkScan.isEnabled})
             // ignore: unnecessary_lambdas
             .then((value) => null, onError: (error) => log(error));
@@ -800,34 +828,48 @@ class _SparkScanViewController {
   }
 
   Future<FrameData> _getLastFrameData(SparkScanSession session) {
-    return _methodChannel
+    return methodChannel
         .invokeMethod(SparkScanFunctionNames.getLastFrameData, session.frameId)
-        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: _onError);
+        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: onError);
   }
 
   void unsubscribeSparkScanListener() {
     _sparkScanListenerSubscription?.cancel();
     _sparkScanListenerSubscription = null;
-    _methodChannel.invokeMethod(
-        SparkScanFunctionNames.removeSparkScanListener, {'viewId': _viewId}).then((value) => null, onError: _onError);
+    methodChannel.invokeMethod(
+        SparkScanFunctionNames.removeSparkScanListener, {'viewId': _viewId}).then((value) => null, onError: onError);
   }
 
   Future<void> updateSparkScanMode() {
-    return _methodChannel.invokeMethod(SparkScanFunctionNames.updateSparkScanMode,
-        {'viewId': _viewId, 'updateJson': jsonEncode(view._sparkScan.toMap())}).onError(_onError);
+    return methodChannel.invokeMethod(SparkScanFunctionNames.updateSparkScanMode,
+        {'viewId': _viewId, 'updateJson': jsonEncode(view._sparkScan.toMap())}).onError(onError);
   }
 
+  @override
   void dispose() {
     unsubscribeSparkScanListener();
     unsubscribeFromFeedbackDelegateEvents();
     unsubscribeUiListeners();
+    super.dispose();
   }
 
   void setFeedbackDelegate(SparkScanFeedbackDelegate? newValue) {
     if (newValue == null) {
-      _methodChannel.invokeMethod('unregisterSparkScanFeedbackDelegateForEvents', {'viewId': _viewId});
+      methodChannel.invokeMethod('unregisterSparkScanFeedbackDelegateForEvents', {'viewId': _viewId});
     } else {
-      _methodChannel.invokeMethod('registerSparkScanFeedbackDelegateForEvents', {'viewId': _viewId});
+      methodChannel.invokeMethod('registerSparkScanFeedbackDelegateForEvents', {'viewId': _viewId});
     }
+  }
+
+  void showView() {
+    methodChannel.invokeMethod('showSparkScanView', {
+      'viewId': _viewId,
+    }).onError(onError);
+  }
+
+  void hideView() {
+    methodChannel.invokeMethod('hideSparkScanView', {
+      'viewId': _viewId,
+    }).onError(onError);
   }
 }

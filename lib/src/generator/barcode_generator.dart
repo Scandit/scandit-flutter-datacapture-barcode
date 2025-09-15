@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
 
 import 'barcode_generator_function_names.dart';
 import 'qr_code_crrection_level.dart';
@@ -165,15 +167,13 @@ class AztecBarcodeGeneratorBuilder extends BarcodeGeneratorBuilder<AztecBarcodeG
   }
 }
 
-class _BarcodeGeneratorController {
+class _BarcodeGeneratorController extends BaseController {
   final BarcodeGenerator barcodeGenerator;
 
-  final MethodChannel _methodChannel = const MethodChannel(BarcodeGeneratorFunctionNames.methodsChannelName);
-
-  _BarcodeGeneratorController(this.barcodeGenerator);
+  _BarcodeGeneratorController(this.barcodeGenerator) : super(BarcodeGeneratorFunctionNames.methodsChannelName);
 
   Future<Image> generateFromData(Uint8List data, double imageWidth) async {
-    var result = await _methodChannel.invokeMethod<Uint8List>(BarcodeGeneratorFunctionNames.generateFromData, {
+    var result = await methodChannel.invokeMethod<Uint8List>(BarcodeGeneratorFunctionNames.generateFromData, {
       'generatorId': barcodeGenerator.id,
       'data': data,
       'imageWidth': imageWidth,
@@ -185,7 +185,7 @@ class _BarcodeGeneratorController {
   }
 
   Future<Image> generateFromText(String text, double imageWidth) async {
-    var result = await _methodChannel.invokeMethod<Uint8List>(BarcodeGeneratorFunctionNames.generateFromText, {
+    var result = await methodChannel.invokeMethod<Uint8List>(BarcodeGeneratorFunctionNames.generateFromText, {
       'generatorId': barcodeGenerator.id,
       'text': text,
       'imageWidth': imageWidth,
@@ -196,12 +196,14 @@ class _BarcodeGeneratorController {
     return Image.memory(result, width: imageWidth);
   }
 
+  @override
   void dispose() {
-    _methodChannel.invokeMethod(BarcodeGeneratorFunctionNames.dispose, {'generatorId': barcodeGenerator.id});
+    methodChannel.invokeMethod(BarcodeGeneratorFunctionNames.dispose, {'generatorId': barcodeGenerator.id});
+    super.dispose();
   }
 
   void create() {
-    _methodChannel.invokeMethod(BarcodeGeneratorFunctionNames.create, jsonEncode(barcodeGenerator.toMap()));
+    methodChannel.invokeMethod(BarcodeGeneratorFunctionNames.create, jsonEncode(barcodeGenerator.toMap()));
   }
 }
 
