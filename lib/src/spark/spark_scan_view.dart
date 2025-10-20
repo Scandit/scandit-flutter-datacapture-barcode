@@ -450,20 +450,24 @@ class SparkScanView extends StatefulWidget implements Serializable {
     return _controller?.startScanning() ?? Future.value(null);
   }
 
-  Future<void> pauseScanning() {
-    return _controller?.pauseScanning() ?? Future.value(null);
+  Future<void> pauseScanning() async {
+    await _controller?.pauseScanning();
   }
 
-  Future<void> showToast(String text) {
-    return _controller?.showToast(text) ?? Future.value(null);
+  Future<void> stopScanning() async {
+    await _controller?.stopScanning();
   }
 
-  Future<void> _update() {
-    return _controller?.updateView() ?? Future.value(null);
+  Future<void> showToast(String text) async {
+    await _controller?.showToast(text);
   }
 
-  Future<void> _bringViewToFront() {
-    return _controller?._bringViewToFront() ?? Future.value(null);
+  Future<void> _update() async {
+    await _controller?.updateView();
+  }
+
+  Future<void> _bringViewToFront() async {
+    await _controller?._bringViewToFront();
   }
 
   String? _triggerButtonImage = SparkScanDefaults.sparkScanViewDefaults.triggerButtonImage;
@@ -730,6 +734,10 @@ class _SparkScanViewController extends BaseController {
 
   Future<void> pauseScanning() {
     return methodChannel.invokeMethod(SparkScanFunctionNames.pauseScanning, {'viewId': _viewId}).onError(onError);
+  }
+
+  Future<void> stopScanning() {
+    return methodChannel.invokeMethod(SparkScanFunctionNames.stopScanning, {'viewId': _viewId}).onError(onError);
   }
 
   Future<void> showToast(String text) {

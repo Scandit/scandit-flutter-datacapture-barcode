@@ -25,6 +25,7 @@ class SparkScanMethodHandler {
         static let removeSparkScanViewUiListener = "removeSparkScanViewUiListener"
         static let sparkScanViewStartScanning = "sparkScanViewStartScanning"
         static let sparkScanViewPauseScanning = "sparkScanViewPauseScanning"
+        static let sparkScanViewStopScanning = "sparkScanViewStopScanning"
         static let showToast = "showToast"
         static let onWidgetPaused = "onWidgetPaused"
         static let setModeEnabledState = "setModeEnabledState"
@@ -100,6 +101,10 @@ class SparkScanMethodHandler {
         case FunctionNames.sparkScanViewPauseScanning:
             let params = methodCall.arguments as! [String: Any]
             sparkScanModule.pauseScanning(viewId: params["viewId"] as! Int)
+            result(nil)
+        case FunctionNames.sparkScanViewStopScanning:
+            let params = methodCall.arguments as! [String: Any]
+            sparkScanModule.stopScanning(viewId: params["viewId"] as! Int)
             result(nil)
         case FunctionNames.showToast:
             let params = methodCall.arguments as! [String: Any]
