@@ -5,7 +5,7 @@
  */
 
 import 'dart:convert';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../../scandit_flutter_datacapture_barcode_selection.dart';
 import 'barcode_selection_basic_overlay.dart';
@@ -19,7 +19,7 @@ import 'barcode_selection_strategy.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeSelectionDefaults {
-  static MethodChannel channel = MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
+  static MethodChannel channel = const MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
 
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
@@ -75,7 +75,7 @@ class BarcodeSelectionTapSelectionDefaults {
   final BarcodeSelectionFreezeBehavior freezeBehavior;
   final BarcodeSelectionTapBehavior tapBehavior;
 
-  BarcodeSelectionTapSelectionDefaults(this.freezeBehavior, this.tapBehavior);
+  const BarcodeSelectionTapSelectionDefaults(this.freezeBehavior, this.tapBehavior);
 
   factory BarcodeSelectionTapSelectionDefaults.fromJSON(Map<String, dynamic> json) {
     var freezeBehaviour = BarcodeSelectionFreezeBehaviorSerializer.fromJSON(json['defaultFreezeBehaviour']);
@@ -88,7 +88,7 @@ class BarcodeSelectionTapSelectionDefaults {
 class BarcodeSelectionAimerSelectionDefaults {
   final BarcodeSelectionStrategy selectionStrategy;
 
-  BarcodeSelectionAimerSelectionDefaults(this.selectionStrategy);
+  const BarcodeSelectionAimerSelectionDefaults(this.selectionStrategy);
 
   factory BarcodeSelectionAimerSelectionDefaults.fromJSON(Map<String, dynamic> json) {
     var defaultStrategy = jsonDecode(json['defaultSelectionStrategy']);
@@ -101,7 +101,7 @@ class BarcodeSelectionAimerSelectionDefaults {
 class BarcodeSelectionFeedbackDefaults {
   final Feedback selection;
 
-  BarcodeSelectionFeedbackDefaults(this.selection);
+  const BarcodeSelectionFeedbackDefaults(this.selection);
 
   factory BarcodeSelectionFeedbackDefaults.fromJSON(Map<String, dynamic> json) {
     var selection = json['selection'];
@@ -145,7 +145,7 @@ class BarcodeSelectionSettingsDefaults {
   final bool singleBarcodeAutoDetectionEnabled;
   final BarcodeSelectionType selectionType;
 
-  BarcodeSelectionSettingsDefaults(this.codeDuplicateFilter, this.selectionType,
+  const BarcodeSelectionSettingsDefaults(this.codeDuplicateFilter, this.selectionType,
       {required this.singleBarcodeAutoDetectionEnabled});
 
   factory BarcodeSelectionSettingsDefaults.fromJSON(Map<String, dynamic> json) {
@@ -165,7 +165,7 @@ class BarcodeSelectionBasicOverlayDefaults {
   final bool shouldShowHints;
   final Color frozenBackgroundColor;
 
-  BarcodeSelectionBasicOverlayDefaults(
+  const BarcodeSelectionBasicOverlayDefaults(
       this.defaultStyle, this.brushes, this.shouldShowHints, this.frozenBackgroundColor);
 
   factory BarcodeSelectionBasicOverlayDefaults.fromJSON(Map<String, dynamic> json) {
@@ -187,7 +187,7 @@ class BarcodeSelectionBasicOverlayBrushDefaults {
   final Brush selectedBrush;
   final Brush trackedBrush;
 
-  BarcodeSelectionBasicOverlayBrushDefaults(
+  const BarcodeSelectionBasicOverlayBrushDefaults(
       this.aimedBrush, this.selectingBrush, this.selectedBrush, this.trackedBrush);
 
   factory BarcodeSelectionBasicOverlayBrushDefaults.fromJSON(Map<String, dynamic> json) {

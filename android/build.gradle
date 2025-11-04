@@ -4,11 +4,6 @@ def safeExtGet(prop, fallback) {
 
 apply plugin: 'com.android.library'
 
-def test_gradle = "../../common-build-test.gradle"
-if (file(test_gradle).exists()) {
-    apply from: test_gradle
-}
-
 android {
     if (project.android.hasProperty("namespace")) {
         sourceSets {
@@ -22,7 +17,7 @@ android {
 
 
     defaultConfig {
-        minSdkVersion safeExtGet("minSdkVersion", 23)
+        minSdkVersion safeExtGet("minSdkVersion", 24)
         targetSdkVersion safeExtGet("targetSdkVersion", 33)
         versionCode 1
         versionName "1.0"
@@ -34,7 +29,7 @@ android {
 }
 
 dependencies {
-    def sdk_version = "6.28.7"
+    def sdk_version = "8.0.0"
 
     println("Version of the native sdk used in this build: ${safeExtGet('global_sdk_version', sdk_version)}")
     if (findProject(':scandit-datacapture-frameworks-barcode') != null) {

@@ -33,12 +33,14 @@ class BarcodeCountMethodHandler {
         static let finishDidScan = "barcodeCountFinishOnScan"
 
         static let finishBrushForRecognizedBarcode = "finishBrushForRecognizedBarcodeEvent"
-        static let finishBrushForUnrecognizedBarcode = "finishBrushForUnrecognizedBarcodeEvent"
         static let finishBrushForRecognizedBarcodeNotInListEvent = "finishBrushForRecognizedBarcodeNotInListEvent"
 
         static let getBarcodeCountDefaults = "getBarcodeCountDefaults"
         static let setModeEnabledState = "setModeEnabledState"
         static let updateFeedback = "updateFeedback"
+
+        static let submitBarcodeCountStatusProviderCallback = "submitBarcodeCountStatusProviderCallback"
+        static let addBarcodeCountStatusProvider = "addBarcodeCountStatusProvider"
     }
 
     private let barcodeCountModule: BarcodeCountModule
@@ -50,101 +52,122 @@ class BarcodeCountMethodHandler {
     public func methodCallHandler(methodCall: FlutterMethodCall, result: @escaping FlutterResult) {
         switch methodCall.method {
         case FunctionNames.addBarcodeCountViewListener:
-            barcodeCountModule.addBarcodeCountViewListener()
-            result(nil)
+            barcodeCountModule.addBarcodeCountViewListener(viewId:  extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
         case FunctionNames.removeBarcodeCountViewListener:
-            barcodeCountModule.removeBarcodeCountViewListener()
-            result(nil)
+            barcodeCountModule.removeBarcodeCountViewListener(viewId:  extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
         case FunctionNames.addBarcodeCountViewUiListener:
-            barcodeCountModule.addBarcodeCountViewUiListener()
-            result(nil)
+            barcodeCountModule.addBarcodeCountViewUiListener(viewId:  extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
         case FunctionNames.removeBarcodeCountViewUiListener:
-            barcodeCountModule.removeBarcodeCountViewUiListener()
-            result(nil)
+            barcodeCountModule.removeBarcodeCountViewUiListener(viewId:  extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
         case FunctionNames.clearHighlights:
-            barcodeCountModule.clearHighlights()
+            barcodeCountModule.clearHighlights(viewId:  extractViewId(methodCall))
             result(nil)
         case FunctionNames.finishBrushForRecognizedBarcode:
-            guard let args = methodCall.arguments as? [String: Any],
-                  let brushJson = args["brush"] as? String,
-                  let trackedBarcodeId = args["trackedBarcodeId"] as? Int else {
-                result(FlutterError(code: "-1",
-                                    message: "Invalid argument for \(FunctionNames.finishBrushForRecognizedBarcode)",
-                                    details: methodCall.arguments))
-                return
-            }
-            barcodeCountModule.finishBrushForRecognizedBarcodeEvent(brush: Brush(jsonString: brushJson),
-                                                                    trackedBarcodeId: trackedBarcodeId)
-            result(nil)
+
+            let viewId =  extractViewId(methodCall)
+            let brush: Brush? = extractArgumentOrDefault(methodCall, key: "brush", defaultValue: nil).flatMap { Brush(jsonString: $0) }
+            let trackedBarcodeId: Int =  extractArgument(methodCall, key: "trackedBarcodeId")
+
+            barcodeCountModule.finishBrushForRecognizedBarcodeEvent(viewId: viewId,
+                                                                    brush: brush,
+                                                                    trackedBarcodeId: trackedBarcodeId,
+                                                                    result: FlutterFrameworkResult(reply: result))
         case FunctionNames.finishBrushForRecognizedBarcodeNotInListEvent:
-            guard let args = methodCall.arguments as? [String: Any],
-                  let brushJson = args["brush"] as? String,
-                  let trackedBarcodeId = args["trackedBarcodeId"] as? Int else {
-                result(FlutterError(code: "-1",
-                                    message: "Invalid argument for \(FunctionNames.finishBrushForRecognizedBarcodeNotInListEvent)",
-                                    details: methodCall.arguments))
-                return
-            }
-            barcodeCountModule.finishBrushForRecognizedBarcodeNotInListEvent(brush: Brush(jsonString: brushJson),
-                                                                             trackedBarcodeId: trackedBarcodeId)
-            result(nil)
-        case FunctionNames.finishBrushForUnrecognizedBarcode:
-            guard let args = methodCall.arguments as? [String: Any],
-                  let brushJson = args["brush"] as? String,
-                  let trackedBarcodeId = args["trackedBarcodeId"] as? Int else {
-                result(FlutterError(code: "-1",
-                                    message: "Invalid argument for \(FunctionNames.finishBrushForRecognizedBarcodeNotInListEvent)",
-                                    details: methodCall.arguments))
-                return
-            }
-            barcodeCountModule.finishBrushForUnrecognizedBarcodeEvent(brush: Brush(jsonString: brushJson),
-                                                                      trackedBarcodeId: trackedBarcodeId)
-            result(nil)
+            let viewId =  extractViewId(methodCall)
+            let brush: Brush? = extractArgumentOrDefault(methodCall, key: "brush", defaultValue: nil).flatMap { Brush(jsonString: $0) }
+            let trackedBarcodeId: Int =  extractArgument(methodCall, key: "trackedBarcodeId")
+
+            barcodeCountModule.finishBrushForRecognizedBarcodeNotInListEvent(viewId: viewId,
+                                                                             brush: brush,
+                                                                             trackedBarcodeId: trackedBarcodeId,
+                                                                             result: FlutterFrameworkResult(reply: result))
         case FunctionNames.getBarcodeCountDefaults:
             let jsonString = barcodeCountModule.defaults.stringValue
             result(jsonString)
         case FunctionNames.setBarcodeCountCaptureList:
-            barcodeCountModule.setBarcodeCountCaptureList(barcodesJson: methodCall.arguments as! String)
+            barcodeCountModule.setBarcodeCountCaptureList(viewId:  extractViewId(methodCall), barcodesJson:  extractArgument(methodCall, key: "targetBarcodes"))
             result(nil)
         case FunctionNames.resetBarcodeCountSession:
-            barcodeCountModule.resetBarcodeCountSession(frameSequenceId: methodCall.arguments as? Int)
+            barcodeCountModule.resetBarcodeCountSession(
+                viewId:  extractViewId(methodCall),
+                frameSequenceId: extractArgumentOrDefault(methodCall, key: "frameSequenceId", defaultValue: nil)
+            )
             result(nil)
         case FunctionNames.finishDidScan:
-            let enabled = methodCall.arguments as? Bool ?? false
-            barcodeCountModule.finishOnScan(enabled: enabled)
+            barcodeCountModule.finishOnScan(
+                viewId:  extractViewId(methodCall),
+                enabled:  extractArgument(methodCall, key: "enabled"))
             result(nil)
         case FunctionNames.addBarcodeCountListener:
-            barcodeCountModule.addBarcodeCountListener()
+            barcodeCountModule.addAsyncBarcodeCountListener(viewId:  extractViewId(methodCall))
             result(nil)
         case FunctionNames.removeBarcodeCountListener:
-            barcodeCountModule.removeBarcodeCountListener()
+            barcodeCountModule.removeAsyncBarcodeCountListener(viewId:  extractViewId(methodCall))
             result(nil)
         case FunctionNames.getBarcodeCountLastFrameData:
-            LastFrameData.shared.getLastFrameDataBytes {
-                result($0)
-            }
+            barcodeCountModule.getLastFrameDataBytes(
+                frameId: methodCall.arguments as! String,
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.resetBarcodeCount:
-            barcodeCountModule.resetBarcodeCount()
+            barcodeCountModule.resetBarcodeCount(viewId:  extractViewId(methodCall))
             result(nil)
         case FunctionNames.startScanningPhase:
-            barcodeCountModule.startScanningPhase()
+            barcodeCountModule.startScanningPhase(viewId:  extractViewId(methodCall))
             result(nil)
         case FunctionNames.endScanningPhase:
-            barcodeCountModule.endScanningPhase()
+            barcodeCountModule.endScanningPhase(viewId:  extractViewId(methodCall))
             result(nil)
         case FunctionNames.updateBarcodeCountView:
-            barcodeCountModule.updateBarcodeCountView(viewJson: methodCall.arguments as! String)
-            result(nil)
+            barcodeCountModule.updateBarcodeCountView(viewId:  extractViewId(methodCall), viewJson:  extractArgument(methodCall, key: "viewJson"), result: FlutterFrameworkResult(reply: result))
         case FunctionNames.updateBarcodeCount:
-            barcodeCountModule.updateBarcodeCount(modeJson: methodCall.arguments as! String)
-            result(nil)
+            barcodeCountModule.updateBarcodeCount(viewId:  extractViewId(methodCall), modeJson:  extractArgument(methodCall, key: "modeJson"), result: FlutterFrameworkResult(reply: result))
         case FunctionNames.setModeEnabledState:
-            barcodeCountModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
+            barcodeCountModule.setModeEnabled(viewId:  extractViewId(methodCall), enabled:  extractArgument(methodCall, key: "enabled"))
             result(nil)
         case FunctionNames.updateFeedback:
-            barcodeCountModule.updateFeedback(feedbackJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
+            barcodeCountModule.updateFeedback(
+                viewId:  extractViewId(methodCall),
+                feedbackJson:  extractArgument(methodCall, key: "feedbackJson"),
+                result: FlutterFrameworkResult(reply: result)
+            )
+        case FunctionNames.submitBarcodeCountStatusProviderCallback:
+            barcodeCountModule.submitBarcodeCountStatusProviderCallbackResult(
+                viewId:  extractViewId(methodCall),
+                statusJson:  extractArgument(methodCall, key: "statusJson"),
+                result: FlutterFrameworkResult(reply: result)
+            )
+        case FunctionNames.addBarcodeCountStatusProvider:
+            barcodeCountModule.addBarcodeCountStatusProvider(
+                viewId: extractViewId(methodCall),
+                result: FlutterFrameworkResult(reply: result)
+            )
         default:
             result(FlutterMethodNotImplemented)
         }
+    }
+
+    func extractArgument<T>(_ methodCall: FlutterMethodCall, key: String, as type: T.Type = T.self) -> T {
+        guard let args = methodCall.arguments as? [String: Any] else {
+            fatalError("FlutterMethodCall arguments are not a [String: Any] dictionary.")
+        }
+        guard let value = args[key] as? T else {
+            fatalError("Argument for key '\(key)' is missing or of the wrong type.")
+        }
+        return value
+    }
+
+    func extractArgumentOrDefault<T>(_ methodCall: FlutterMethodCall, key: String, defaultValue: T?, as type: T.Type = T.self) -> T? {
+        guard let args = methodCall.arguments as? [String: Any] else {
+            return defaultValue
+        }
+        guard let value = args[key] as? T else {
+            return defaultValue
+        }
+        return value
+    }
+
+    func extractViewId(_ methodCall: FlutterMethodCall) -> Int {
+        return extractArgument(methodCall, key: "viewId")
     }
 }

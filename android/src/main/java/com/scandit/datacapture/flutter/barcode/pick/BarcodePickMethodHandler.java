@@ -7,6 +7,7 @@ package com.scandit.datacapture.flutter.barcode.pick;
 
 import androidx.annotation.NonNull;
 
+import com.scandit.datacapture.flutter.core.utils.FlutterMethodCall;
 import com.scandit.datacapture.flutter.core.utils.FlutterResult;
 import com.scandit.datacapture.frameworks.barcode.pick.BarcodePickModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
@@ -29,88 +30,14 @@ public class BarcodePickMethodHandler implements MethodChannel.MethodCallHandler
     }
 
     @Override
-    public void onMethodCall(MethodCall call, @NonNull MethodChannel.Result result) {
-        switch (call.method) {
-            case "getDefaults":
-                result.success(new JSONObject(getSharedModule().getDefaults()).toString());
-                break;
+    public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+        boolean executionResult = getSharedModule().execute(
+                new FlutterMethodCall(call),
+                new FlutterResult(result)
+        );
 
-            case "removeScanningListener":
-                getSharedModule().removeScanningListener(new FlutterResult(result));
-                break;
-
-            case "addScanningListener":
-                getSharedModule().addScanningListener(new FlutterResult(result));
-                break;
-
-            case "startPickView":
-                getSharedModule().viewStart();
-                result.success(null);
-                break;
-
-            case "stopPickView":
-                getSharedModule().viewStop();
-                result.success(null);
-                break;
-
-            case "freezePickView":
-                getSharedModule().viewFreeze(new FlutterResult(result));
-                break;
-
-            case "releasePickView":
-                getSharedModule().viewOnDestroy();
-                result.success(null);
-                break;
-
-            case "pickViewOnResume":
-                getSharedModule().viewOnResume();
-                result.success(null);
-                break;
-
-            case "pickViewOnPause":
-                getSharedModule().viewOnPause();
-                result.success(null);
-                break;
-
-            case "addViewUiListener":
-                getSharedModule().addViewUiListener(new FlutterResult(result));
-                break;
-
-            case "removeViewUiListener":
-                getSharedModule().removeViewUiListener(new FlutterResult(result));
-                break;
-
-            case "addViewListener":
-                getSharedModule().addViewListener(new FlutterResult(result));
-                break;
-
-            case "removeViewListener":
-                getSharedModule().removeViewListener(new FlutterResult(result));
-                break;
-
-            case "addActionListener":
-                getSharedModule().addActionListener();
-                result.success(null);
-                break;
-
-            case "removeActionListener":
-                getSharedModule().removeActionListener();
-                result.success(null);
-                break;
-
-            case "finishOnProductIdentifierForItems":
-                assert call.arguments() != null;
-                getSharedModule().finishOnProductIdentifierForItems(call.arguments());
-                result.success(null);
-                break;
-
-            case "finishPickAction":
-                assert call.arguments() != null;
-                getSharedModule().finishPickAction(call.arguments(), new FlutterResult(result));
-                break;
-
-            default:
-                throw new IllegalArgumentException("Nothing implemented for " + call.method);
+        if (!executionResult) {
+            result.notImplemented();
         }
     }
 

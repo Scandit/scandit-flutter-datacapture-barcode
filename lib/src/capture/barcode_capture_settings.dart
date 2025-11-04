@@ -15,8 +15,7 @@ import '../composite_type.dart';
 class BarcodeCaptureSettings implements Serializable {
   BarcodeCaptureSettings();
 
-  Duration codeDuplicateFilter =
-      Duration(milliseconds: BarcodeCaptureDefaults.barcodeCaptureSettingsDefaults.codeDuplicateFilter);
+  Duration codeDuplicateFilter = BarcodeCaptureDefaults.barcodeCaptureSettingsDefaults.codeDuplicateFilter;
 
   LocationSelection? locationSelection;
 
@@ -27,14 +26,6 @@ class BarcodeCaptureSettings implements Serializable {
   Set<Symbology> get enabledSymbologies => _enabledSymbologies();
 
   Set<CompositeType> enabledCompositeTypes = {};
-
-  @Deprecated('Use batterySaving instead.')
-  BatterySavingMode get batterySavingMode => batterySaving;
-
-  @Deprecated('Use batterySaving instead.')
-  set batterySavingMode(BatterySavingMode newValue) {
-    batterySaving = newValue;
-  }
 
   BatterySavingMode batterySaving = BarcodeCaptureDefaults.barcodeCaptureSettingsDefaults.batterySaving;
 
@@ -87,8 +78,9 @@ class BarcodeCaptureSettings implements Serializable {
 
   void enableSymbologiesForCompositeTypes(Set<CompositeType> compositeTypes) {
     for (var compositeType in compositeTypes) {
-      var symbologies = BarcodeDefaults.compositeTypeDescriptionsDefaults
-          .firstWhere((element) => element.types.contains(compositeType));
+      var symbologies = BarcodeDefaults.compositeTypeDescriptionsDefaults.firstWhere(
+        (element) => element.types.contains(compositeType),
+      );
 
       enableSymbologies(symbologies.symbologies);
     }

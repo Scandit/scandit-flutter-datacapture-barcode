@@ -18,10 +18,7 @@ class BarcodePickMethodHandler {
         static let stopPickView = "stopPickView"
         static let freezePickView = "freezePickView"
         static let releasePickView = "releasePickView"
-        
-        static let pausePickView = "pickViewOnPause"
-        static let resumePickView = "pickViewOnResume"
-        
+
         static let addViewUiListener = "addViewUiListener"
         static let removeViewUiListener = "removeViewUiListener"
         static let addViewListener = "addViewListener"
@@ -30,6 +27,12 @@ class BarcodePickMethodHandler {
         static let removeActionListener = "removeActionListener"
         static let finishOnProductIdentifierForItems = "finishOnProductIdentifierForItems"
         static let finishPickAction = "finishPickAction"
+        static let addBarcodePickListener = "addBarcodePickListener"
+        static let removeBarcodePickListener = "removeBarcodePickListener"
+        static let finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest
+        = "finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest"
+        static let finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest
+        = "finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest"
     }
 
     private let barcodePickModule: BarcodePickModule
@@ -44,55 +47,108 @@ class BarcodePickMethodHandler {
             let defaults = barcodePickModule.defaults.stringValue
             result(defaults)
         case FunctionNames.addScanningListener:
-            barcodePickModule.addScanningListener()
-            result(nil)
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.addScanningListener(viewId: viewId, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.removeScanningListener:
-            barcodePickModule.removeScanningListener()
-            result(nil)
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.removeScanningListener(viewId: viewId, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.startPickView:
-            barcodePickModule.viewStart()
-            result(nil)
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.viewStart(viewId: viewId, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.freezePickView:
-            barcodePickModule.viewFreeze()
-            result(nil)
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.viewFreeze(viewId: viewId, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.releasePickView:
-            barcodePickModule.viewStop()
-            result(nil)
-        case FunctionNames.pausePickView:
-            // Nothing to call on iOS for this event
-            result(nil)
-        case FunctionNames.resumePickView:
-            // Nothing to call on iOS for this event
-            result(nil)
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.viewStop(viewId: viewId, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.stopPickView:
-            barcodePickModule.viewPause()
-            result(nil)
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.viewPause(viewId: viewId, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.addViewUiListener:
-            barcodePickModule.addViewUiListener()
-            result(nil)
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.addViewUiListener(viewId: viewId, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.removeViewUiListener:
-            barcodePickModule.removeViewUiListener()
-            result(nil)
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.removeViewUiListener(viewId: viewId, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.addViewListener:
-            barcodePickModule.addViewListener()
-            result(nil)
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.addViewListener(viewId: viewId, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.removeViewListener:
-            barcodePickModule.removeViewListener()
-            result(nil)
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.removeViewListener(viewId: viewId, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.addActionListener:
-            barcodePickModule.addActionListener()
-            result(nil)
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.addActionListener(viewId: viewId, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.removeActionListener:
-            barcodePickModule.removeActionListener()
-            result(nil)
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.removeActionListener(viewId: viewId, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.finishOnProductIdentifierForItems:
-            barcodePickModule.finishProductIdentifierForItems(barcodePickProductProviderCallbackItemsJson: methodCall.arguments as! String)
-            result(nil)
+            let viewId = extractViewId(methodCall)
+            let data = extractArgument(methodCall, key: "data", as: String.self)
+            barcodePickModule.finishProductIdentifierForItems(viewId: viewId, barcodePickProductProviderCallbackItemsJson: data, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.finishPickAction:
-            let data = methodCall.arguments as! String
-            barcodePickModule.finishPickAction(data: data, result: FlutterFrameworkResult(reply: result))
+            let viewId = extractViewId(methodCall)
+            let itemData = extractArgument(methodCall, key: "itemData", as: String.self)
+            let actionResult = extractArgument(methodCall, key: "result", as: Bool.self)
+            barcodePickModule.finishPickAction(viewId: viewId, data: itemData, actionResult: actionResult, result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.addBarcodePickListener:
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.addBarcodePickListener(viewId: viewId, result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.removeBarcodePickListener:
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.removeBarcodePickListener(viewId: viewId, result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest:
+            guard let args = methodCall.arguments as? [String: Any?] else {
+                result(FlutterError(
+                    code: "-1",
+                    message: "Invalid argument for \(FunctionNames.finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest)",
+                    details: methodCall.arguments)
+                )
+                return
+            }
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest(
+                viewId: viewId, response: args, result: FlutterFrameworkResult(reply: result)
+            )
+        case FunctionNames.finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest:
+            guard let args = methodCall.arguments as? [String: Any?] else {
+                result(FlutterError(
+                    code: "-1",
+                    message: "Invalid argument for \(FunctionNames.finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest)",
+                    details: methodCall.arguments)
+                )
+                return
+            }
+            let viewId = extractViewId(methodCall)
+            barcodePickModule.finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest(
+                viewId: viewId, response: args, result: FlutterFrameworkResult(reply: result)
+            )
         default:
             result(FlutterMethodNotImplemented)
         }
+    }
+
+    func extractArgument<T>(_ methodCall: FlutterMethodCall, key: String, as type: T.Type = T.self) -> T {
+        guard let args = methodCall.arguments as? [String: Any] else {
+            fatalError("FlutterMethodCall arguments are not a [String: Any] dictionary.")
+        }
+        guard let value = args[key] as? T else {
+            fatalError("Argument for key '\(key)' is missing or of the wrong type.")
+        }
+        return value
+    }
+
+    func extractArgumentOrDefault<T>(_ methodCall: FlutterMethodCall, key: String, defaultValue: T?, as type: T.Type = T.self) -> T? {
+        guard let args = methodCall.arguments as? [String: Any] else {
+            return defaultValue
+        }
+        guard let value = args[key] as? T else {
+            return defaultValue
+        }
+        return value
+    }
+
+    func extractViewId(_ methodCall: FlutterMethodCall) -> Int {
+        return extractArgument(methodCall, key: "viewId")
     }
 }

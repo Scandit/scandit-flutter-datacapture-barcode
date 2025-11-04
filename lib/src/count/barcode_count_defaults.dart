@@ -5,7 +5,7 @@
  */
 
 import 'dart:convert';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 import '../../scandit_flutter_datacapture_barcode.dart';
@@ -14,7 +14,7 @@ import 'barcode_count_view.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeCountDefaults {
-  static MethodChannel channel = MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
+  static MethodChannel channel = const MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
 
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
@@ -64,11 +64,9 @@ class BarcodeCountViewDefaults {
   final bool shouldShowToolbar;
   final Brush defaultNotInListBrush;
   final Brush defaultRecognizedBrush;
-  final Brush defaultUnrecognizedBrush;
   final bool shouldShowScanAreaGuides;
   final String clearHighlightsButtonText;
   final String exitButtonText;
-  final String textForUnrecognizedBarcodesDetectedHint;
   final String textForTapShutterToScanHint;
   final String textForScanningHint;
   final String textForMoveCloserAndRescanHint;
@@ -95,8 +93,11 @@ class BarcodeCountViewDefaults {
   final bool shouldShowListProgressBar;
   final bool shouldShowTorchControl;
   final Anchor torchControlPosition;
+  final bool tapToUncountEnabled;
+  final String textForTapToUncountHint;
+  final bool shouldShowStatusModeButton;
 
-  BarcodeCountViewDefaults(
+  const BarcodeCountViewDefaults(
       this.style,
       this.shouldShowUserGuidanceView,
       this.shouldShowListButton,
@@ -109,11 +110,9 @@ class BarcodeCountViewDefaults {
       this.shouldShowToolbar,
       this.defaultNotInListBrush,
       this.defaultRecognizedBrush,
-      this.defaultUnrecognizedBrush,
       this.shouldShowScanAreaGuides,
       this.clearHighlightsButtonText,
       this.exitButtonText,
-      this.textForUnrecognizedBarcodesDetectedHint,
       this.textForTapShutterToScanHint,
       this.textForScanningHint,
       this.textForMoveCloserAndRescanHint,
@@ -139,7 +138,10 @@ class BarcodeCountViewDefaults {
       this.singleScanButtonContentDescription,
       this.shouldShowListProgressBar,
       this.shouldShowTorchControl,
-      this.torchControlPosition);
+      this.torchControlPosition,
+      this.tapToUncountEnabled,
+      this.textForTapToUncountHint,
+      this.shouldShowStatusModeButton);
 
   factory BarcodeCountViewDefaults.fromJSON(Map<String, dynamic> json) {
     final style = BarcodeCountViewStyleSerializer.fromJSON(json['style'] as String);
@@ -154,13 +156,10 @@ class BarcodeCountViewDefaults {
     final shouldShowToolbar = json['shouldShowToolbar'] as bool;
     final defaultNotInListBrush = BrushDefaults.fromJSON(json['notInListBrush'] as Map<String, dynamic>).toBrush();
     final defaultRecognizedBrush = BrushDefaults.fromJSON(json['recognizedBrush'] as Map<String, dynamic>).toBrush();
-    final defaultUnrecognizedBrush =
-        BrushDefaults.fromJSON(json['unrecognizedBrush'] as Map<String, dynamic>).toBrush();
 
     final shouldShowScanAreaGuides = json['shouldShowScanAreaGuides'] as bool;
     final clearHighlightsButtonText = json['clearHighlightsButtonText'];
     final exitButtonText = json['exitButtonText'];
-    final textForUnrecognizedBarcodesDetectedHint = json['textForUnrecognizedBarcodesDetectedHint'];
     final textForTapShutterToScanHint = json['textForTapShutterToScanHint'];
     final textForScanningHint = json['textForScanningHint'];
     final textForMoveCloserAndRescanHint = json['textForMoveCloserAndRescanHint'];
@@ -262,6 +261,9 @@ class BarcodeCountViewDefaults {
     final shouldShowListProgressBar = json['shouldShowListProgressBar'] as bool;
     final shouldShowTorchControl = json['shouldShowTorchControl'] as bool;
     final torchControlPosition = AnchorDeserializer.fromJSON(json['torchControlPosition']);
+    final tapToUncountEnabled = json['tapToUncountEnabled'] as bool;
+    final textForTapToUncountHint = json['textForTapToUncountHint'] as String;
+    final shouldShowStatusModeButton = json['shouldShowStatusModeButton'] as bool? ?? false;
 
     return BarcodeCountViewDefaults(
         style,
@@ -276,11 +278,9 @@ class BarcodeCountViewDefaults {
         shouldShowToolbar,
         defaultNotInListBrush,
         defaultRecognizedBrush,
-        defaultUnrecognizedBrush,
         shouldShowScanAreaGuides,
         clearHighlightsButtonText,
         exitButtonText,
-        textForUnrecognizedBarcodesDetectedHint,
         textForTapShutterToScanHint,
         textForScanningHint,
         textForMoveCloserAndRescanHint,
@@ -306,7 +306,10 @@ class BarcodeCountViewDefaults {
         singleScanButtonContentDescription,
         shouldShowListProgressBar,
         shouldShowTorchControl,
-        torchControlPosition);
+        torchControlPosition,
+        tapToUncountEnabled,
+        textForTapToUncountHint,
+        shouldShowStatusModeButton);
   }
 }
 
@@ -315,7 +318,7 @@ class BarcodeCountSettingsDefaults {
   final BarcodeFilterSettings barcodeFilterSettings;
   final bool expectsOnlyUniqueBarcodes;
 
-  BarcodeCountSettingsDefaults(this.barcodeFilterSettings, this.expectsOnlyUniqueBarcodes);
+  const BarcodeCountSettingsDefaults(this.barcodeFilterSettings, this.expectsOnlyUniqueBarcodes);
 
   factory BarcodeCountSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     return BarcodeCountSettingsDefaults(
@@ -346,7 +349,7 @@ class BarcodeCountToolbarSettingsDefaults {
   final String? colorSchemeButtonAccessibilityHint;
   final String? colorSchemeButtonAccessibilityLabel;
 
-  BarcodeCountToolbarSettingsDefaults._(
+  const BarcodeCountToolbarSettingsDefaults._(
       this.audioOnButtonText,
       this.audioOffButtonText,
       this.audioButtonContentDescription,
@@ -464,7 +467,7 @@ class BarcodeCountFeedbackDefaults {
   final Feedback success;
   final Feedback failure;
 
-  BarcodeCountFeedbackDefaults(this.success, this.failure);
+  const BarcodeCountFeedbackDefaults(this.success, this.failure);
 
   factory BarcodeCountFeedbackDefaults.fromJSON(Map<String, dynamic> json) {
     var successJson = json['success'];

@@ -7,45 +7,51 @@
 import 'package:flutter/services.dart';
 
 class BarcodePluginEvents {
-  static late Stream barcodeCountEventStream = _getBarcodeCountStream();
+  static Stream barcodeCountEventStream = _getBarcodeCountStream();
 
-  static late Stream barcodeCaptureEventStream = _getBarcodeCaptureStream();
+  static Stream barcodeCaptureEventStream = _getBarcodeCaptureStream();
 
-  static late Stream barcodeSelectionEventStream = _getBarcodeSelectionStream();
+  static Stream barcodeSelectionEventStream = _getBarcodeSelectionStream();
 
-  static late Stream barcodeTrackingEventStream = _getBarcodeTrackingStream();
+  static Stream barcodeBatchEventStream = _getBarcodeBatchStream();
 
-  static late Stream sparkScanEventStream = _getSparkScanStream();
+  static Stream sparkScanEventStream = _getSparkScanStream();
 
-  static late Stream barcodeFindEventStream = _getBarcodeFindStream();
+  static Stream barcodeFindEventStream = _getBarcodeFindStream();
 
-  static late Stream barcodePickEventStream = _getBarcodePickStream();
+  static Stream barcodePickEventStream = _getBarcodePickStream();
+
+  static Stream barcodeArEventStream = _getBarcodeArStream();
 
   static Stream _getBarcodeCountStream() {
-    return EventChannel('com.scandit.datacapture.barcode.count/event_channel').receiveBroadcastStream();
+    return const EventChannel('com.scandit.datacapture.barcode.count/event_channel').receiveBroadcastStream();
   }
 
   static Stream _getBarcodeCaptureStream() {
-    return EventChannel('com.scandit.datacapture.barcode.capture/event_channel').receiveBroadcastStream();
+    return const EventChannel('com.scandit.datacapture.barcode.capture/event_channel').receiveBroadcastStream();
   }
 
   static Stream _getBarcodeSelectionStream() {
-    return EventChannel('com.scandit.datacapture.barcode.selection/event_channel').receiveBroadcastStream();
+    return const EventChannel('com.scandit.datacapture.barcode.selection/event_channel').receiveBroadcastStream();
   }
 
-  static Stream _getBarcodeTrackingStream() {
-    return EventChannel('com.scandit.datacapture.barcode.tracking/event_channel').receiveBroadcastStream();
+  static Stream _getBarcodeBatchStream() {
+    return const EventChannel('com.scandit.datacapture.barcode.batch/event_channel').receiveBroadcastStream();
   }
 
   static Stream _getSparkScanStream() {
-    return EventChannel('com.scandit.datacapture.barcode.spark/event_channel').receiveBroadcastStream();
+    return const EventChannel('com.scandit.datacapture.barcode.spark/event_channel').receiveBroadcastStream();
   }
 
   static Stream _getBarcodeFindStream() {
-    return EventChannel('com.scandit.datacapture.barcode.find/event_channel').receiveBroadcastStream();
+    return const EventChannel('com.scandit.datacapture.barcode.find/event_channel').receiveBroadcastStream();
   }
 
   static Stream _getBarcodePickStream() {
-    return EventChannel('com.scandit.datacapture.barcode.pick/event_channel').receiveBroadcastStream();
+    return const EventChannel('com.scandit.datacapture.barcode.pick/event_channel').receiveBroadcastStream();
+  }
+
+  static Stream _getBarcodeArStream() {
+    return const EventChannel('com.scandit.datacapture.barcode.ar/event_channel').receiveBroadcastStream();
   }
 }
