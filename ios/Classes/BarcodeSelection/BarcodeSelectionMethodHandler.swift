@@ -48,10 +48,10 @@ class BarcodeSelectionMethodHandler {
             barcodeSelectionModule.resetLatestSession(frameSequenceId: methodCall.arguments as? Int)
             result(nil)
         case FunctionNames.addListener:
-            barcodeSelectionModule.addAsyncListener()
+            barcodeSelectionModule.addListener()
             result(nil)
         case FunctionNames.removeListener:
-            barcodeSelectionModule.removeAsyncListener()
+            barcodeSelectionModule.removeListener()
             result(nil)
         case FunctionNames.resetMode:
             barcodeSelectionModule.resetSelection()

@@ -66,16 +66,15 @@ class BarcodeCaptureSettingsDefaults {
 
 @immutable
 class BarcodeCaptureOverlayDefaults {
-  final BarcodeCaptureOverlayStyle defaultStyle;
+  // ignore: deprecated_member_use_from_same_package
   final Map<BarcodeCaptureOverlayStyle, Brush> brushes;
 
-  const BarcodeCaptureOverlayDefaults(this.defaultStyle, this.brushes);
+  const BarcodeCaptureOverlayDefaults(this.brushes);
 
   factory BarcodeCaptureOverlayDefaults.fromJSON(Map<String, dynamic> json) {
-    var defaultStyle = BarcodeCaptureOverlayStyleSerializer.fromJSON(json['defaultStyle'] as String);
     var styles = (json['Brushes'] as Map<String, dynamic>).map((key, value) => MapEntry(
         BarcodeCaptureOverlayStyleSerializer.fromJSON(key),
         BrushDefaults.fromJSON(value as Map<String, dynamic>).toBrush()));
-    return BarcodeCaptureOverlayDefaults(defaultStyle, styles);
+    return BarcodeCaptureOverlayDefaults(styles);
   }
 }

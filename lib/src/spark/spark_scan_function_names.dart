@@ -17,6 +17,7 @@ abstract class SparkScanFunctionNames {
   static const String removeSparkScanViewUiListener = 'removeSparkScanViewUiListener';
   static const String startScanning = 'sparkScanViewStartScanning';
   static const String pauseScanning = 'sparkScanViewPauseScanning';
+  static const String stopScanning = 'sparkScanViewStopScanning';
   static const String sparkScanViewEmitFeedback = 'sparkScanViewEmitFeedback';
   static const String updateView = 'sparkScanViewUpdate';
   static const String showToast = 'showToast';
