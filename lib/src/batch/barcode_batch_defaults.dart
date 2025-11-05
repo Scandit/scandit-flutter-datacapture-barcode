@@ -5,11 +5,10 @@
  */
 
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
-
 import 'barcode_batch_basic_overlay.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import 'barcode_batch_function_names.dart';
 

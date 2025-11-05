@@ -4,14 +4,11 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-// ignore: unnecessary_library_name
 library scandit_flutter_datacapture_barcode_find;
 
-export 'src/find/barcode_find_listener.dart' show BarcodeFindListener;
-export 'src/find/barcode_find_transformer.dart' show BarcodeFindTransformer;
+export 'src/find/barcode_find.dart' show BarcodeFind, BarcodeFindListener, BarcodeFindTransformer;
 export 'src/find/barcode_find_feedback.dart' show BarcodeFindFeedback;
 export 'src/find/barcode_find_item.dart' show BarcodeFindItem, BarcodeFindItemContent, BarcodeFindItemSearchOptions;
 export 'src/find/barcode_find_settings.dart' show BarcodeFindSettings;
 export 'src/find/barcode_find_view_settings.dart' show BarcodeFindViewSettings;
-export 'src/find/barcode_find_view.dart' show BarcodeFindView, BarcodeFind;
-export 'src/find/barcode_find_view_ui_listener.dart' show BarcodeFindViewUiListener;
+export 'src/find/barcode_find_view.dart' show BarcodeFindView, BarcodeFindViewUiListener;

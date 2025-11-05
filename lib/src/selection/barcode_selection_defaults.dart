@@ -5,7 +5,7 @@
  */
 
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 import 'package:flutter/services.dart';
 import '../../scandit_flutter_datacapture_barcode_selection.dart';
 import 'barcode_selection_basic_overlay.dart';

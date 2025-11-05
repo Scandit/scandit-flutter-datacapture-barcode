@@ -7,7 +7,6 @@ package com.scandit.datacapture.flutter.barcode.capture;
 
 import androidx.annotation.NonNull;
 
-import com.scandit.datacapture.flutter.core.utils.FlutterMethodCall;
 import com.scandit.datacapture.flutter.core.utils.FlutterResult;
 import com.scandit.datacapture.frameworks.barcode.capture.BarcodeCaptureModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
@@ -15,6 +14,8 @@ import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
+
+import org.json.JSONObject;
 
 public class BarcodeCaptureMethodHandler implements MethodChannel.MethodCallHandler {
 
@@ -28,14 +29,65 @@ public class BarcodeCaptureMethodHandler implements MethodChannel.MethodCallHand
     }
 
     @Override
-    public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-        boolean executionResult = getSharedModule().execute(
-                new FlutterMethodCall(call),
-                new FlutterResult(result)
-        );
-
-        if (!executionResult) {
-            result.notImplemented();
+    public void onMethodCall(MethodCall call, @NonNull MethodChannel.Result result) {
+        switch (call.method) {
+            case "getBarcodeCaptureDefaults":
+                result.success(new JSONObject(getSharedModule().getDefaults()).toString());
+                break;
+            case "finishDidScan":
+                getSharedModule().finishDidScan(Boolean.TRUE.equals(call.arguments));
+                result.success(null);
+                break;
+            case "finishDidUpdateSession":
+                getSharedModule().finishDidUpdateSession(Boolean.TRUE.equals(call.arguments));
+                result.success(null);
+                break;
+            case "addBarcodeCaptureListener":
+                getSharedModule().addAsyncListener();
+                result.success(null);
+                break;
+            case "removeBarcodeCaptureListener":
+                getSharedModule().removeAsyncListener();
+                result.success(null);
+                break;
+            case "resetBarcodeCaptureSession":
+                getSharedModule().resetSession(
+                        call.arguments()
+                );
+                result.success(null);
+                break;
+            case "getLastFrameData":
+                assert call.arguments() != null;
+                getSharedModule().getFrameDataBytes(
+                        call.arguments(),
+                        new FlutterResult(result)
+                );
+                break;
+            case "setModeEnabledState":
+                getSharedModule().setModeEnabled(Boolean.TRUE.equals(call.arguments()));
+                break;
+            case "updateBarcodeCaptureMode":
+                assert call.arguments() != null;
+                getSharedModule().updateModeFromJson(
+                        call.arguments(), new FlutterResult(result)
+                );
+                break;
+            case "applyBarcodeCaptureModeSettings":
+                assert call.arguments() != null;
+                getSharedModule().applyModeSettings(
+                        call.arguments(), new FlutterResult(result)
+                );
+                break;
+            case "updateBarcodeCaptureOverlay":
+                assert call.arguments() != null;
+                getSharedModule().updateOverlay(call.arguments(), new FlutterResult(result));
+                break;
+            case "updateFeedback":
+                assert call.arguments() != null;
+                getSharedModule().updateFeedback(call.arguments(), new FlutterResult(result));
+                break;
+            default:
+                result.notImplemented();
         }
     }
 

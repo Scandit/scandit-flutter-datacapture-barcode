@@ -30,6 +30,39 @@ class SparkScanViewSettings extends Serializable {
   int? hardwareTriggerKeyCode = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.hardwareTriggerKeyCode;
   bool visualFeedbackEnabled = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.visualFeedbackEnabled;
 
+  bool _ignoreDragLimits = true;
+
+  @Deprecated('There is no drag limit anymore.')
+  bool get ignoreDragLimits => _ignoreDragLimits;
+
+  @Deprecated('There is no drag limit anymore.')
+  set ignoreDragLimits(bool newValue) {
+    // ignore set
+    _ignoreDragLimits = true;
+  }
+
+  double _targetZoomFactorOut = 0.0;
+
+  @Deprecated('Use zoomFactorOut instead')
+  double get targetZoomFactorOut => _targetZoomFactorOut;
+
+  @Deprecated('Use zoomFactorOut instead')
+  set targetZoomFactorOut(double newValue) {
+    // ignore set
+    _targetZoomFactorOut = 0.0;
+  }
+
+  double _targetZoomFactorIn = 0.0;
+
+  @Deprecated('Use zoomFactorIn instead')
+  double get targetZoomFactorIn => _targetZoomFactorIn;
+
+  @Deprecated('Use zoomFactorIn instead')
+  set targetZoomFactorIn(double newValue) {
+    // ignore set
+    _targetZoomFactorIn = 0.0;
+  }
+
   double zoomFactorIn = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.zoomFactorIn;
 
   double zoomFactorOut = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.zoomFactorOut;

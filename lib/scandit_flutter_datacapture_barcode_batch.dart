@@ -4,12 +4,12 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
-// ignore: unnecessary_library_name
 library scandit_flutter_datacapture_barcode_batch;
 
 export 'src/tracked_barcode.dart' show TrackedBarcode;
 export 'src/batch/barcode_batch.dart' show BarcodeBatch, BarcodeBatchListener;
-export 'src/batch/barcode_batch_settings.dart' show BarcodeBatchSettings;
+// ignore: deprecated_member_use_from_same_package
+export 'src/batch/barcode_batch_settings.dart' show BarcodeBatchSettings, BarcodeBatchScenario;
 export 'src/batch/barcode_batch_session.dart' show BarcodeBatchSession;
 export 'src/batch/barcode_batch_advanced_overlay.dart'
     show BarcodeBatchAdvancedOverlay, BarcodeBatchAdvancedOverlayListener;
