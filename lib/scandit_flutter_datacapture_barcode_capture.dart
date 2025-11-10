@@ -6,8 +6,8 @@
 
 library scandit_flutter_datacapture_barcode_capture;
 
-export 'src/capture/barcode_capture.dart' show BarcodeCapture, BarcodeCaptureListener, BarcodeCaptureFeedback;
-// ignore: deprecated_member_use_from_same_package
+export 'src/capture/barcode_capture.dart' show BarcodeCapture, BarcodeCaptureListener;
+export 'src/capture/barcode_capture_feedback.dart' show BarcodeCaptureFeedback;
 export 'src/capture/barcode_capture_overlay.dart' show BarcodeCaptureOverlay, BarcodeCaptureOverlayStyle;
 export 'src/capture/barcode_capture_session.dart' show BarcodeCaptureSession;
 export 'src/capture/barcode_capture_settings.dart' show BarcodeCaptureSettings;

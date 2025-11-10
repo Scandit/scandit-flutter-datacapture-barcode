@@ -26,10 +26,7 @@ class BarcodeCountSession with _PrivateBarcodeCountSession {
 
   List<Barcode> get additionalBarcodes => _additionalBarcodes;
 
-  final int _viewId;
-
-  BarcodeCountSession._(
-      this._recognizedBarcodes, this._additionalBarcodes, this._frameSequenceId, String frameId, this._viewId) {
+  BarcodeCountSession._(this._recognizedBarcodes, this._additionalBarcodes, this._frameSequenceId, String frameId) {
     _frameId = frameId;
   }
 
@@ -43,13 +40,12 @@ class BarcodeCountSession with _PrivateBarcodeCountSession {
         .toList()
         .cast<Barcode>();
     final frameId = event['frameId'] as String;
-    final viewId = event['viewId'] as int;
 
-    return BarcodeCountSession._(trackedCodes, additionalBarcodes, frameSequenceId, frameId, viewId);
+    return BarcodeCountSession._(trackedCodes, additionalBarcodes, frameSequenceId, frameId);
   }
 
   Future<void> reset() {
-    return _controller.reset(_viewId, _frameSequenceId);
+    return _controller.reset(_frameSequenceId);
   }
 }
 
@@ -62,11 +58,8 @@ mixin _PrivateBarcodeCountSession {
 class _BarcodeCountSessionController {
   late final MethodChannel _methodChannel = _getChannel();
 
-  Future<void> reset(int viewId, int frameSequenceId) {
-    return _methodChannel.invokeMethod(BarcodeCountFunctionNames.resetBarcodeCountSession, {
-      'viewId': viewId,
-      'frameSequenceId': frameSequenceId,
-    });
+  Future<void> reset(int frameSequenceId) {
+    return _methodChannel.invokeMethod(BarcodeCountFunctionNames.resetBarcodeCountSession, frameSequenceId);
   }
 
   MethodChannel _getChannel() {

@@ -6,15 +6,13 @@
 
 import 'dart:convert';
 
+import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
-// ignore: implementation_imports
-import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
 
 import '../capture/barcode_capture_defaults.dart';
 import '../capture/barcode_capture.dart';
 import 'barcode_capture_function_names.dart';
 
-@Deprecated('BarcodeCaptureOverlayStyle is deprecated and will be removed in a future release.')
 enum BarcodeCaptureOverlayStyle {
   frame('frame');
 
@@ -26,11 +24,8 @@ enum BarcodeCaptureOverlayStyle {
   final String _name;
 }
 
-// ignore: deprecated_member_use_from_same_package
 extension BarcodeCaptureOverlayStyleSerializer on BarcodeCaptureOverlayStyle {
-  // ignore: deprecated_member_use_from_same_package
   static BarcodeCaptureOverlayStyle fromJSON(String jsonValue) {
-    // ignore: deprecated_member_use_from_same_package
     return BarcodeCaptureOverlayStyle.values.firstWhere((element) => element.toString() == jsonValue);
   }
 }
@@ -38,44 +33,13 @@ extension BarcodeCaptureOverlayStyleSerializer on BarcodeCaptureOverlayStyle {
 class BarcodeCaptureOverlay extends DataCaptureOverlay {
   static final _noViewfinder = {'type': 'none'};
 
-  _BarcodeCaptureOverlayController? _controller;
-
-  DataCaptureView? _view;
-
-  final BarcodeCapture _mode;
-
-  BarcodeCaptureOverlay(BarcodeCapture mode) : this._(mode, null);
-
-  @Deprecated('Use the version without parameters instead.')
-  BarcodeCaptureOverlay.withBarcodeCapture(BarcodeCapture barcodeCapture)
-      : this.withBarcodeCaptureForView(barcodeCapture, null);
-
-  @Deprecated('Use the version without parameters instead.')
-  BarcodeCaptureOverlay.withBarcodeCaptureForView(BarcodeCapture barcodeCapture, DataCaptureView? view)
-      : this._(barcodeCapture, view);
-
-  @Deprecated(
-      'withBarcodeCaptureForViewWithStyle is deprecated and will be removed in a future release. Use the version without style parameter instead.')
-  BarcodeCaptureOverlay.withBarcodeCaptureForViewWithStyle(
-      BarcodeCapture barcodeCapture, DataCaptureView? view, BarcodeCaptureOverlayStyle style)
-      : this.withBarcodeCaptureForView(barcodeCapture, view);
-
-  int get _dataCaptureViewId => _view?.viewId ?? -1;
+  late _BarcodeCaptureOverlayController _controller;
 
   @override
-  DataCaptureView? get view => _view;
+  DataCaptureView? view;
 
-  @override
-  set view(DataCaptureView? newValue) {
-    if (newValue == null) {
-      _view = null;
-      _controller = null;
-      return;
-    }
-
-    _view = newValue;
-    _controller ??= _BarcodeCaptureOverlayController(this);
-  }
+  // ignore: unused_field
+  BarcodeCapture _barcodeCapture;
 
   late Brush _brush;
 
@@ -83,7 +47,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
 
   set brush(Brush newValue) {
     _brush = newValue;
-    _controller?.update();
+    _controller.update();
   }
 
   bool _shouldShowScanAreaGuides = false;
@@ -92,7 +56,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
 
   set shouldShowScanAreaGuides(bool newValue) {
     _shouldShowScanAreaGuides = newValue;
-    _controller?.update();
+    _controller.update();
   }
 
   Viewfinder? _viewfinder;
@@ -104,29 +68,36 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
     _viewfinder = newValue;
     _viewfinder?.addListener(_handleViewfinderChanged);
 
-    _controller?.update();
+    _controller.update();
   }
 
   void _handleViewfinderChanged() {
-    _controller?.update();
+    _controller.update();
   }
 
-  // ignore: deprecated_member_use_from_same_package
-  final BarcodeCaptureOverlayStyle _style = BarcodeCaptureOverlayStyle.frame;
+  final BarcodeCaptureOverlayStyle style;
 
-  @Deprecated('The style property is deprecated and will be removed in a future release.')
-  BarcodeCaptureOverlayStyle get style => _style;
-
-  BarcodeCaptureOverlay._(this._mode, DataCaptureView? view) : super('barcodeCapture') {
-    // ignore: deprecated_member_use_from_same_package
+  BarcodeCaptureOverlay._(this._barcodeCapture, this.view, this.style) : super('barcodeCapture') {
     _brush = BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.brushes[style]!;
-
     view?.addOverlay(this);
+    _controller = _BarcodeCaptureOverlayController(this);
   }
+
+  BarcodeCaptureOverlay.withBarcodeCapture(BarcodeCapture barcodeCapture)
+      : this.withBarcodeCaptureForView(barcodeCapture, null);
+
+  BarcodeCaptureOverlay.withBarcodeCaptureForView(BarcodeCapture barcodeCapture, DataCaptureView? view)
+      : this.withBarcodeCaptureForViewWithStyle(
+            barcodeCapture, view, BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.defaultStyle);
+
+  BarcodeCaptureOverlay.withBarcodeCaptureForViewWithStyle(
+      BarcodeCapture barcodeCapture, DataCaptureView? view, BarcodeCaptureOverlayStyle style)
+      : this._(barcodeCapture, view, style);
 
   @Deprecated('Use the brush instance property instead.')
   static Brush get defaultBrush {
-    return BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.brushes[BarcodeCaptureOverlayStyle.frame]!;
+    return BarcodeCaptureDefaults
+        .barcodeCaptureOverlayDefaults.brushes[BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.defaultStyle]!;
   }
 
   @override
@@ -136,23 +107,25 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
       'brush': _brush.toMap(),
       'shouldShowScanAreaGuides': _shouldShowScanAreaGuides,
       'viewfinder': _viewfinder == null ? _noViewfinder : _viewfinder?.toMap(),
-      // ignore: deprecated_member_use_from_same_package
       'style': style.toString()
     });
-    json['modeId'] = _mode.toMap()['modeId'];
     return json;
   }
 }
 
-class _BarcodeCaptureOverlayController extends BaseController {
+class _BarcodeCaptureOverlayController {
+  late final MethodChannel _methodChannel = _getChannel();
+
   final BarcodeCaptureOverlay _overlay;
 
-  _BarcodeCaptureOverlayController(this._overlay) : super(BarcodeCaptureFunctionNames.methodsChannelName);
+  _BarcodeCaptureOverlayController(this._overlay);
 
   Future<void> update() {
-    return methodChannel.invokeMethod(BarcodeCaptureFunctionNames.updateBarcodeCaptureOverlay, {
-      'viewId': _overlay._dataCaptureViewId,
-      'overlayJson': jsonEncode(_overlay.toMap()),
-    });
+    return _methodChannel.invokeMethod(
+        BarcodeCaptureFunctionNames.updateBarcodeCaptureOverlay, jsonEncode(_overlay.toMap()));
+  }
+
+  MethodChannel _getChannel() {
+    return const MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
   }
 }

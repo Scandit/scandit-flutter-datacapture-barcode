@@ -8,27 +8,16 @@ import Flutter
 import ScanditFrameworksBarcode
 
 class FlutterBarcodeCountView: UIView, FlutterPlatformView {
-    weak var barcodeCountModule: BarcodeCountModule?
+    weak var factory: FlutterBarcodeCountViewFactory?
 
     func view() -> UIView {
         self
     }
 
     override func removeFromSuperview() {
-        barcodeCountModule?.disposeBarcodeCountView(viewId: self.tag)
         super.removeFromSuperview()
-    }
-    
-    override func addSubview(_ view: UIView) {
-        super.addSubview(view)
-        if view is BarcodeCountView {
-            view.translatesAutoresizingMaskIntoConstraints = false
-            addConstraints([
-                view.leadingAnchor.constraint(equalTo: leadingAnchor),
-                view.trailingAnchor.constraint(equalTo: trailingAnchor),
-                view.topAnchor.constraint(equalTo: topAnchor),
-                view.bottomAnchor.constraint(equalTo: bottomAnchor)
-            ])
-        }
+        guard let index = factory?.views.firstIndex(of: self) else { return }
+        factory?.views.remove(at: index)
+        factory?.addBarcodeCountViewToLastContainer()
     }
 }

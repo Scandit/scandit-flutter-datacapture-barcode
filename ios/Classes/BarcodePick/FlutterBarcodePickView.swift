@@ -9,15 +9,17 @@ import ScanditFrameworksBarcode
 import scandit_flutter_datacapture_core
 
 class FlutterBarcodePickView: UIView, FlutterPlatformView {
-    weak var barcodePickModule: BarcodePickModule?
+    weak var factory: FlutterBarcodePickViewFactory?
 
     func view() -> UIView {
         self
     }
 
     override func removeFromSuperview() {
-        barcodePickModule?.removeView(viewId: self.tag, result: FlutterLogInsteadOfResult())
         super.removeFromSuperview()
+        guard let index = factory?.views.firstIndex(of: self) else { return }
+        factory?.views.remove(at: index)
+        factory?.addBarcodePickViewToLastContainer()
     }
 
     override func didAddSubview(_ subview: UIView) {

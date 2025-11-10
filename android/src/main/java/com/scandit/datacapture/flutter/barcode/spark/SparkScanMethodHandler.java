@@ -7,7 +7,6 @@ package com.scandit.datacapture.flutter.barcode.spark;
 
 import androidx.annotation.NonNull;
 
-import com.scandit.datacapture.flutter.core.utils.FlutterMethodCall;
 import com.scandit.datacapture.flutter.core.utils.FlutterResult;
 import com.scandit.datacapture.frameworks.barcode.spark.SparkScanModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
@@ -15,6 +14,8 @@ import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
+
+import org.json.JSONObject;
 
 public class SparkScanMethodHandler implements MethodChannel.MethodCallHandler {
 
@@ -28,14 +29,99 @@ public class SparkScanMethodHandler implements MethodChannel.MethodCallHandler {
     }
 
     @Override
-    public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
-        boolean executionResult = getSharedModule().execute(
-                new FlutterMethodCall(call),
-                new FlutterResult(result)
-        );
+    public void onMethodCall(MethodCall call, @NonNull MethodChannel.Result result) {
+        switch (call.method) {
+            case "getSparkScanDefaults":
+                result.success(new JSONObject(getSharedModule().getDefaults()).toString());
+                break;
 
-        if (!executionResult) {
-            result.notImplemented();
+            case "finishDidScan":
+                getSharedModule().finishDidScanCallback(Boolean.TRUE.equals(call.arguments()));
+                result.success(null);
+                break;
+
+            case "finishDidUpdateSession":
+                getSharedModule().finishDidUpdateSessionCallback(
+                        Boolean.TRUE.equals(call.arguments())
+                );
+                result.success(null);
+                break;
+
+            case "addSparkScanListener":
+                getSharedModule().addAsyncSparkScanListener();
+                result.success(null);
+                break;
+
+            case "removeSparkScanListener":
+                getSharedModule().removeAsyncSparkScanListener();
+                result.success(null);
+                break;
+
+            case "resetSparkScanSession":
+                getSharedModule().resetSession();
+                result.success(null);
+                break;
+
+            case "getLastFrameData":
+                assert call.arguments() != null;
+                getSharedModule().getFrameDataBytes(call.arguments(), new FlutterResult(result));
+                break;
+
+            case "updateSparkScanMode":
+                assert call.arguments() != null;
+                getSharedModule().updateMode(call.arguments(), new FlutterResult(result));
+                break;
+
+            case "addSparkScanViewUiListener":
+                getSharedModule().addSparkScanViewUiListener();
+                result.success(null);
+                break;
+
+            case "removeSparkScanViewUiListener":
+                getSharedModule().removeSparkScanViewUiListener();
+                result.success(null);
+                break;
+
+            case "sparkScanViewStartScanning":
+                getSharedModule().startScanning(new FlutterResult(result));
+                break;
+
+            case "sparkScanViewPauseScanning":
+                getSharedModule().pauseScanning();
+                result.success(null);
+                break;
+
+            case "showToast":
+                assert call.arguments() != null;
+                getSharedModule().showToast(call.arguments(), new FlutterResult(result));
+                break;
+
+            case "setModeEnabledState":
+                getSharedModule().setModeEnabled(Boolean.TRUE.equals(call.arguments()));
+                break;
+
+            case "addFeedbackDelegate":
+                getSharedModule().addFeedbackDelegate(new FlutterResult(result));
+                break;
+
+            case "removeFeedbackDelegate":
+                getSharedModule().removeFeedbackDelegate(new FlutterResult(result));
+                break;
+
+            case "submitFeedbackForBarcode":
+                getSharedModule().submitFeedbackForBarcode(
+                        call.arguments(),
+                        new FlutterResult(result)
+                );
+                break;
+
+            case "sparkScanViewUpdate":
+                assert call.arguments() != null;
+                getSharedModule().updateView(call.arguments(), new FlutterResult(result));
+                break;
+
+            default:
+                throw new IllegalStateException("Unexpected value: " + call.method);
         }
     }
 
@@ -45,7 +131,7 @@ public class SparkScanMethodHandler implements MethodChannel.MethodCallHandler {
         if (sharedModuleInstance == null) {
             synchronized (this) {
                 if (sharedModuleInstance == null) {
-                    sharedModuleInstance = (SparkScanModule) this.serviceLocator.resolve(SparkScanModule.class.getName());
+                    sharedModuleInstance = (SparkScanModule)this.serviceLocator.resolve(SparkScanModule.class.getName());
                 }
             }
         }
