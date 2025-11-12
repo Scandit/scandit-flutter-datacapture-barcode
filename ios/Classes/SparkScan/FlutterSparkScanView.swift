@@ -13,6 +13,7 @@ class FlutterSparkScanView: UIView, FlutterPlatformView {
     let creationJson: String
     let sparkScanModule: SparkScanModule
     var isViewCreated: Bool
+    var viewId: Int = 0
 
     init(frame: CGRect, creationJson: String, sparkScanModule: SparkScanModule) {
         self.creationJson = creationJson
@@ -35,38 +36,47 @@ class FlutterSparkScanView: UIView, FlutterPlatformView {
             return
         }
         
-        guard let _ = superview, let _ = window else { return }
+        guard let _ = superview, let _ = window else {
+            print("FlutterSparkScanView: Failed to setup view - superview or window is nil")
+            return
+        }
+        
         let flutterAppDelegate = (UIApplication.shared.delegate as! FlutterAppDelegate)
-        let flutterView = flutterAppDelegate.window.rootViewController!.view!
-        let parent = flutterView.superview!
+        
+        // Handle both older Flutter versions (non-optional window) and newer versions (optional window)
+        let appWindow: UIWindow?
+        if #available(iOS 13.0, *) {
+            // iOS 13+ with scene support - window is optional
+            appWindow = flutterAppDelegate.window
+        } else {
+            // Pre-iOS 13 - window was non-optional, but we treat it as optional for consistency
+            appWindow = flutterAppDelegate.window
+        }
+        
+        guard let window = appWindow,
+              let rootViewController = window.rootViewController,
+              let flutterView = rootViewController.view,
+              let parent = flutterView.superview else {
+            print("FlutterSparkScanView: Failed to setup view - Flutter app delegate window, root view controller, view, or parent is nil")
+            return
+        }
   
-        sparkScanModule.addViewToContainer(parent,
+        self.viewId = sparkScanModule.addViewToContainer(parent,
                                            jsonString: creationJson,
                                            result: FlutterLogInsteadOfResult())
-        let sparkScanView = sparkScanModule.sparkScanView!
-        parent.bringSubviewToFront(sparkScanView)
         
-        let sparkScanViewConstraints = parent.constraints.filter {
-            $0.firstItem === sparkScanView
-        }
-        parent.removeConstraints(sparkScanViewConstraints)
-        parent.addConstraints([
-            sparkScanView.topAnchor.constraint(equalTo: flutterView.topAnchor),
-            sparkScanView.leadingAnchor.constraint(equalTo: flutterView.leadingAnchor),
-            sparkScanView.trailingAnchor.constraint(equalTo: flutterView.trailingAnchor),
-            sparkScanView.bottomAnchor.constraint(equalTo: flutterView.bottomAnchor),
-        ])
+        sparkScanModule.bringSparkScanViewToFront(viewId: self.viewId)
+        sparkScanModule.setupViewConstraints(viewId: self.viewId, referenceView: flutterView)
+        
         isViewCreated = true
     }
 
     override func removeFromSuperview() {
+        sparkScanModule.disposeView(viewId: self.viewId)
         super.removeFromSuperview()
-        guard let index = factory?.views.firstIndex(of: self) else { return }
-        factory?.views.remove(at: index)
-        sparkScanModule.sparkScanView?.removeFromSuperview()
     }
 
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        sparkScanModule.sparkScanView?.hitTest(point, with: event)
+        return sparkScanModule.hitTest(viewId: self.viewId, point: point, with: event)
     }
 }
