@@ -49,12 +49,12 @@ public class BarcodeSelectionMethodHandler implements MethodChannel.MethodCallHa
                 break;
 
             case "addBarcodeSelectionListener":
-                getSharedModule().addListener();
+                getSharedModule().addAsyncListener();
                 result.success(null);
                 break;
 
             case "removeBarcodeSelectionListener":
-                getSharedModule().removeListener();
+                getSharedModule().removeAsyncListener();
                 result.success(null);
                 break;
 

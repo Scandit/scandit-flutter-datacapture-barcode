@@ -26,7 +26,6 @@ public class BarcodeCountMethodHandler implements MethodChannel.MethodCallHandle
 
     public static final String EVENT_CHANNEL_NAME = "com.scandit.datacapture.barcode.count/event_channel";
     public static final String METHOD_CHANNEL_NAME = "com.scandit.datacapture.barcode.count/method_channel";
-    private static final String FIELD_VIEW_ID = "viewId";
 
     private final ServiceLocator<FrameworkModule> serviceLocator;
 
@@ -34,38 +33,31 @@ public class BarcodeCountMethodHandler implements MethodChannel.MethodCallHandle
         this.serviceLocator = serviceLocator;
     }
 
-    private <T> T getArgument(MethodCall call, String key) {
-        if (!call.hasArgument(key)) {
-            throw new IllegalArgumentException("Missing viewId in call " + call.method);
-        }
-        return call.argument(key);
-    }
-
     @Override
     public void onMethodCall(MethodCall call, @NonNull MethodChannel.Result result) {
         switch (call.method) {
             case "addBarcodeCountViewListener":
-                getSharedModule().addBarcodeCountViewListener(getArgument(call, FIELD_VIEW_ID));
+                getSharedModule().addBarcodeCountViewListener();
                 result.success(null);
                 break;
 
             case "removeBarcodeCountViewListener":
-                getSharedModule().removeBarcodeCountViewListener(getArgument(call, FIELD_VIEW_ID));
+                getSharedModule().removeBarcodeCountViewListener();
                 result.success(null);
                 break;
 
             case "addBarcodeCountViewUiListener":
-                getSharedModule().addBarcodeCountViewUiListener(getArgument(call, FIELD_VIEW_ID));
+                getSharedModule().addBarcodeCountViewUiListener();
                 result.success(null);
                 break;
 
             case "removeBarcodeCountViewUiListener":
-                getSharedModule().removeBarcodeCountViewUiListener(getArgument(call, FIELD_VIEW_ID));
+                getSharedModule().removeBarcodeCountViewUiListener();
                 result.success(null);
                 break;
 
             case "clearHighlights":
-                getSharedModule().clearHighlights(getArgument(call, FIELD_VIEW_ID));
+                getSharedModule().clearHighlights();
                 result.success(null);
                 break;
 
@@ -83,10 +75,7 @@ public class BarcodeCountMethodHandler implements MethodChannel.MethodCallHandle
 
             case "setBarcodeCountCaptureList":
                 try {
-                    getSharedModule().setBarcodeCountCaptureList(
-                            getArgument(call, FIELD_VIEW_ID),
-                            new JSONArray((String) getArgument(call, "targetBarcodes"))
-                    );
+                    getSharedModule().setBarcodeCountCaptureList(new JSONArray((String) call.arguments));
                     result.success(null);
                 } catch (JSONException e) {
                     result.error("-1", e.getMessage(), e.getCause());
@@ -94,28 +83,23 @@ public class BarcodeCountMethodHandler implements MethodChannel.MethodCallHandle
                 break;
 
             case "resetBarcodeCountSession":
-                getSharedModule().resetBarcodeCountSession(
-                        getArgument(call, FIELD_VIEW_ID),
-                        getArgument(call, "frameSequenceId")
-                );
+                getSharedModule().resetBarcodeCountSession((Long) call.arguments);
                 result.success(null);
                 break;
 
             case "barcodeCountFinishOnScan":
-                getSharedModule().finishOnScan(
-                        getArgument(call, FIELD_VIEW_ID),
-                        getArgument(call, "enabled")
-                );
+                boolean enabled = call.arguments instanceof Boolean ? (Boolean) call.arguments : false;
+                getSharedModule().finishOnScan(enabled);
                 result.success(true);
                 break;
 
             case "addBarcodeCountListener":
-                getSharedModule().addAsyncBarcodeCountListener(getArgument(call, FIELD_VIEW_ID));
+                getSharedModule().addAsyncBarcodeCountListener();
                 result.success(null);
                 break;
 
             case "removeBarcodeCountListener":
-                getSharedModule().removeAsyncBarcodeCountListener(getArgument(call, FIELD_VIEW_ID));
+                getSharedModule().removeAsyncBarcodeCountListener();
                 result.success(null);
                 break;
 
@@ -125,66 +109,48 @@ public class BarcodeCountMethodHandler implements MethodChannel.MethodCallHandle
                 break;
 
             case "resetBarcodeCount":
-                getSharedModule().resetBarcodeCount(getArgument(call, FIELD_VIEW_ID));
+                getSharedModule().resetBarcodeCount();
                 result.success(null);
                 break;
 
             case "startScanningPhase":
-                getSharedModule().startScanningPhase(getArgument(call, FIELD_VIEW_ID));
+                getSharedModule().startScanningPhase();
                 result.success(null);
                 break;
 
             case "endScanningPhase":
-                getSharedModule().endScanningPhase(getArgument(call, FIELD_VIEW_ID));
+                getSharedModule().endScanningPhase();
                 result.success(null);
                 break;
 
             case "updateBarcodeCountView":
                 assert call.arguments() != null;
-                getSharedModule().updateBarcodeCountView(
-                        getArgument(call, FIELD_VIEW_ID),
-                        getArgument(call, "viewJson")
-                );
+                getSharedModule().updateBarcodeCountView(call.arguments());
                 result.success(null);
                 break;
 
             case "updateBarcodeCountMode":
                 assert call.arguments() != null;
-                getSharedModule().updateBarcodeCount(
-                        getArgument(call, FIELD_VIEW_ID),
-                        getArgument(call, "modeJson")
-                );
+                getSharedModule().updateBarcodeCount(call.arguments());
                 result.success(null);
                 break;
 
             case "setModeEnabledState":
-                getSharedModule().setModeEnabled(
-                        getArgument(call, FIELD_VIEW_ID),
-                        getArgument(call, "enabled")
-                );
+                getSharedModule().setModeEnabled(Boolean.TRUE.equals(call.arguments()));
                 break;
 
             case "updateFeedback":
                 assert call.arguments() != null;
-                getSharedModule().updateFeedback(
-                        getArgument(call, FIELD_VIEW_ID),
-                        getArgument(call, "feedbackJson"),
-                        new FlutterResult(result)
-                );
+                getSharedModule().updateFeedback(call.arguments(), new FlutterResult(result));
                 break;
             case "submitBarcodeCountStatusProviderCallback":
                 assert call.arguments() != null;
-                getSharedModule().submitBarcodeCountStatusProviderCallbackResult(
-                        getArgument(call, FIELD_VIEW_ID),
-                        getArgument(call, "statusJson"),
+                getSharedModule().submitBarcodeCountStatusProviderCallbackResult(call.arguments(),
                         new FlutterResult(result)
                 );
                 break;
             case "addBarcodeCountStatusProvider":
-                getSharedModule().addBarcodeCountStatusProvider(
-                        getArgument(call, FIELD_VIEW_ID),
-                        new FlutterResult(result)
-                );
+                getSharedModule().addBarcodeCountStatusProvider(new FlutterResult(result));
                 break;
 
             default:
@@ -198,12 +164,11 @@ public class BarcodeCountMethodHandler implements MethodChannel.MethodCallHandle
             result.error("-1", "Invalid argument for finishBrushForRecognizedBarcodeEvent", "");
             return;
         }
-        String brushJson = getArgument(call, "brush");
-        int trackedBarcodeId = getArgument(call, "trackedBarcodeId");
-        int viewId = getArgument(call, FIELD_VIEW_ID);
+        String brushJson = (String) arguments.get("brush");
+        int trackedBarcodeId = (int) arguments.get("trackedBarcodeId");
 
         assert brushJson != null;
-        getSharedModule().finishBrushForRecognizedBarcodeEvent(viewId, BrushDeserializer.fromJson(brushJson), trackedBarcodeId);
+        getSharedModule().finishBrushForRecognizedBarcodeEvent(BrushDeserializer.fromJson(brushJson), trackedBarcodeId);
         result.success(null);
     }
 
@@ -213,12 +178,11 @@ public class BarcodeCountMethodHandler implements MethodChannel.MethodCallHandle
             result.error("-1", "Invalid argument for finishBrushForRecognizedBarcodeNotInListEvent", "");
             return;
         }
-        String brushJson = getArgument(call, "brush");
-        int trackedBarcodeId = getArgument(call, "trackedBarcodeId");
-        int viewId = getArgument(call, FIELD_VIEW_ID);
+        String brushJson = (String) arguments.get("brush");
+        int trackedBarcodeId = (int) arguments.get("trackedBarcodeId");
 
         assert brushJson != null;
-        getSharedModule().finishBrushForRecognizedBarcodeNotInListEvent(viewId, BrushDeserializer.fromJson(brushJson), trackedBarcodeId);
+        getSharedModule().finishBrushForRecognizedBarcodeNotInListEvent(BrushDeserializer.fromJson(brushJson), trackedBarcodeId);
         result.success(null);
     }
 

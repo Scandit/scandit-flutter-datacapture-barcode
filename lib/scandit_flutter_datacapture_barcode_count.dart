@@ -6,6 +6,8 @@
 
 library scandit_flutter_datacapture_barcode_count;
 
+export 'src/count/barcode_count.dart'
+    show BarcodeCount, BarcodeCountCaptureList, BarcodeCountCaptureListListener, BarcodeCountListener;
 export 'src/count/barcode_count_capture_list_session.dart' show BarcodeCountCaptureListSession;
 export 'src/count/barcode_count_feedback.dart' show BarcodeCountFeedback;
 export 'src/count/barcode_count_session.dart' show BarcodeCountSession;
@@ -13,8 +15,6 @@ export 'src/count/barcode_count_settings.dart' show BarcodeCountSettings;
 export 'src/count/target_barcode.dart' show TargetBarcode;
 export 'src/count/barcode_count_view.dart'
     show
-        BarcodeCount,
-        BarcodeCountCaptureList,
         BarcodeCountView,
         BarcodeCountViewListener,
         BarcodeCountViewUiListener,
@@ -29,5 +29,3 @@ export 'src/count/barcode_count_status_result.dart'
         BarcodeCountStatusResultAbort,
         BarcodeCountStatusResultError,
         BarcodeCountStatusResultSuccess;
-export 'src/count/barcode_count_capture_list_listener.dart' show BarcodeCountCaptureListListener;
-export 'src/count/barcode_count_listener.dart' show BarcodeCountListener;

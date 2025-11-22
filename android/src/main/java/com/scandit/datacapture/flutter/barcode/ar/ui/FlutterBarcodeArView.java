@@ -43,7 +43,7 @@ public class FlutterBarcodeArView extends FlutterBasePlatformView {
 
     @Override
     public void dispose() {
-        module.viewDisposed((int)this.getTag());
+        module.viewDisposed();
         removeAllViews();
         super.dispose();
     }

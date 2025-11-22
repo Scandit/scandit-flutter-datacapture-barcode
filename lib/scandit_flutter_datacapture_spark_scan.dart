@@ -11,7 +11,6 @@ export 'src/spark/spark_scan_settings.dart' show SparkScanSettings;
 
 export 'src/spark/spark_scan_view.dart' show SparkScanView, SparkScan;
 export 'src/spark/spark_scan_listener.dart' show SparkScanListener;
-// ignore: deprecated_member_use_from_same_package
 export 'src/spark/spark_scan_view_ui_listener.dart' show SparkScanViewUiListener, ExtendedSparkScanViewUiListener;
 export 'src/spark/spark_scan_feedback_delegate.dart' show SparkScanFeedbackDelegate;
 export 'src/spark/spark_scan_preview_behavior.dart' show SparkScanPreviewBehavior;

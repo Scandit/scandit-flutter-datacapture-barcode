@@ -36,30 +36,10 @@ class FlutterSparkScanView: UIView, FlutterPlatformView {
             return
         }
         
-        guard let _ = superview, let _ = window else {
-            print("FlutterSparkScanView: Failed to setup view - superview or window is nil")
-            return
-        }
-        
+        guard let _ = superview, let _ = window else { return }
         let flutterAppDelegate = (UIApplication.shared.delegate as! FlutterAppDelegate)
-        
-        // Handle both older Flutter versions (non-optional window) and newer versions (optional window)
-        let appWindow: UIWindow?
-        if #available(iOS 13.0, *) {
-            // iOS 13+ with scene support - window is optional
-            appWindow = flutterAppDelegate.window
-        } else {
-            // Pre-iOS 13 - window was non-optional, but we treat it as optional for consistency
-            appWindow = flutterAppDelegate.window
-        }
-        
-        guard let window = appWindow,
-              let rootViewController = window.rootViewController,
-              let flutterView = rootViewController.view,
-              let parent = flutterView.superview else {
-            print("FlutterSparkScanView: Failed to setup view - Flutter app delegate window, root view controller, view, or parent is nil")
-            return
-        }
+        let flutterView = flutterAppDelegate.window.rootViewController!.view!
+        let parent = flutterView.superview!
   
         self.viewId = sparkScanModule.addViewToContainer(parent,
                                            jsonString: creationJson,

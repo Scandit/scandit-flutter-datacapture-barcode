@@ -9,10 +9,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
-import 'barcode_find_constants.dart';
+import 'barcode_find_function_names.dart';
 
 class BarcodeFindDefaults {
-  static MethodChannel mainChannel = const MethodChannel(BarcodeFindConstants.methodsChannelName);
+  static MethodChannel mainChannel = const MethodChannel(BarcodeFindFunctionNames.methodsChannelName);
 
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
@@ -30,7 +30,7 @@ class BarcodeFindDefaults {
 
   static Future<void> initializeDefaults() async {
     if (_isInitialized) return;
-    var result = await mainChannel.invokeMethod(BarcodeFindConstants.getBarcodeFindDefaults);
+    var result = await mainChannel.invokeMethod(BarcodeFindFunctionNames.getBarcodeFindDefaults);
     var json = jsonDecode(result as String);
 
     _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(json['RecommendedCameraSettings']);
