@@ -10,8 +10,7 @@ export 'src/ar/barcode_ar_feedback.dart' show BarcodeArFeedback;
 export 'src/ar/barcode_ar_session.dart' show BarcodeArSession;
 export 'src/ar/barcode_ar_settings.dart' show BarcodeArSettings;
 export 'src/ar/barcode_ar_view_settings.dart' show BarcodeArViewSettings;
-export 'src/ar/barcode_ar.dart' show BarcodeAr, BarcodeArListener;
-export 'src/ar/barcode_ar_view.dart' show BarcodeArView, BarcodeArViewUiListener;
+export 'src/ar/barcode_ar_view.dart' show BarcodeAr, BarcodeArListener, BarcodeArView, BarcodeArViewUiListener;
 export 'src/ar/barcode_ar_highlight.dart'
     show
         BarcodeArHighlight,

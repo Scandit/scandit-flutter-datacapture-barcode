@@ -7,17 +7,20 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/ar/barcode_ar_feedback.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/ar/barcode_ar_session.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/ar/barcode_ar_settings.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import '../barcode.dart';
-import 'barcode_ar.dart';
 import 'barcode_ar_annotation.dart';
 import 'barcode_ar_annotation_provider.dart';
 import 'barcode_ar_common.dart';
@@ -27,10 +30,76 @@ import 'barcode_ar_highlight.dart';
 import 'barcode_ar_highlight_provider.dart';
 import 'barcode_ar_view_settings.dart';
 
+abstract class BarcodeArListener {
+  static const String _barcodeArListenerDidUpdateSession = 'BarcodeArListener.didUpdateSession';
+
+  Future<void> didUpdateSession(BarcodeAr barcodeAr, BarcodeArSession session, Future<FrameData> getFrameData());
+}
+
 abstract class BarcodeArViewUiListener {
   static const String _barcodeArViewUiListenerDidTapHighlight = 'BarcodeArViewUiListener.didTapHighlightForBarcode';
 
   void didTapHighlightForBarcode(BarcodeAr barcodeAr, Barcode barcode, BarcodeArHighlight highlight);
+}
+
+class BarcodeAr extends Serializable {
+  _BarcodeArViewController? _controller;
+
+  BarcodeArSettings _settings;
+
+  final List<BarcodeArListener> _listeners = [];
+
+  BarcodeAr._(DataCaptureContext? context, this._settings);
+
+  BarcodeAr.forContext(DataCaptureContext context, BarcodeArSettings settings) : this._(context, settings);
+
+  static CameraSettings get recommendedCameraSettings => CameraSettings(
+        BarcodeArDefaults.recommendedCameraSettings.preferredResolution,
+        BarcodeArDefaults.recommendedCameraSettings.zoomFactor,
+        BarcodeArDefaults.recommendedCameraSettings.focusRange,
+        BarcodeArDefaults.recommendedCameraSettings.focusGestureStrategy,
+        BarcodeArDefaults.recommendedCameraSettings.zoomGestureZoomFactor,
+        properties: BarcodeArDefaults.recommendedCameraSettings.properties,
+        shouldPreferSmoothAutoFocus: BarcodeArDefaults.recommendedCameraSettings.shouldPreferSmoothAutoFocus,
+      );
+
+  BarcodeArFeedback _feedback = BarcodeArFeedback();
+
+  BarcodeArFeedback get feedback => _feedback;
+
+  set feedback(BarcodeArFeedback newValue) {
+    _feedback = newValue;
+    _controller?.updateFeedback(newValue);
+  }
+
+  Future<void> applySettings(BarcodeArSettings settings) {
+    _settings = settings;
+    return _controller?.applyNewSettings(settings) ?? Future.value();
+  }
+
+  void addListener(BarcodeArListener listener) {
+    if (_listeners.isEmpty) {
+      _controller?.subscribeModeListeners();
+    }
+
+    if (_listeners.contains(listener)) {
+      return;
+    }
+    _listeners.add(listener);
+  }
+
+  void removeListener(BarcodeArListener listener) {
+    _listeners.remove(listener);
+
+    if (_listeners.isEmpty) {
+      _controller?.unsubscribeModeListeners();
+    }
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {'type': 'barcodeAr', 'settings': _settings.toMap(), 'feedback': _feedback.toMap()};
+  }
 }
 
 // ignore: must_be_immutable
@@ -44,10 +113,12 @@ class BarcodeArView extends StatefulWidget implements Serializable {
   final CameraSettings? _cameraSettings;
 
   bool _isInitialized = false;
+  int _viewId = 0;
 
   BarcodeArView._(this._dataCaptureContext, this._barcodeAr, this._barcodeArViewSettings, this._cameraSettings)
       : super() {
     _controller = _BarcodeArViewController(this);
+    _barcodeAr._controller = _controller;
   }
 
   factory BarcodeArView.forMode(DataCaptureContext dataCaptureContext, BarcodeAr barcodeAr) {
@@ -208,10 +279,12 @@ class BarcodeArView extends StatefulWidget implements Serializable {
         'cameraSwitchControlPosition': cameraSwitchControlPosition.toString(),
         'shouldShowMacroModeControl': shouldShowMacroModeControl,
         'macroModeControlPosition': macroModeControlPosition.toString(),
+        'hasModeListener': _barcodeAr._listeners.isNotEmpty,
+        'hasUiListener': _viewUIListener != null,
+        'hasHighlightProvider': _highlightProvider != null,
+        'hasAnnotationProvider': _annotationProvider != null,
         'isStarted': _isStarted,
-        'hasUiListener': uiListener != null,
-        'hasHighlightProvider': highlightProvider != null,
-        'hasAnnotationProvider': annotationProvider != null,
+        'viewId': _viewId,
         'viewSettings': _barcodeArViewSettings?.toMap(),
         'cameraSettings': _cameraSettings?.toMap()
       },
@@ -233,11 +306,17 @@ class _BarcodeArViewController implements BarcodeArViewController {
 
   _BarcodeArViewController(this._view) {
     _subscribeToEvents();
+    if (_view._barcodeAr._listeners.isNotEmpty) {
+      subscribeModeListeners();
+    }
   }
 
   void _subscribeToEvents() {
     _viewEventsSubscription = BarcodePluginEvents.barcodeArEventStream.listen((event) async {
       var json = jsonDecode(event);
+      final viewId = json['viewId'] as int;
+      if (viewId != _view._viewId) return;
+
       var eventName = json['event'] as String;
       switch (eventName) {
         case BarcodeArViewUiListener._barcodeArViewUiListenerDidTapHighlight:
@@ -258,7 +337,8 @@ class _BarcodeArViewController implements BarcodeArViewController {
 
           var result = {"barcodeId": barcodeId, "highlight": highlight?.toMap()};
 
-          _methodChannel.invokeMethod(BarcodeArFunctionNames.finishHighlightForBarcode, jsonEncode(result));
+          _methodChannel.invokeMethod(BarcodeArFunctionNames.finishHighlightForBarcode,
+              {'viewId': _view._viewId, 'result': jsonEncode(result)});
           break;
         case BarcodeArFunctionNames.annotationForBarcodeEvent:
           final barcodeId = json['barcodeId'] as String;
@@ -274,7 +354,8 @@ class _BarcodeArViewController implements BarcodeArViewController {
 
           var result = {"barcodeId": barcodeId, "annotation": annotation?.toMap()};
 
-          _methodChannel.invokeMethod(BarcodeArFunctionNames.finishAnnotationForBarcode, jsonEncode(result));
+          _methodChannel.invokeMethod(BarcodeArFunctionNames.finishAnnotationForBarcode,
+              {'viewId': _view._viewId, 'result': jsonEncode(result)});
           break;
 
         case BarcodeArFunctionNames.didTapPopoverEvent:
@@ -354,7 +435,8 @@ class _BarcodeArViewController implements BarcodeArViewController {
 
   Future<void> updateView() {
     final viewJson = jsonEncode(_view.toMap()['View']);
-    return _methodChannel.invokeMethod(BarcodeArFunctionNames.updateView, viewJson);
+    return _methodChannel
+        .invokeMethod(BarcodeArFunctionNames.updateView, {'viewId': _view._viewId, 'viewJson': viewJson});
   }
 
   void setUiListener(BarcodeArViewUiListener? listener) {
@@ -362,7 +444,7 @@ class _BarcodeArViewController implements BarcodeArViewController {
         ? BarcodeArFunctionNames.registerBarcodeArViewUiListener
         : BarcodeArFunctionNames.unregisterBarcodeArViewUiListener;
 
-    _methodChannel.invokeMethod(methodToInvoke).then((value) => null, onError: _onError);
+    _methodChannel.invokeMethod(methodToInvoke, {'viewId': _view._viewId}).then((value) => null, onError: _onError);
   }
 
   void _onError(Object? error, StackTrace? stackTrace) {
@@ -379,7 +461,7 @@ class _BarcodeArViewController implements BarcodeArViewController {
       _highlightCache.clear();
     }
 
-    _methodChannel.invokeMethod(methodToInvoke).then((value) => null, onError: _onError);
+    _methodChannel.invokeMethod(methodToInvoke, {'viewId': _view._viewId}).then((value) => null, onError: _onError);
   }
 
   void setAnnotationProvider(BarcodeArAnnotationProvider? newValue) {
@@ -391,53 +473,118 @@ class _BarcodeArViewController implements BarcodeArViewController {
       _annotationsCache.clear();
     }
 
-    _methodChannel.invokeMethod(methodToInvoke).then((value) => null, onError: _onError);
+    _methodChannel.invokeMethod(methodToInvoke, {'viewId': _view._viewId}).then((value) => null, onError: _onError);
   }
 
   Future<void> start() {
-    return _methodChannel.invokeMethod(BarcodeArFunctionNames.viewStart);
+    return _methodChannel.invokeMethod(BarcodeArFunctionNames.viewStart, {'viewId': _view._viewId});
   }
 
   Future<void> stop() {
     _highlightCache.clear();
     _annotationsCache.clear();
-    return _methodChannel.invokeMethod(BarcodeArFunctionNames.viewStop);
+    return _methodChannel.invokeMethod(BarcodeArFunctionNames.viewStop, {'viewId': _view._viewId});
   }
 
   Future<void> pause() {
     _highlightCache.clear();
     _annotationsCache.clear();
-    return _methodChannel.invokeMethod(BarcodeArFunctionNames.viewPause);
+    return _methodChannel.invokeMethod(BarcodeArFunctionNames.viewPause, {'viewId': _view._viewId});
   }
 
   Future<void> reset() {
     _highlightCache.clear();
     _annotationsCache.clear();
-    return _methodChannel.invokeMethod(BarcodeArFunctionNames.viewReset);
+    return _methodChannel.invokeMethod(BarcodeArFunctionNames.viewReset, {'viewId': _view._viewId});
   }
 
   @override
   Future<void> updateAnnotation(BarcodeArAnnotation annotation) {
-    return _methodChannel.invokeMethod(BarcodeArFunctionNames.updateAnnotation, jsonEncode(annotation.toMap()));
+    return _methodChannel.invokeMethod(BarcodeArFunctionNames.updateAnnotation,
+        {'viewId': _view._viewId, 'annotationJson': jsonEncode(annotation.toMap())});
   }
 
   @override
   Future<void> updateHighlight(BarcodeArHighlight highlight) {
-    return _methodChannel.invokeMethod(BarcodeArFunctionNames.updateHighlight, jsonEncode(highlight.toMap()));
+    return _methodChannel.invokeMethod(BarcodeArFunctionNames.updateHighlight,
+        {'viewId': _view._viewId, 'highlightJson': jsonEncode(highlight.toMap())});
   }
 
   @override
   Future<void> updateBarcodeArPopoverButtonAtIndex(BarcodeArPopoverAnnotation annotation, int index) {
     var button = annotation.buttons[index].toMap();
-    var updateQequest = {
+    var updateRequest = {
       'button': button,
       'barcodeId': annotation.barcodeId,
     };
-    return _methodChannel.invokeMethod(
-        BarcodeArFunctionNames.updateBarcodeArPopoverButtonAtIndex, jsonEncode(updateQequest));
+    return _methodChannel.invokeMethod(BarcodeArFunctionNames.updateBarcodeArPopoverButtonAtIndex,
+        {'viewId': _view._viewId, 'updateJson': jsonEncode(updateRequest)});
+  }
+
+  // Mode
+
+  StreamSubscription<dynamic>? _barcodeArSubscription;
+
+  Future<void> applyNewSettings(BarcodeArSettings settings) {
+    return _methodChannel.invokeMethod(BarcodeArFunctionNames.applyBarcodeArModeSettings,
+        {'viewId': _view._viewId, 'settings': jsonEncode(settings.toMap())}).then((value) => null, onError: _onError);
+  }
+
+  Future<void> updateFeedback(BarcodeArFeedback newValue) {
+    return _methodChannel.invokeMethod(BarcodeArFunctionNames.updateFeedback,
+        {'viewId': _view._viewId, 'feedback': jsonEncode(newValue.toMap())}).onError(_onError);
+  }
+
+  void subscribeModeListeners() {
+    if (_barcodeArSubscription != null) return;
+
+    _methodChannel.invokeMethod(BarcodeArFunctionNames.addBarcodeArListener, {'viewId': _view._viewId}).then(
+        (value) => _listenForModeEvents(),
+        onError: _onError);
+  }
+
+  StreamSubscription _listenForModeEvents() {
+    return _barcodeArSubscription = BarcodePluginEvents.barcodeArEventStream.listen((event) async {
+      var payload = jsonDecode(event as String);
+
+      final viewId = payload['viewId'] as int;
+      if (viewId != _view._viewId) return;
+
+      if (payload['event'] as String == BarcodeArListener._barcodeArListenerDidUpdateSession) {
+        if (_view._barcodeAr._listeners.isNotEmpty && payload.containsKey('session')) {
+          var session = BarcodeArSession.fromJSON(payload);
+          await _notifyDidUpdateListeners(session);
+        }
+        _methodChannel.invokeMethod(BarcodeArFunctionNames.barcodeArFinishDidUpdateSession,
+            {'viewId': _view._viewId}).then((value) => null, onError: (error, stack) => log(error));
+      }
+    });
+  }
+
+  Future<void> _notifyDidUpdateListeners(BarcodeArSession session) async {
+    for (var listener in _view._barcodeAr._listeners) {
+      await listener.didUpdateSession(_view._barcodeAr, session, () => _getLastFrameData(session));
+    }
+  }
+
+  Future<FrameData> _getLastFrameData(BarcodeArSession session) {
+    return _methodChannel.invokeMethod(BarcodeArFunctionNames.getFrameData, {'frameId': session.frameId}).then(
+        (value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)),
+        onError: _onError);
+  }
+
+  void unsubscribeModeListeners() {
+    _barcodeArSubscription?.cancel();
+    _methodChannel.invokeMethod(BarcodeArFunctionNames.removeBarcodeArListener, {'viewId': _view._viewId}).then(
+        (value) => null,
+        onError: _onError);
+
+    _barcodeArSubscription = null;
   }
 
   void dispose() {
+    _barcodeArSubscription?.cancel();
+    _barcodeArSubscription = null;
     _viewEventsSubscription?.cancel();
     _viewEventsSubscription = null;
     _highlightCache.clear();
@@ -446,7 +593,15 @@ class _BarcodeArViewController implements BarcodeArViewController {
 }
 
 class _BarcodeArViewState extends State<BarcodeArView> {
+  final int _viewId = Random().nextInt(0x7FFFFFFF);
+
   _BarcodeArViewState();
+
+  @override
+  void initState() {
+    super.initState();
+    widget._viewId = _viewId;
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -13,6 +13,7 @@ import '../capture/barcode_capture_defaults.dart';
 import '../capture/barcode_capture.dart';
 import 'barcode_capture_function_names.dart';
 
+@Deprecated('BarcodeCaptureOverlayStyle is deprecated and will be removed in a future release.')
 enum BarcodeCaptureOverlayStyle {
   frame('frame');
 
@@ -24,8 +25,11 @@ enum BarcodeCaptureOverlayStyle {
   final String _name;
 }
 
+// ignore: deprecated_member_use_from_same_package
 extension BarcodeCaptureOverlayStyleSerializer on BarcodeCaptureOverlayStyle {
+  // ignore: deprecated_member_use_from_same_package
   static BarcodeCaptureOverlayStyle fromJSON(String jsonValue) {
+    // ignore: deprecated_member_use_from_same_package
     return BarcodeCaptureOverlayStyle.values.firstWhere((element) => element.toString() == jsonValue);
   }
 }
@@ -75,9 +79,14 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
     _controller.update();
   }
 
-  final BarcodeCaptureOverlayStyle style;
+  // ignore: deprecated_member_use_from_same_package
+  final BarcodeCaptureOverlayStyle _style = BarcodeCaptureOverlayStyle.frame;
 
-  BarcodeCaptureOverlay._(this._barcodeCapture, this.view, this.style) : super('barcodeCapture') {
+  @Deprecated('The style property is deprecated and will be removed in a future release.')
+  BarcodeCaptureOverlayStyle get style => _style;
+
+  BarcodeCaptureOverlay._(this._barcodeCapture, this.view) : super('barcodeCapture') {
+    // ignore: deprecated_member_use_from_same_package
     _brush = BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.brushes[style]!;
     view?.addOverlay(this);
     _controller = _BarcodeCaptureOverlayController(this);
@@ -87,17 +96,17 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
       : this.withBarcodeCaptureForView(barcodeCapture, null);
 
   BarcodeCaptureOverlay.withBarcodeCaptureForView(BarcodeCapture barcodeCapture, DataCaptureView? view)
-      : this.withBarcodeCaptureForViewWithStyle(
-            barcodeCapture, view, BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.defaultStyle);
+      : this._(barcodeCapture, view);
 
+  @Deprecated(
+      'withBarcodeCaptureForViewWithStyle is deprecated and will be removed in a future release. Use the version without style parameter instead.')
   BarcodeCaptureOverlay.withBarcodeCaptureForViewWithStyle(
       BarcodeCapture barcodeCapture, DataCaptureView? view, BarcodeCaptureOverlayStyle style)
-      : this._(barcodeCapture, view, style);
+      : this.withBarcodeCaptureForView(barcodeCapture, view);
 
   @Deprecated('Use the brush instance property instead.')
   static Brush get defaultBrush {
-    return BarcodeCaptureDefaults
-        .barcodeCaptureOverlayDefaults.brushes[BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.defaultStyle]!;
+    return BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.brushes[BarcodeCaptureOverlayStyle.frame]!;
   }
 
   @override
@@ -107,6 +116,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
       'brush': _brush.toMap(),
       'shouldShowScanAreaGuides': _shouldShowScanAreaGuides,
       'viewfinder': _viewfinder == null ? _noViewfinder : _viewfinder?.toMap(),
+      // ignore: deprecated_member_use_from_same_package
       'style': style.toString()
     });
     return json;

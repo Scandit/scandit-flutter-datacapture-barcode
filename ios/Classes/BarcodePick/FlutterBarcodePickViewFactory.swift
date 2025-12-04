@@ -10,7 +10,6 @@ import ScanditFrameworksCore
 import scandit_flutter_datacapture_core
 
 class FlutterBarcodePickViewFactory: NSObject, FlutterPlatformViewFactory {
-    var views: [FlutterBarcodePickView] = []
 
     let barcodePickModule: BarcodePickModule
 
@@ -31,25 +30,15 @@ class FlutterBarcodePickViewFactory: NSObject, FlutterPlatformViewFactory {
             fatalError("Unable to create the BarcodePickView without the json.")
         }
         let view = FlutterBarcodePickView(frame: frame)
-        view.factory = self
+        view.barcodePickModule = barcodePickModule
         barcodePickModule.addViewToContainer(container: view,
                                              jsonString: creationJson,
                                              result: FlutterLogInsteadOfResult())
-        views.append(view)
         return view
     }
 
     func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
         FlutterStandardMessageCodec.sharedInstance()
-    }
-
-    func addBarcodePickViewToLastContainer() {
-        guard let view = views.last,
-              let barcodePickView = barcodePickModule.barcodePickView else { return }
-        if barcodePickView.superview != nil {
-            barcodePickView.removeFromSuperview()
-        }
-        view.addSubview(barcodePickView)
     }
 }
 

@@ -10,7 +10,6 @@ import ScanditFrameworksCore
 import scandit_flutter_datacapture_core
 
 class FlutterBarcodeArViewFactory: NSObject, FlutterPlatformViewFactory {
-    var views: [FlutterBarcodeArView] = []
 
     let barcodeArModule: BarcodeArModule
 
@@ -31,25 +30,15 @@ class FlutterBarcodeArViewFactory: NSObject, FlutterPlatformViewFactory {
             fatalError("Unable to create the BarcodeArView without the json.")
         }
         let view = FlutterBarcodeArView(frame: frame)
-        view.factory = self
+        view.barcodeArModule = barcodeArModule
         barcodeArModule.addViewToContainer(container: view,
                                              jsonString: creationJson,
                                              result: FlutterLogInsteadOfResult())
-        views.append(view)
         return view
     }
 
     func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
         FlutterStandardMessageCodec.sharedInstance()
-    }
-
-    func addBarcodeArViewToLastContainer() {
-        guard let view = views.last,
-              let barcodeArView = barcodeArModule.barcodeArView else { return }
-        if barcodeArView.superview != nil {
-            barcodeArView.removeFromSuperview()
-        }
-        view.addSubview(barcodeArView)
     }
 }
 

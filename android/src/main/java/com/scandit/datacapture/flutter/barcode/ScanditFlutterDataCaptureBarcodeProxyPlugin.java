@@ -292,11 +292,7 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin extends BaseFlutterPlug
         BarcodeFindModule barcodeFindModule = resolveModule(BarcodeFindModule.class);
         if (barcodeFindModule != null) return;
 
-        barcodeFindModule = BarcodeFindModule.create(
-                new FrameworksBarcodeFindListener(barcodeFindEmitter),
-                new FrameworksBarcodeFindViewUiListener(barcodeFindEmitter),
-                new FrameworksBarcodeFindTransformer(barcodeFindEmitter)
-        );
+        barcodeFindModule = BarcodeFindModule.create(barcodeFindEmitter);
         barcodeFindModule.onCreate(binding.getApplicationContext());
 
         registerModule(barcodeFindModule);
@@ -306,11 +302,7 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin extends BaseFlutterPlug
         BarcodeBatchModule barcodeBatchModule = resolveModule(BarcodeBatchModule.class);
         if (barcodeBatchModule != null) return;
 
-        barcodeBatchModule = BarcodeBatchModule.create(
-                FrameworksBarcodeBatchListener.create(barcodeBatchEmitter),
-                new FrameworksBarcodeBatchBasicOverlayListener(barcodeBatchEmitter),
-                new FrameworksBarcodeBatchAdvancedOverlayListener(barcodeBatchEmitter)
-        );
+        barcodeBatchModule = BarcodeBatchModule.create(barcodeBatchEmitter);
         barcodeBatchModule.onCreate(binding.getApplicationContext());
 
         registerModule(barcodeBatchModule);
