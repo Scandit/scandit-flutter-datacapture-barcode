@@ -27,14 +27,6 @@ class BarcodeCaptureSettings implements Serializable {
 
   Set<CompositeType> enabledCompositeTypes = {};
 
-  @Deprecated('Use batterySaving instead.')
-  BatterySavingMode get batterySavingMode => batterySaving;
-
-  @Deprecated('Use batterySaving instead.')
-  set batterySavingMode(BatterySavingMode newValue) {
-    batterySaving = newValue;
-  }
-
   BatterySavingMode batterySaving = BarcodeCaptureDefaults.barcodeCaptureSettingsDefaults.batterySaving;
 
   ScanIntention scanIntention = BarcodeCaptureDefaults.barcodeCaptureSettingsDefaults.scanIntention;
@@ -86,8 +78,9 @@ class BarcodeCaptureSettings implements Serializable {
 
   void enableSymbologiesForCompositeTypes(Set<CompositeType> compositeTypes) {
     for (var compositeType in compositeTypes) {
-      var symbologies = BarcodeDefaults.compositeTypeDescriptionsDefaults
-          .firstWhere((element) => element.types.contains(compositeType));
+      var symbologies = BarcodeDefaults.compositeTypeDescriptionsDefaults.firstWhere(
+        (element) => element.types.contains(compositeType),
+      );
 
       enableSymbologies(symbologies.symbologies);
     }

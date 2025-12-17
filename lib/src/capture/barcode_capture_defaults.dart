@@ -5,11 +5,10 @@
  */
 
 import 'dart:convert';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
-import 'barcode_capture_overlay.dart';
 import 'barcode_capture_function_names.dart';
 
 // ignore: avoid_classes_with_only_static_members
@@ -66,15 +65,12 @@ class BarcodeCaptureSettingsDefaults {
 
 @immutable
 class BarcodeCaptureOverlayDefaults {
-  // ignore: deprecated_member_use_from_same_package
-  final Map<BarcodeCaptureOverlayStyle, Brush> brushes;
+  final Brush defaultBrush;
 
-  const BarcodeCaptureOverlayDefaults(this.brushes);
+  const BarcodeCaptureOverlayDefaults(this.defaultBrush);
 
   factory BarcodeCaptureOverlayDefaults.fromJSON(Map<String, dynamic> json) {
-    var styles = (json['Brushes'] as Map<String, dynamic>).map((key, value) => MapEntry(
-        BarcodeCaptureOverlayStyleSerializer.fromJSON(key),
-        BrushDefaults.fromJSON(value as Map<String, dynamic>).toBrush()));
-    return BarcodeCaptureOverlayDefaults(styles);
+    return BarcodeCaptureOverlayDefaults(
+        BrushDefaults.fromJSON(json['DefaultBrush'] as Map<String, dynamic>).toBrush());
   }
 }

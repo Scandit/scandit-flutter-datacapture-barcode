@@ -4,10 +4,10 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-import 'package:meta/meta.dart';
-import '../../scandit_flutter_datacapture_barcode.dart';
-import 'target_barcode.dart';
-import '../../scandit_flutter_datacapture_barcode_batch.dart';
+import 'package:flutter/foundation.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/count/target_barcode.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/tracked_barcode.dart';
 
 @immutable
 class BarcodeCountCaptureListSession {

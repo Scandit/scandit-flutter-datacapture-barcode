@@ -26,7 +26,7 @@ enum Symbology {
   maxiCode('maxicode'),
   dotCode('dotcode'),
   kix('kix'),
-  rm4scc('rm4scc'),
+  royalMail4state('royal-mail-4state'),
   gs1Databar('databar'),
   gs1DatabarExpanded('databarExpanded'),
   gs1DatabarLimited('databarLimited'),

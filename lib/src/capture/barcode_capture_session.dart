@@ -43,7 +43,7 @@ class BarcodeCaptureSession with _PrivateBarcodeCaptureSession {
   }
 
   Future<void> reset() {
-    return _controller.reset(_frameSequenceId);
+    return _controller.reset();
   }
 }
 
@@ -56,8 +56,8 @@ mixin _PrivateBarcodeCaptureSession {
 class _BarcodeCaptureSessionController {
   late final MethodChannel _methodChannel = _getChannel();
 
-  Future<void> reset(int frameSequenceId) {
-    return _methodChannel.invokeMethod(BarcodeCaptureFunctionNames.resetBarcodeCaptureSession, frameSequenceId);
+  Future<void> reset() {
+    return _methodChannel.invokeMethod(BarcodeCaptureFunctionNames.resetBarcodeCaptureSession);
   }
 
   MethodChannel _getChannel() {

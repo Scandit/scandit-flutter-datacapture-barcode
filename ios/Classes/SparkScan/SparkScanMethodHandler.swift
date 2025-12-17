@@ -6,9 +6,28 @@
 
 import Flutter
 import ScanditCaptureCore
-import scandit_flutter_datacapture_core
 import ScanditFrameworksBarcode
 import ScanditFrameworksCore
+import scandit_flutter_datacapture_core
+
+// Helper extension to safely extract parameters from method call arguments
+private extension FlutterMethodCall {
+    func params() -> [String: Any]? {
+        arguments as? [String: Any]
+    }
+
+    func intValue(for key: String, from params: [String: Any]) -> Int? {
+        params[key] as? Int
+    }
+
+    func stringValue(for key: String, from params: [String: Any]) -> String? {
+        params[key] as? String
+    }
+
+    func boolValue(for key: String, from params: [String: Any], default defaultValue: Bool = false) -> Bool {
+        params[key] as? Bool ?? defaultValue
+    }
+}
 
 class SparkScanMethodHandler {
     private enum FunctionNames {
@@ -25,6 +44,7 @@ class SparkScanMethodHandler {
         static let removeSparkScanViewUiListener = "removeSparkScanViewUiListener"
         static let sparkScanViewStartScanning = "sparkScanViewStartScanning"
         static let sparkScanViewPauseScanning = "sparkScanViewPauseScanning"
+        static let sparkScanViewStopScanning = "sparkScanViewStopScanning"
         static let showToast = "showToast"
         static let onWidgetPaused = "onWidgetPaused"
         static let setModeEnabledState = "setModeEnabledState"
@@ -33,6 +53,8 @@ class SparkScanMethodHandler {
         static let submitFeedbackForBarcode = "submitFeedbackForBarcode"
         static let bringSparkScanViewToFront = "bringViewToFront"
         static let updateSparkScanView = "sparkScanViewUpdate"
+        static let showSparkScanView = "showSparkScanView"
+        static let hideSparkScanView = "hideSparkScanView"
     }
 
     private let sparkScanModule: SparkScanModule
@@ -44,98 +66,223 @@ class SparkScanMethodHandler {
     public func methodCallHandler(methodCall: FlutterMethodCall, result: @escaping FlutterResult) {
         switch methodCall.method {
         case FunctionNames.getSparkScanDefaults:
-            let jsonString = sparkScanModule.defaults.stringValue
-            result(jsonString)
+            dispatchMain {
+                let jsonString = self.sparkScanModule.defaults.stringValue
+                result(jsonString)
+            }
         case FunctionNames.finishDidScan:
-            let params = methodCall.arguments as! [String: Any]
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
             sparkScanModule.finishDidScan(
-                viewId: params["viewId"] as! Int,
-                enabled: params["enabled"] as? Bool ?? false
+                viewId: viewId,
+                enabled: methodCall.boolValue(for: "enabled", from: params, default: false)
             )
             result(nil)
         case FunctionNames.finishDidUpdateSession:
-            let params = methodCall.arguments as! [String: Any]
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
             sparkScanModule.finishDidUpdateSession(
-                viewId: params["viewId"] as! Int,
-                enabled: params["enabled"] as? Bool ?? false
+                viewId: viewId,
+                enabled: methodCall.boolValue(for: "enabled", from: params, default: false)
             )
             result(nil)
         case FunctionNames.addSparkScanListener:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.addAsyncSparkScanListener(viewId: params["viewId"] as! Int)
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.addSparkScanListener(viewId: viewId)
             result(nil)
         case FunctionNames.removeSparkScanListener:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.removeAsyncSparkScanListener(viewId: params["viewId"] as! Int)
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.removeSparkScanListener(viewId: viewId)
             result(nil)
         case FunctionNames.resetSparkScanSession:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.resetSession(viewId: params["viewId"] as! Int)
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.resetSession(viewId: viewId)
             result(nil)
         case FunctionNames.getLastFrameData:
+            guard let frameId = methodCall.arguments as? String else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required frameId", details: nil))
+                return
+            }
             sparkScanModule.getLastFrameDataBytes(
-                frameId: methodCall.arguments as! String,
+                frameId: frameId,
                 result: FlutterFrameworkResult(reply: result)
             )
         case FunctionNames.updateSparkScanMode:
-            let params = methodCall.arguments as! [String: Any]
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params),
+                let modeJson = methodCall.stringValue(for: "updateJson", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
             sparkScanModule.updateMode(
-                viewId: params["viewId"] as! Int,
-                modeJson: params["updateJson"] as! String,
+                viewId: viewId,
+                modeJson: modeJson,
                 result: FlutterFrameworkResult(reply: result)
             )
         case FunctionNames.addSparkScanViewUiListener:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.addSparkScanViewUiListener(viewId: params["viewId"] as! Int)
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.addSparkScanViewUiListener(viewId: viewId)
             result(nil)
         case FunctionNames.removeSparkScanViewUiListener:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.removeSparkScanViewUiListener(viewId: params["viewId"] as! Int)
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.removeSparkScanViewUiListener(viewId: viewId)
             result(nil)
         case FunctionNames.sparkScanViewStartScanning:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.startScanning(viewId: params["viewId"] as! Int, result: FlutterFrameworkResult(reply: result))
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.startScanning(
+                viewId: viewId,
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.sparkScanViewPauseScanning:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.pauseScanning(viewId: params["viewId"] as! Int)
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.pauseScanning(viewId: viewId)
+            result(nil)
+        case FunctionNames.sparkScanViewStopScanning:
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.stopScanning(viewId: viewId)
             result(nil)
         case FunctionNames.showToast:
-            let params = methodCall.arguments as! [String: Any]
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params),
+                let text = methodCall.stringValue(for: "text", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
             sparkScanModule.showToast(
-                viewId: params["viewId"] as! Int,
-                text: params["text"] as! String,
+                viewId: viewId,
+                text: text,
                 result: FlutterFrameworkResult(reply: result)
             )
         case FunctionNames.setModeEnabledState:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.setModeEnabled(viewId: params["viewId"] as! Int, enabled: params["enabled"] as! Bool)
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params),
+                let enabled = params["enabled"] as? Bool
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.setModeEnabled(viewId: viewId, enabled: enabled)
             result(nil)
         case FunctionNames.registerSparkScanFeedbackDelegateForEvents:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.addFeedbackDelegate(params["viewId"] as! Int)
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.addFeedbackDelegate(viewId)
             result(nil)
         case FunctionNames.unregisterSparkScanFeedbackDelegateForEvents:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.removeFeedbackDelegate(params["viewId"] as! Int)
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.removeFeedbackDelegate(viewId)
             result(nil)
         case FunctionNames.submitFeedbackForBarcode:
-            let params = methodCall.arguments as! [String: Any]
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
             sparkScanModule.submitFeedbackForBarcode(
-                viewId: params["viewId"] as! Int,
-                feedbackJson: params["feedbackJson"] as? String,
+                viewId: viewId,
+                feedbackJson: methodCall.stringValue(for: "feedbackJson", from: params),
                 result: FlutterFrameworkResult(reply: result)
             )
         case FunctionNames.bringSparkScanViewToFront:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.bringSparkScanViewToFront(viewId: params["viewId"] as! Int)
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.bringSparkScanViewToFront(viewId: viewId)
             result(nil)
         case FunctionNames.updateSparkScanView:
-            let params = methodCall.arguments as! [String: Any]
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params),
+                let viewJson = methodCall.stringValue(for: "updateJson", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
             sparkScanModule.updateView(
-                viewId: params["viewId"] as! Int,
-                viewJson: params["updateJson"] as! String,
+                viewId: viewId,
+                viewJson: viewJson,
                 result: FlutterFrameworkResult(reply: result)
             )
+        case FunctionNames.showSparkScanView:
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.showView(viewId)
+            result(nil)
+        case FunctionNames.hideSparkScanView:
+            guard let params = methodCall.params(),
+                let viewId = methodCall.intValue(for: "viewId", from: params)
+            else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing required parameters", details: nil))
+                return
+            }
+            sparkScanModule.hideView(viewId)
+            result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }
