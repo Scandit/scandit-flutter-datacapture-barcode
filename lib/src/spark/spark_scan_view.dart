@@ -64,6 +64,9 @@ class SparkScan extends DataCaptureMode {
   }
 
   void addListener(SparkScanListener listener) {
+    if (_listeners.isEmpty) {
+      _controller?.subscribeSparkScanListener();
+    }
     if (_listeners.contains(listener)) {
       return;
     }
@@ -72,6 +75,9 @@ class SparkScan extends DataCaptureMode {
 
   void removeListener(SparkScanListener listener) {
     _listeners.remove(listener);
+    if (_listeners.isEmpty) {
+      _controller?.unsubscribeSparkScanListener();
+    }
   }
 
   Future<void> _didChange() {
@@ -84,7 +90,7 @@ class SparkScan extends DataCaptureMode {
       'type': 'sparkScan',
       'enabled': _enabled,
       'settings': _settings.toMap(),
-      'hasListeners': _listeners.isNotEmpty || _settings.itemDefinitions?.isNotEmpty == true,
+      'hasListeners': _listeners.isNotEmpty,
     };
   }
 }
@@ -567,7 +573,9 @@ class _SparkScanViewController extends BaseController {
   }
 
   void _initialize() {
-    subscribeSparkScanListener();
+    if (view._sparkScan._listeners.isNotEmpty) {
+      subscribeSparkScanListener();
+    }
 
     if (view._feedbackDelegate != null) {
       subscribeToFeedbackDelegateEvents();
@@ -678,6 +686,8 @@ class _SparkScanViewController extends BaseController {
   void _setupModeListenerSubscription() {
     if (_sparkScanListenerSubscription != null) return;
     _sparkScanListenerSubscription = BarcodePluginEvents.sparkScanEventStream.listen((event) async {
+      if (view._sparkScan._listeners.isEmpty) return;
+
       var json = jsonDecode(event);
       final viewId = json['viewId'] as int;
       if (viewId != _viewId) return;
@@ -687,45 +697,21 @@ class _SparkScanViewController extends BaseController {
       if (eventName == 'SparkScanListener.didScan') {
         var session = SparkScanSession.fromJSON(json, _viewId);
         await _notifyListenersOfDidScan(session);
-
-        try {
-          if (session.newlyRecognizedItems.isNotEmpty) {
-            for (final definition in view._sparkScan._settings.itemDefinitions ?? []) {
-              final onScan = definition.onScan;
-              if (onScan == null) {
-                continue;
-              }
-
-              final recognizedItems = session.newlyRecognizedItems
-                  .where((item) => item.definitionIdentifier != null)
-                  .map((item) => MapEntry(item, item.definitionIdentifier!.toMap()['identifier']))
-                  .where((entry) => entry.value == definition.identifier.toMap()['identifier'])
-                  .map((entry) => entry.key)
-                  .toList();
-
-              if (recognizedItems.isNotEmpty) {
-                for (final recognizedItem in recognizedItems) {
-                  onScan(recognizedItem);
-                }
-              }
-            }
-          }
-        } catch (error) {
-          log(error.toString());
-        }
-
         methodChannel.invokeMethod(SparkScanFunctionNames.sparkScanFinishDidScan, {
           'viewId': _viewId,
           'enabled': view._sparkScan.isEnabled,
-        }).then((value) => null, onError: (error) => log(error));
+        })
+            // ignore: unnecessary_lambdas
+            .then((value) => null, onError: (error) => log(error));
       } else if (eventName == 'SparkScanListener.didUpdateSession') {
         var session = SparkScanSession.fromJSON(json, _viewId);
         await _notifyListenersOfDidUpateSession(session);
-
         methodChannel.invokeMethod(SparkScanFunctionNames.sparkScanFinishDidUpdateSession, {
           'viewId': _viewId,
           'enabled': view._sparkScan.isEnabled,
-        }).then((value) => null, onError: (error) => log(error));
+        })
+            // ignore: unnecessary_lambdas
+            .then((value) => null, onError: (error) => log(error));
       }
     });
   }
@@ -747,9 +733,9 @@ class _SparkScanViewController extends BaseController {
   }
 
   Future<FrameData> _getLastFrameData(SparkScanSession session) {
-    return methodChannel.invokeMethod(SparkScanFunctionNames.getLastFrameData, {
-      'frameId': session.frameId,
-    }).then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: onError);
+    return methodChannel
+        .invokeMethod(SparkScanFunctionNames.getLastFrameData, session.frameId)
+        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: onError);
   }
 
   void unsubscribeSparkScanListener() {

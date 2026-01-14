@@ -173,8 +173,9 @@ class _BarcodeCaptureListenerController extends BaseController {
   }
 
   Future<void> updateMode() {
-    return methodChannel.invokeMethod(BarcodeCaptureFunctionNames.updateBarcodeCaptureMode,
-        {'modeJson': jsonEncode(_barcodeCapture.toMap())}).then((value) => null, onError: onError);
+    return methodChannel
+        .invokeMethod(BarcodeCaptureFunctionNames.updateBarcodeCaptureMode, jsonEncode(_barcodeCapture.toMap()))
+        .then((value) => null, onError: onError);
   }
 
   Future<void> applyNewSettings(BarcodeCaptureSettings settings) {
@@ -205,9 +206,9 @@ class _BarcodeCaptureListenerController extends BaseController {
   }
 
   Future<FrameData> _getLastFrameData(BarcodeCaptureSession session) {
-    return methodChannel.invokeMethod(BarcodeCaptureFunctionNames.getLastFrameData, {'frameId': session.frameId}).then(
-        (value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)),
-        onError: onError);
+    return methodChannel
+        .invokeMethod(BarcodeCaptureFunctionNames.getLastFrameData, session.frameId)
+        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: onError);
   }
 
   Future<void> _notifyListenersOfDidScan(BarcodeCaptureSession session) async {

@@ -717,6 +717,9 @@ class BarcodeCount extends DataCaptureMode {
   final List<BarcodeCountListener> _listeners = [];
   _BarcodeCountViewController? _controller;
 
+  // Pending capture list to be set when controller is ready
+  BarcodeCountCaptureList? _pendingCaptureList;
+
   @override
   // ignore: unnecessary_overrides
   DataCaptureContext? get context => super.context;
@@ -801,7 +804,12 @@ class BarcodeCount extends DataCaptureMode {
   }
 
   Future<void> setBarcodeCountCaptureList(BarcodeCountCaptureList list) {
-    return _controller?.setBarcodeCountCaptureList(list) ?? Future.value();
+    final controller = _controller;
+    if (controller != null) {
+      return controller.setBarcodeCountCaptureList(list);
+    }
+    _pendingCaptureList = list;
+    return Future.value();
   }
 
   List<Barcode> _additionalBarcodes = [];
@@ -1128,6 +1136,14 @@ class _BarcodeCountViewState extends State<BarcodeCountView> implements CameraOw
     }
   }
 
+  void _applyPendingCaptureList() {
+    final pendingList = widget._barcodeCount._pendingCaptureList;
+    if (pendingList != null) {
+      widget._barcodeCount._pendingCaptureList = null;
+      _controller?.setBarcodeCountCaptureList(pendingList);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     const viewType = 'com.scandit.BarcodeCountView';
@@ -1158,6 +1174,7 @@ class _BarcodeCountViewState extends State<BarcodeCountView> implements CameraOw
               _controller = _BarcodeCountViewController(widget);
               widget._controller = _controller;
               widget._barcodeCount._controller = _controller;
+              _applyPendingCaptureList();
             })
             ..create();
           return view;
@@ -1172,6 +1189,7 @@ class _BarcodeCountViewState extends State<BarcodeCountView> implements CameraOw
           _controller = _BarcodeCountViewController(widget);
           widget._controller = _controller;
           widget._barcodeCount._controller = _controller;
+          _applyPendingCaptureList();
         },
       );
     }

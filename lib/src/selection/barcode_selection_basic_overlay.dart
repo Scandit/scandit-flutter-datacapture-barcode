@@ -216,7 +216,7 @@ class _BarcodeSelectionBasicOverlayController extends BaseController {
   Future<void> update() {
     return methodChannel.invokeMethod(
       BarcodeSelectionFunctionNames.updateBarcodeSelectionBasicOverlay,
-      {'overlayJson': jsonEncode(_overlay.toMap())},
+      jsonEncode(_overlay.toMap()),
     );
   }
 }

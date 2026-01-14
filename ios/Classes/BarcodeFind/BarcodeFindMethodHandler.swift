@@ -5,9 +5,9 @@
  */
 
 import Flutter
+import scandit_flutter_datacapture_core
 import ScanditFrameworksBarcode
 import ScanditFrameworksCore
-import scandit_flutter_datacapture_core
 
 class BarcodeFindMethodHandler {
     private enum FunctionNames {

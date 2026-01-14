@@ -46,8 +46,6 @@ class SparkScanViewSettings extends Serializable {
   SparkScanMiniPreviewSize defaultMiniPreviewSize =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.defaultMiniPreviewSize;
 
-  Brush? smartSelectionCandidateBrush;
-
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -66,7 +64,6 @@ class SparkScanViewSettings extends Serializable {
       'shouldShowOnTopAlways': shouldShowOnTopAlways,
       'defaultCameraPosition': defaultCameraPosition.toString(),
       'defaultMiniPreviewSize': defaultMiniPreviewSize.toString(),
-      'smartSelectionCandidateBrush': smartSelectionCandidateBrush?.toMap(),
     };
   }
 }

@@ -6,7 +6,6 @@
 
 import Flutter
 import ScanditFrameworksBarcode
-import ScanditFrameworksCore
 import scandit_flutter_datacapture_core
 
 class BarcodeGeneratorHandler {
@@ -17,12 +16,34 @@ class BarcodeGeneratorHandler {
     }
 
     func methodCallHandler(methodCall: FlutterMethodCall, result: @escaping FlutterResult) {
-        let executionResult = barcodeGeneratorModule.execute(
-            method: FlutterFrameworksMethodCall(methodCall),
-            result: FlutterFrameworkResult(reply: result)
-        )
-
-        if !executionResult {
+        switch methodCall.method {
+        case "createGenerator":
+            barcodeGeneratorModule.createGenerator(
+                generatorJson: methodCall.arguments as! String,
+                result: FlutterFrameworkResult(reply: result)
+            )
+        case "generateToBytes":
+            let args = methodCall.arguments as! [String: Any]
+            barcodeGeneratorModule.generateToBytes(
+                generatorId: args["generatorId"] as! String,
+                text: args["text"] as! String,
+                imageWidth: args["imageWidth"] as! Int,
+                result: FlutterFrameworkResult(reply: result)
+            )
+        case "generateFromBytesToBytes":
+            let args = methodCall.arguments as! [String: Any]
+            barcodeGeneratorModule.generateFromBytesToBytes(
+                generatorId: args["generatorId"] as! String,
+                data: (args["data"] as! FlutterStandardTypedData).data,
+                imageWidth: args["imageWidth"] as! Int,
+                result: FlutterFrameworkResult(reply: result)
+            )
+        case "disposeGenerator":
+            barcodeGeneratorModule.disposeGenerator(
+                generatorId: methodCall.arguments as! String,
+                result: FlutterFrameworkResult(reply: result)
+            )
+        default:
             result(FlutterMethodNotImplemented)
         }
     }

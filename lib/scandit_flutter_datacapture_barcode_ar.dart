@@ -17,7 +17,6 @@ export 'src/ar/barcode_ar_highlight.dart'
         BarcodeArHighlight,
         BarcodeArCircleHighlight,
         BarcodeArRectangleHighlight,
-        BarcodeArCustomHighlight,
         BarcodeArCircleHighlightPreset,
         BarcodeArCircleHighlightPresetSerializer;
 export 'src/ar/barcode_ar_annotation.dart'
@@ -28,8 +27,7 @@ export 'src/ar/barcode_ar_annotation.dart'
         BarcodeArPopoverAnnotation,
         BarcodeArPopoverAnnotationButton,
         BarcodeArPopoverAnnotationListener,
-        BarcodeArStatusIconAnnotation,
-        BarcodeArCustomAnnotation;
+        BarcodeArStatusIconAnnotation;
 export 'src/ar/barcode_ar_annotation_trigger.dart'
     show BarcodeArAnnotationTrigger, BarcodeArAnnotationTriggerSerializer;
 export 'src/ar/barcode_ar_info_annotation_width_preset.dart'

@@ -239,9 +239,9 @@ class _BarcodeSelectionListenerController extends BaseController {
   Future<FrameData?> _getLastFrameData(BarcodeSelectionSession session) {
     if (session.frameId == null) return Future.value(null);
 
-    return methodChannel.invokeMethod(BarcodeSelectionFunctionNames.getLastFrameData, {
-      'frameId': session.frameId,
-    }).then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: onError);
+    return methodChannel
+        .invokeMethod(BarcodeSelectionFunctionNames.getLastFrameData, session.frameId)
+        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: onError);
   }
 
   void setModeEnabledState(bool newValue) {

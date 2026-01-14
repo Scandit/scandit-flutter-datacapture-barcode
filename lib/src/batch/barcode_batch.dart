@@ -140,8 +140,9 @@ class _BarcodeBatchListenerController extends BaseController {
   }
 
   Future<void> updateMode() {
-    return methodChannel.invokeMethod(BarcodeBatchFunctionNames.updateBarcodeBatchMode,
-        {'modeJson': jsonEncode(mode.toMap())}).then((value) => null, onError: onError);
+    return methodChannel
+        .invokeMethod(BarcodeBatchFunctionNames.updateBarcodeBatchMode, jsonEncode(mode.toMap()))
+        .then((value) => null, onError: onError);
   }
 
   Future<void> applyNewSettings(BarcodeBatchSettings settings) {
@@ -165,9 +166,9 @@ class _BarcodeBatchListenerController extends BaseController {
   }
 
   Future<FrameData> _getLastFrameData(BarcodeBatchSession session) {
-    return methodChannel.invokeMethod(BarcodeBatchFunctionNames.getLastFrameData, {'frameId': session.frameId}).then(
-        (value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)),
-        onError: onError);
+    return methodChannel
+        .invokeMethod(BarcodeBatchFunctionNames.getLastFrameData, session.frameId)
+        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: onError);
   }
 
   void setModeEnabledState(bool newValue) {
