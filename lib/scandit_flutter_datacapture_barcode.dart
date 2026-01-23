@@ -4,7 +4,6 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
-// ignore: unnecessary_library_name
 library scandit_flutter_datacapture_barcode;
 
 export 'src/scandit_flutter_datacapture_barcode.dart' show ScanditFlutterDataCaptureBarcode;

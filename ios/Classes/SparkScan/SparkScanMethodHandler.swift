@@ -47,10 +47,8 @@ class SparkScanMethodHandler {
     public func methodCallHandler(methodCall: FlutterMethodCall, result: @escaping FlutterResult) {
         switch methodCall.method {
         case FunctionNames.getSparkScanDefaults:
-            dispatchMain {
-                let jsonString = self.sparkScanModule.defaults.stringValue
-                result(jsonString)
-            }
+            let jsonString = sparkScanModule.defaults.stringValue
+            result(jsonString)
         case FunctionNames.finishDidScan:
             let params = methodCall.arguments as! [String: Any]
             sparkScanModule.finishDidScan(

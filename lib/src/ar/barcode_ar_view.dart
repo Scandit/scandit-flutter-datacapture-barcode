@@ -18,7 +18,6 @@ import 'package:scandit_flutter_datacapture_barcode/src/ar/barcode_ar_feedback.d
 import 'package:scandit_flutter_datacapture_barcode/src/ar/barcode_ar_session.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/ar/barcode_ar_settings.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
-import 'package:scandit_flutter_datacapture_core/experimental.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
@@ -56,6 +55,9 @@ class BarcodeAr extends Serializable {
 
   BarcodeAr(BarcodeArSettings settings) : this._(settings);
 
+  @Deprecated('Use constructor BarcodeAr(BarcodeArSettings settings) instead.')
+  BarcodeAr.forContext(DataCaptureContext context, BarcodeArSettings settings) : this._(settings);
+
   static CameraSettings createRecommendedCameraSettings() {
     return CameraSettings(
       BarcodeArDefaults.recommendedCameraSettings.preferredResolution,
@@ -67,6 +69,9 @@ class BarcodeAr extends Serializable {
       shouldPreferSmoothAutoFocus: BarcodeArDefaults.recommendedCameraSettings.shouldPreferSmoothAutoFocus,
     );
   }
+
+  @Deprecated('Use createRecommendedCameraSettings() instead.')
+  static CameraSettings get recommendedCameraSettings => createRecommendedCameraSettings();
 
   BarcodeArFeedback _feedback = BarcodeArFeedback();
 
@@ -131,19 +136,12 @@ class BarcodeArView extends StatefulWidget implements Serializable {
   }
 
   factory BarcodeArView.forModeWithViewSettings(
-    DataCaptureContext dataCaptureContext,
-    BarcodeAr barcodeAr,
-    BarcodeArViewSettings viewSettings,
-  ) {
+      DataCaptureContext dataCaptureContext, BarcodeAr barcodeAr, BarcodeArViewSettings viewSettings) {
     return BarcodeArView._(dataCaptureContext, barcodeAr, viewSettings, null);
   }
 
-  factory BarcodeArView.forModeWithViewSettingsAndCameraSettings(
-    DataCaptureContext dataCaptureContext,
-    BarcodeAr barcodeAr,
-    BarcodeArViewSettings viewSettings,
-    CameraSettings cameraSettings,
-  ) {
+  factory BarcodeArView.forModeWithViewSettingsAndCameraSettings(DataCaptureContext dataCaptureContext,
+      BarcodeAr barcodeAr, BarcodeArViewSettings viewSettings, CameraSettings cameraSettings) {
     return BarcodeArView._(dataCaptureContext, barcodeAr, viewSettings, cameraSettings);
   }
 
@@ -298,9 +296,9 @@ class BarcodeArView extends StatefulWidget implements Serializable {
         'isStarted': _isStarted,
         'viewId': _viewId,
         'viewSettings': _barcodeArViewSettings?.toMap(),
-        'cameraSettings': _cameraSettings?.toMap(),
+        'cameraSettings': _cameraSettings?.toMap()
       },
-      'BarcodeAr': _barcodeAr.toMap(),
+      'BarcodeAr': _barcodeAr.toMap()
     };
   }
 }
@@ -349,10 +347,8 @@ class _BarcodeArViewController extends BaseController implements BarcodeArViewCo
 
           var result = {"barcodeId": barcodeId, "highlight": highlight?.toMap()};
 
-          methodChannel.invokeMethod(BarcodeArFunctionNames.finishHighlightForBarcode, {
-            'viewId': _view._viewId,
-            'result': jsonEncode(result),
-          }).onError(onError);
+          methodChannel.invokeMethod(BarcodeArFunctionNames.finishHighlightForBarcode,
+              {'viewId': _view._viewId, 'result': jsonEncode(result)}).onError(onError);
           break;
         case BarcodeArFunctionNames.annotationForBarcodeEvent:
           final barcodeId = json['barcodeId'] as String;
@@ -368,10 +364,8 @@ class _BarcodeArViewController extends BaseController implements BarcodeArViewCo
 
           var result = {"barcodeId": barcodeId, "annotation": annotation?.toMap()};
 
-          methodChannel.invokeMethod(BarcodeArFunctionNames.finishAnnotationForBarcode, {
-            'viewId': _view._viewId,
-            'result': jsonEncode(result),
-          }).onError(onError);
+          methodChannel.invokeMethod(BarcodeArFunctionNames.finishAnnotationForBarcode,
+              {'viewId': _view._viewId, 'result': jsonEncode(result)}).onError(onError);
           break;
 
         case BarcodeArFunctionNames.didTapPopoverEvent:
@@ -451,10 +445,8 @@ class _BarcodeArViewController extends BaseController implements BarcodeArViewCo
 
   Future<void> updateView() {
     final viewJson = jsonEncode(_view.toMap()['View']);
-    return methodChannel.invokeMethod(BarcodeArFunctionNames.updateView, {
-      'viewId': _view._viewId,
-      'viewJson': viewJson,
-    });
+    return methodChannel
+        .invokeMethod(BarcodeArFunctionNames.updateView, {'viewId': _view._viewId, 'viewJson': viewJson});
   }
 
   void setUiListener(BarcodeArViewUiListener? listener) {
@@ -513,28 +505,25 @@ class _BarcodeArViewController extends BaseController implements BarcodeArViewCo
 
   @override
   Future<void> updateAnnotation(BarcodeArAnnotation annotation) {
-    return methodChannel.invokeMethod(BarcodeArFunctionNames.updateAnnotation, {
-      'viewId': _view._viewId,
-      'annotationJson': jsonEncode(annotation.toMap()),
-    });
+    return methodChannel.invokeMethod(BarcodeArFunctionNames.updateAnnotation,
+        {'viewId': _view._viewId, 'annotationJson': jsonEncode(annotation.toMap())});
   }
 
   @override
   Future<void> updateHighlight(BarcodeArHighlight highlight) {
-    return methodChannel.invokeMethod(BarcodeArFunctionNames.updateHighlight, {
-      'viewId': _view._viewId,
-      'highlightJson': jsonEncode(highlight.toMap()),
-    });
+    return methodChannel.invokeMethod(BarcodeArFunctionNames.updateHighlight,
+        {'viewId': _view._viewId, 'highlightJson': jsonEncode(highlight.toMap())});
   }
 
   @override
   Future<void> updateBarcodeArPopoverButtonAtIndex(BarcodeArPopoverAnnotation annotation, int index) {
     var button = annotation.buttons[index].toMap();
-    var updateRequest = {'button': button, 'barcodeId': annotation.barcodeId};
-    return methodChannel.invokeMethod(BarcodeArFunctionNames.updateBarcodeArPopoverButtonAtIndex, {
-      'viewId': _view._viewId,
-      'updateJson': jsonEncode(updateRequest),
-    });
+    var updateRequest = {
+      'button': button,
+      'barcodeId': annotation.barcodeId,
+    };
+    return methodChannel.invokeMethod(BarcodeArFunctionNames.updateBarcodeArPopoverButtonAtIndex,
+        {'viewId': _view._viewId, 'updateJson': jsonEncode(updateRequest)});
   }
 
   // Mode
@@ -542,17 +531,13 @@ class _BarcodeArViewController extends BaseController implements BarcodeArViewCo
   StreamSubscription<dynamic>? _barcodeArSubscription;
 
   Future<void> applyNewSettings(BarcodeArSettings settings) {
-    return methodChannel.invokeMethod(BarcodeArFunctionNames.applyBarcodeArModeSettings, {
-      'viewId': _view._viewId,
-      'settings': jsonEncode(settings.toMap()),
-    });
+    return methodChannel.invokeMethod(BarcodeArFunctionNames.applyBarcodeArModeSettings,
+        {'viewId': _view._viewId, 'settings': jsonEncode(settings.toMap())});
   }
 
   Future<void> updateFeedback(BarcodeArFeedback newValue) {
-    return methodChannel.invokeMethod(BarcodeArFunctionNames.updateFeedback, {
-      'viewId': _view._viewId,
-      'feedback': jsonEncode(newValue.toMap()),
-    });
+    return methodChannel.invokeMethod(
+        BarcodeArFunctionNames.updateFeedback, {'viewId': _view._viewId, 'feedback': jsonEncode(newValue.toMap())});
   }
 
   void subscribeModeListeners() {
@@ -610,12 +595,8 @@ class _BarcodeArViewController extends BaseController implements BarcodeArViewCo
   }
 }
 
-class _BarcodeArViewState extends State<BarcodeArView> implements CameraOwner {
+class _BarcodeArViewState extends State<BarcodeArView> {
   final int _viewId = Random().nextInt(0x7FFFFFFF);
-  bool _isRouteActive = true;
-
-  @override
-  String get id => 'barcode-ar-view-$_viewId';
 
   _BarcodeArViewState();
 
@@ -623,26 +604,6 @@ class _BarcodeArViewState extends State<BarcodeArView> implements CameraOwner {
   void initState() {
     super.initState();
     widget._viewId = _viewId;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _checkRouteStatus();
-  }
-
-  void _checkRouteStatus() {
-    final route = ModalRoute.of(context);
-    final wasActive = _isRouteActive;
-    _isRouteActive = route?.isCurrent == true;
-
-    if (wasActive != _isRouteActive) {
-      if (_isRouteActive) {
-        CameraOwnershipHelper.requestOwnership(CameraPosition.worldFacing, this);
-      } else {
-        CameraOwnershipHelper.releaseOwnership(CameraPosition.worldFacing, this);
-      }
-    }
   }
 
   @override

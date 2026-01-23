@@ -128,7 +128,7 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
         )
         let brushProviderQueue = DispatchQueue(label: "com.scandit.datacapture.flutter.brushprovider")
         let barcodeSelectionModule = BarcodeSelectionModule(
-            emitter: barcodeSelectionEmitter,
+            barcodeSelectionListener: FrameworksBarcodeSelectionListener(emitter: barcodeSelectionEmitter),
             aimedBrushProvider: FrameworksBarcodeSelectionAimedBrushProvider(emitter: barcodeSelectionEmitter,
                                                                              queue: brushProviderQueue),
             trackedBrushProvider: FrameworksBarcodeSelectionTrackedBrushProvider(emitter: barcodeSelectionEmitter,

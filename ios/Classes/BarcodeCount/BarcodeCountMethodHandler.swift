@@ -63,11 +63,11 @@ class BarcodeCountMethodHandler {
             barcodeCountModule.clearHighlights(viewId:  extractViewId(methodCall))
             result(nil)
         case FunctionNames.finishBrushForRecognizedBarcode:
-
+            
             let viewId =  extractViewId(methodCall)
             let brush: Brush? = extractArgumentOrDefault(methodCall, key: "brush", defaultValue: nil).flatMap { Brush(jsonString: $0) }
             let trackedBarcodeId: Int =  extractArgument(methodCall, key: "trackedBarcodeId")
-
+            
             barcodeCountModule.finishBrushForRecognizedBarcodeEvent(viewId: viewId,
                                                                     brush: brush,
                                                                     trackedBarcodeId: trackedBarcodeId,
@@ -76,7 +76,7 @@ class BarcodeCountMethodHandler {
             let viewId =  extractViewId(methodCall)
             let brush: Brush? = extractArgumentOrDefault(methodCall, key: "brush", defaultValue: nil).flatMap { Brush(jsonString: $0) }
             let trackedBarcodeId: Int =  extractArgument(methodCall, key: "trackedBarcodeId")
-
+            
             barcodeCountModule.finishBrushForRecognizedBarcodeNotInListEvent(viewId: viewId,
                                                                              brush: brush,
                                                                              trackedBarcodeId: trackedBarcodeId,
@@ -146,7 +146,7 @@ class BarcodeCountMethodHandler {
             result(FlutterMethodNotImplemented)
         }
     }
-
+    
     func extractArgument<T>(_ methodCall: FlutterMethodCall, key: String, as type: T.Type = T.self) -> T {
         guard let args = methodCall.arguments as? [String: Any] else {
             fatalError("FlutterMethodCall arguments are not a [String: Any] dictionary.")
@@ -156,7 +156,7 @@ class BarcodeCountMethodHandler {
         }
         return value
     }
-
+    
     func extractArgumentOrDefault<T>(_ methodCall: FlutterMethodCall, key: String, defaultValue: T?, as type: T.Type = T.self) -> T? {
         guard let args = methodCall.arguments as? [String: Any] else {
             return defaultValue
@@ -166,7 +166,7 @@ class BarcodeCountMethodHandler {
         }
         return value
     }
-
+    
     func extractViewId(_ methodCall: FlutterMethodCall) -> Int {
         return extractArgument(methodCall, key: "viewId")
     }

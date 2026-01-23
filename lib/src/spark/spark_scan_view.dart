@@ -20,7 +20,6 @@ import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_listene
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_session.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_settings.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_view_ui_listener.dart';
-import 'package:scandit_flutter_datacapture_core/experimental.dart';
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
@@ -45,6 +44,9 @@ class SparkScan extends DataCaptureMode {
   SparkScan._(this._settings);
 
   SparkScan({SparkScanSettings? settings}) : this._(settings ?? SparkScanSettings());
+
+  @Deprecated('Use constructor SparkScan({SparkScanSettings? settings}) instead.')
+  SparkScan.withSettings(SparkScanSettings settings) : this._(settings);
 
   @override
   bool get isEnabled => _enabled;
@@ -90,7 +92,7 @@ class SparkScan extends DataCaptureMode {
       'type': 'sparkScan',
       'enabled': _enabled,
       'settings': _settings.toMap(),
-      'hasListeners': _listeners.isNotEmpty,
+      'hasListeners': _listeners.isNotEmpty
     };
   }
 }
@@ -101,6 +103,8 @@ class SparkScanView extends StatefulWidget implements Serializable {
   final SparkScan _sparkScan;
   SparkScanViewSettings _settings;
   SparkScanViewUiListener? _uiListener;
+  // ignore: deprecated_member_use_from_same_package
+  ExtendedSparkScanViewUiListener? _extendedUiListener;
   SparkScanFeedbackDelegate? _feedbackDelegate;
 
   bool _viewWasCreated = false;
@@ -110,13 +114,9 @@ class SparkScanView extends StatefulWidget implements Serializable {
   SparkScanView._(this._child, this._sparkScan, this._settings) : super();
 
   SparkScanView.forContext(
-    Widget child,
-    DataCaptureContext dataCaptureContext,
-    SparkScan sparkScan,
-    SparkScanViewSettings? settings,
-  )
-  // we require the DCContext only to make sure the user created/initialized it
-  : this._(child, sparkScan, settings ?? SparkScanViewSettings());
+      Widget child, DataCaptureContext dataCaptureContext, SparkScan sparkScan, SparkScanViewSettings? settings)
+      // we require the DCContext only to make sure the user created/initialized it
+      : this._(child, sparkScan, settings ?? SparkScanViewSettings());
 
   @override
   State<StatefulWidget> createState() {
@@ -129,6 +129,16 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   static bool get hardwareTriggerSupported {
     return SparkScanDefaults.sparkScanViewDefaults.hardwareTriggerSupported;
+  }
+
+  @Deprecated('The torch button has been moved to the mini preview. Use property `torchControlVisible` instead.')
+  bool get torchButtonVisible {
+    return false;
+  }
+
+  @Deprecated('The torch button has been moved to the mini preview. Use property `torchControlVisible` instead.')
+  set torchButtonVisible(bool newValue) {
+    // Do nothing
   }
 
   bool _torchControlVisible = SparkScanDefaults.sparkScanViewDefaults.torchControlVisible;
@@ -162,6 +172,76 @@ class SparkScanView extends StatefulWidget implements Serializable {
   set scanningBehaviorButtonVisible(bool newValue) {
     _scanningBehaviorButtonVisible = newValue;
     _update();
+  }
+
+  @Deprecated('The trigger button no longer displays text.')
+  String? get stopCapturingText {
+    return null;
+  }
+
+  @Deprecated('The trigger button no longer displays text.')
+  set stopCapturingText(String? newValue) {
+    // Do nothing
+  }
+
+  @Deprecated('The trigger button no longer displays text.')
+  String? get startCapturingText {
+    return null;
+  }
+
+  @Deprecated('The trigger button no longer displays text.')
+  set startCapturingText(String? newValue) {
+    // Do nothing
+  }
+
+  @Deprecated('The trigger button no longer displays text.')
+  String? get resumeCapturingText {
+    return null;
+  }
+
+  @Deprecated('The trigger button no longer displays text.')
+  set resumeCapturingText(String? newValue) {
+    // Do nothing
+  }
+
+  @Deprecated('The trigger button no longer displays text.')
+  String? get scanningCapturingText {
+    return null;
+  }
+
+  @Deprecated('The trigger button no longer displays text.')
+  set scanningCapturingText(String? newValue) {
+    // Do nothing
+  }
+
+  @Deprecated('Use property `triggerButtonCollapsedColor` and property `triggerButtonExpandedColor` instead.')
+  Color? get captureButtonBackgroundColor {
+    return null;
+  }
+
+  @Deprecated('Use property `triggerButtonCollapsedColor` and property `triggerButtonExpandedColor` instead.')
+  set captureButtonBackgroundColor(Color? newValue) {
+    // Do nothing
+  }
+
+  @Deprecated('This property is not relevant anymore.')
+  Color? get captureButtonActiveBackgroundColor {
+    return null;
+  }
+
+  @Deprecated('This property is not relevant anymore.')
+  set captureButtonActiveBackgroundColor(Color? newValue) {
+    // Do nothing
+  }
+
+  @Deprecated('Use property `triggerButtonTintColor` instead.')
+  Color? get captureButtonTintColor {
+    return null;
+  }
+
+  @Deprecated('Use property `triggerButtonTintColor` instead.')
+  set captureButtonTintColor(Color? newValue) {
+    // Do nothing
   }
 
   Color? _toolbarBackgroundColor = SparkScanDefaults.sparkScanViewDefaults.toolbarBackgroundColor;
@@ -262,6 +342,17 @@ class SparkScanView extends StatefulWidget implements Serializable {
     _update();
   }
 
+  // ignore: deprecated_member_use_from_same_package
+  void setExtendedListener(ExtendedSparkScanViewUiListener? listener) {
+    if (listener != null) {
+      _controller?.subscribeUiListeners();
+    } else {
+      _controller?.unsubscribeUiListeners();
+    }
+    _extendedUiListener = listener;
+    _update();
+  }
+
   SparkScanFeedbackDelegate? get feedbackDelegate => _feedbackDelegate;
 
   set feedbackDelegate(SparkScanFeedbackDelegate? newValue) {
@@ -349,7 +440,13 @@ class SparkScanView extends StatefulWidget implements Serializable {
     _update();
   }
 
-  Future<void> startScanning() async {
+  @Deprecated(
+      'There is no longer a need to manually call the onPause function. This function will be removed in future SDK versions.')
+  Future<void> onPause() {
+    return Future.value(null);
+  }
+
+  Future<void> startScanning() {
     return _controller?.startScanning() ?? Future.value(null);
   }
 
@@ -427,6 +524,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
         'triggerButtonTintColor': triggerButtonTintColor?.jsonValue,
         'hasFeedbackDelegate': _feedbackDelegate != null,
         'hasUiListener': _uiListener != null,
+        'hasExtendedUiListener': _extendedUiListener != null,
         'viewId': _controller?._viewId ?? 0,
       },
       'SparkScan': _sparkScan.toMap(),
@@ -434,14 +532,11 @@ class SparkScanView extends StatefulWidget implements Serializable {
   }
 }
 
-class _SparkScanViewState extends State<SparkScanView> implements CameraOwner {
+class _SparkScanViewState extends State<SparkScanView> {
   late Widget platformView;
   final int _viewId = (DateTime.now().millisecondsSinceEpoch ~/ 1000).toInt();
   late _SparkScanViewController _controller;
   bool _isRouteActive = true;
-
-  @override
-  String get id => 'spark-scan-view-$_viewId';
 
   _SparkScanViewState();
 
@@ -476,9 +571,7 @@ class _SparkScanViewState extends State<SparkScanView> implements CameraOwner {
     if (wasActive != _isRouteActive) {
       if (_isRouteActive) {
         _controller.showView();
-        CameraOwnershipHelper.requestOwnership(CameraPosition.worldFacing, this);
       } else {
-        CameraOwnershipHelper.releaseOwnership(CameraPosition.worldFacing, this);
         _controller.hideView();
       }
     }
@@ -539,8 +632,16 @@ class _SparkScanViewState extends State<SparkScanView> implements CameraOwner {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Positioned(top: 0, left: 0, right: 0, bottom: 0, child: platformView),
-        Positioned.fill(child: widget._child),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: platformView,
+        ),
+        Positioned.fill(
+          child: widget._child,
+        ),
       ],
     );
   }
@@ -581,7 +682,7 @@ class _SparkScanViewController extends BaseController {
       subscribeToFeedbackDelegateEvents();
     }
 
-    if (view._uiListener != null) {
+    if (view._uiListener != null || view._extendedUiListener != null) {
       subscribeUiListeners();
     }
   }
@@ -597,14 +698,17 @@ class _SparkScanViewController extends BaseController {
 
       if (eventName == 'SparkScanViewUiListener.barcodeCountButtonTapped') {
         view._uiListener?.didTapBarcodeCountButton(view);
+        view._extendedUiListener?.didTapBarcodeCountButton(view);
       } else if (eventName == 'SparkScanViewUiListener.barcodeFindButtonTapped') {
         view._uiListener?.didTapBarcodeFindButton(view);
+        view._extendedUiListener?.didTapBarcodeFindButton(view);
       } else if (eventName == 'SparkScanViewUiListener.didChangeViewState') {
         final stateJson = json['state'] as String;
         final newState = SparkScanViewStateSerializer.fromJSON(stateJson);
         view._uiListener?.didChangeViewState(newState);
+        view._extendedUiListener?.didChangeViewState(newState);
       } else if (eventName == 'SparkScanViewUiListener.labelCaptureButtonTapped') {
-        view._uiListener?.didTapLabelCaptureButton(view);
+        view._extendedUiListener?.didTapLabelCaptureButton(view);
       }
     });
   }
@@ -621,7 +725,10 @@ class _SparkScanViewController extends BaseController {
   Future<void> updateView() {
     if (!view._viewWasCreated) return Future.value();
 
-    final updateArgs = {'viewId': _viewId, 'updateJson': jsonEncode(view.toMap())};
+    final updateArgs = {
+      'viewId': _viewId,
+      'updateJson': jsonEncode(view.toMap()),
+    };
     return methodChannel.invokeMethod(SparkScanFunctionNames.updateView, updateArgs).onError(onError);
   }
 
@@ -654,10 +761,8 @@ class _SparkScanViewController extends BaseController {
       if (feedback != null) {
         feedbackJson = jsonEncode(feedback.toMap());
       }
-      methodChannel.invokeMethod(SparkScanFunctionNames.submitFeedbackForBarcode, {
-        'viewId': _viewId,
-        'feedbackJson': feedbackJson,
-      }).onError(onError);
+      methodChannel.invokeMethod(SparkScanFunctionNames.submitFeedbackForBarcode,
+          {'viewId': _viewId, 'feedbackJson': feedbackJson}).onError(onError);
     });
   }
 
@@ -674,8 +779,10 @@ class _SparkScanViewController extends BaseController {
   }
 
   void setModeEnabledState(bool newValue) {
-    methodChannel.invokeMethod(SparkScanFunctionNames.setModeEnabledState,
-        {'viewId': _viewId, 'enabled': newValue}).then((value) => null, onError: onError);
+    methodChannel.invokeMethod(SparkScanFunctionNames.setModeEnabledState, {
+      'viewId': _viewId,
+      'enabled': newValue,
+    }).then((value) => null, onError: onError);
   }
 
   void subscribeSparkScanListener() {
@@ -697,19 +804,15 @@ class _SparkScanViewController extends BaseController {
       if (eventName == 'SparkScanListener.didScan') {
         var session = SparkScanSession.fromJSON(json, _viewId);
         await _notifyListenersOfDidScan(session);
-        methodChannel.invokeMethod(SparkScanFunctionNames.sparkScanFinishDidScan, {
-          'viewId': _viewId,
-          'enabled': view._sparkScan.isEnabled,
-        })
+        methodChannel.invokeMethod(SparkScanFunctionNames.sparkScanFinishDidScan,
+                {'viewId': _viewId, 'enabled': view._sparkScan.isEnabled})
             // ignore: unnecessary_lambdas
             .then((value) => null, onError: (error) => log(error));
       } else if (eventName == 'SparkScanListener.didUpdateSession') {
         var session = SparkScanSession.fromJSON(json, _viewId);
         await _notifyListenersOfDidUpateSession(session);
-        methodChannel.invokeMethod(SparkScanFunctionNames.sparkScanFinishDidUpdateSession, {
-          'viewId': _viewId,
-          'enabled': view._sparkScan.isEnabled,
-        })
+        methodChannel.invokeMethod(SparkScanFunctionNames.sparkScanFinishDidUpdateSession,
+                {'viewId': _viewId, 'enabled': view._sparkScan.isEnabled})
             // ignore: unnecessary_lambdas
             .then((value) => null, onError: (error) => log(error));
       }
@@ -746,10 +849,8 @@ class _SparkScanViewController extends BaseController {
   }
 
   Future<void> updateSparkScanMode() {
-    return methodChannel.invokeMethod(SparkScanFunctionNames.updateSparkScanMode, {
-      'viewId': _viewId,
-      'updateJson': jsonEncode(view._sparkScan.toMap()),
-    }).onError(onError);
+    return methodChannel.invokeMethod(SparkScanFunctionNames.updateSparkScanMode,
+        {'viewId': _viewId, 'updateJson': jsonEncode(view._sparkScan.toMap())}).onError(onError);
   }
 
   @override

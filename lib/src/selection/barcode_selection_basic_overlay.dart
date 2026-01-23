@@ -39,17 +39,33 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
 
   final BarcodeSelection _mode;
 
-  BarcodeSelectionBasicOverlay._(this._mode, this.style) : super('barcodeSelectionBasic') {
+  BarcodeSelectionBasicOverlay._(this._mode, this._view, this.style) : super('barcodeSelectionBasic') {
     var brushDefaultsForCurrentStyle = BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.brushes[style]!;
     _aimedBrush = brushDefaultsForCurrentStyle.aimedBrush;
     _selectedBrush = brushDefaultsForCurrentStyle.selectedBrush;
     _selectingBrush = brushDefaultsForCurrentStyle.selectingBrush;
     _trackedBrush = brushDefaultsForCurrentStyle.trackedBrush;
+
+    view?.addOverlay(this);
     viewfinder.addListener(_handleViewfinderChanged);
   }
 
   BarcodeSelectionBasicOverlay(BarcodeSelection mode, {BarcodeSelectionBasicOverlayStyle? style})
-      : this._(mode, style ?? BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.defaultStyle);
+      : this._(mode, null, style ?? BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.defaultStyle);
+
+  @Deprecated('Use BarcodeSelectionBasicOverlay({BarcodeSelectionBasicOverlayStyle? style})')
+  BarcodeSelectionBasicOverlay.withBarcodeSelection(BarcodeSelection barcodeSelection)
+      : this.withBarcodeSelectionForView(barcodeSelection, null);
+
+  @Deprecated('Use BarcodeSelectionBasicOverlay({BarcodeSelectionBasicOverlayStyle? style})')
+  BarcodeSelectionBasicOverlay.withBarcodeSelectionForView(BarcodeSelection barcodeSelection, DataCaptureView? view)
+      : this.withBarcodeSelectionForViewWithStyle(
+            barcodeSelection, view, BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.defaultStyle);
+
+  @Deprecated('Use BarcodeSelectionBasicOverlay({BarcodeSelectionBasicOverlayStyle? style})')
+  BarcodeSelectionBasicOverlay.withBarcodeSelectionForViewWithStyle(
+      BarcodeSelection barcodeSelection, DataCaptureView? view, BarcodeSelectionBasicOverlayStyle style)
+      : this._(barcodeSelection, view, style);
 
   DataCaptureView? _view;
 

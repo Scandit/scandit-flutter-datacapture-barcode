@@ -32,6 +32,9 @@ import com.scandit.datacapture.frameworks.barcode.find.BarcodeFindModule;
 import com.scandit.datacapture.frameworks.barcode.generator.BarcodeGeneratorModule;
 import com.scandit.datacapture.frameworks.barcode.pick.BarcodePickModule;
 import com.scandit.datacapture.frameworks.barcode.selection.BarcodeSelectionModule;
+import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionAimedBrushProvider;
+import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionListener;
+import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionTrackedBrushProvider;
 import com.scandit.datacapture.frameworks.barcode.spark.SparkScanModule;
 import com.scandit.datacapture.frameworks.barcode.batch.BarcodeBatchModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
@@ -312,7 +315,11 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin extends BaseFlutterPlug
         BarcodeSelectionModule barcodeSelectionModule = resolveModule(BarcodeSelectionModule.class);
         if (barcodeSelectionModule != null) return;
 
-        barcodeSelectionModule = BarcodeSelectionModule.create(barcodeSelectionEmitter);
+        barcodeSelectionModule = BarcodeSelectionModule.create(
+                FrameworksBarcodeSelectionListener.create(barcodeSelectionEmitter),
+                new FrameworksBarcodeSelectionAimedBrushProvider(barcodeSelectionEmitter),
+                new FrameworksBarcodeSelectionTrackedBrushProvider(barcodeSelectionEmitter)
+        );
         barcodeSelectionModule.onCreate(binding.getApplicationContext());
 
         registerModule(barcodeSelectionModule);

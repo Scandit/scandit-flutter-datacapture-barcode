@@ -4,7 +4,6 @@
  * Copyright (C) 2024- Scandit AG. All rights reserved.
  */
 
-// ignore: unnecessary_library_name
 library scandit_flutter_datacapture_barcode_count;
 
 export 'src/ar/barcode_ar_feedback.dart' show BarcodeArFeedback;

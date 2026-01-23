@@ -20,15 +20,18 @@ class BarcodeSelection extends DataCaptureMode {
   BarcodeSelectionSettings _settings;
   BarcodeSelectionFeedback _feedback = BarcodeSelectionFeedback.defaultFeedback;
   PointWithUnit? _pointOfInterest;
-
   final _modeId = Random().nextInt(0x7FFFFFFF);
 
-  BarcodeSelection._(this._settings) {
+  BarcodeSelection._(DataCaptureContext? context, this._settings) {
     _controller = _BarcodeSelectionListenerController(this);
-    _feedback.addListener(_updateFeedbackHandler);
+    context?.setMode(this);
   }
 
-  BarcodeSelection(BarcodeSelectionSettings settings) : this._(settings);
+  BarcodeSelection(BarcodeSelectionSettings settings) : this._(null, settings);
+
+  @Deprecated('Use constructor BarcodeSelection(BarcodeSelectionSettings settings) instead.')
+  BarcodeSelection.forContext(DataCaptureContext context, BarcodeSelectionSettings settings)
+      : this._(context, settings);
 
   @override
   // ignore: unnecessary_overrides
@@ -58,16 +61,13 @@ class BarcodeSelection extends DataCaptureMode {
     );
   }
 
+  @Deprecated('Use createRecommendedCameraSettings() instead.')
+  static CameraSettings get recommendedCameraSettings => createRecommendedCameraSettings();
+
   BarcodeSelectionFeedback get feedback => _feedback;
 
   set feedback(BarcodeSelectionFeedback newValue) {
-    _feedback.removeListener(_updateFeedbackHandler);
     _feedback = newValue;
-    _feedback.addListener(_updateFeedbackHandler);
-    _controller.updateFeedback();
-  }
-
-  void _updateFeedbackHandler() {
     _controller.updateFeedback();
   }
 
@@ -97,7 +97,7 @@ class BarcodeSelection extends DataCaptureMode {
     }
   }
 
-  Future<void> applySettings(BarcodeSelectionSettings settings) async {
+  Future<void> applySettings(BarcodeSelectionSettings settings) {
     _settings = settings;
     return _controller.applyNewSettings(settings);
   }
@@ -116,9 +116,6 @@ class BarcodeSelection extends DataCaptureMode {
       'type': 'barcodeSelection',
       'feedback': _feedback.toMap(),
       'settings': _settings.toMap(),
-      'modeId': _modeId,
-      'hasListeners': _listeners.isNotEmpty,
-      'enabled': _enabled,
     };
     if (_pointOfInterest != null) {
       json['pointOfInterest'] = _pointOfInterest?.toMap();
@@ -151,20 +148,17 @@ class _BarcodeSelectionListenerController extends BaseController {
   _BarcodeSelectionListenerController(this._barcodeSelection) : super(BarcodeSelectionFunctionNames.methodsChannelName);
 
   void subscribeListeners() {
-    methodChannel.invokeMethod(BarcodeSelectionFunctionNames.addListener, {'modeId': _barcodeSelection._modeId}).then(
-        (value) => _setupBarcodeSelectionSubscription(),
-        onError: onError);
+    methodChannel
+        .invokeMethod(BarcodeSelectionFunctionNames.addListener)
+        .then((value) => _setupBarcodeSelectionSubscription(), onError: onError);
   }
 
   void unsubscribeListeners() {
     _barcodeSelectionSubscription?.cancel();
-    methodChannel.invokeMethod(BarcodeSelectionFunctionNames.removeListener,
-        {'modeId': _barcodeSelection._modeId}).then((value) => null, onError: onError);
+    methodChannel.invokeMethod(BarcodeSelectionFunctionNames.removeListener).then((value) => null, onError: onError);
   }
 
   void _setupBarcodeSelectionSubscription() {
-    if (_barcodeSelectionSubscription != null) return;
-
     _barcodeSelectionSubscription = BarcodePluginEvents.barcodeSelectionEventStream.listen((event) {
       if (_barcodeSelection._listeners.isEmpty) return;
 
@@ -173,20 +167,22 @@ class _BarcodeSelectionListenerController extends BaseController {
       if (eventName == BarcodeSelectionListener._didUpdateSelectionEventName) {
         var session = BarcodeSelectionSession.fromJSON(eventJSON);
         _notifyListenersOfDidUpdateSelection(session).then((value) {
-          methodChannel.invokeMethod(
-            BarcodeSelectionFunctionNames.barcodeSelectionFinishDidUpdateSelection,
-            {'modeId': _barcodeSelection._modeId, 'enabled': _barcodeSelection.isEnabled},
-          )
+          methodChannel
+              .invokeMethod(
+                BarcodeSelectionFunctionNames.barcodeSelectionFinishDidUpdateSelection,
+                _barcodeSelection.isEnabled,
+              )
               // ignore: unnecessary_lambdas
               .then((value) => null, onError: (error) => developer.log(error));
         });
       } else if (eventName == BarcodeSelectionListener._didUpdateSessionEventName) {
         var session = BarcodeSelectionSession.fromJSON(eventJSON);
         _notifyListenersOfDidUpateSession(session).then((value) {
-          methodChannel.invokeMethod(
-            BarcodeSelectionFunctionNames.barcodeSelectionFinishDidUpdateSession,
-            {'modeId': _barcodeSelection._modeId, 'enabled': _barcodeSelection.isEnabled},
-          )
+          methodChannel
+              .invokeMethod(
+                BarcodeSelectionFunctionNames.barcodeSelectionFinishDidUpdateSession,
+                _barcodeSelection.isEnabled,
+              )
               // ignore: unnecessary_lambdas
               .then((value) => null, onError: (error) => developer.log(error));
         });
@@ -195,33 +191,33 @@ class _BarcodeSelectionListenerController extends BaseController {
   }
 
   Future<void> unfreezeCamera() {
-    return methodChannel.invokeMethod(BarcodeSelectionFunctionNames.unfreezeCamera,
-        {'modeId': _barcodeSelection._modeId}).then((value) => null, onError: onError);
+    return methodChannel
+        .invokeMethod(BarcodeSelectionFunctionNames.unfreezeCamera)
+        .then((value) => null, onError: onError);
   }
 
   Future<void> reset() {
-    return methodChannel.invokeMethod(BarcodeSelectionFunctionNames.resetMode, {'modeId': _barcodeSelection._modeId});
+    return methodChannel.invokeMethod(BarcodeSelectionFunctionNames.resetMode);
   }
 
   Future<void> updateMode() {
     return methodChannel.invokeMethod(
       BarcodeSelectionFunctionNames.updateBarcodeSelectionMode,
-      {'modeId': _barcodeSelection._modeId, 'modeJson': jsonEncode(_barcodeSelection.toMap())},
+      jsonEncode(_barcodeSelection.toMap()),
     );
   }
 
   Future<void> updateFeedback() {
     return methodChannel.invokeMethod(
       BarcodeSelectionFunctionNames.updateFeedback,
-      {'modeId': _barcodeSelection._modeId, 'feedbackJson': jsonEncode(_barcodeSelection.feedback.toMap())},
+      jsonEncode(_barcodeSelection.feedback.toMap()),
     );
   }
 
   Future<void> applyNewSettings(BarcodeSelectionSettings settings) {
-    return methodChannel.invokeMethod(BarcodeSelectionFunctionNames.applyBarcodeSelectionModeSettings, {
-      'modeId': _barcodeSelection._modeId,
-      'modeSettingsJson': jsonEncode(settings.toMap())
-    }).then((value) => null, onError: onError);
+    return methodChannel
+        .invokeMethod(BarcodeSelectionFunctionNames.applyBarcodeSelectionModeSettings, jsonEncode(settings.toMap()))
+        .then((value) => null, onError: onError);
   }
 
   Future<void> _notifyListenersOfDidUpateSession(BarcodeSelectionSession session) async {
@@ -245,7 +241,8 @@ class _BarcodeSelectionListenerController extends BaseController {
   }
 
   void setModeEnabledState(bool newValue) {
-    methodChannel.invokeMethod(BarcodeSelectionFunctionNames.setModeEnabledState,
-        {'modeId': _barcodeSelection._modeId, 'enabled': newValue}).then((value) => null, onError: onError);
+    methodChannel
+        .invokeMethod(BarcodeSelectionFunctionNames.setModeEnabledState, newValue)
+        .then((value) => null, onError: onError);
   }
 }
