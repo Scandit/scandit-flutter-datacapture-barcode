@@ -6,34 +6,12 @@
 
 import 'dart:convert';
 
+import 'package:scandit_flutter_datacapture_barcode/src/capture/barcode_capture.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/capture/barcode_capture_defaults.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
-
-import '../capture/barcode_capture_defaults.dart';
-import '../capture/barcode_capture.dart';
 import 'barcode_capture_function_names.dart';
-
-@Deprecated('BarcodeCaptureOverlayStyle is deprecated and will be removed in a future release.')
-enum BarcodeCaptureOverlayStyle {
-  frame('frame');
-
-  const BarcodeCaptureOverlayStyle(this._name);
-
-  @override
-  String toString() => _name;
-
-  final String _name;
-}
-
-// ignore: deprecated_member_use_from_same_package
-extension BarcodeCaptureOverlayStyleSerializer on BarcodeCaptureOverlayStyle {
-  // ignore: deprecated_member_use_from_same_package
-  static BarcodeCaptureOverlayStyle fromJSON(String jsonValue) {
-    // ignore: deprecated_member_use_from_same_package
-    return BarcodeCaptureOverlayStyle.values.firstWhere((element) => element.toString() == jsonValue);
-  }
-}
 
 class BarcodeCaptureOverlay extends DataCaptureOverlay {
   static final _noViewfinder = {'type': 'none'};
@@ -44,21 +22,9 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
 
   final BarcodeCapture _mode;
 
-  BarcodeCaptureOverlay(BarcodeCapture mode) : this._(mode, null);
+  BarcodeCaptureOverlay._(this._mode) : super('barcodeCapture');
 
-  @Deprecated('Use the version without parameters instead.')
-  BarcodeCaptureOverlay.withBarcodeCapture(BarcodeCapture barcodeCapture)
-      : this.withBarcodeCaptureForView(barcodeCapture, null);
-
-  @Deprecated('Use the version without parameters instead.')
-  BarcodeCaptureOverlay.withBarcodeCaptureForView(BarcodeCapture barcodeCapture, DataCaptureView? view)
-      : this._(barcodeCapture, view);
-
-  @Deprecated(
-      'withBarcodeCaptureForViewWithStyle is deprecated and will be removed in a future release. Use the version without style parameter instead.')
-  BarcodeCaptureOverlay.withBarcodeCaptureForViewWithStyle(
-      BarcodeCapture barcodeCapture, DataCaptureView? view, BarcodeCaptureOverlayStyle style)
-      : this.withBarcodeCaptureForView(barcodeCapture, view);
+  BarcodeCaptureOverlay(BarcodeCapture mode) : this._(mode);
 
   int get _dataCaptureViewId => _view?.viewId ?? -1;
 
@@ -77,7 +43,7 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
     _controller ??= _BarcodeCaptureOverlayController(this);
   }
 
-  late Brush _brush;
+  Brush _brush = BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.defaultBrush;
 
   Brush get brush => _brush;
 
@@ -111,24 +77,6 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
     _controller?.update();
   }
 
-  // ignore: deprecated_member_use_from_same_package
-  final BarcodeCaptureOverlayStyle _style = BarcodeCaptureOverlayStyle.frame;
-
-  @Deprecated('The style property is deprecated and will be removed in a future release.')
-  BarcodeCaptureOverlayStyle get style => _style;
-
-  BarcodeCaptureOverlay._(this._mode, DataCaptureView? view) : super('barcodeCapture') {
-    // ignore: deprecated_member_use_from_same_package
-    _brush = BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.brushes[style]!;
-
-    view?.addOverlay(this);
-  }
-
-  @Deprecated('Use the brush instance property instead.')
-  static Brush get defaultBrush {
-    return BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.brushes[BarcodeCaptureOverlayStyle.frame]!;
-  }
-
   @override
   Map<String, dynamic> toMap() {
     var json = super.toMap();
@@ -136,8 +84,6 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
       'brush': _brush.toMap(),
       'shouldShowScanAreaGuides': _shouldShowScanAreaGuides,
       'viewfinder': _viewfinder == null ? _noViewfinder : _viewfinder?.toMap(),
-      // ignore: deprecated_member_use_from_same_package
-      'style': style.toString()
     });
     json['modeId'] = _mode.toMap()['modeId'];
     return json;

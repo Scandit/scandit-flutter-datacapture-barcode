@@ -36,6 +36,7 @@ class BarcodeArMethodHandler {
         static let updateAnnotation = "updateAnnotation"
         static let updateHighlight = "updateHighlight"
         static let updateBarcodeArPopoverButtonAtIndex = "updateBarcodeArPopoverButtonAtIndex"
+        static let onCustomHighlightClicked = "onCustomHighlightClicked"
     }
 
     private let barcodeAr: BarcodeArModule
@@ -50,35 +51,81 @@ class BarcodeArMethodHandler {
             let defaults = barcodeAr.defaults
             result(defaults.stringValue)
         case FunctionNames.updateFeedback:
-            barcodeAr.updateFeedback(viewId: extractViewId(methodCall), feedbackJson: extractArgument(methodCall, key: "feedback"), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.updateFeedback(
+                viewId: extractViewId(methodCall),
+                feedbackJson: extractArgument(methodCall, key: "feedback"),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.resetLatestBarcodeArSession:
-            barcodeAr.resetLatestBarcodeArSession(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.resetLatestBarcodeArSession(
+                viewId: extractViewId(methodCall),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.applyBarcodeArModeSettings:
-            barcodeAr.applyBarcodeArModeSettings(viewId: extractViewId(methodCall), modeSettingsJson: extractArgument(methodCall, key: "settings"), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.applyBarcodeArModeSettings(
+                viewId: extractViewId(methodCall),
+                modeSettingsJson: extractArgument(methodCall, key: "settings"),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.updateBarcodeArMode:
-            barcodeAr.updateMode(viewId: extractViewId(methodCall), modeJson: extractArgument(methodCall, key: "modeJson"), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.updateMode(
+                viewId: extractViewId(methodCall),
+                modeJson: extractArgument(methodCall, key: "modeJson"),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.addBarcodeArListener:
             barcodeAr.addModeListener(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
         case FunctionNames.removeBarcodeArListener:
-            barcodeAr.removeModeListener(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.removeModeListener(
+                viewId: extractViewId(methodCall),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.barcodeArFinishDidUpdateSession:
-            barcodeAr.finishDidUpdateSession(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.finishDidUpdateSession(
+                viewId: extractViewId(methodCall),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.getFrameData:
-            barcodeAr.getLastFrameDataBytes(frameId: extractArgument(methodCall, key: "frameId"), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.getLastFrameDataBytes(
+                frameId: extractArgument(methodCall, key: "frameId"),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.updateView:
-            barcodeAr.updateView(viewId: extractViewId(methodCall), viewJson: extractArgument(methodCall, key: "view"), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.updateView(
+                viewId: extractViewId(methodCall),
+                viewJson: extractArgument(methodCall, key: "view"),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.registerBarcodeArViewUiListener:
-            barcodeAr.registerBarcodeArViewUiListener(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.registerBarcodeArViewUiListener(
+                viewId: extractViewId(methodCall),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.unregisterBarcodeArViewUiListener:
-            barcodeAr.unregisterBarcodeArViewUiListener(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.unregisterBarcodeArViewUiListener(
+                viewId: extractViewId(methodCall),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.registerBarcodeArHighlightProvider:
-            barcodeAr.registerBarcodeArHighlightProvider(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.registerBarcodeArHighlightProvider(
+                viewId: extractViewId(methodCall),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.unregisterBarcodeArHighlightProvider:
-            barcodeAr.unregisterBarcodeArHighlightProvider(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.unregisterBarcodeArHighlightProvider(
+                viewId: extractViewId(methodCall),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.registerBarcodeArAnnotationProvider:
-            barcodeAr.registerBarcodeArAnnotationProvider(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.registerBarcodeArAnnotationProvider(
+                viewId: extractViewId(methodCall),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.unregisterBarcodeArAnnotationProvider:
-            barcodeAr.unregisterBarcodeArAnnotationProvider(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.unregisterBarcodeArAnnotationProvider(
+                viewId: extractViewId(methodCall),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.viewStart:
             barcodeAr.viewStart(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
         case FunctionNames.viewStop:
@@ -88,15 +135,41 @@ class BarcodeArMethodHandler {
         case FunctionNames.viewReset:
             barcodeAr.viewReset(viewId: extractViewId(methodCall), result: FlutterFrameworkResult(reply: result))
         case FunctionNames.finishHighlightForBarcode:
-            barcodeAr.finishHighlightForBarcode(viewId: extractViewId(methodCall), highlightJson: extractArgument(methodCall, key: "result"), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.finishHighlightForBarcode(
+                viewId: extractViewId(methodCall),
+                highlightJson: extractArgument(methodCall, key: "result"),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.finishAnnotationForBarcode:
-            barcodeAr.finishAnnotationForBarcode(viewId: extractViewId(methodCall), annotationJson: extractArgument(methodCall, key: "result"), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.finishAnnotationForBarcode(
+                viewId: extractViewId(methodCall),
+                annotationJson: extractArgument(methodCall, key: "result"),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.updateAnnotation:
-            barcodeAr.updateAnnotation(viewId: extractViewId(methodCall), annotationJson: extractArgument(methodCall, key: "annotationJson"), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.updateAnnotation(
+                viewId: extractViewId(methodCall),
+                annotationJson: extractArgument(methodCall, key: "annotationJson"),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.updateHighlight:
-            barcodeAr.updateHighlight(viewId: extractViewId(methodCall), highlightJson: extractArgument(methodCall, key: "highlight"), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.updateHighlight(
+                viewId: extractViewId(methodCall),
+                highlightJson: extractArgument(methodCall, key: "highlight"),
+                result: FlutterFrameworkResult(reply: result)
+            )
         case FunctionNames.updateBarcodeArPopoverButtonAtIndex:
-            barcodeAr.updateBarcodeArPopoverButtonAtIndex(viewId: extractViewId(methodCall), updateJson: extractArgument(methodCall, key: "update"), result: FlutterFrameworkResult(reply: result))
+            barcodeAr.updateBarcodeArPopoverButtonAtIndex(
+                viewId: extractViewId(methodCall),
+                updateJson: extractArgument(methodCall, key: "update"),
+                result: FlutterFrameworkResult(reply: result)
+            )
+        case FunctionNames.onCustomHighlightClicked:
+            barcodeAr.onCustomHighlightClicked(
+                viewId: extractViewId(methodCall),
+                barcodeId: extractArgument(methodCall, key: "barcodeId"),
+                result: FlutterFrameworkResult(reply: result)
+            )
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -113,6 +186,6 @@ class BarcodeArMethodHandler {
     }
 
     func extractViewId(_ methodCall: FlutterMethodCall) -> Int {
-        return extractArgument(methodCall, key: "viewId")
+        extractArgument(methodCall, key: "viewId")
     }
 }

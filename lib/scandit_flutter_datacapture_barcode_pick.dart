@@ -4,6 +4,7 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
+// ignore: unnecessary_library_name
 library scandit_flutter_datacapture_barcode_pick;
 
 export 'src/pick/barcode_pick_product_provider_callback_item.dart' show BarcodePickProductProviderCallbackItem;
