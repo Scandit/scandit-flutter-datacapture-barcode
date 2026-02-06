@@ -7,8 +7,7 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/usi/scanned_item.dart';
+import '../../scandit_flutter_datacapture_barcode.dart';
 import 'spark_scan_function_names.dart';
 
 class SparkScanSession with _PrivateSparkScanSession {
@@ -17,19 +16,12 @@ class SparkScanSession with _PrivateSparkScanSession {
   final Barcode? _newlyRecognizedBarcode;
   Barcode? get newlyRecognizedBarcode => _newlyRecognizedBarcode;
 
-  final List<ScannedItem> _newlyRecognizedItems;
-  List<ScannedItem> get newlyRecognizedItems => _newlyRecognizedItems;
-
-  final List<ScannedItem> _allScannedItems;
-  List<ScannedItem> get allScannedItems => _allScannedItems;
-
   final int _frameSequenceId;
   int get frameSequenceId => _frameSequenceId;
 
   final int _viewId;
 
-  SparkScanSession._(this._newlyRecognizedBarcode, this._newlyRecognizedItems, this._allScannedItems,
-      this._frameSequenceId, String frameId, this._viewId) {
+  SparkScanSession._(this._newlyRecognizedBarcode, this._frameSequenceId, String frameId, this._viewId) {
     _frameId = frameId;
   }
 
@@ -37,8 +29,6 @@ class SparkScanSession with _PrivateSparkScanSession {
     var json = jsonDecode(event['session']);
     return SparkScanSession._(
       json['newlyRecognizedBarcode'] != null ? Barcode.fromJSON(json['newlyRecognizedBarcode']) : null,
-      json['newItems'] != null ? (json['newItems'] as List<dynamic>).map((e) => ScannedItem.fromJSON(e)).toList() : [],
-      json['allItems'] != null ? (json['allItems'] as List<dynamic>).map((e) => ScannedItem.fromJSON(e)).toList() : [],
       (json['frameSequenceId'] as num).toInt(),
       event['frameId'],
       viewId,

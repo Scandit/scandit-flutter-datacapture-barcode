@@ -13,6 +13,8 @@ abstract class SparkScanViewUiListener {
   void didTapBarcodeCountButton(SparkScanView view);
 
   void didChangeViewState(SparkScanViewState newState);
+}
 
+abstract class ExtendedSparkScanViewUiListener extends SparkScanViewUiListener {
   void didTapLabelCaptureButton(SparkScanView view);
 }

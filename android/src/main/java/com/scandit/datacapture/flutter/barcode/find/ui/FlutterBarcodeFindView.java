@@ -19,7 +19,6 @@ import com.scandit.datacapture.frameworks.barcode.find.BarcodeFindModule;
 public class FlutterBarcodeFindView extends FlutterBasePlatformView {
 
     private final BarcodeFindModule barcodeFindModule;
-    private final int barcodeFindViewId;
 
     public FlutterBarcodeFindView(Context context,
                                   String jsonString,
@@ -27,11 +26,7 @@ public class FlutterBarcodeFindView extends FlutterBasePlatformView {
         super(context);
         this.barcodeFindModule = barcodeFindModule;
 
-        this.barcodeFindViewId = barcodeFindModule.addViewToContainer(
-                this,
-                jsonString,
-                new FlutterLogInsteadOfResult()
-        );
+        barcodeFindModule.addViewToContainer(this, jsonString, new FlutterLogInsteadOfResult());
     }
 
     @Override
@@ -49,7 +44,7 @@ public class FlutterBarcodeFindView extends FlutterBasePlatformView {
 
     @Override
     public void dispose() {
-        barcodeFindModule.viewDisposed(this.barcodeFindViewId);
+        barcodeFindModule.viewDisposed();
         removeAllViews();
         super.dispose();
     }

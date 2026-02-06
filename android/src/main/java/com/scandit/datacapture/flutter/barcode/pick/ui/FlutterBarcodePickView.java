@@ -8,11 +8,9 @@ package com.scandit.datacapture.flutter.barcode.pick.ui;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 
-import com.scandit.datacapture.barcode.pick.ui.BarcodePickView;
 import com.scandit.datacapture.flutter.core.ui.FlutterBasePlatformView;
 import com.scandit.datacapture.flutter.core.utils.FlutterLogInsteadOfResult;
 import com.scandit.datacapture.frameworks.barcode.pick.BarcodePickModule;
@@ -27,11 +25,7 @@ public class FlutterBarcodePickView extends FlutterBasePlatformView {
         super(context);
         this.barcodePickModule = barcodePickModule;
 
-        BarcodePickView view = barcodePickModule.addViewToContainer(this, jsonString, new FlutterLogInsteadOfResult());
-
-        if (view != null) {
-            this.setTag(view.getTag());
-        }
+        barcodePickModule.addViewToContainer(this, jsonString, new FlutterLogInsteadOfResult());
     }
 
     @Override
@@ -49,7 +43,7 @@ public class FlutterBarcodePickView extends FlutterBasePlatformView {
 
     @Override
     public void dispose() {
-        barcodePickModule.releasePickView((int)this.getTag(), new FlutterLogInsteadOfResult());
+        barcodePickModule.viewDisposed();
         removeAllViews();
         super.dispose();
     }
