@@ -7,9 +7,10 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 
 import '../../scandit_flutter_datacapture_barcode.dart';
-import 'barcode_count_function_names.dart';
 
 class BarcodeCountSession with _PrivateBarcodeCountSession {
   final _BarcodeCountSessionController _controller = _BarcodeCountSessionController();
@@ -26,7 +27,10 @@ class BarcodeCountSession with _PrivateBarcodeCountSession {
 
   List<Barcode> get additionalBarcodes => _additionalBarcodes;
 
-  BarcodeCountSession._(this._recognizedBarcodes, this._additionalBarcodes, this._frameSequenceId, String frameId) {
+  final int _viewId;
+
+  BarcodeCountSession._(
+      this._recognizedBarcodes, this._additionalBarcodes, this._frameSequenceId, String frameId, this._viewId) {
     _frameId = frameId;
   }
 
@@ -40,12 +44,13 @@ class BarcodeCountSession with _PrivateBarcodeCountSession {
         .toList()
         .cast<Barcode>();
     final frameId = event['frameId'] as String;
+    final viewId = event['viewId'] as int;
 
-    return BarcodeCountSession._(trackedCodes, additionalBarcodes, frameSequenceId, frameId);
+    return BarcodeCountSession._(trackedCodes, additionalBarcodes, frameSequenceId, frameId, viewId);
   }
 
   Future<void> reset() {
-    return _controller.reset(_frameSequenceId);
+    return _controller.reset(_viewId, _frameSequenceId);
   }
 }
 
@@ -56,13 +61,13 @@ mixin _PrivateBarcodeCountSession {
 }
 
 class _BarcodeCountSessionController {
-  late final MethodChannel _methodChannel = _getChannel();
+  late final BarcodeMethodHandler _methodHandler = _getMethodHandler();
 
-  Future<void> reset(int frameSequenceId) {
-    return _methodChannel.invokeMethod(BarcodeCountFunctionNames.resetBarcodeCountSession, frameSequenceId);
+  Future<void> reset(int viewId, int frameSequenceId) {
+    return _methodHandler.resetBarcodeCountSession(viewId: viewId);
   }
 
-  MethodChannel _getChannel() {
-    return const MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
+  BarcodeMethodHandler _getMethodHandler() {
+    return BarcodeMethodHandler(const MethodChannel(BarcodeFunctionNames.methodsChannelName));
   }
 }

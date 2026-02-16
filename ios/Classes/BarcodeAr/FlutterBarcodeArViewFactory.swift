@@ -10,7 +10,6 @@ import ScanditFrameworksCore
 import scandit_flutter_datacapture_core
 
 class FlutterBarcodeArViewFactory: NSObject, FlutterPlatformViewFactory {
-    var views: [FlutterBarcodeArView] = []
 
     let barcodeArModule: BarcodeArModule
 
@@ -19,9 +18,11 @@ class FlutterBarcodeArViewFactory: NSObject, FlutterPlatformViewFactory {
         super.init()
     }
 
-    func create(withFrame frame: CGRect,
-                viewIdentifier viewId: Int64,
-                arguments args: Any?) -> FlutterPlatformView {
+    func create(
+        withFrame frame: CGRect,
+        viewIdentifier viewId: Int64,
+        arguments args: Any?
+    ) -> FlutterPlatformView {
         guard let creationArgs = args as? [String: Any] else {
             Log.error("Unable to create BarcodeArView without the JSON.")
             fatalError("Unable to create BarcodeArView without the JSON.")
@@ -31,26 +32,16 @@ class FlutterBarcodeArViewFactory: NSObject, FlutterPlatformViewFactory {
             fatalError("Unable to create the BarcodeArView without the json.")
         }
         let view = FlutterBarcodeArView(frame: frame)
-        view.factory = self
-        barcodeArModule.addViewToContainer(container: view,
-                                             jsonString: creationJson,
-                                             result: FlutterLogInsteadOfResult())
-        views.append(view)
+        view.barcodeArModule = barcodeArModule
+        barcodeArModule.addViewToContainer(
+            container: view,
+            jsonString: creationJson,
+            result: FlutterLogInsteadOfResult()
+        )
         return view
     }
 
     func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
         FlutterStandardMessageCodec.sharedInstance()
     }
-
-    func addBarcodeArViewToLastContainer() {
-        guard let view = views.last,
-              let barcodeArView = barcodeArModule.barcodeArView else { return }
-        if barcodeArView.superview != nil {
-            barcodeArView.removeFromSuperview()
-        }
-        view.addSubview(barcodeArView)
-    }
 }
-
-

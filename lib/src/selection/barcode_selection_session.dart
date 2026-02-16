@@ -7,8 +7,9 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 
-import 'barcode_selection_function_names.dart';
 import '../../scandit_flutter_datacapture_barcode.dart';
 
 class BarcodeSelectionSession with _PrivateBarcodeSelectionSession {
@@ -26,17 +27,19 @@ class BarcodeSelectionSession with _PrivateBarcodeSelectionSession {
   final int _frameSequenceId;
   int get frameSequenceId => _frameSequenceId;
 
+  final int _modeId;
+
   BarcodeSelectionSession._(this._newlySelectedBarcodes, this._newlyUnselectedBarcodes, this._selectedBarcodes,
-      this._frameSequenceId, String? frameId) {
+      this._frameSequenceId, String? frameId, this._modeId) {
     _frameId = frameId;
   }
 
   Future<void> reset() {
-    return _controller.reset(_frameSequenceId);
+    return _controller.reset(_modeId, _frameSequenceId);
   }
 
   Future<int> getCount(Barcode barcode) {
-    return _controller.getCount(barcode);
+    return _controller.getCount(_modeId, barcode);
   }
 
   factory BarcodeSelectionSession.fromJSON(Map<String, dynamic> event) {
@@ -60,6 +63,7 @@ class BarcodeSelectionSession with _PrivateBarcodeSelectionSession {
           .cast<Barcode>(),
       (json['frameSequenceId'] as num).toInt(),
       event['frameId'] as String?,
+      event['modeId'] as int,
     );
   }
 }
@@ -71,20 +75,21 @@ mixin _PrivateBarcodeSelectionSession {
 }
 
 class _BarcodeSelectionSessionController {
-  late final MethodChannel _methodChannel = _getChannel();
+  late final BarcodeMethodHandler barcodeMethodHandler = _getMethodHandler();
 
-  Future<int> getCount(Barcode barcode) {
+  Future<int> getCount(int modeId, Barcode barcode) async {
     var selectionIdentifier = (barcode.data ?? '') + barcode.symbology.toString();
-    return _methodChannel
-        .invokeMethod<int>(BarcodeSelectionFunctionNames.getBarcodeSelectionSessionCount, selectionIdentifier)
-        .then((value) => value ?? 0);
+    final count = await barcodeMethodHandler.getCountForBarcodeInBarcodeSelectionSession(
+        modeId: modeId, selectionIdentifier: selectionIdentifier);
+    return count.toInt();
   }
 
-  Future<void> reset(int frameSequenceId) {
-    return _methodChannel.invokeMethod(BarcodeSelectionFunctionNames.resetBarcodeSelectionSession, frameSequenceId);
+  Future<void> reset(int modeId, int frameSequenceId) {
+    return barcodeMethodHandler.resetBarcodeSelectionSession(modeId: modeId).then((value) => null);
   }
 
-  MethodChannel _getChannel() {
-    return const MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
+  BarcodeMethodHandler _getMethodHandler() {
+    final channel = const MethodChannel(BarcodeFunctionNames.methodsChannelName);
+    return BarcodeMethodHandler(channel);
   }
 }

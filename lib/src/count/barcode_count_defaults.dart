@@ -5,17 +5,13 @@
  */
 
 import 'dart:convert';
-import 'package:meta/meta.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_filter_settings.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/count/barcode_count_view.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
-import '../../scandit_flutter_datacapture_barcode.dart';
-import 'barcode_count_function_names.dart';
-import 'barcode_count_view.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeCountDefaults {
-  static MethodChannel channel = const MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
-
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
   static CameraSettingsDefaults get cameraSettingsDefaults => _cameraSettingsDefaults;
@@ -32,21 +28,14 @@ class BarcodeCountDefaults {
 
   static BarcodeCountViewDefaults get viewDefaults => _viewDefaults;
 
-  static bool _isInitialized = false;
-
-  static Future<void> initializeDefaults() async {
-    if (_isInitialized) return;
-    var result = await channel.invokeMethod(BarcodeCountFunctionNames.getDefaults);
-    var json = jsonDecode(result as String);
-    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(json['RecommendedCameraSettings']);
+  static void initializeDefaults(Map<String, dynamic> barcodeCountDefaults) {
+    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(barcodeCountDefaults['RecommendedCameraSettings']);
 
     _barcodeCountSettingsDefaults =
-        BarcodeCountSettingsDefaults.fromJSON(json["BarcodeCountSettings"] as Map<String, dynamic>);
-    _barcodeCountFeedbackDefaults =
-        BarcodeCountFeedbackDefaults.fromJSON(jsonDecode(json["BarcodeCountFeedback"]) as Map<String, dynamic>);
-    _viewDefaults = BarcodeCountViewDefaults.fromJSON(json["BarcodeCountView"] as Map<String, dynamic>);
-
-    _isInitialized = true;
+        BarcodeCountSettingsDefaults.fromJSON(barcodeCountDefaults["BarcodeCountSettings"] as Map<String, dynamic>);
+    _barcodeCountFeedbackDefaults = BarcodeCountFeedbackDefaults.fromJSON(
+        jsonDecode(barcodeCountDefaults["BarcodeCountFeedback"]) as Map<String, dynamic>);
+    _viewDefaults = BarcodeCountViewDefaults.fromJSON(barcodeCountDefaults["BarcodeCountView"] as Map<String, dynamic>);
   }
 }
 
