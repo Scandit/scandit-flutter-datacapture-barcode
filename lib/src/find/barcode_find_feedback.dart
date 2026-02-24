@@ -4,14 +4,21 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-import 'package:flutter/foundation.dart';
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
 
 import 'barcode_find_defaults.dart';
+import 'barcode_find_function_names.dart';
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
-class BarcodeFindFeedback extends ChangeNotifier implements Serializable {
-  BarcodeFindFeedback();
+class BarcodeFindFeedback implements Serializable {
+  late _BarcodeFindFeedbackController _controller;
+
+  BarcodeFindFeedback() {
+    _controller = _BarcodeFindFeedbackController(this);
+  }
 
   Feedback _found = BarcodeFindDefaults.barcodeFindFeedbackDefaults.found;
 
@@ -19,7 +26,7 @@ class BarcodeFindFeedback extends ChangeNotifier implements Serializable {
 
   set found(Feedback newValue) {
     _found = newValue;
-    notifyListeners();
+    _controller.updateFeedback();
   }
 
   Feedback _itemListUpdated = BarcodeFindDefaults.barcodeFindFeedbackDefaults.itemListUpdated;
@@ -28,7 +35,7 @@ class BarcodeFindFeedback extends ChangeNotifier implements Serializable {
 
   set itemListUpdated(Feedback newValue) {
     _itemListUpdated = newValue;
-    notifyListeners();
+    _controller.updateFeedback();
   }
 
   static BarcodeFindFeedback get defaultFeedback => BarcodeFindFeedback();
@@ -39,5 +46,16 @@ class BarcodeFindFeedback extends ChangeNotifier implements Serializable {
       'found': found.toMap(),
       'itemListUpdated': itemListUpdated.toMap(),
     };
+  }
+}
+
+class _BarcodeFindFeedbackController {
+  final MethodChannel _methodChannel = const MethodChannel(BarcodeFindFunctionNames.methodsChannelName);
+  final BarcodeFindFeedback _feedback;
+
+  _BarcodeFindFeedbackController(this._feedback);
+
+  Future<void> updateFeedback() {
+    return _methodChannel.invokeMethod(BarcodeFindFunctionNames.updateFeedback, jsonEncode(_feedback.toMap()));
   }
 }

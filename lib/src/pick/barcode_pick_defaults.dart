@@ -1,7 +1,9 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_filter_highlight_settings.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/pick/internal/barcode_pick_consts.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/pick/ui/barcode_pick_status_icon_settings.dart';
 
 import 'package:scandit_flutter_datacapture_barcode/src/pick/ui/barcode_pick_view_highlight_style.dart';
@@ -12,6 +14,8 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 import 'barcode_pick_state.dart';
 
 class BarcodePickDefaults {
+  static MethodChannel channel = const MethodChannel(BarcodePickFunctionNames.methodsChannelName);
+
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
   static CameraSettingsDefaults get cameraSettingsDefaults => _cameraSettingsDefaults;
@@ -39,19 +43,20 @@ class BarcodePickDefaults {
 
   static bool _isInitialized = false;
 
-  static void initializeDefaults(Map<String, dynamic> barcodePickDefaults) {
+  static Future<void> initializeDefaults() async {
     if (_isInitialized) return;
+    var result = await channel.invokeMethod(BarcodePickFunctionNames.getDefaults);
 
-    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(barcodePickDefaults['RecommendedCameraSettings']);
-    _symbologySettingsDefaults = (barcodePickDefaults['SymbologySettings'] as Map<String, dynamic>).map(
+    var json = jsonDecode(result as String);
+    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(json['RecommendedCameraSettings']);
+    _symbologySettingsDefaults = (json['SymbologySettings'] as Map<String, dynamic>).map(
       (key, value) => MapEntry(key, SymbologySettings.fromJSON(SymbologySerializer.fromJSON(key), jsonDecode(value))),
     );
     _barcodePickStatusIconSettingsDefaults =
-        BarcodePickStatusIconSettingsDefaults.fromJSON(barcodePickDefaults['BarcodePickStatusIconSettings']);
-    _barcodePickSettingsDefaults = BarcodePickSettingsDefaults.fromJSON(barcodePickDefaults['BarcodePickSettings']);
-    _viewHighlightStyleDefaults =
-        ViewHighlightStyleDefaults.fromJSON(barcodePickDefaults['BarcodePickViewHighlightStyle']);
-    _viewSettingsDefaults = ViewSettingsDefaults.fromJSON(barcodePickDefaults['ViewSettings']);
+        BarcodePickStatusIconSettingsDefaults.fromJSON(json['BarcodePickStatusIconSettings']);
+    _barcodePickSettingsDefaults = BarcodePickSettingsDefaults.fromJSON(json['BarcodePickSettings']);
+    _viewHighlightStyleDefaults = ViewHighlightStyleDefaults.fromJSON(json['BarcodePickViewHighlightStyle']);
+    _viewSettingsDefaults = ViewSettingsDefaults.fromJSON(json['ViewSettings']);
 
     _isInitialized = true;
   }

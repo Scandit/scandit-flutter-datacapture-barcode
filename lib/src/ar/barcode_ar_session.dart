@@ -7,10 +7,9 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 
 import '../tracked_barcode.dart';
+import 'barcode_ar_function_names.dart';
 
 class BarcodeArSession with _PrivatecBarcodeArSession {
   final _BarcodeArSessionController _controller = _BarcodeArSessionController();
@@ -19,8 +18,7 @@ class BarcodeArSession with _PrivatecBarcodeArSession {
   final List<int> _removedTrackedBarcodes;
   final Map<int, TrackedBarcode> _trackedBarcodes;
 
-  BarcodeArSession._(
-      this._addedTrackedBarcodes, this._removedTrackedBarcodes, this._trackedBarcodes, String frameId, this._viewId) {
+  BarcodeArSession._(this._addedTrackedBarcodes, this._removedTrackedBarcodes, this._trackedBarcodes, String frameId) {
     _frameId = frameId;
   }
 
@@ -29,8 +27,6 @@ class BarcodeArSession with _PrivatecBarcodeArSession {
   List<int> get removedTrackedBarcodes => _removedTrackedBarcodes;
 
   Map<int, TrackedBarcode> get trackedBarcodes => _trackedBarcodes;
-
-  final int _viewId;
 
   factory BarcodeArSession.fromJSON(Map<String, dynamic> event) {
     final json = jsonDecode(event['session']);
@@ -45,13 +41,12 @@ class BarcodeArSession with _PrivatecBarcodeArSession {
       removedTrackedBarcodes = (json['removedTrackedBarcodes'] as List).map((id) => int.parse(id)).toList();
     }
     final frameId = event['frameId'] as String;
-    final viewId = event['viewId'] as int;
 
-    return BarcodeArSession._(addedTrackedCodes, removedTrackedBarcodes, allTrackedBarcodes, frameId, viewId);
+    return BarcodeArSession._(addedTrackedCodes, removedTrackedBarcodes, allTrackedBarcodes, frameId);
   }
 
   Future<void> reset() {
-    return _controller.reset(_viewId);
+    return _controller.reset();
   }
 }
 
@@ -62,13 +57,13 @@ mixin _PrivatecBarcodeArSession {
 }
 
 class _BarcodeArSessionController {
-  late final BarcodeMethodHandler _barcodeMethodHandler = _getBarcodeMethodHandler();
+  late final MethodChannel _methodChannel = _getChannel();
 
-  Future<void> reset(int viewId) {
-    return _barcodeMethodHandler.resetBarcodeArSession(viewId: viewId);
+  Future<void> reset() {
+    return _methodChannel.invokeMethod(BarcodeArFunctionNames.resetLatestBarcodeArSession);
   }
 
-  BarcodeMethodHandler _getBarcodeMethodHandler() {
-    return BarcodeMethodHandler(const MethodChannel(BarcodeFunctionNames.methodsChannelName));
+  MethodChannel _getChannel() {
+    return const MethodChannel(BarcodeArFunctionNames.methodsChannelName);
   }
 }

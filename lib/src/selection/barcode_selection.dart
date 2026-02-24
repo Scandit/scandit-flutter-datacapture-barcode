@@ -1,20 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer' as developer;
-import 'dart:math';
+import 'dart:developer';
 
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
-// ignore: implementation_imports
-import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
-// ignore: implementation_imports
-import 'package:scandit_flutter_datacapture_core/src/internal/generated/core_method_handler.dart';
 
+import 'package:flutter/services.dart';
 import 'barcode_selection_defaults.dart';
 import 'barcode_selection_feedback.dart';
 import 'barcode_selection_settings.dart';
+import 'barcode_selection_function_names.dart';
 import 'barcode_selection_session.dart';
 
 class BarcodeSelection extends DataCaptureMode {
@@ -24,14 +19,13 @@ class BarcodeSelection extends DataCaptureMode {
   BarcodeSelectionFeedback _feedback = BarcodeSelectionFeedback.defaultFeedback;
   PointWithUnit? _pointOfInterest;
 
-  final _modeId = Random().nextInt(0x7FFFFFFF);
-
-  BarcodeSelection._(this._settings) {
-    _controller = _BarcodeSelectionListenerController(this);
-    _feedback.addListener(_updateFeedbackHandler);
+  BarcodeSelection._(DataCaptureContext? context, this._settings) {
+    _controller = _BarcodeSelectionListenerController.forBarcodeSelection(this);
+    context?.addMode(this);
   }
 
-  BarcodeSelection(BarcodeSelectionSettings settings) : this._(settings);
+  BarcodeSelection.forContext(DataCaptureContext context, BarcodeSelectionSettings settings)
+      : this._(context, settings);
 
   @override
   // ignore: unnecessary_overrides
@@ -48,29 +42,19 @@ class BarcodeSelection extends DataCaptureMode {
     _controller.setModeEnabledState(newValue);
   }
 
-  static CameraSettings createRecommendedCameraSettings() {
+  static CameraSettings get recommendedCameraSettings => _recommendedCameraSettings();
+
+  static CameraSettings _recommendedCameraSettings() {
     var defaults = BarcodeSelectionDefaults.cameraSettingsDefaults;
-    return CameraSettings(
-      defaults.preferredResolution,
-      defaults.zoomFactor,
-      defaults.focusRange,
-      defaults.focusGestureStrategy,
-      defaults.zoomGestureZoomFactor,
-      properties: defaults.properties,
-      shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus,
-    );
+    return CameraSettings(defaults.preferredResolution, defaults.zoomFactor, defaults.focusRange,
+        defaults.focusGestureStrategy, defaults.zoomGestureZoomFactor,
+        properties: defaults.properties, shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus);
   }
 
   BarcodeSelectionFeedback get feedback => _feedback;
 
   set feedback(BarcodeSelectionFeedback newValue) {
-    _feedback.removeListener(_updateFeedbackHandler);
     _feedback = newValue;
-    _feedback.addListener(_updateFeedbackHandler);
-    _controller.updateFeedback();
-  }
-
-  void _updateFeedbackHandler() {
     _controller.updateFeedback();
   }
 
@@ -100,7 +84,7 @@ class BarcodeSelection extends DataCaptureMode {
     }
   }
 
-  Future<void> applySettings(BarcodeSelectionSettings settings) async {
+  Future<void> applySettings(BarcodeSelectionSettings settings) {
     _settings = settings;
     return _controller.applyNewSettings(settings);
   }
@@ -118,15 +102,11 @@ class BarcodeSelection extends DataCaptureMode {
     var json = <String, dynamic>{
       'type': 'barcodeSelection',
       'feedback': _feedback.toMap(),
-      'settings': _settings.toMap(),
-      'modeId': _modeId,
-      'hasListeners': _listeners.isNotEmpty,
-      'enabled': _enabled,
+      'settings': _settings.toMap()
     };
     if (_pointOfInterest != null) {
       json['pointOfInterest'] = _pointOfInterest?.toMap();
     }
-    json['modeId'] = _modeId;
     return json;
   }
 }
@@ -136,44 +116,30 @@ abstract class BarcodeSelectionListener {
   static const String _didUpdateSessionEventName = 'BarcodeSelectionListener.didUpdateSession';
 
   Future<void> didUpdateSelection(
-    BarcodeSelection barcodeSelection,
-    BarcodeSelectionSession session,
-    Future<FrameData?> getFrameData(),
-  );
+      BarcodeSelection barcodeSelection, BarcodeSelectionSession session, Future<FrameData?> getFrameData());
   Future<void> didUpdateSession(
-    BarcodeSelection barcodeSelection,
-    BarcodeSelectionSession session,
-    Future<FrameData?> getFrameData(),
-  );
+      BarcodeSelection barcodeSelection, BarcodeSelectionSession session, Future<FrameData?> getFrameData());
 }
 
-class _BarcodeSelectionListenerController extends BaseController {
+class _BarcodeSelectionListenerController {
+  final MethodChannel _methodChannel = const MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
   final BarcodeSelection _barcodeSelection;
   StreamSubscription<dynamic>? _barcodeSelectionSubscription;
-  late final BarcodeMethodHandler methodHandler;
-  late final CoreMethodHandler coreMethodHandler;
 
-  _BarcodeSelectionListenerController(this._barcodeSelection) : super(BarcodeFunctionNames.methodsChannelName) {
-    methodHandler = BarcodeMethodHandler(methodChannel);
-  }
+  _BarcodeSelectionListenerController.forBarcodeSelection(this._barcodeSelection);
 
   void subscribeListeners() {
-    methodHandler
-        .registerBarcodeSelectionListenerForEvents(modeId: _barcodeSelection._modeId)
-        .then((value) => _setupBarcodeSelectionSubscription(), onError: onError);
+    _methodChannel
+        .invokeMethod(BarcodeSelectionFunctionNames.addListener)
+        .then((value) => _setupBarcodeSelectionSubscription(), onError: _onError);
   }
 
   void unsubscribeListeners() {
     _barcodeSelectionSubscription?.cancel();
-    methodHandler
-        .unregisterBarcodeSelectionListenerForEvents(modeId: _barcodeSelection._modeId)
-        .then((value) => null, onError: onError);
-    _barcodeSelectionSubscription = null;
+    _methodChannel.invokeMethod(BarcodeSelectionFunctionNames.removeListener).then((value) => null, onError: _onError);
   }
 
   void _setupBarcodeSelectionSubscription() {
-    if (_barcodeSelectionSubscription != null) return;
-
     _barcodeSelectionSubscription = BarcodePluginEvents.barcodeSelectionEventStream.listen((event) {
       if (_barcodeSelection._listeners.isEmpty) return;
 
@@ -182,83 +148,79 @@ class _BarcodeSelectionListenerController extends BaseController {
       if (eventName == BarcodeSelectionListener._didUpdateSelectionEventName) {
         var session = BarcodeSelectionSession.fromJSON(eventJSON);
         _notifyListenersOfDidUpdateSelection(session).then((value) {
-          methodHandler
-              .finishBarcodeSelectionDidSelect(modeId: _barcodeSelection._modeId, enabled: _barcodeSelection.isEnabled)
-              .then((value) => null, onError: (error) => developer.log(error));
+          _methodChannel
+              .invokeMethod(
+                  BarcodeSelectionFunctionNames.barcodeSelectionFinishDidUpdateSelection, _barcodeSelection.isEnabled)
+              // ignore: unnecessary_lambdas
+              .then((value) => null, onError: (error) => log(error));
         });
       } else if (eventName == BarcodeSelectionListener._didUpdateSessionEventName) {
         var session = BarcodeSelectionSession.fromJSON(eventJSON);
         _notifyListenersOfDidUpateSession(session).then((value) {
-          methodHandler
-              .finishBarcodeSelectionDidUpdateSession(
-                  modeId: _barcodeSelection._modeId, enabled: _barcodeSelection.isEnabled)
-              .then((value) => null, onError: (error) => developer.log(error));
+          _methodChannel
+              .invokeMethod(
+                  BarcodeSelectionFunctionNames.barcodeSelectionFinishDidUpdateSession, _barcodeSelection.isEnabled)
+              // ignore: unnecessary_lambdas
+              .then((value) => null, onError: (error) => log(error));
         });
       }
     });
   }
 
   Future<void> unfreezeCamera() {
-    return methodHandler
-        .unfreezeCameraInBarcodeSelection(modeId: _barcodeSelection._modeId)
-        .then((value) => null, onError: onError);
+    return _methodChannel
+        .invokeMethod(BarcodeSelectionFunctionNames.unfreezeCamera)
+        .then((value) => null, onError: _onError);
   }
 
   Future<void> reset() {
-    return methodHandler
-        .resetBarcodeSelection(modeId: _barcodeSelection._modeId)
-        .then((value) => null, onError: onError);
+    return _methodChannel.invokeMethod(BarcodeSelectionFunctionNames.resetMode);
   }
 
   Future<void> updateMode() {
-    return methodHandler
-        .updateBarcodeSelectionMode(modeId: _barcodeSelection._modeId, modeJson: jsonEncode(_barcodeSelection.toMap()))
-        .then((value) => null, onError: onError);
+    return _methodChannel.invokeMethod(
+        BarcodeSelectionFunctionNames.updateBarcodeSelectionMode, jsonEncode(_barcodeSelection.toMap()));
   }
 
   Future<void> updateFeedback() {
-    return methodHandler
-        .updateBarcodeSelectionFeedback(
-            modeId: _barcodeSelection._modeId, feedbackJson: jsonEncode(_barcodeSelection.feedback.toMap()))
-        .then((value) => null, onError: onError);
+    return _methodChannel.invokeMethod(
+        BarcodeSelectionFunctionNames.updateFeedback, jsonEncode(_barcodeSelection.feedback.toMap()));
   }
 
   Future<void> applyNewSettings(BarcodeSelectionSettings settings) {
-    return methodHandler
-        .applyBarcodeSelectionModeSettings(
-            modeId: _barcodeSelection._modeId, modeSettingsJson: jsonEncode(settings.toMap()))
-        .then((value) => null, onError: onError);
+    return _methodChannel
+        .invokeMethod(BarcodeSelectionFunctionNames.applyBarcodeSelectionModeSettings, jsonEncode(settings.toMap()))
+        .then((value) => null, onError: _onError);
   }
 
   Future<void> _notifyListenersOfDidUpateSession(BarcodeSelectionSession session) async {
-    // Iterate backwards to avoid allocation and handle concurrent modifications safely
-    // This is called frequently so we avoid creating a copy
-    for (var i = _barcodeSelection._listeners.length - 1; i >= 0; i--) {
-      if (i < _barcodeSelection._listeners.length) {
-        await _barcodeSelection._listeners[i]
-            .didUpdateSession(_barcodeSelection, session, () => _getLastFrameData(session));
-      }
+    for (var listener in _barcodeSelection._listeners) {
+      await listener.didUpdateSession(_barcodeSelection, session, () => _getLastFrameData(session));
     }
   }
 
   Future<void> _notifyListenersOfDidUpdateSelection(BarcodeSelectionSession session) async {
-    for (var listener in _barcodeSelection._listeners.toList()) {
+    for (var listener in _barcodeSelection._listeners) {
       await listener.didUpdateSelection(_barcodeSelection, session, () => _getLastFrameData(session));
     }
   }
 
   Future<FrameData?> _getLastFrameData(BarcodeSelectionSession session) {
-    final frameId = session.frameId;
-    if (frameId == null) return Future.value(null);
+    if (session.frameId == null) return Future.value(null);
 
-    return coreMethodHandler
-        .getLastFrameOrNullAsMap(frameId: frameId)
-        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: onError);
+    return _methodChannel
+        .invokeMethod(BarcodeSelectionFunctionNames.getLastFrameData, session.frameId)
+        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: _onError);
   }
 
   void setModeEnabledState(bool newValue) {
-    methodHandler
-        .setBarcodeSelectionModeEnabledState(modeId: _barcodeSelection._modeId, enabled: newValue)
-        .then((value) => null, onError: onError);
+    _methodChannel
+        .invokeMethod(BarcodeSelectionFunctionNames.setModeEnabledState, newValue)
+        .then((value) => null, onError: _onError);
+  }
+
+  void _onError(Object? error, StackTrace? stackTrace) {
+    if (error == null) return;
+    throw error;
   }
 }

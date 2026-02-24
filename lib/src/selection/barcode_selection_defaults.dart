@@ -5,19 +5,22 @@
  */
 
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 import 'package:flutter/services.dart';
 import '../../scandit_flutter_datacapture_barcode_selection.dart';
 import 'barcode_selection_basic_overlay.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'barcode_selection_type.dart';
+import 'barcode_selection_function_names.dart';
 import 'barcode_selection_tap_behaviour.dart';
 import 'barcode_selection_freeze_behaviour.dart';
 import 'barcode_selection_strategy.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeSelectionDefaults {
+  static MethodChannel channel = const MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
+
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
   static late BarcodeSelectionSettingsDefaults _barcodeSelectionSettingsDefaults;
@@ -45,18 +48,25 @@ class BarcodeSelectionDefaults {
   static BarcodeSelectionTapSelectionDefaults get barcodeSelectionTapSelectionDefaults =>
       _barcodeSelectionTapSelectionDefaults;
 
-  static void initializeDefaults(Map<String, dynamic> barcodeSelectionDefaults) {
-    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(barcodeSelectionDefaults['RecommendedCameraSettings']);
-    _barcodeSelectionSettingsDefaults = BarcodeSelectionSettingsDefaults.fromJSON(
-        barcodeSelectionDefaults['BarcodeSelectionSettings'] as Map<String, dynamic>);
-    _barcodeCaptureOverlayDefaults = BarcodeSelectionBasicOverlayDefaults.fromJSON(
-        barcodeSelectionDefaults['BarcodeSelectionBasicOverlay'] as Map<String, dynamic>);
+  static bool _isInitialized = false;
+
+  static Future<void> initializeDefaults() async {
+    if (_isInitialized) return;
+    var result = await channel.invokeMethod(BarcodeSelectionFunctionNames.getBarcodeSelectionDefaults);
+    var json = jsonDecode(result as String);
+    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(json['RecommendedCameraSettings']);
+    _barcodeSelectionSettingsDefaults =
+        BarcodeSelectionSettingsDefaults.fromJSON(json['BarcodeSelectionSettings'] as Map<String, dynamic>);
+    _barcodeCaptureOverlayDefaults =
+        BarcodeSelectionBasicOverlayDefaults.fromJSON(json['BarcodeSelectionBasicOverlay'] as Map<String, dynamic>);
     _barcodeSelectionFeedbackDefaults =
-        BarcodeSelectionFeedbackDefaults.fromJSON(jsonDecode(barcodeSelectionDefaults['Feedback']));
-    _barcodeSelectionTapSelectionDefaults = BarcodeSelectionTapSelectionDefaults.fromJSON(
-        barcodeSelectionDefaults['BarcodeSelectionTapSelection'] as Map<String, dynamic>);
-    _barcodeSelectionAimerSelectionDefaults = BarcodeSelectionAimerSelectionDefaults.fromJSON(
-        barcodeSelectionDefaults['BarcodeSelectionAimerSelection'] as Map<String, dynamic>);
+        BarcodeSelectionFeedbackDefaults.fromJSON(jsonDecode(json['Feedback']) as Map<String, dynamic>);
+    _barcodeSelectionTapSelectionDefaults =
+        BarcodeSelectionTapSelectionDefaults.fromJSON(json['BarcodeSelectionTapSelection'] as Map<String, dynamic>);
+    _barcodeSelectionAimerSelectionDefaults =
+        BarcodeSelectionAimerSelectionDefaults.fromJSON(json['BarcodeSelectionAimerSelection'] as Map<String, dynamic>);
+
+    _isInitialized = true;
   }
 }
 

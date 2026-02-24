@@ -9,13 +9,41 @@ import '../symbology.dart';
 import '../symbology_settings.dart';
 import '../barcode_defaults.dart';
 
+@Deprecated('Setting a scenario is no longer recommended, use the BarcodeBatchSettings empty constructor instead.')
+enum BarcodeBatchScenario {
+  a('A'),
+  b('B');
+
+  const BarcodeBatchScenario(this._name);
+
+  @override
+  String toString() => _name;
+
+  final String _name;
+}
+
+// ignore: deprecated_member_use_from_same_package
+extension BarcodeBatchScenarioSerializer on BarcodeBatchScenario {
+  // ignore: deprecated_member_use_from_same_package
+  static BarcodeBatchScenario fromJSON(String jsonValue) {
+    // ignore: deprecated_member_use_from_same_package
+    return BarcodeBatchScenario.values.firstWhere((element) => element.toString() == jsonValue);
+  }
+}
+
 class BarcodeBatchSettings implements Serializable {
+  // ignore: deprecated_member_use_from_same_package
+  final BarcodeBatchScenario? _scenario;
   final Map<String, dynamic> _properties = {};
   final Map<String, SymbologySettings> _symbologies = {};
 
   Set<Symbology> get enabledSymbologies => _enabledSymbologies();
 
-  BarcodeBatchSettings();
+// ignore: deprecated_member_use_from_same_package
+  BarcodeBatchSettings() : this.forScenario(null);
+  BarcodeBatchSettings._(this._scenario);
+  @Deprecated('Setting a scenario is no longer recommended, use the BarcodeBatchSettings empty constructor instead.')
+  BarcodeBatchSettings.forScenario(BarcodeBatchScenario? scenario) : this._(scenario);
 
   SymbologySettings settingsForSymbology(Symbology symbology) {
     var identifier = symbology.toString();
@@ -57,8 +85,11 @@ class BarcodeBatchSettings implements Serializable {
   Map<String, dynamic> toMap() {
     var json = <String, dynamic>{
       'properties': _properties,
-      'symbologies': _symbologies.map((key, value) => MapEntry(key, value.toMap())),
+      'symbologies': _symbologies.map((key, value) => MapEntry(key, value.toMap()))
     };
+    if (_scenario != null) {
+      json['scenario'] = _scenario.toString();
+    }
     return json;
   }
 }

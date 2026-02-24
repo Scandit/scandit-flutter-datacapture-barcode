@@ -13,6 +13,4 @@ abstract class SparkScanViewUiListener {
   void didTapBarcodeCountButton(SparkScanView view);
 
   void didChangeViewState(SparkScanViewState newState);
-
-  void didTapLabelCaptureButton(SparkScanView view);
 }

@@ -8,12 +8,9 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
-// ignore: implementation_imports
-import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
 
+import 'barcode_generator_function_names.dart';
 import 'qr_code_crrection_level.dart';
 
 class BarcodeGenerator extends Serializable implements DataCaptureComponent {
@@ -168,17 +165,19 @@ class AztecBarcodeGeneratorBuilder extends BarcodeGeneratorBuilder<AztecBarcodeG
   }
 }
 
-class _BarcodeGeneratorController extends BaseController {
+class _BarcodeGeneratorController {
   final BarcodeGenerator barcodeGenerator;
-  late final BarcodeMethodHandler barcodeMethodHandler;
 
-  _BarcodeGeneratorController(this.barcodeGenerator) : super(BarcodeFunctionNames.methodsChannelName) {
-    barcodeMethodHandler = BarcodeMethodHandler(methodChannel);
-  }
+  final MethodChannel _methodChannel = const MethodChannel(BarcodeGeneratorFunctionNames.methodsChannelName);
+
+  _BarcodeGeneratorController(this.barcodeGenerator);
 
   Future<Image> generateFromData(Uint8List data, double imageWidth) async {
-    final result = await barcodeMethodHandler.generateFromBaseEncodedDataToBytes(
-        generatorId: barcodeGenerator.id, data: data, imageWidth: imageWidth.toInt());
+    var result = await _methodChannel.invokeMethod<Uint8List>(BarcodeGeneratorFunctionNames.generateFromData, {
+      'generatorId': barcodeGenerator.id,
+      'data': data,
+      'imageWidth': imageWidth,
+    });
     if (result == null) {
       throw Exception('Failed to generate barcode');
     }
@@ -186,22 +185,23 @@ class _BarcodeGeneratorController extends BaseController {
   }
 
   Future<Image> generateFromText(String text, double imageWidth) async {
-    final result = await barcodeMethodHandler.generateFromStringToBytes(
-        generatorId: barcodeGenerator.id, text: text, imageWidth: imageWidth.toInt());
+    var result = await _methodChannel.invokeMethod<Uint8List>(BarcodeGeneratorFunctionNames.generateFromText, {
+      'generatorId': barcodeGenerator.id,
+      'text': text,
+      'imageWidth': imageWidth,
+    });
     if (result == null) {
       throw Exception('Failed to generate barcode');
     }
     return Image.memory(result, width: imageWidth);
   }
 
-  @override
   void dispose() {
-    barcodeMethodHandler.disposeBarcodeGenerator(generatorId: barcodeGenerator.id);
-    super.dispose();
+    _methodChannel.invokeMethod(BarcodeGeneratorFunctionNames.dispose, {'generatorId': barcodeGenerator.id});
   }
 
   void create() {
-    barcodeMethodHandler.createBarcodeGenerator(barcodeGeneratorJson: jsonEncode(barcodeGenerator.toMap()));
+    _methodChannel.invokeMethod(BarcodeGeneratorFunctionNames.create, jsonEncode(barcodeGenerator.toMap()));
   }
 }
 

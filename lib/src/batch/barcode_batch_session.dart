@@ -7,8 +7,7 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
+import 'barcode_batch_function_names.dart';
 
 import '../tracked_barcode.dart';
 
@@ -52,8 +51,14 @@ class BarcodeBatchSession with _PrivatecBarcodeBatchSession {
         (key, value) =>
             MapEntry(int.parse(key), TrackedBarcode.fromJSON(value, sessionFrameSequenceId: frameSequenceId)));
 
-    return BarcodeBatchSession._(addedTrackedCodes, removedTrackedCodes, updatedTrackedCodes, trackedCodes,
-        frameSequenceId, eventJson['frameId']);
+    return BarcodeBatchSession._(
+      addedTrackedCodes,
+      removedTrackedCodes,
+      updatedTrackedCodes,
+      trackedCodes,
+      frameSequenceId,
+      eventJson['frameId'],
+    );
   }
 
   Future<void> reset() {
@@ -68,13 +73,13 @@ mixin _PrivatecBarcodeBatchSession {
 }
 
 class _BarcodeBatchSessionController {
-  late final BarcodeMethodHandler barcodeMethodHandler = _getMethodHandler();
+  late final MethodChannel _methodChannel = _getChannel();
 
   Future<void> reset(int frameSequenceId) {
-    return barcodeMethodHandler.resetBarcodeBatchSession();
+    return _methodChannel.invokeMethod(BarcodeBatchFunctionNames.resetBarcodeBatchSession, frameSequenceId);
   }
 
-  BarcodeMethodHandler _getMethodHandler() {
-    return BarcodeMethodHandler(const MethodChannel(BarcodeFunctionNames.methodsChannelName));
+  MethodChannel _getChannel() {
+    return const MethodChannel(BarcodeBatchFunctionNames.methodsChannelName);
   }
 }

@@ -8,8 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/pick/internal/barcode_pick_consts.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import '../barcode_plugin_events.dart';
@@ -27,10 +26,6 @@ mixin PrivateBarcodePickProductProvider {
 
   void unsubscribeEvents() {
     _controller.unsubscribeFromEvents();
-  }
-
-  void setViewId(int viewId) {
-    _controller._viewId = viewId;
   }
 }
 
@@ -69,20 +64,14 @@ class BarcodePickAsyncMapperProductProvider
 
 class _BarcodePickAsyncMapperProductProviderController {
   final BarcodePickAsyncMapperProductProvider _provider;
-  late final BarcodeMethodHandler barcodeMethodHandler = _getMethodHandler();
   StreamSubscription<dynamic>? _providerEventsSubscription;
-  int _viewId = 0;
+  final MethodChannel _methodChannel = const MethodChannel(BarcodePickFunctionNames.methodsChannelName);
 
   _BarcodePickAsyncMapperProductProviderController(this._provider);
 
   void subsribeForEvents() {
     _providerEventsSubscription = BarcodePluginEvents.barcodePickEventStream.listen((event) {
       var eventJSON = jsonDecode(event) as Map<String, dynamic>;
-
-      // Filter events by viewId
-      final viewId = eventJSON['viewId'] as int?;
-      if (viewId != null && viewId != _viewId) return;
-
       var eventName = eventJSON['event'] as String;
 
       if (eventName == BarcodePickAsyncMapperProductProviderCallback._onProductIdentifierForItems) {
@@ -95,16 +84,12 @@ class _BarcodePickAsyncMapperProductProviderController {
 
   void finishOnProductIdentifierForItems(List<BarcodePickProductProviderCallbackItem> data) {
     var result = data.map((e) => e.toMap()).toList();
-    barcodeMethodHandler.finishOnProductIdentifierForItems(viewId: _viewId, itemsJson: jsonEncode(result));
+    _methodChannel.invokeMethod(BarcodePickFunctionNames.finishOnProductIdentifierForItems, jsonEncode(result));
   }
 
   void unsubscribeFromEvents() {
     _providerEventsSubscription?.cancel();
     _providerEventsSubscription = null;
-  }
-
-  BarcodeMethodHandler _getMethodHandler() {
-    return BarcodeMethodHandler(MethodChannel(BarcodeFunctionNames.methodsChannelName));
   }
 }
 
