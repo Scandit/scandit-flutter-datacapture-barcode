@@ -7,7 +7,6 @@
 import Flutter
 import ScanditFrameworksBarcode
 import ScanditFrameworksCore
-import scandit_flutter_datacapture_core
 
 class FlutterBarcodeCountViewFactory: NSObject, FlutterPlatformViewFactory {
     var views: [FlutterBarcodeCountView] = []
@@ -32,7 +31,7 @@ class FlutterBarcodeCountViewFactory: NSObject, FlutterPlatformViewFactory {
         }
         let view = FlutterBarcodeCountView(frame: frame)
         view.factory = self
-        barcodeCountModule.addViewFromJson(parent: view, viewJson: creationJson, result: FlutterLogInsteadOfResult())
+        barcodeCountModule.addViewFromJson(parent: view, viewJson: creationJson)
         views.append(view)
         return view
     }

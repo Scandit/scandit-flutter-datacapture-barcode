@@ -25,11 +25,12 @@ class SparkScanMethodHandler {
         static let removeSparkScanViewUiListener = "removeSparkScanViewUiListener"
         static let sparkScanViewStartScanning = "sparkScanViewStartScanning"
         static let sparkScanViewPauseScanning = "sparkScanViewPauseScanning"
+        static let sparkScanViewEmitFeedback = "sparkScanViewEmitFeedback"
         static let showToast = "showToast"
         static let onWidgetPaused = "onWidgetPaused"
         static let setModeEnabledState = "setModeEnabledState"
-        static let registerSparkScanFeedbackDelegateForEvents = "registerSparkScanFeedbackDelegateForEvents"
-        static let unregisterSparkScanFeedbackDelegateForEvents = "unregisterSparkScanFeedbackDelegateForEvents"
+        static let addFeedbackDelegate = "addFeedbackDelegate"
+        static let removeFeedbackDelegate = "removeFeedbackDelegate"
         static let submitFeedbackForBarcode = "submitFeedbackForBarcode"
         static let bringSparkScanViewToFront = "bringViewToFront"
         static let updateSparkScanView = "sparkScanViewUpdate"
@@ -47,95 +48,78 @@ class SparkScanMethodHandler {
             let jsonString = sparkScanModule.defaults.stringValue
             result(jsonString)
         case FunctionNames.finishDidScan:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.finishDidScan(
-                viewId: params["viewId"] as! Int,
-                enabled: params["enabled"] as? Bool ?? false
-            )
+            let enabled = methodCall.arguments as? Bool ?? false
+            sparkScanModule.finishDidScan(enabled: enabled)
             result(nil)
         case FunctionNames.finishDidUpdateSession:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.finishDidUpdateSession(
-                viewId: params["viewId"] as! Int,
-                enabled: params["enabled"] as? Bool ?? false
-            )
+            let enabled = methodCall.arguments as? Bool ?? false
+            sparkScanModule.finishDidUpdateSession(enabled: enabled)
             result(nil)
         case FunctionNames.addSparkScanListener:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.addAsyncSparkScanListener(viewId: params["viewId"] as! Int)
+            sparkScanModule.addSparkScanListener()
             result(nil)
         case FunctionNames.removeSparkScanListener:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.removeAsyncSparkScanListener(viewId: params["viewId"] as! Int)
+            sparkScanModule.removeSparkScanListener()
             result(nil)
         case FunctionNames.resetSparkScanSession:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.resetSession(viewId: params["viewId"] as! Int)
+            sparkScanModule.resetSession()
             result(nil)
         case FunctionNames.getLastFrameData:
-            sparkScanModule.getLastFrameDataBytes(
-                frameId: methodCall.arguments as! String,
-                result: FlutterFrameworkResult(reply: result)
-            )
+            LastFrameData.shared.getLastFrameDataBytes {
+                result($0)
+            }
         case FunctionNames.updateSparkScanMode:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.updateMode(
-                viewId: params["viewId"] as! Int,
-                modeJson: params["updateJson"] as! String,
-                result: FlutterFrameworkResult(reply: result)
-            )
+            sparkScanModule.updateMode(modeJson: methodCall.arguments as! String, 
+                                       result: FlutterFrameworkResult(reply: result))
         case FunctionNames.addSparkScanViewUiListener:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.addSparkScanViewUiListener(viewId: params["viewId"] as! Int)
+            sparkScanModule.addSparkScanViewUiListener()
             result(nil)
         case FunctionNames.removeSparkScanViewUiListener:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.removeSparkScanViewUiListener(viewId: params["viewId"] as! Int)
+            sparkScanModule.removeSparkScanViewUiListener()
             result(nil)
         case FunctionNames.sparkScanViewStartScanning:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.startScanning(viewId: params["viewId"] as! Int, result: FlutterFrameworkResult(reply: result))
+            sparkScanModule.startScanning(result: FlutterFrameworkResult(reply: result))
         case FunctionNames.sparkScanViewPauseScanning:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.pauseScanning(viewId: params["viewId"] as! Int)
+            sparkScanModule.pauseScanning()
             result(nil)
+        case FunctionNames.sparkScanViewEmitFeedback:
+            sparkScanModule.emitFeedback(feedbackJson: methodCall.arguments as! String, 
+                                         result: FlutterFrameworkResult(reply: result))
         case FunctionNames.showToast:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.showToast(
-                viewId: params["viewId"] as! Int,
-                text: params["text"] as! String,
-                result: FlutterFrameworkResult(reply: result)
-            )
+            sparkScanModule.showToast(text: methodCall.arguments as! String, 
+                                      result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.onWidgetPaused:
+            sparkScanModule.onPause(result: FlutterFrameworkResult(reply: result))
         case FunctionNames.setModeEnabledState:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.setModeEnabled(viewId: params["viewId"] as! Int, enabled: params["enabled"] as! Bool)
+            sparkScanModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
             result(nil)
-        case FunctionNames.registerSparkScanFeedbackDelegateForEvents:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.addFeedbackDelegate(params["viewId"] as! Int)
-            result(nil)
-        case FunctionNames.unregisterSparkScanFeedbackDelegateForEvents:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.removeFeedbackDelegate(params["viewId"] as! Int)
-            result(nil)
+        case FunctionNames.addFeedbackDelegate:
+            sparkScanModule.addFeedbackDelegate(result: FlutterFrameworkResult(reply: result))
+        case FunctionNames.removeFeedbackDelegate:
+            sparkScanModule.removeFeedbackDelegate(result: FlutterFrameworkResult(reply: result))
         case FunctionNames.submitFeedbackForBarcode:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.submitFeedbackForBarcode(
-                viewId: params["viewId"] as! Int,
-                feedbackJson: params["feedbackJson"] as? String,
-                result: FlutterFrameworkResult(reply: result)
-            )
+            sparkScanModule.submitFeedbackForBarcode(feedbackJson: methodCall.arguments as? String,
+                                                     result: FlutterFrameworkResult(reply: result))
         case FunctionNames.bringSparkScanViewToFront:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.bringSparkScanViewToFront(viewId: params["viewId"] as! Int)
+            guard sparkScanModule.shouldBringSparkScanViewToFront else {
+                result(nil)
+                return
+            }
+            guard let sparkScanView = sparkScanModule.sparkScanView else {
+                result(SparkScanError.nilView)
+                return
+            }
+            guard let parent = sparkScanView.superview else {
+                result(SparkScanError.nilParent)
+                return
+            }
+            dispatchMainSync {
+                parent.bringSubviewToFront(sparkScanView)
+            }
             result(nil)
         case FunctionNames.updateSparkScanView:
-            let params = methodCall.arguments as! [String: Any]
-            sparkScanModule.updateView(
-                viewId: params["viewId"] as! Int,
-                viewJson: params["updateJson"] as! String,
-                result: FlutterFrameworkResult(reply: result)
-            )
+            sparkScanModule.updateView(viewJson: methodCall.arguments as! String,
+                                       result: FlutterFrameworkResult(reply: result))
         default:
             result(FlutterMethodNotImplemented)
         }

@@ -54,6 +54,12 @@ public class BarcodeFindMethodHandler implements MethodChannel.MethodCallHandler
             case "unregisterBarcodeFindViewListener":
                 getSharedModule().removeBarcodeFindViewListener(new FlutterResult(result));
                 break;
+            case "barcodeFindViewOnPause":
+                getSharedModule().viewOnPause(new FlutterResult(result));
+                break;
+            case "barcodeFindViewOnResume":
+                getSharedModule().viewOnResume(new FlutterResult(result));
+                break;
             case "barcodeFindSetItemList":
                 assert call.arguments() != null;
                 getSharedModule().setItemList(call.arguments(), new FlutterResult(result));

@@ -93,10 +93,6 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
     _controller.update();
   }
 
-  void _handleViewfinderChanged() {
-    _controller.update();
-  }
-
   final Viewfinder _viewfinder = AimerViewfinder();
 
   Viewfinder get viewfinder => _viewfinder;
@@ -111,8 +107,6 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
     _trackedBrush = brushDefaultsForCurrentStyle.trackedBrush;
     view?.addOverlay(this);
     _controller = _BarcodeSelectionBasicOverlayController(this);
-
-    viewfinder.addListener(_handleViewfinderChanged);
   }
 
   Color _frozenBackgroundColor = BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.frozenBackgroundColor;
@@ -122,41 +116,6 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
   set frozenBackgroundColor(Color newValue) {
     _frozenBackgroundColor = newValue;
     _controller.update();
-  }
-
-  String? _textForSelectOrDoubleTapToFreezeHint;
-
-  Future<void> setTextForSelectOrDoubleTapToFreezeHint(String text) {
-    _textForSelectOrDoubleTapToFreezeHint = text;
-    return _controller.update();
-  }
-
-  String? _textForTapToSelectHint;
-
-  Future<void> setTextForTapToSelectHint(String text) {
-    _textForTapToSelectHint = text;
-    return _controller.update();
-  }
-
-  String? _textForDoubleTapToUnfreezeHint;
-
-  Future<void> setTextForDoubleTapToUnfreezeHint(String text) {
-    _textForDoubleTapToUnfreezeHint = text;
-    return _controller.update();
-  }
-
-  String? _textForTapAnywhereToSelectHint;
-
-  Future<void> setTextForTapAnywhereToSelectHint(String text) {
-    _textForTapAnywhereToSelectHint = text;
-    return _controller.update();
-  }
-
-  String? _textForAimToSelectAutoHint;
-
-  Future<void> setTextForAimToSelectAutoHint(String text) {
-    _textForAimToSelectAutoHint = text;
-    return _controller.update();
   }
 
   BarcodeSelectionBasicOverlay.withBarcodeSelection(BarcodeSelection barcodeSelection)
@@ -184,21 +143,6 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
       'style': style.toString(),
       'frozenBackgroundColor': _frozenBackgroundColor.jsonValue,
     });
-    if (_textForSelectOrDoubleTapToFreezeHint != null) {
-      json['textForSelectOrDoubleTapToFreezeHint'] = _textForSelectOrDoubleTapToFreezeHint;
-    }
-    if (_textForTapToSelectHint != null) {
-      json['textForTapToSelectHint'] = _textForTapToSelectHint;
-    }
-    if (_textForDoubleTapToUnfreezeHint != null) {
-      json['textForDoubleTapToUnfreezeHint'] = _textForDoubleTapToUnfreezeHint;
-    }
-    if (_textForTapAnywhereToSelectHint != null) {
-      json['textForTapAnywhereToSelectHint'] = _textForTapAnywhereToSelectHint;
-    }
-    if (_textForAimToSelectAutoHint != null) {
-      json['textForAimToSelectAutoHint'] = _textForAimToSelectAutoHint;
-    }
     return json;
   }
 }
@@ -206,7 +150,7 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
 class _BarcodeSelectionBasicOverlayController {
   late final MethodChannel _methodChannel = _getChannel();
 
-  final BarcodeSelectionBasicOverlay _overlay;
+  BarcodeSelectionBasicOverlay _overlay;
 
   _BarcodeSelectionBasicOverlayController(this._overlay);
 
@@ -216,6 +160,6 @@ class _BarcodeSelectionBasicOverlayController {
   }
 
   MethodChannel _getChannel() {
-    return const MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
+    return MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
   }
 }

@@ -45,19 +45,18 @@ class BarcodeCaptureMethodHandler {
             barcodeCaptureModule.finishDidUpdateSession(enabled: enabled)
             result(nil)
         case FunctionNames.addBarcodeCaptureListener:
-            barcodeCaptureModule.addAsyncListener()
+            barcodeCaptureModule.addListener()
             result(nil)
         case FunctionNames.removeBarcodeCaptureListener:
-            barcodeCaptureModule.removeAsyncListener()
+            barcodeCaptureModule.removeListener()
             result(nil)
         case FunctionNames.resetBarcodeCaptureSession:
             barcodeCaptureModule.resetSession(frameSequenceId: methodCall.arguments as? Int)
             result(nil)
         case FunctionNames.getLastFrameData:
-            barcodeCaptureModule.getLastFrameDataBytes(
-                frameId: methodCall.arguments as! String,
-                result: FlutterFrameworkResult(reply: result)
-            )
+            LastFrameData.shared.getLastFrameDataBytes {
+                result($0)
+            }
         case FunctionNames.setModeEnabledState:
             barcodeCaptureModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
             result(nil)
