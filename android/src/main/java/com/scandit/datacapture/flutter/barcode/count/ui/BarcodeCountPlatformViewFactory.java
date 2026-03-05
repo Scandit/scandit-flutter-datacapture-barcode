@@ -45,7 +45,7 @@ public class BarcodeCountPlatformViewFactory extends PlatformViewFactory {
             throw new IllegalArgumentException("Unable to create the BarcodeCountView without the json.");
         }
 
-        BarcodeCountModule barcodeCountModule = (BarcodeCountModule) this.serviceLocator.resolve(BarcodeCountModule.class.getName());
+        BarcodeCountModule barcodeCountModule = (BarcodeCountModule) this.serviceLocator.resolve(BarcodeCountModule.class.getSimpleName());
         if (barcodeCountModule == null) {
             throw new IllegalArgumentException("Unable to create the BarcodeCountView. Barcode Count module not initialized.");
         }

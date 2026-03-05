@@ -26,8 +26,6 @@ class SparkScanToastSettings extends Serializable {
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.continuousModeEnabledMessage;
   String? continuousModeDisabledMessage =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.continuousModeDisabledMessage;
-  String? cameraTimeoutMessage =
-      SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.cameraTimeoutMessage;
   String? scanPausedMessage =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.scanPausedMessage;
   String? zoomedInMessage =
@@ -53,7 +51,6 @@ class SparkScanToastSettings extends Serializable {
       'targetModeDisabledMessage': targetModeDisabledMessage,
       'continuousModeEnabledMessage': continuousModeEnabledMessage,
       'continuousModeDisabledMessage': continuousModeDisabledMessage,
-      'cameraTimeoutMessage': cameraTimeoutMessage,
       'scanPausedMessage': scanPausedMessage,
       'zoomedInMessage': zoomedInMessage,
       'zoomedOutMessage': zoomedOutMessage,

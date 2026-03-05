@@ -45,7 +45,7 @@ public class BarcodePickPlatformViewFactory extends PlatformViewFactory {
             throw new IllegalArgumentException("Unable to create the BarcodePickView without the json.");
         }
 
-        BarcodePickModule barcodePickModule = (BarcodePickModule) this.serviceLocator.resolve(BarcodePickModule.class.getName());
+        BarcodePickModule barcodePickModule = (BarcodePickModule) this.serviceLocator.resolve(BarcodePickModule.class.getSimpleName());
         if (barcodePickModule == null) {
             throw new IllegalArgumentException("Unable to create the BarcodePickView. Barcode Pick module not initialized.");
         }

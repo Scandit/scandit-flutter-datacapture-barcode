@@ -4,6 +4,7 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
+import 'package:scandit_flutter_datacapture_barcode/src/usi/scan_item_definition.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import '../barcode_defaults.dart';
@@ -14,8 +15,7 @@ import 'spark_scan_defaults.dart';
 class SparkScanSettings implements Serializable {
   SparkScanSettings();
 
-  Duration codeDuplicateFilter =
-      Duration(milliseconds: SparkScanDefaults.sparkScanSettingsDefaults.codeDuplicateFilter);
+  Duration codeDuplicateFilter = SparkScanDefaults.sparkScanSettingsDefaults.codeDuplicateFilter;
 
   BatterySavingMode batterySaving = SparkScanDefaults.sparkScanSettingsDefaults.batterySaving;
 
@@ -27,17 +27,7 @@ class SparkScanSettings implements Serializable {
 
   ScanIntention scanIntention = SparkScanDefaults.sparkScanSettingsDefaults.scanIntention;
 
-  bool _singleBarcodeAutoDetection = SparkScanDefaults.sparkScanSettingsDefaults.singleBarcodeAutoDetection;
-
-  @Deprecated(
-      'With the recent improvements introduced in the target mode, selection of barcodes is easier and more reliable. Given that, this method is outdated and not needed anymore.')
-  bool get singleBarcodeAutoDetection => _singleBarcodeAutoDetection;
-
-  @Deprecated(
-      'With the recent improvements introduced in the target mode, selection of barcodes is easier and more reliable. Given that, this method is outdated and not needed anymore.')
-  set singleBarcodeAutoDetection(bool newValue) {
-    _singleBarcodeAutoDetection = newValue;
-  }
+  List<ScanItemDefinition>? itemDefinitions;
 
   Set<Symbology> _enabledSymbologies() {
     return _symbologies.values.where((element) => element.isEnabled).map((e) => e.symbology).toSet().cast<Symbology>();
@@ -79,6 +69,7 @@ class SparkScanSettings implements Serializable {
       'batterySaving': batterySaving.toString(),
       'symbologies': _symbologies.map<String, Map<String, dynamic>>((key, value) => MapEntry(key, value.toMap())),
       'scanIntention': scanIntention.toString(),
+      'scanItemDefinitions': itemDefinitions?.map((e) => e.toMap()).toList(),
     };
   }
 }
