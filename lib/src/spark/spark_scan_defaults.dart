@@ -7,17 +7,20 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_mini_preview_size.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/feedback.dart' as feedback;
 
+import 'spark_scan_function_names.dart';
 import 'spark_scan_view_capture_mode.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class SparkScanDefaults {
+  static MethodChannel mainChannel = const MethodChannel(SparkScanFunctionNames.methodsChannelName);
+
   static late SparkScanSettingsDefaults _sparkScanSettingsDefaults;
 
   static SparkScanSettingsDefaults get sparkScanSettingsDefaults => _sparkScanSettingsDefaults;
@@ -32,12 +35,13 @@ class SparkScanDefaults {
 
   static bool _isInitialized = false;
 
-  static void initializeDefaults(Map<String, dynamic> sparkScanDefaults) {
+  static Future<void> initializeDefaults() async {
     if (_isInitialized) return;
-    _sparkScanSettingsDefaults =
-        SparkScanSettingsDefaults.fromJSON(sparkScanDefaults['SparkScanSettings'] as Map<String, dynamic>);
-    _sparkScanFeedbackDefaults = SparkScanFeedbackDefaults.fromJSON(sparkScanDefaults['Feedback']);
-    _sparkScanViewDefaults = SparkScanViewDefaults.fromJSON(sparkScanDefaults['SparkScanView']);
+    var result = await mainChannel.invokeMethod(SparkScanFunctionNames.getSparkScanDefaults);
+    var json = jsonDecode(result as String);
+    _sparkScanSettingsDefaults = SparkScanSettingsDefaults.fromJSON(json['SparkScanSettings'] as Map<String, dynamic>);
+    _sparkScanFeedbackDefaults = SparkScanFeedbackDefaults.fromJSON(json['Feedback']);
+    _sparkScanViewDefaults = SparkScanViewDefaults.fromJSON(json['SparkScanView']);
 
     _isInitialized = true;
   }
@@ -355,7 +359,7 @@ class SparkScanViewSettingsDefaults {
 
   factory SparkScanViewSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     final triggerButtonCollapseTimeout = Duration(seconds: (json['triggerButtonCollapseTimeout'] as num).toInt());
-    final defaultTorchState = TorchState.fromJSON(json['defaultTorchState'] as String);
+    final defaultTorchState = TorchStateDeserializer.fromJSON(json['defaultTorchState'] as String);
     final defaultScanningMode =
         SparkScanScanningModeSerializer.fromJSON(jsonDecode(json['defaultScanningMode']) as Map<String, dynamic>);
 
@@ -388,7 +392,7 @@ class SparkScanViewSettingsDefaults {
 
     CameraPosition defaultCameraPosition = CameraPosition.worldFacing;
     if (json.containsKey('defaultCameraPosition')) {
-      defaultCameraPosition = CameraPosition.fromJSON(json['defaultCameraPosition']);
+      defaultCameraPosition = CameraPositionDeserializer.cameraPositionFromJSON(json['defaultCameraPosition']);
     }
 
     final defaultMiniPreviewSize =

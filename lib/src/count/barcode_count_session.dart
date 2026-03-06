@@ -7,10 +7,9 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 
 import '../../scandit_flutter_datacapture_barcode.dart';
+import 'barcode_count_function_names.dart';
 
 class BarcodeCountSession with _PrivateBarcodeCountSession {
   final _BarcodeCountSessionController _controller = _BarcodeCountSessionController();
@@ -61,13 +60,16 @@ mixin _PrivateBarcodeCountSession {
 }
 
 class _BarcodeCountSessionController {
-  late final BarcodeMethodHandler _methodHandler = _getMethodHandler();
+  late final MethodChannel _methodChannel = _getChannel();
 
   Future<void> reset(int viewId, int frameSequenceId) {
-    return _methodHandler.resetBarcodeCountSession(viewId: viewId);
+    return _methodChannel.invokeMethod(BarcodeCountFunctionNames.resetBarcodeCountSession, {
+      'viewId': viewId,
+      'frameSequenceId': frameSequenceId,
+    });
   }
 
-  BarcodeMethodHandler _getMethodHandler() {
-    return BarcodeMethodHandler(const MethodChannel(BarcodeFunctionNames.methodsChannelName));
+  MethodChannel _getChannel() {
+    return const MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
   }
 }

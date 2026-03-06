@@ -4,7 +4,6 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-import 'package:scandit_flutter_datacapture_barcode/src/usi/scan_item_definition.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import '../barcode_defaults.dart';
@@ -26,8 +25,6 @@ class SparkScanSettings implements Serializable {
   Set<Symbology> get enabledSymbologies => _enabledSymbologies();
 
   ScanIntention scanIntention = SparkScanDefaults.sparkScanSettingsDefaults.scanIntention;
-
-  List<ScanItemDefinition>? itemDefinitions;
 
   Set<Symbology> _enabledSymbologies() {
     return _symbologies.values.where((element) => element.isEnabled).map((e) => e.symbology).toSet().cast<Symbology>();
@@ -69,7 +66,6 @@ class SparkScanSettings implements Serializable {
       'batterySaving': batterySaving.toString(),
       'symbologies': _symbologies.map<String, Map<String, dynamic>>((key, value) => MapEntry(key, value.toMap())),
       'scanIntention': scanIntention.toString(),
-      'scanItemDefinitions': itemDefinitions?.map((e) => e.toMap()).toList(),
     };
   }
 }

@@ -67,7 +67,7 @@ class BarcodeCountSettings implements Serializable {
       'symbologies': _symbologies.map<String, Map<String, dynamic>>((key, value) => MapEntry(key, value.toMap())),
       'properties': _properties,
       'expectOnlyUniqueBarcodes': expectsOnlyUniqueBarcodes,
-      'barcodeFilterSettings': _filterSettings.toMap()
+      'filterSettings': _filterSettings.toMap()
     };
   }
 }

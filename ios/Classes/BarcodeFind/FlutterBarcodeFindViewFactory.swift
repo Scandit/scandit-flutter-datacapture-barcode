@@ -18,11 +18,9 @@ class FlutterBarcodeFindViewFactory: NSObject, FlutterPlatformViewFactory {
         super.init()
     }
 
-    func create(
-        withFrame frame: CGRect,
-        viewIdentifier viewId: Int64,
-        arguments args: Any?
-    ) -> FlutterPlatformView {
+    func create(withFrame frame: CGRect,
+                viewIdentifier viewId: Int64,
+                arguments args: Any?) -> FlutterPlatformView {
         guard let creationArgs = args as? [String: Any] else {
             Log.error("Unable to create BarcodeFindView without the JSON.")
             fatalError("Unable to create BarcodeFindView without the JSON.")
@@ -33,11 +31,9 @@ class FlutterBarcodeFindViewFactory: NSObject, FlutterPlatformViewFactory {
         }
         let view = FlutterBarcodeFindView(frame: frame)
         view.findModule = self.barcodeFindModule
-        barcodeFindModule.addViewToContainer(
-            container: view,
-            jsonString: creationJson,
-            result: FlutterLogInsteadOfResult()
-        )
+        barcodeFindModule.addViewToContainer(container: view,
+                                             jsonString: creationJson,
+                                             result: FlutterLogInsteadOfResult())
         return view
     }
 
@@ -45,3 +41,4 @@ class FlutterBarcodeFindViewFactory: NSObject, FlutterPlatformViewFactory {
         FlutterStandardMessageCodec.sharedInstance()
     }
 }
+

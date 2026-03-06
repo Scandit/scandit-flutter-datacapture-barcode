@@ -8,8 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/pick/internal/barcode_pick_consts.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import '../barcode_plugin_events.dart';
@@ -69,8 +68,8 @@ class BarcodePickAsyncMapperProductProvider
 
 class _BarcodePickAsyncMapperProductProviderController {
   final BarcodePickAsyncMapperProductProvider _provider;
-  late final BarcodeMethodHandler barcodeMethodHandler = _getMethodHandler();
   StreamSubscription<dynamic>? _providerEventsSubscription;
+  final MethodChannel _methodChannel = const MethodChannel(BarcodePickFunctionNames.methodsChannelName);
   int _viewId = 0;
 
   _BarcodePickAsyncMapperProductProviderController(this._provider);
@@ -95,16 +94,16 @@ class _BarcodePickAsyncMapperProductProviderController {
 
   void finishOnProductIdentifierForItems(List<BarcodePickProductProviderCallbackItem> data) {
     var result = data.map((e) => e.toMap()).toList();
-    barcodeMethodHandler.finishOnProductIdentifierForItems(viewId: _viewId, itemsJson: jsonEncode(result));
+    var params = <String, dynamic>{
+      'data': jsonEncode(result),
+    };
+    params['viewId'] = _viewId;
+    _methodChannel.invokeMethod(BarcodePickFunctionNames.finishOnProductIdentifierForItems, params);
   }
 
   void unsubscribeFromEvents() {
     _providerEventsSubscription?.cancel();
     _providerEventsSubscription = null;
-  }
-
-  BarcodeMethodHandler _getMethodHandler() {
-    return BarcodeMethodHandler(MethodChannel(BarcodeFunctionNames.methodsChannelName));
   }
 }
 
