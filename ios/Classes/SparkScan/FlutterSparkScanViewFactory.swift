@@ -10,7 +10,7 @@ import ScanditFrameworksCore
 import scandit_flutter_datacapture_core
 
 class FlutterSparkScanViewFactory: NSObject, FlutterPlatformViewFactory {
-    
+
     let sparkScanModule: SparkScanModule
 
     init(sparkScanModule: SparkScanModule) {
@@ -18,9 +18,11 @@ class FlutterSparkScanViewFactory: NSObject, FlutterPlatformViewFactory {
         super.init()
     }
 
-    func create(withFrame frame: CGRect,
-                viewIdentifier viewId: Int64,
-                arguments args: Any?) -> FlutterPlatformView {
+    func create(
+        withFrame frame: CGRect,
+        viewIdentifier viewId: Int64,
+        arguments args: Any?
+    ) -> FlutterPlatformView {
         guard let creationArgs = args as? [String: Any] else {
             Log.error("Unable to create SparkScanView without the JSON.")
             fatalError("Unable to create SparkScanView without the JSON.")
@@ -29,9 +31,11 @@ class FlutterSparkScanViewFactory: NSObject, FlutterPlatformViewFactory {
             Log.error("Unable to create the SparkScanView without the json.")
             fatalError("Unable to create the SparkScanView without the json.")
         }
-        let view = FlutterSparkScanView(frame: frame, 
-                                        creationJson: creationJson,
-                                        sparkScanModule: sparkScanModule)
+        let view = FlutterSparkScanView(
+            frame: frame,
+            creationJson: creationJson,
+            sparkScanModule: sparkScanModule
+        )
         view.factory = self
         return view
     }

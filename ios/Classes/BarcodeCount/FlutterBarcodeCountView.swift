@@ -18,7 +18,7 @@ class FlutterBarcodeCountView: UIView, FlutterPlatformView {
         barcodeCountModule?.disposeBarcodeCountView(viewId: self.tag)
         super.removeFromSuperview()
     }
-    
+
     override func addSubview(_ view: UIView) {
         super.addSubview(view)
         if view is BarcodeCountView {
@@ -27,7 +27,7 @@ class FlutterBarcodeCountView: UIView, FlutterPlatformView {
                 view.leadingAnchor.constraint(equalTo: leadingAnchor),
                 view.trailingAnchor.constraint(equalTo: trailingAnchor),
                 view.topAnchor.constraint(equalTo: topAnchor),
-                view.bottomAnchor.constraint(equalTo: bottomAnchor)
+                view.bottomAnchor.constraint(equalTo: bottomAnchor),
             ])
         }
     }

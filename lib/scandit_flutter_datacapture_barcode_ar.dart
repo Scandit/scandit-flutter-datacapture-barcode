@@ -4,6 +4,7 @@
  * Copyright (C) 2024- Scandit AG. All rights reserved.
  */
 
+// ignore: unnecessary_library_name
 library scandit_flutter_datacapture_barcode_count;
 
 export 'src/ar/barcode_ar_feedback.dart' show BarcodeArFeedback;
@@ -16,6 +17,7 @@ export 'src/ar/barcode_ar_highlight.dart'
         BarcodeArHighlight,
         BarcodeArCircleHighlight,
         BarcodeArRectangleHighlight,
+        BarcodeArCustomHighlight,
         BarcodeArCircleHighlightPreset,
         BarcodeArCircleHighlightPresetSerializer;
 export 'src/ar/barcode_ar_annotation.dart'
@@ -26,7 +28,8 @@ export 'src/ar/barcode_ar_annotation.dart'
         BarcodeArPopoverAnnotation,
         BarcodeArPopoverAnnotationButton,
         BarcodeArPopoverAnnotationListener,
-        BarcodeArStatusIconAnnotation;
+        BarcodeArStatusIconAnnotation,
+        BarcodeArCustomAnnotation;
 export 'src/ar/barcode_ar_annotation_trigger.dart'
     show BarcodeArAnnotationTrigger, BarcodeArAnnotationTriggerSerializer;
 export 'src/ar/barcode_ar_info_annotation_width_preset.dart'

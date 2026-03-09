@@ -22,12 +22,18 @@ class BarcodeMethodHandler {
         switch methodCall.method {
         case FunctionNames.getDefaults:
             do {
-                let defaultsJSONString = String(data: try JSONSerialization.data(withJSONObject: barcodeModule.defaults.toEncodable(),
-                                                                                 options: []),
-                                                encoding: .utf8)
+                let defaultsJSONString = String(
+                    data: try JSONSerialization.data(
+                        withJSONObject: barcodeModule.defaults.toEncodable(),
+                        options: []
+                    ),
+                    encoding: .utf8
+                )
                 result(defaultsJSONString)
             } catch let error as NSError {
-                result(FlutterError(code: "-1", message: "Unable to load the defaults. \(error)", details: error.domain))
+                result(
+                    FlutterError(code: "-1", message: "Unable to load the defaults. \(error)", details: error.domain)
+                )
             }
         default:
             result(FlutterMethodNotImplemented)
