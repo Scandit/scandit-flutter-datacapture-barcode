@@ -26,9 +26,7 @@ abstract class BarcodeBatchAdvancedOverlayListener {
       'BarcodeBatchAdvancedOverlayListener.didTapViewForTrackedBarcode';
 
   BarcodeBatchAdvancedOverlayWidget? widgetForTrackedBarcode(
-    BarcodeBatchAdvancedOverlay overlay,
-    TrackedBarcode trackedBarcode,
-  );
+      BarcodeBatchAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
   Anchor anchorForTrackedBarcode(BarcodeBatchAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
   PointWithUnit offsetForTrackedBarcode(BarcodeBatchAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
   void didTapViewForTrackedBarcode(BarcodeBatchAdvancedOverlay overlay, TrackedBarcode trackedBarcode);
@@ -58,7 +56,15 @@ class BarcodeBatchAdvancedOverlay extends DataCaptureOverlay {
   }
 
   BarcodeBatchAdvancedOverlay._(this._mode) : super('barcodeTrackingAdvanced');
+
   BarcodeBatchAdvancedOverlay(BarcodeBatch mode) : this._(mode);
+
+  @Deprecated('Use the version without parameters instead.')
+  factory BarcodeBatchAdvancedOverlay.withBarcodeBatchForView(BarcodeBatch barcodeBatch, DataCaptureView? view) {
+    var overlay = BarcodeBatchAdvancedOverlay._(barcodeBatch);
+    view?.addOverlay(overlay);
+    return overlay;
+  }
 
   BarcodeBatchAdvancedOverlayListener? _listener;
 

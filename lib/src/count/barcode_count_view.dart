@@ -23,7 +23,6 @@ import 'package:scandit_flutter_datacapture_barcode/src/count/barcode_count_tool
 import 'package:scandit_flutter_datacapture_barcode/src/count/requests/barcode_count_status_provider_request.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/count/requests/barcode_count_status_provider_result.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/tracked_barcode.dart';
-import 'package:scandit_flutter_datacapture_core/experimental.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
@@ -112,10 +111,7 @@ class BarcodeCountView extends StatefulWidget implements Serializable {
   }
 
   factory BarcodeCountView.forContextWithModeAndStyle(
-    DataCaptureContext dataCaptureContext,
-    BarcodeCount barcodeCount,
-    BarcodeCountViewStyle style,
-  ) {
+      DataCaptureContext dataCaptureContext, BarcodeCount barcodeCount, BarcodeCountViewStyle style) {
     return BarcodeCountView._(dataCaptureContext, barcodeCount, style);
   }
 
@@ -592,7 +588,7 @@ class BarcodeCountView extends StatefulWidget implements Serializable {
         'hasUiListener': _barcodeCountViewUiListener != null,
         'viewId': _viewId,
       },
-      'BarcodeCount': _barcodeCount.toMap(),
+      'BarcodeCount': _barcodeCount.toMap()
     };
 
     if (listButtonAccessibilityHint != BarcodeCountDefaults.viewDefaults.listButtonAccessibilityHint) {
@@ -717,9 +713,6 @@ class BarcodeCount extends DataCaptureMode {
   final List<BarcodeCountListener> _listeners = [];
   _BarcodeCountViewController? _controller;
 
-  // Pending capture list to be set when controller is ready
-  BarcodeCountCaptureList? _pendingCaptureList;
-
   @override
   // ignore: unnecessary_overrides
   DataCaptureContext? get context => super.context;
@@ -742,20 +735,20 @@ class BarcodeCount extends DataCaptureMode {
 
   static CameraSettings createRecommendedCameraSettings() {
     var defaults = BarcodeCountDefaults.cameraSettingsDefaults;
-    return CameraSettings(
-      defaults.preferredResolution,
-      defaults.zoomFactor,
-      defaults.focusRange,
-      defaults.focusGestureStrategy,
-      defaults.zoomGestureZoomFactor,
-      shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus,
-      properties: defaults.properties,
-    );
+    return CameraSettings(defaults.preferredResolution, defaults.zoomFactor, defaults.focusRange,
+        defaults.focusGestureStrategy, defaults.zoomGestureZoomFactor,
+        shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus, properties: defaults.properties);
   }
+
+  @Deprecated('Use createRecommendedCameraSettings() instead.')
+  static CameraSettings get recommendedCameraSettings => createRecommendedCameraSettings();
 
   BarcodeCount._(this._settings);
 
   BarcodeCount(BarcodeCountSettings settings) : this._(settings);
+
+  @Deprecated('Use constructor BarcodeCount(BarcodeCountSettings settings) instead.')
+  BarcodeCount.forContext(DataCaptureContext context, BarcodeCountSettings settings) : this._(settings);
 
   Future<void> applySettings(BarcodeCountSettings settings) {
     _settings = settings;
@@ -804,12 +797,7 @@ class BarcodeCount extends DataCaptureMode {
   }
 
   Future<void> setBarcodeCountCaptureList(BarcodeCountCaptureList list) {
-    final controller = _controller;
-    if (controller != null) {
-      return controller.setBarcodeCountCaptureList(list);
-    }
-    _pendingCaptureList = list;
-    return Future.value();
+    return _controller?.setBarcodeCountCaptureList(list) ?? Future.value();
   }
 
   List<Barcode> _additionalBarcodes = [];
@@ -892,7 +880,10 @@ class _BarcodeCountViewController extends BaseController {
           _handleBrushForRecognizedBarcodeNotInListEvent(eventJSON);
           break;
         case BarcodeCountViewListener._didTapFilteredBarcodeEventName:
-          view.listener?.didTapFilteredBarcode(view, TrackedBarcode.fromJSON(jsonDecode(eventJSON['trackedBarcode'])));
+          view.listener?.didTapFilteredBarcode(
+            view,
+            TrackedBarcode.fromJSON(jsonDecode(eventJSON['trackedBarcode'])),
+          );
           break;
         case BarcodeCountViewListener._didTapRecognizedBarcodeEventName:
           view.listener?.didTapRecognizedBarcode(
@@ -933,23 +924,23 @@ class _BarcodeCountViewController extends BaseController {
 
   Future<void> submitBarcodeCountStatusProviderCallback(BarcodeCountStatusResult statusResult, String requestId) {
     final result = BarcodeCountStatusProviderResult.create(requestId, statusResult);
-    return methodChannel.invokeMethod(BarcodeCountFunctionNames.submitBarcodeCountStatusProviderCallback, {
-      'viewId': view._viewId,
-      'statusJson': jsonEncode(result.toMap()),
-    });
+    return methodChannel.invokeMethod(BarcodeCountFunctionNames.submitBarcodeCountStatusProviderCallback,
+        {'viewId': view._viewId, 'statusJson': jsonEncode(result.toMap())});
   }
 
   Future<void> addBarcodeCountStatusProvider() {
-    return methodChannel.invokeMethod(BarcodeCountFunctionNames.addBarcodeCountStatusProvider, {
-      'viewId': view._viewId,
-    });
+    return methodChannel
+        .invokeMethod(BarcodeCountFunctionNames.addBarcodeCountStatusProvider, {'viewId': view._viewId});
   }
 
   void _handleBrushForRecognizedBarcodeEvent(dynamic json) {
     var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
 
     var brush = view.listener?.brushForRecognizedBarcode(view, trackedBarcode);
-    var argument = <String, dynamic>{'trackedBarcodeId': trackedBarcode.identifier, 'viewId': view._viewId};
+    var argument = <String, dynamic>{
+      'trackedBarcodeId': trackedBarcode.identifier,
+      'viewId': view._viewId,
+    };
     if (brush != null) {
       argument['brush'] = jsonEncode(brush.toMap());
     }
@@ -961,7 +952,10 @@ class _BarcodeCountViewController extends BaseController {
     var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
 
     var brush = view.listener?.brushForRecognizedBarcodeNotInList(view, trackedBarcode);
-    var argument = <String, dynamic>{'trackedBarcodeId': trackedBarcode.identifier, 'viewId': view._viewId};
+    var argument = <String, dynamic>{
+      'trackedBarcodeId': trackedBarcode.identifier,
+      'viewId': view._viewId,
+    };
     if (brush != null) {
       argument['brush'] = jsonEncode(brush.toMap());
     }
@@ -984,10 +978,8 @@ class _BarcodeCountViewController extends BaseController {
 
   Future<void> updateView() {
     final viewMap = view.toMap()['View'];
-    return methodChannel.invokeMethod(BarcodeCountFunctionNames.updateBarcodeCountView, {
-      'viewId': view._viewId,
-      'viewJson': jsonEncode(viewMap),
-    });
+    return methodChannel.invokeMethod(
+        BarcodeCountFunctionNames.updateBarcodeCountView, {'viewId': view._viewId, 'viewJson': jsonEncode(viewMap)});
   }
 
   StreamSubscription<dynamic>? _streamModeSubscription;
@@ -1045,10 +1037,13 @@ class _BarcodeCountViewController extends BaseController {
 
   Future<void> setBarcodeCountCaptureList(BarcodeCountCaptureList list) {
     _barcodeCountCaptureList = list;
-    return methodChannel.invokeMethod(BarcodeCountFunctionNames.setBarcodeCountCaptureList, {
-      'viewId': view._viewId,
-      'targetBarcodes': jsonEncode(list._targetBarcodes.map((e) => e.toMap()).toList()),
-    });
+    return methodChannel.invokeMethod(
+      BarcodeCountFunctionNames.setBarcodeCountCaptureList,
+      {
+        'viewId': view._viewId,
+        'targetBarcodes': jsonEncode(list._targetBarcodes.map((e) => e.toMap()).toList()),
+      },
+    );
   }
 
   Future<FrameData> _getLastFrameData(BarcodeCountSession session) {
@@ -1058,17 +1053,13 @@ class _BarcodeCountViewController extends BaseController {
   }
 
   Future<void> updateMode() {
-    return methodChannel.invokeMethod(BarcodeCountFunctionNames.updateBarcodeCountMode, {
-      'viewId': view._viewId,
-      'modeJson': jsonEncode(view._barcodeCount.toMap()),
-    });
+    return methodChannel.invokeMethod(BarcodeCountFunctionNames.updateBarcodeCountMode,
+        {'viewId': view._viewId, 'modeJson': jsonEncode(view._barcodeCount.toMap())});
   }
 
   Future<void> updateFeedback() {
-    return methodChannel.invokeMethod(BarcodeCountFunctionNames.updateFeedback, {
-      'viewId': view._viewId,
-      'feedbackJson': jsonEncode(view._barcodeCount.feedback.toMap()),
-    });
+    return methodChannel.invokeMethod(BarcodeCountFunctionNames.updateFeedback,
+        {'viewId': view._viewId, 'feedbackJson': jsonEncode(view._barcodeCount.feedback.toMap())});
   }
 
   void setModeEnabledState(bool newValue) {
@@ -1099,14 +1090,10 @@ class _BarcodeCountViewController extends BaseController {
   }
 }
 
-class _BarcodeCountViewState extends State<BarcodeCountView> implements CameraOwner {
+class _BarcodeCountViewState extends State<BarcodeCountView> {
   final int _viewId = Random().nextInt(0x7FFFFFFF);
 
   _BarcodeCountViewController? _controller;
-  bool _isRouteActive = true;
-
-  @override
-  String get id => 'barcode-count-view-$_viewId';
 
   _BarcodeCountViewState();
 
@@ -1114,34 +1101,6 @@ class _BarcodeCountViewState extends State<BarcodeCountView> implements CameraOw
   void initState() {
     super.initState();
     widget._viewId = _viewId;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _checkRouteStatus();
-  }
-
-  void _checkRouteStatus() {
-    final route = ModalRoute.of(context);
-    final wasActive = _isRouteActive;
-    _isRouteActive = route?.isCurrent == true;
-
-    if (wasActive != _isRouteActive) {
-      if (_isRouteActive) {
-        CameraOwnershipHelper.requestOwnership(CameraPosition.worldFacing, this);
-      } else {
-        CameraOwnershipHelper.releaseOwnership(CameraPosition.worldFacing, this);
-      }
-    }
-  }
-
-  void _applyPendingCaptureList() {
-    final pendingList = widget._barcodeCount._pendingCaptureList;
-    if (pendingList != null) {
-      widget._barcodeCount._pendingCaptureList = null;
-      _controller?.setBarcodeCountCaptureList(pendingList);
-    }
   }
 
   @override
@@ -1174,7 +1133,6 @@ class _BarcodeCountViewState extends State<BarcodeCountView> implements CameraOw
               _controller = _BarcodeCountViewController(widget);
               widget._controller = _controller;
               widget._barcodeCount._controller = _controller;
-              _applyPendingCaptureList();
             })
             ..create();
           return view;
@@ -1189,7 +1147,6 @@ class _BarcodeCountViewState extends State<BarcodeCountView> implements CameraOw
           _controller = _BarcodeCountViewController(widget);
           widget._controller = _controller;
           widget._barcodeCount._controller = _controller;
-          _applyPendingCaptureList();
         },
       );
     }

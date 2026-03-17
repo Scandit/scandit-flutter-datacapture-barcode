@@ -50,6 +50,9 @@ class BarcodeCapture extends DataCaptureMode {
     _controller.updateFeedback();
   }
 
+  @Deprecated('Use createRecommendedCameraSettings() instead.')
+  static CameraSettings get recommendedCameraSettings => createRecommendedCameraSettings();
+
   static CameraSettings createRecommendedCameraSettings() {
     var defaults = BarcodeCaptureDefaults.cameraSettingsDefaults;
     return CameraSettings(
@@ -63,13 +66,18 @@ class BarcodeCapture extends DataCaptureMode {
     );
   }
 
-  BarcodeCapture._(this._settings) {
+  BarcodeCapture._(DataCaptureContext? context, this._settings) {
     _controller = _BarcodeCaptureListenerController(this);
     // Set the modeId on the initial feedback object
     _feedback._setModeId(_modeId);
+
+    context?.setMode(this);
   }
 
-  BarcodeCapture(BarcodeCaptureSettings settings) : this._(settings);
+  BarcodeCapture(BarcodeCaptureSettings settings) : this._(null, settings);
+
+  @Deprecated('Use constructor BarcodeCapture(BarcodeCaptureSettings settings) instead.')
+  BarcodeCapture.forContext(DataCaptureContext context, BarcodeCaptureSettings settings) : this._(context, settings);
 
   Future<void> applySettings(BarcodeCaptureSettings settings) {
     _settings = settings;
@@ -173,8 +181,9 @@ class _BarcodeCaptureListenerController extends BaseController {
   }
 
   Future<void> updateMode() {
-    return methodChannel.invokeMethod(BarcodeCaptureFunctionNames.updateBarcodeCaptureMode,
-        {'modeJson': jsonEncode(_barcodeCapture.toMap())}).then((value) => null, onError: onError);
+    return methodChannel
+        .invokeMethod(BarcodeCaptureFunctionNames.updateBarcodeCaptureMode, jsonEncode(_barcodeCapture.toMap()))
+        .then((value) => null, onError: onError);
   }
 
   Future<void> applyNewSettings(BarcodeCaptureSettings settings) {
@@ -205,9 +214,9 @@ class _BarcodeCaptureListenerController extends BaseController {
   }
 
   Future<FrameData> _getLastFrameData(BarcodeCaptureSession session) {
-    return methodChannel.invokeMethod(BarcodeCaptureFunctionNames.getLastFrameData, {'frameId': session.frameId}).then(
-        (value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)),
-        onError: onError);
+    return methodChannel
+        .invokeMethod(BarcodeCaptureFunctionNames.getLastFrameData, session.frameId)
+        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: onError);
   }
 
   Future<void> _notifyListenersOfDidScan(BarcodeCaptureSession session) async {
