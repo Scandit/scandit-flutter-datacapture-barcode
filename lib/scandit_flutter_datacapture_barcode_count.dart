@@ -4,6 +4,7 @@
  * Copyright (C) 2022- Scandit AG. All rights reserved.
  */
 
+// ignore: unnecessary_library_name
 library scandit_flutter_datacapture_barcode_count;
 
 export 'src/count/barcode_count_capture_list_session.dart' show BarcodeCountCaptureListSession;

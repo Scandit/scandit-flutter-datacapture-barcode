@@ -321,3 +321,30 @@ class BarcodeArStatusIconAnnotation extends BarcodeArAnnotation {
     return json;
   }
 }
+
+class BarcodeArCustomAnnotation extends BarcodeArAnnotation {
+  final Widget _child;
+  final Barcode _barcode;
+  final Anchor _anchor;
+  BarcodeArCustomAnnotation._(this._barcode, BarcodeArAnnotationTrigger annotationTrigger, this._child, this._anchor)
+      : super._(annotationTrigger, 'barcodeArCustomAnnotation');
+
+  BarcodeArCustomAnnotation({
+    required Barcode barcode,
+    required BarcodeArAnnotationTrigger annotationTrigger,
+    required Widget child,
+    Anchor? anchor,
+  }) : this._(barcode, annotationTrigger, child, anchor ?? Anchor.topCenter);
+
+  Barcode get barcode => _barcode;
+
+  Widget get child => _child;
+
+  Anchor get anchor => _anchor;
+
+  @override
+  Map<String, dynamic> toMap() {
+    var json = super.toMap();
+    return json;
+  }
+}

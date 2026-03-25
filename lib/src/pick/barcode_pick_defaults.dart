@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_filter_highlight_settings.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/pick/internal/barcode_pick_consts.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/pick/ui/barcode_pick_status_icon_settings.dart';

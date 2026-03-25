@@ -26,17 +26,19 @@ class BarcodeSelectionSession with _PrivateBarcodeSelectionSession {
   final int _frameSequenceId;
   int get frameSequenceId => _frameSequenceId;
 
+  final int _modeId;
+
   BarcodeSelectionSession._(this._newlySelectedBarcodes, this._newlyUnselectedBarcodes, this._selectedBarcodes,
-      this._frameSequenceId, String? frameId) {
+      this._frameSequenceId, String? frameId, this._modeId) {
     _frameId = frameId;
   }
 
   Future<void> reset() {
-    return _controller.reset(_frameSequenceId);
+    return _controller.reset(_modeId, _frameSequenceId);
   }
 
   Future<int> getCount(Barcode barcode) {
-    return _controller.getCount(barcode);
+    return _controller.getCount(_modeId, barcode);
   }
 
   factory BarcodeSelectionSession.fromJSON(Map<String, dynamic> event) {
@@ -60,6 +62,7 @@ class BarcodeSelectionSession with _PrivateBarcodeSelectionSession {
           .cast<Barcode>(),
       (json['frameSequenceId'] as num).toInt(),
       event['frameId'] as String?,
+      event['modeId'] as int,
     );
   }
 }
@@ -73,15 +76,15 @@ mixin _PrivateBarcodeSelectionSession {
 class _BarcodeSelectionSessionController {
   late final MethodChannel _methodChannel = _getChannel();
 
-  Future<int> getCount(Barcode barcode) {
+  Future<int> getCount(int modeId, Barcode barcode) {
     var selectionIdentifier = (barcode.data ?? '') + barcode.symbology.toString();
-    return _methodChannel
-        .invokeMethod<int>(BarcodeSelectionFunctionNames.getBarcodeSelectionSessionCount, selectionIdentifier)
-        .then((value) => value ?? 0);
+    return _methodChannel.invokeMethod<int>(BarcodeSelectionFunctionNames.getBarcodeSelectionSessionCount,
+        {'modeId': modeId, 'selectionIdentifier': selectionIdentifier}).then((value) => value ?? 0);
   }
 
-  Future<void> reset(int frameSequenceId) {
-    return _methodChannel.invokeMethod(BarcodeSelectionFunctionNames.resetBarcodeSelectionSession, frameSequenceId);
+  Future<void> reset(int modeId, int frameSequenceId) {
+    return _methodChannel.invokeMethod(BarcodeSelectionFunctionNames.resetBarcodeSelectionSession,
+        {'modeId': modeId, 'frameSequenceId': frameSequenceId});
   }
 
   MethodChannel _getChannel() {

@@ -18,9 +18,11 @@ class FlutterBarcodePickViewFactory: NSObject, FlutterPlatformViewFactory {
         super.init()
     }
 
-    func create(withFrame frame: CGRect,
-                viewIdentifier viewId: Int64,
-                arguments args: Any?) -> FlutterPlatformView {
+    func create(
+        withFrame frame: CGRect,
+        viewIdentifier viewId: Int64,
+        arguments args: Any?
+    ) -> FlutterPlatformView {
         guard let creationArgs = args as? [String: Any] else {
             Log.error("Unable to create BarcodePickView without the JSON.")
             fatalError("Unable to create BarcodePickView without the JSON.")
@@ -31,9 +33,11 @@ class FlutterBarcodePickViewFactory: NSObject, FlutterPlatformViewFactory {
         }
         let view = FlutterBarcodePickView(frame: frame)
         view.barcodePickModule = barcodePickModule
-        barcodePickModule.addViewToContainer(container: view,
-                                             jsonString: creationJson,
-                                             result: FlutterLogInsteadOfResult())
+        barcodePickModule.addViewToContainer(
+            container: view,
+            jsonString: creationJson,
+            result: FlutterLogInsteadOfResult()
+        )
         return view
     }
 
@@ -41,5 +45,3 @@ class FlutterBarcodePickViewFactory: NSObject, FlutterPlatformViewFactory {
         FlutterStandardMessageCodec.sharedInstance()
     }
 }
-
-

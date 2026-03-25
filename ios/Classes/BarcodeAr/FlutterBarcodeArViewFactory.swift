@@ -18,9 +18,11 @@ class FlutterBarcodeArViewFactory: NSObject, FlutterPlatformViewFactory {
         super.init()
     }
 
-    func create(withFrame frame: CGRect,
-                viewIdentifier viewId: Int64,
-                arguments args: Any?) -> FlutterPlatformView {
+    func create(
+        withFrame frame: CGRect,
+        viewIdentifier viewId: Int64,
+        arguments args: Any?
+    ) -> FlutterPlatformView {
         guard let creationArgs = args as? [String: Any] else {
             Log.error("Unable to create BarcodeArView without the JSON.")
             fatalError("Unable to create BarcodeArView without the JSON.")
@@ -31,9 +33,11 @@ class FlutterBarcodeArViewFactory: NSObject, FlutterPlatformViewFactory {
         }
         let view = FlutterBarcodeArView(frame: frame)
         view.barcodeArModule = barcodeArModule
-        barcodeArModule.addViewToContainer(container: view,
-                                             jsonString: creationJson,
-                                             result: FlutterLogInsteadOfResult())
+        barcodeArModule.addViewToContainer(
+            container: view,
+            jsonString: creationJson,
+            result: FlutterLogInsteadOfResult()
+        )
         return view
     }
 
@@ -41,5 +45,3 @@ class FlutterBarcodeArViewFactory: NSObject, FlutterPlatformViewFactory {
         FlutterStandardMessageCodec.sharedInstance()
     }
 }
-
-
