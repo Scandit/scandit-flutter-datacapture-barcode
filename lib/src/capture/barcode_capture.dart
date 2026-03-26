@@ -6,17 +6,19 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer' as developer;
 import 'dart:math';
 
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/internal/helpers.dart';
 
 import 'barcode_capture_defaults.dart';
 import 'barcode_capture_settings.dart';
-import 'barcode_capture_function_names.dart';
 import 'barcode_capture_session.dart';
 
 class BarcodeCapture extends DataCaptureMode {
@@ -60,6 +62,9 @@ class BarcodeCapture extends DataCaptureMode {
       defaults.zoomGestureZoomFactor,
       properties: defaults.properties,
       shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus,
+      torchLevel: defaults.torchLevel,
+      macroMode: defaults.macroMode,
+      adaptiveExposure: defaults.adaptiveExposure,
     );
   }
 
@@ -121,97 +126,91 @@ abstract class BarcodeCaptureListener {
 class _BarcodeCaptureListenerController extends BaseController {
   final BarcodeCapture _barcodeCapture;
   StreamSubscription<dynamic>? _barcodeCaptureSubscription;
+  late final BarcodeMethodHandler barcodeMethodHandler;
 
-  _BarcodeCaptureListenerController(this._barcodeCapture) : super(BarcodeCaptureFunctionNames.methodsChannelName);
+  _BarcodeCaptureListenerController(this._barcodeCapture) : super(BarcodeFunctionNames.methodsChannelName) {
+    barcodeMethodHandler = BarcodeMethodHandler(methodChannel);
+  }
 
   void subscribeListeners() {
-    methodChannel.invokeMethod(BarcodeCaptureFunctionNames.addBarcodeCaptureListener,
-        {'modeId': _barcodeCapture._modeId}).then((value) => _setupBarcodeCaptureSubscription(), onError: onError);
+    barcodeMethodHandler
+        .registerBarcodeCaptureListenerForEvents(modeId: _barcodeCapture._modeId)
+        .then((value) => _setupBarcodeCaptureSubscription(), onError: onError);
   }
 
   void _setupBarcodeCaptureSubscription() {
-    _barcodeCaptureSubscription = BarcodePluginEvents.barcodeCaptureEventStream.listen((event) {
+    _barcodeCaptureSubscription =
+        BarcodePluginEvents.barcodeCaptureEventStream.forMode(_barcodeCapture._modeId).listen((event) {
       if (_barcodeCapture._listeners.isEmpty) return;
 
-      var eventJson = jsonDecode(event);
-      var payload = eventJson as Map<String, dynamic>;
-
-      // Check if this event is for our mode
-      if (payload['modeId'] != _barcodeCapture._modeId) {
-        return;
-      }
-
-      var session = BarcodeCaptureSession.fromJSON(eventJson);
-      var eventName = eventJson['event'] as String;
-      if (eventName == BarcodeCaptureListener._didScanEventName) {
+      var session = BarcodeCaptureSession.fromJSON(event.payload);
+      if (event.isEvent(BarcodeCaptureListener._didScanEventName)) {
         _notifyListenersOfDidScan(session).then((value) {
-          methodChannel.invokeMethod(BarcodeCaptureFunctionNames.barcodeCaptureFinishDidScan, {
-            'modeId': _barcodeCapture._modeId,
-            'enabled': _barcodeCapture.isEnabled,
-          })
-              // ignore: unnecessary_lambdas
-              .then((value) => null, onError: (error) => developer.log(error.toString()));
+          barcodeMethodHandler
+              .finishBarcodeCaptureDidScan(modeId: _barcodeCapture._modeId, enabled: _barcodeCapture.isEnabled)
+              .onError(onError);
         });
-      } else if (eventName == BarcodeCaptureListener._didUpdateSessionEventName) {
+      } else if (event.isEvent(BarcodeCaptureListener._didUpdateSessionEventName)) {
         _notifyListenersOfDidUpateSession(session).then((value) {
-          methodChannel.invokeMethod(BarcodeCaptureFunctionNames.barcodeCaptureFinishDidUpdateSession, {
-            'modeId': _barcodeCapture._modeId,
-            'enabled': _barcodeCapture.isEnabled,
-          })
-              // ignore: unnecessary_lambdas
-              .then((value) => null, onError: (error) => developer.log(error.toString()));
+          barcodeMethodHandler
+              .finishBarcodeCaptureDidUpdateSession(modeId: _barcodeCapture._modeId, enabled: _barcodeCapture.isEnabled)
+              .onError(onError);
         });
       }
     });
   }
 
   void setModeEnabledState(bool newValue) {
-    methodChannel.invokeMethod(BarcodeCaptureFunctionNames.setModeEnabledState, {
-      'modeId': _barcodeCapture._modeId,
-      'enabled': newValue,
-    }).then((value) => null, onError: onError);
+    barcodeMethodHandler
+        .setBarcodeCaptureModeEnabledState(modeId: _barcodeCapture._modeId, enabled: newValue)
+        .onError(onError);
   }
 
   Future<void> updateMode() {
-    return methodChannel.invokeMethod(BarcodeCaptureFunctionNames.updateBarcodeCaptureMode,
-        {'modeJson': jsonEncode(_barcodeCapture.toMap())}).then((value) => null, onError: onError);
+    return barcodeMethodHandler
+        .updateBarcodeCaptureMode(modeJson: jsonEncode(_barcodeCapture.toMap()))
+        .onError(onError);
   }
 
   Future<void> applyNewSettings(BarcodeCaptureSettings settings) {
-    final arguments = {'modeId': _barcodeCapture._modeId, 'modeSettingsJson': jsonEncode(settings.toMap())};
-    return methodChannel
-        .invokeMethod(BarcodeCaptureFunctionNames.applyBarcodeCaptureModeSettings, arguments)
-        .then((value) => null, onError: onError);
+    return barcodeMethodHandler
+        .applyBarcodeCaptureModeSettings(
+            modeId: _barcodeCapture._modeId, modeSettingsJson: jsonEncode(settings.toMap()))
+        .onError(onError);
   }
 
   Future<void> updateFeedback() {
-    return methodChannel.invokeMethod(BarcodeCaptureFunctionNames.updateFeedback, {
-      'modeId': _barcodeCapture._modeId,
-      'feedbackJson': jsonEncode(_barcodeCapture.feedback.toMap()),
-    });
+    return barcodeMethodHandler
+        .updateBarcodeCaptureFeedback(
+            modeId: _barcodeCapture._modeId, feedbackJson: jsonEncode(_barcodeCapture.feedback.toMap()))
+        .onError(onError);
   }
 
   void unsubscribeListeners() {
     _barcodeCaptureSubscription?.cancel();
-    methodChannel.invokeMethod(BarcodeCaptureFunctionNames.removeBarcodeCaptureListener,
-        {'modeId': _barcodeCapture._modeId}).then((value) => null, onError: onError);
+    barcodeMethodHandler.unregisterBarcodeCaptureListenerForEvents(modeId: _barcodeCapture._modeId).onError(onError);
     _barcodeCaptureSubscription = null;
   }
 
   Future<void> _notifyListenersOfDidUpateSession(BarcodeCaptureSession session) async {
-    for (var listener in _barcodeCapture._listeners) {
-      await listener.didUpdateSession(_barcodeCapture, session, () => _getLastFrameData(session));
+    // Iterate backwards to avoid allocation and handle concurrent modifications safely
+    // This is called frequently (~30ms intervals) so we avoid creating a copy
+    for (var i = _barcodeCapture._listeners.length - 1; i >= 0; i--) {
+      if (i < _barcodeCapture._listeners.length) {
+        await _barcodeCapture._listeners[i]
+            .didUpdateSession(_barcodeCapture, session, () => _getLastFrameData(session));
+      }
     }
   }
 
   Future<FrameData> _getLastFrameData(BarcodeCaptureSession session) {
-    return methodChannel.invokeMethod(BarcodeCaptureFunctionNames.getLastFrameData, {'frameId': session.frameId}).then(
-        (value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)),
-        onError: onError);
+    return getCoreMethodHandler()
+        .getLastFrameOrNullAsMap(frameId: session.frameId)
+        .then((value) => DefaultFrameData.fromJSON(value), onError: onError);
   }
 
   Future<void> _notifyListenersOfDidScan(BarcodeCaptureSession session) async {
-    for (var listener in _barcodeCapture._listeners) {
+    for (var listener in _barcodeCapture._listeners.toList()) {
       await listener.didScan(_barcodeCapture, session, () => _getLastFrameData(session));
     }
   }
@@ -249,18 +248,21 @@ class BarcodeCaptureFeedback implements Serializable {
 
 class _BarcodeCaptureFeedbackController extends BaseController {
   final BarcodeCaptureFeedback _feedback;
+  late final BarcodeMethodHandler barcodeMethodHandler;
 
-  _BarcodeCaptureFeedbackController(this._feedback) : super(BarcodeCaptureFunctionNames.methodsChannelName);
+  _BarcodeCaptureFeedbackController(this._feedback) : super(BarcodeFunctionNames.methodsChannelName) {
+    barcodeMethodHandler = BarcodeMethodHandler(methodChannel);
+  }
 
   Future<void> updateFeedback() {
-    if (_feedback._modeId == null) {
+    var modeId = _feedback._modeId;
+    if (modeId == null) {
       // If no modeId is set, don't update (this feedback is not associated with a mode yet)
       return Future.value();
     }
 
-    return methodChannel.invokeMethod(BarcodeCaptureFunctionNames.updateFeedback, {
-      'modeId': _feedback._modeId,
-      'feedbackJson': jsonEncode(_feedback.toMap()),
-    });
+    return barcodeMethodHandler
+        .updateBarcodeCaptureFeedback(modeId: modeId, feedbackJson: jsonEncode(_feedback.toMap()))
+        .onError(onError);
   }
 }

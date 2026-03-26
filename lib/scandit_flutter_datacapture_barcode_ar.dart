@@ -29,7 +29,8 @@ export 'src/ar/barcode_ar_annotation.dart'
         BarcodeArPopoverAnnotationButton,
         BarcodeArPopoverAnnotationListener,
         BarcodeArStatusIconAnnotation,
-        BarcodeArCustomAnnotation;
+        BarcodeArCustomAnnotation,
+        BarcodeArResponsiveAnnotation;
 export 'src/ar/barcode_ar_annotation_trigger.dart'
     show BarcodeArAnnotationTrigger, BarcodeArAnnotationTriggerSerializer;
 export 'src/ar/barcode_ar_info_annotation_width_preset.dart'

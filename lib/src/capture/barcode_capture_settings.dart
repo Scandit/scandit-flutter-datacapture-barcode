@@ -11,6 +11,7 @@ import '../symbology.dart';
 import '../symbology_settings.dart';
 import 'barcode_capture_defaults.dart';
 import '../composite_type.dart';
+import '../aruco_dictionary.dart';
 
 class BarcodeCaptureSettings implements Serializable {
   BarcodeCaptureSettings();
@@ -22,6 +23,8 @@ class BarcodeCaptureSettings implements Serializable {
   final Map<String, dynamic> _properties = {};
 
   final Map<String, SymbologySettings> _symbologies = {};
+
+  ArucoDictionary? _arucoDictionary;
 
   Set<Symbology> get enabledSymbologies => _enabledSymbologies();
 
@@ -41,6 +44,7 @@ class BarcodeCaptureSettings implements Serializable {
       'enabledCompositeTypes': enabledCompositeTypes.map((e) => e.toString()).toList(),
       'batterySaving': batterySaving.toString(),
       'scanIntention': scanIntention.toString(),
+      'arucoDictionary': _arucoDictionary?.toMap()
     };
   }
 
@@ -84,5 +88,9 @@ class BarcodeCaptureSettings implements Serializable {
 
       enableSymbologies(symbologies.symbologies);
     }
+  }
+
+  void setArucoDictionary(ArucoDictionary dictionary) {
+    _arucoDictionary = dictionary;
   }
 }

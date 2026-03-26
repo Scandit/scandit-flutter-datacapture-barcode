@@ -6,9 +6,12 @@
 
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
-import 'barcode_capture_function_names.dart';
-import '../../scandit_flutter_datacapture_barcode.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
+
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
 
 class BarcodeCaptureSession with _PrivateBarcodeCaptureSession {
   final _BarcodeCaptureSessionController _controller = _BarcodeCaptureSessionController();
@@ -53,14 +56,14 @@ mixin _PrivateBarcodeCaptureSession {
   String get frameId => _frameId;
 }
 
-class _BarcodeCaptureSessionController {
-  late final MethodChannel _methodChannel = _getChannel();
+class _BarcodeCaptureSessionController extends BaseController {
+  late final BarcodeMethodHandler barcodeMethodHandler;
 
-  Future<void> reset() {
-    return _methodChannel.invokeMethod(BarcodeCaptureFunctionNames.resetBarcodeCaptureSession);
+  _BarcodeCaptureSessionController() : super(BarcodeFunctionNames.methodsChannelName) {
+    barcodeMethodHandler = BarcodeMethodHandler(methodChannel);
   }
 
-  MethodChannel _getChannel() {
-    return const MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
+  Future<void> reset() {
+    return barcodeMethodHandler.resetBarcodeCaptureSession().onError(onError);
   }
 }

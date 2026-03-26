@@ -40,6 +40,8 @@ abstract class BarcodeFilterHighlightSettings implements Serializable {
 }
 
 class BarcodeFilterHighlightSettingsBrush extends BarcodeFilterHighlightSettings {
+  BarcodeFilterHighlightSettingsBrush() : super._(BarcodeFilterHighlightType.brush, Brush.transparent);
+
   BarcodeFilterHighlightSettingsBrush._(Brush brush) : super._(BarcodeFilterHighlightType.brush, brush);
 
   factory BarcodeFilterHighlightSettingsBrush.create(Brush brush) {

@@ -14,6 +14,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/find/barcode_find_defaults.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/find/barcode_find_constants.dart';
@@ -23,6 +24,7 @@ import 'package:scandit_flutter_datacapture_barcode/src/find/barcode_find_listen
 import 'package:scandit_flutter_datacapture_barcode/src/find/barcode_find_settings.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/find/barcode_find_transformer.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/find/barcode_find_view_ui_listener.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 import 'package:scandit_flutter_datacapture_core/experimental.dart';
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
@@ -325,6 +327,9 @@ class BarcodeFind extends DataCaptureMode {
       defaults.zoomGestureZoomFactor,
       shouldPreferSmoothAutoFocus: defaults.shouldPreferSmoothAutoFocus,
       properties: defaults.properties,
+      torchLevel: defaults.torchLevel,
+      macroMode: defaults.macroMode,
+      adaptiveExposure: defaults.adaptiveExposure,
     );
   }
 
@@ -422,10 +427,12 @@ class BarcodeFind extends DataCaptureMode {
 
 class _BarcodeFindViewController extends BaseController {
   StreamSubscription<dynamic>? _viewEventsSubscription;
+  late final BarcodeMethodHandler barcodeMethodHandler;
 
   final BarcodeFindView view;
 
-  _BarcodeFindViewController(this.view) : super(BarcodeFindConstants.methodsChannelName) {
+  _BarcodeFindViewController(this.view) : super(BarcodeFunctionNames.methodsChannelName) {
+    barcodeMethodHandler = BarcodeMethodHandler(methodChannel);
     initialize();
   }
 
@@ -448,13 +455,9 @@ class _BarcodeFindViewController extends BaseController {
       return;
     }
 
-    _viewEventsSubscription = BarcodePluginEvents.barcodeFindEventStream.listen((event) {
-      var eventJSON = jsonDecode(event);
-      var eventName = eventJSON['event'] as String;
-      switch (eventName) {
-        case BarcodeFindConstants.onFinishButtonTappedEventName:
-          _handleOnFinishButtonTapped(eventJSON);
-          break;
+    _viewEventsSubscription = BarcodePluginEvents.barcodeFindEventStream.asFlutterEvents().listen((event) {
+      if (event.isEvent(BarcodeFindConstants.onFinishButtonTappedEventName)) {
+        _handleOnFinishButtonTapped(event.payload);
       }
     });
   }
@@ -473,43 +476,37 @@ class _BarcodeFindViewController extends BaseController {
   }
 
   Future<void> updateView() {
-    return methodChannel.invokeMethod(BarcodeFindConstants.updateFindView, {
-      'viewId': view._viewId,
-      'barcodeFindViewJson': jsonEncode(view.toMap()),
-    });
+    return barcodeMethodHandler
+        .updateFindView(viewId: view._viewId, barcodeFindViewJson: jsonEncode(view.toMap()))
+        .onError(onError);
   }
 
   Future<void> stopViewSearching() {
-    return methodChannel.invokeMethod(BarcodeFindConstants.barcodeFindViewStopSearching, {'viewId': view._viewId});
+    return barcodeMethodHandler.barcodeFindViewStopSearching(viewId: view._viewId).onError(onError);
   }
 
   Future<void> setItemList(Set<BarcodeFindItem> items) {
-    return methodChannel.invokeMethod(BarcodeFindConstants.barcodeFindSetItemList, {
-      'viewId': view._viewId,
-      'itemsJson': jsonEncode(items.map((e) => e.toMap()).toList()),
-    });
+    return barcodeMethodHandler
+        .barcodeFindSetItemList(viewId: view._viewId, itemsJson: jsonEncode(items.map((e) => e.toMap()).toList()))
+        .onError(onError);
   }
 
   Future<void> startViewSearching() {
-    return methodChannel.invokeMethod(BarcodeFindConstants.barcodeFindViewStartSearching, {'viewId': view._viewId});
+    return barcodeMethodHandler.barcodeFindViewStartSearching(viewId: view._viewId).onError(onError);
   }
 
   Future<void> pauseViewSearching() {
-    return methodChannel.invokeMethod(BarcodeFindConstants.barcodeFindViewPauseSearching);
+    return barcodeMethodHandler.barcodeFindViewPauseSearching(viewId: view._viewId).onError(onError);
   }
 
   void setUiListener(BarcodeFindViewUiListener? listener) {
-    var methodToInvoke = listener != null
-        ? BarcodeFindConstants.registerBarcodeFindViewListener
-        : BarcodeFindConstants.unregisterBarcodeFindViewListener;
-
     if (listener != null) {
+      barcodeMethodHandler.registerBarcodeFindViewListener(viewId: view._viewId).onError(onError);
       subscribeToViewEvents();
     } else {
+      barcodeMethodHandler.unregisterBarcodeFindViewListener(viewId: view._viewId).onError(onError);
       unsubscribeFromViewEvents();
     }
-
-    methodChannel.invokeMethod(methodToInvoke, {'viewId': view._viewId}).then((value) => null, onError: onError);
   }
 
   // Mode
@@ -518,32 +515,26 @@ class _BarcodeFindViewController extends BaseController {
   StreamSubscription<dynamic>? _barcodeTransformerSubscription;
 
   Future<void> updateMode() {
-    return methodChannel.invokeMethod(BarcodeFindConstants.updateFindMode, {
-      'viewId': view._viewId,
-      'barcodeFindJson': jsonEncode(view._barcodeFind.toMap()),
-    }).then((value) => null, onError: onError);
+    return barcodeMethodHandler
+        .updateFindMode(viewId: view._viewId, barcodeFindJson: jsonEncode(view._barcodeFind.toMap()))
+        .onError(onError);
   }
 
   Future<void> modeStart() {
-    return methodChannel.invokeMethod(
-        BarcodeFindConstants.barcodeFindModeStart, {'viewId': view._viewId}).then((value) => null, onError: onError);
+    return barcodeMethodHandler.barcodeFindModeStart(viewId: view._viewId).onError(onError);
   }
 
   Future<void> modePause() {
-    return methodChannel.invokeMethod(
-        BarcodeFindConstants.barcodeFindModePause, {'viewId': view._viewId}).then((value) => null, onError: onError);
+    return barcodeMethodHandler.barcodeFindModePause(viewId: view._viewId).onError(onError);
   }
 
   Future<void> modeStop() {
-    return methodChannel.invokeMethod(
-        BarcodeFindConstants.barcodeFindModeStop, {'viewId': view._viewId}).then((value) => null, onError: onError);
+    return barcodeMethodHandler.barcodeFindModeStop(viewId: view._viewId).onError(onError);
   }
 
   void subscribeModeListeners() {
-    methodChannel
-        .invokeMethod(BarcodeFindConstants.registerBarcodeFindListener, {'viewId': view._viewId})
-        .then((value) => subscribeModeListenersEvents())
-        .onError(onError);
+    barcodeMethodHandler.registerBarcodeFindListener(viewId: view._viewId).onError(onError);
+    subscribeModeListenersEvents();
   }
 
   void subscribeModeListenersEvents() {
@@ -551,16 +542,14 @@ class _BarcodeFindViewController extends BaseController {
       return;
     }
 
-    _modeEventsSubscription = BarcodePluginEvents.barcodeFindEventStream.listen((event) {
-      var eventJSON = jsonDecode(event) as Map<String, dynamic>;
-      var eventName = eventJSON['event'] as String;
-      if (eventName == BarcodeFindConstants.onTransformBarcodeData) {
+    _modeEventsSubscription = BarcodePluginEvents.barcodeFindEventStream.asFlutterEvents().listen((event) {
+      if (event.isEvent(BarcodeFindConstants.onTransformBarcodeData)) {
         // handled separately
         return;
       }
 
-      if (eventName == BarcodeFindConstants.onSearchStartedEvent) {
-        for (var listener in view._barcodeFind._listeners) {
+      if (event.isEvent(BarcodeFindConstants.onSearchStartedEvent)) {
+        for (var listener in view._barcodeFind._listeners.toList()) {
           listener.didStartSearch();
         }
         return;
@@ -568,17 +557,17 @@ class _BarcodeFindViewController extends BaseController {
 
       Set<BarcodeFindItem> foundItems = <BarcodeFindItem>{};
 
-      if (eventJSON.containsKey('foundItems')) {
-        var foundItemsData = List.from(eventJSON['foundItems']);
+      if (event.payload.containsKey('foundItems')) {
+        var foundItemsData = List.from(event.payload['foundItems']);
         foundItems = foundItemsData
             .map((e) => view._barcodeFind._itemsToFind.firstWhere((element) => element.searchOptions.barcodeData == e))
             .toSet();
       }
 
-      for (var listener in view._barcodeFind._listeners) {
-        if (eventName == BarcodeFindConstants.onSearchPausedEvent) {
+      for (var listener in view._barcodeFind._listeners.toList()) {
+        if (event.isEvent(BarcodeFindConstants.onSearchPausedEvent)) {
           listener.didPauseSearch(foundItems);
-        } else if (eventName == BarcodeFindConstants.onSearchStoppedEvent) {
+        } else if (event.isEvent(BarcodeFindConstants.onSearchStoppedEvent)) {
           listener.didStopSearch(foundItems);
         }
       }
@@ -586,46 +575,34 @@ class _BarcodeFindViewController extends BaseController {
   }
 
   void setModeEnabledState(bool newValue) {
-    methodChannel.invokeMethod(BarcodeFindConstants.setModeEnabledState,
-        {'viewId': view._viewId, 'enabled': newValue}).then((value) => null, onError: onError);
+    barcodeMethodHandler.setBarcodeFindModeEnabledState(viewId: view._viewId, enabled: newValue).onError(onError);
   }
 
   Future<void> updateFeedback() {
-    return methodChannel.invokeMethod(BarcodeFindConstants.updateFeedback, {
-      'viewId': view._viewId,
-      'feedbackJson': jsonEncode(view._barcodeFind.feedback.toMap()),
-    });
+    return barcodeMethodHandler
+        .updateBarcodeFindFeedback(viewId: view._viewId, feedbackJson: jsonEncode(view._barcodeFind.feedback.toMap()))
+        .onError(onError);
   }
 
   void unsubscribeModeListeners() {
     _modeEventsSubscription?.cancel();
     _modeEventsSubscription = null;
-    methodChannel.invokeMethod(BarcodeFindConstants.unregisterBarcodeFindListener, {'viewId': view._viewId}).then(
-        (value) => null,
-        onError: onError);
+    barcodeMethodHandler.unregisterBarcodeFindListener(viewId: view._viewId).onError(onError);
   }
 
   Future<void> setBarcodeTransformer() {
-    return methodChannel.invokeMethod(BarcodeFindConstants.setBarcodeTransformer, {'viewId': view._viewId}).then(
-        (value) => subscribeBarcodeTransformerEvents(),
-        onError: onError);
+    return barcodeMethodHandler.setBarcodeTransformer(viewId: view._viewId).onError(onError);
   }
 
   void subscribeBarcodeTransformerEvents() {
-    if (_barcodeTransformerSubscription != null) {
-      return;
-    }
-
-    _barcodeTransformerSubscription = BarcodePluginEvents.barcodeFindEventStream.listen((event) {
-      var eventJSON = jsonDecode(event) as Map<String, dynamic>;
-      var eventName = eventJSON['event'] as String;
-      if (eventName == BarcodeFindConstants.onTransformBarcodeData) {
-        var data = eventJSON['data'] as String?;
+    barcodeMethodHandler.registerBarcodeFindListener(viewId: view._viewId).onError(onError);
+    _barcodeTransformerSubscription = BarcodePluginEvents.barcodeFindEventStream.asFlutterEvents().listen((event) {
+      if (event.isEvent(BarcodeFindConstants.onTransformBarcodeData)) {
+        var data = event.payload['data'] as String?;
         var result = view._barcodeFind._barcodeTransformer?.transformBarcodeData(data);
-        methodChannel.invokeMethod(BarcodeFindConstants.submitBarcodeTransformerResult, {
-          'viewId': view._viewId,
-          'transformedBarcode': result,
-        }).onError(onError);
+        barcodeMethodHandler
+            .submitBarcodeFindTransformerResult(viewId: view._viewId, transformedBarcode: result)
+            .onError(onError);
       }
     });
   }
@@ -640,6 +617,7 @@ class _BarcodeFindViewController extends BaseController {
   }
 }
 
+// ignore: experimental_member_use
 class _BarcodeFindViewState extends State<BarcodeFindView> implements CameraOwner {
   _BarcodeFindViewState();
 
@@ -675,8 +653,10 @@ class _BarcodeFindViewState extends State<BarcodeFindView> implements CameraOwne
 
     if (wasActive != _isRouteActive) {
       if (_isRouteActive) {
+        // ignore: experimental_member_use
         CameraOwnershipHelper.requestOwnership(CameraPosition.worldFacing, this);
       } else {
+        // ignore: experimental_member_use
         CameraOwnershipHelper.releaseOwnership(CameraPosition.worldFacing, this);
       }
     }
