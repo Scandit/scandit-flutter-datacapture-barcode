@@ -25,7 +25,6 @@ class BarcodeSelectionMethodHandler {
         static let updateBarcodeSelectionMode = "updateBarcodeSelectionMode"
         static let applyBarcodeSelectionModeSettings = "applyBarcodeSelectionModeSettings"
         static let updateBarcodeSelectionBasicOverlay = "updateBarcodeSelectionBasicOverlay"
-        static let updateFeedback = "updateFeedback"
     }
 
     private let barcodeSelectionModule: BarcodeSelectionModule
@@ -40,10 +39,8 @@ class BarcodeSelectionMethodHandler {
             let jsonString = barcodeSelectionModule.defaults.stringValue
             result(jsonString)
         case FunctionNames.getBarcodeSelectionSessionCount:
-            barcodeSelectionModule.submitBarcodeCountForIdentifier(
-                selectionIdentifier: methodCall.arguments as! String,
-                result: FlutterFrameworkResult(reply: result)
-            )
+            let count = barcodeSelectionModule.getBarcodeCount(selectionIdentifier: methodCall.arguments as! String)
+            result(count)
         case FunctionNames.resetBarcodeSelectionSession:
             barcodeSelectionModule.resetLatestSession(frameSequenceId: methodCall.arguments as? Int)
             result(nil)
@@ -67,10 +64,9 @@ class BarcodeSelectionMethodHandler {
             let enabled = methodCall.arguments as? Bool ?? false
             barcodeSelectionModule.finishDidUpdate(enabled: enabled)
         case FunctionNames.getLastFrameData:
-            barcodeSelectionModule.getLastFrameDataBytes(
-                frameId: methodCall.arguments as! String,
-                result: FlutterFrameworkResult(reply: result)
-            )
+            LastFrameData.shared.getLastFrameDataBytes {
+                result($0)
+            }
         case FunctionNames.setModeEnabledState:
             barcodeSelectionModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
             result(nil)
@@ -80,8 +76,6 @@ class BarcodeSelectionMethodHandler {
             barcodeSelectionModule.applyModeSettings(modeSettingsJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.updateBarcodeSelectionBasicOverlay:
             barcodeSelectionModule.updateBasicOverlay(overlayJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
-        case FunctionNames.updateFeedback:
-            barcodeSelectionModule.updateFeedback(feedbackJson: methodCall.arguments as! String, result: FlutterFrameworkResult(reply: result))
         default:
             result(FlutterMethodNotImplemented)
         }

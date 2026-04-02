@@ -4,14 +4,19 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
-import 'dart:convert';
-
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 import 'barcode_capture_function_names.dart';
 import '../../scandit_flutter_datacapture_barcode.dart';
 
-class BarcodeCaptureSession with _PrivateBarcodeCaptureSession {
+@immutable
+class BarcodeCaptureSession {
   final _BarcodeCaptureSessionController _controller = _BarcodeCaptureSessionController();
+
+  final List<Barcode> _newlyRecognizedBarcodes;
+
+  @Deprecated('Prefer use of the property `newlyRecognizedBarcode` instead.')
+  List<Barcode> get newlyRecognizedBarcodes => _newlyRecognizedBarcodes;
 
   final Barcode? _newlyRecognizedBarcode;
   Barcode? get newlyRecognizedBarcode => _newlyRecognizedBarcode;
@@ -23,44 +28,36 @@ class BarcodeCaptureSession with _PrivateBarcodeCaptureSession {
   int get frameSequenceId => _frameSequenceId;
 
   BarcodeCaptureSession._(
-      this._newlyRecognizedBarcode, this._newlyLocalizedBarcodes, this._frameSequenceId, String frameId) {
-    _frameId = frameId;
-  }
+      this._newlyRecognizedBarcode, this._newlyRecognizedBarcodes, this._newlyLocalizedBarcodes, this._frameSequenceId);
 
-  factory BarcodeCaptureSession.fromJSON(Map<String, dynamic> eventJson) {
-    var json = jsonDecode(eventJson['session']);
-
-    return BarcodeCaptureSession._(
-      json['newlyRecognizedBarcode'] != null ? Barcode.fromJSON(json['newlyRecognizedBarcode']) : null,
-      (json['newlyLocalizedBarcodes'] as List<dynamic>)
-          .cast<Map<String, dynamic>>()
-          .map((e) => LocalizedOnlyBarcode.fromJSON(e))
-          .toList()
-          .cast<LocalizedOnlyBarcode>(),
-      (json['frameSequenceId'] as num).toInt(),
-      eventJson['frameId'],
-    );
-  }
+  BarcodeCaptureSession.fromJSON(Map<String, dynamic> json)
+      : this._(
+            json['newlyRecognizedBarcode'] != null ? Barcode.fromJSON(json['newlyRecognizedBarcode']) : null,
+            (json['newlyRecognizedBarcodes'] as List<dynamic>)
+                .cast<Map<String, dynamic>>()
+                .map((e) => Barcode.fromJSON(e))
+                .toList()
+                .cast<Barcode>(),
+            (json['newlyLocalizedBarcodes'] as List<dynamic>)
+                .cast<Map<String, dynamic>>()
+                .map((e) => LocalizedOnlyBarcode.fromJSON(e))
+                .toList()
+                .cast<LocalizedOnlyBarcode>(),
+            (json['frameSequenceId'] as num).toInt());
 
   Future<void> reset() {
-    return _controller.reset();
+    return _controller.reset(_frameSequenceId);
   }
-}
-
-mixin _PrivateBarcodeCaptureSession {
-  String _frameId = "";
-
-  String get frameId => _frameId;
 }
 
 class _BarcodeCaptureSessionController {
   late final MethodChannel _methodChannel = _getChannel();
 
-  Future<void> reset() {
-    return _methodChannel.invokeMethod(BarcodeCaptureFunctionNames.resetBarcodeCaptureSession);
+  Future<void> reset(int frameSequenceId) {
+    return _methodChannel.invokeMethod(BarcodeCaptureFunctionNames.resetBarcodeCaptureSession, frameSequenceId);
   }
 
   MethodChannel _getChannel() {
-    return const MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
+    return MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
   }
 }
