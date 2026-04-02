@@ -4,12 +4,6 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
-import 'dart:convert';
-
-import 'package:flutter/services.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_info.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/structured_append.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
@@ -49,12 +43,6 @@ class Barcode implements Serializable {
   late int _frameID;
   int get frameID => _frameID;
 
-  late int _moduleCountX;
-  int get moduleCountX => _moduleCountX;
-
-  late int _moduleCountY;
-  int get moduleCountY => _moduleCountY;
-
   String? _compositeData;
   String? get compositeData => _compositeData;
 
@@ -78,8 +66,6 @@ class Barcode implements Serializable {
       required bool isColorInverted,
       required int symbolCount,
       required int frameID,
-      required int moduleCountX,
-      required int moduleCountY,
       String? compositeData,
       String? compositeRawData,
       StructuredAppendData? structuredAppendData}) {
@@ -94,8 +80,6 @@ class Barcode implements Serializable {
     _isColorInverted = isColorInverted;
     _symbolCount = symbolCount;
     _frameID = frameID;
-    _moduleCountX = moduleCountX;
-    _moduleCountY = moduleCountY;
     _compositeData = compositeData;
     _compositeRawData = compositeRawData;
     _structuredAppendData = structuredAppendData;
@@ -114,8 +98,6 @@ class Barcode implements Serializable {
     var isColorInverted = json['isColorInverted'] as bool;
     var symbolCount = (json['symbolCount'] as num).toInt();
     var frameID = (json['frameId'] as num).toInt();
-    var moduleCountX = (json['moduleCountX'] as num?)?.toInt() ?? 0;
-    var moduleCountY = (json['moduleCountY'] as num?)?.toInt() ?? 0;
     var compositeData = json['compositeData'] as String?;
     var compositeRawData = json['compositeRawData'] as String?;
     StructuredAppendData? structuredAppendData;
@@ -135,18 +117,9 @@ class Barcode implements Serializable {
         isColorInverted: isColorInverted,
         symbolCount: symbolCount,
         frameID: frameID,
-        moduleCountX: moduleCountX,
-        moduleCountY: moduleCountY,
         compositeData: compositeData,
         compositeRawData: compositeRawData,
         structuredAppendData: structuredAppendData);
-  }
-
-  static Future<Barcode> create(BarcodeInfo info) async {
-    final methodChannel = MethodChannel(BarcodeFunctionNames.methodsChannelName);
-    final methodHandler = BarcodeMethodHandler(methodChannel);
-    final result = await methodHandler.createFromBarcodeInfo(barcodeInfoJson: jsonEncode(info.toMap()));
-    return Barcode.fromJSON(jsonDecode(result));
   }
 
   @override
@@ -163,8 +136,6 @@ class Barcode implements Serializable {
       'isColorInverted': isColorInverted,
       'symbolCount': symbolCount,
       'frameId': frameID,
-      'moduleCountX': moduleCountX,
-      'moduleCountY': moduleCountY,
       'compositeData': compositeData,
       'compositeRawData': compositeRawData,
       'structuredAppendData': structuredAppendData?.toMap()
