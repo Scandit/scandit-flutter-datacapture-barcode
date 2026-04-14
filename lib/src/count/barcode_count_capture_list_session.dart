@@ -4,10 +4,10 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-import 'package:meta/meta.dart';
-import '../../scandit_flutter_datacapture_barcode.dart';
-import 'target_barcode.dart';
-import '../../scandit_flutter_datacapture_barcode_tracking.dart';
+import 'package:flutter/foundation.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/count/target_barcode.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/tracked_barcode.dart';
 
 @immutable
 class BarcodeCountCaptureListSession {
@@ -27,8 +27,16 @@ class BarcodeCountCaptureListSession {
 
   List<Barcode> get additionalBarcodes => _additionalBarcodes;
 
-  BarcodeCountCaptureListSession._(
-      this._correctBarcodes, this._wrongBarcodes, this._missingBarcodes, this._additionalBarcodes);
+  final List<TrackedBarcode> _acceptedBarcodes;
+
+  List<TrackedBarcode> get acceptedBarcodes => _acceptedBarcodes;
+
+  final List<TrackedBarcode> _rejectedBarcodes;
+
+  List<TrackedBarcode> get rejectedBarcodes => _rejectedBarcodes;
+
+  const BarcodeCountCaptureListSession._(this._correctBarcodes, this._wrongBarcodes, this._missingBarcodes,
+      this._additionalBarcodes, this._acceptedBarcodes, this._rejectedBarcodes);
 
   factory BarcodeCountCaptureListSession.fromJSON(Map<String, dynamic> json) {
     var correctBarcodes = (json['correctBarcodes'] as List)
@@ -47,6 +55,17 @@ class BarcodeCountCaptureListSession {
         .map((additionalBarcodesJSON) => Barcode.fromJSON(additionalBarcodesJSON))
         .toList();
 
-    return BarcodeCountCaptureListSession._(correctBarcodes, wrongBarcodes, missingBarcodes, additionalBarcodes);
+    var acceptedBarcodes = (json['acceptedBarcodes'] as List?)
+            ?.map((acceptedBarcodesJSON) => TrackedBarcode.fromJSON(acceptedBarcodesJSON, sessionFrameSequenceId: 0))
+            .toList() ??
+        [];
+
+    var rejectedBarcodes = (json['rejectedBarcodes'] as List?)
+            ?.map((rejectedBarcodesJSON) => TrackedBarcode.fromJSON(rejectedBarcodesJSON, sessionFrameSequenceId: 0))
+            .toList() ??
+        [];
+
+    return BarcodeCountCaptureListSession._(
+        correctBarcodes, wrongBarcodes, missingBarcodes, additionalBarcodes, acceptedBarcodes, rejectedBarcodes);
   }
 }

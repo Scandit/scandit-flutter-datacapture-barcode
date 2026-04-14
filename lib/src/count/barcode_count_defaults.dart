@@ -5,17 +5,13 @@
  */
 
 import 'dart:convert';
-import 'package:meta/meta.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_filter_settings.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/count/barcode_count_view.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
-import '../../scandit_flutter_datacapture_barcode.dart';
-import 'barcode_count_function_names.dart';
-import 'barcode_count_view.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeCountDefaults {
-  static MethodChannel channel = MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
-
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
   static CameraSettingsDefaults get cameraSettingsDefaults => _cameraSettingsDefaults;
@@ -32,21 +28,14 @@ class BarcodeCountDefaults {
 
   static BarcodeCountViewDefaults get viewDefaults => _viewDefaults;
 
-  static bool _isInitialized = false;
-
-  static Future<void> initializeDefaults() async {
-    if (_isInitialized) return;
-    var result = await channel.invokeMethod(BarcodeCountFunctionNames.getDefaults);
-    var json = jsonDecode(result as String);
-    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(json['RecommendedCameraSettings']);
+  static void initializeDefaults(Map<String, dynamic> barcodeCountDefaults) {
+    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(barcodeCountDefaults['RecommendedCameraSettings']);
 
     _barcodeCountSettingsDefaults =
-        BarcodeCountSettingsDefaults.fromJSON(json["BarcodeCountSettings"] as Map<String, dynamic>);
-    _barcodeCountFeedbackDefaults =
-        BarcodeCountFeedbackDefaults.fromJSON(jsonDecode(json["BarcodeCountFeedback"]) as Map<String, dynamic>);
-    _viewDefaults = BarcodeCountViewDefaults.fromJSON(json["BarcodeCountView"] as Map<String, dynamic>);
-
-    _isInitialized = true;
+        BarcodeCountSettingsDefaults.fromJSON(barcodeCountDefaults["BarcodeCountSettings"] as Map<String, dynamic>);
+    _barcodeCountFeedbackDefaults = BarcodeCountFeedbackDefaults.fromJSON(
+        jsonDecode(barcodeCountDefaults["BarcodeCountFeedback"]) as Map<String, dynamic>);
+    _viewDefaults = BarcodeCountViewDefaults.fromJSON(barcodeCountDefaults["BarcodeCountView"] as Map<String, dynamic>);
   }
 }
 
@@ -64,16 +53,20 @@ class BarcodeCountViewDefaults {
   final bool shouldShowToolbar;
   final Brush defaultNotInListBrush;
   final Brush defaultRecognizedBrush;
-  final Brush defaultUnrecognizedBrush;
+  final Brush defaultAcceptedBrush;
+  final Brush defaultRejectedBrush;
   final bool shouldShowScanAreaGuides;
   final String clearHighlightsButtonText;
   final String exitButtonText;
-  final String textForUnrecognizedBarcodesDetectedHint;
   final String textForTapShutterToScanHint;
   final String textForScanningHint;
   final String textForMoveCloserAndRescanHint;
   final String textForMoveFurtherAndRescanHint;
+  final String textForBarcodesNotInListDetectedHint;
+  final String textForScreenCleanedUpHint;
+  final String textForClusteringGestureHint;
   final BarcodeCountToolbarSettingsDefaults toolbarSettings;
+  final BarcodeCountMappingFlowSettingsDefaults mappingFlowSettings;
   final String listButtonAccessibilityHint;
   final String listButtonAccessibilityLabel;
   final String listButtonContentDescription;
@@ -92,11 +85,21 @@ class BarcodeCountViewDefaults {
   final String singleScanButtonAccessibilityHint;
   final String singleScanButtonAccessibilityLabel;
   final String singleScanButtonContentDescription;
+  final String statusModeButtonAccessibilityHint;
+  final String statusModeButtonAccessibilityLabel;
+  final String statusModeButtonContentDescription;
   final bool shouldShowListProgressBar;
   final bool shouldShowTorchControl;
   final Anchor torchControlPosition;
+  final bool tapToUncountEnabled;
+  final String textForTapToUncountHint;
+  final bool shouldShowStatusModeButton;
+  final bool shouldShowStatusIconsOnScan;
+  final bool shouldDisableModeOnExitButtonTapped;
+  final bool hardwareTriggerSupported;
+  final bool hardwareTriggerEnabled;
 
-  BarcodeCountViewDefaults(
+  const BarcodeCountViewDefaults(
       this.style,
       this.shouldShowUserGuidanceView,
       this.shouldShowListButton,
@@ -109,16 +112,20 @@ class BarcodeCountViewDefaults {
       this.shouldShowToolbar,
       this.defaultNotInListBrush,
       this.defaultRecognizedBrush,
-      this.defaultUnrecognizedBrush,
+      this.defaultAcceptedBrush,
+      this.defaultRejectedBrush,
       this.shouldShowScanAreaGuides,
       this.clearHighlightsButtonText,
       this.exitButtonText,
-      this.textForUnrecognizedBarcodesDetectedHint,
       this.textForTapShutterToScanHint,
       this.textForScanningHint,
       this.textForMoveCloserAndRescanHint,
       this.textForMoveFurtherAndRescanHint,
+      this.textForBarcodesNotInListDetectedHint,
+      this.textForScreenCleanedUpHint,
+      this.textForClusteringGestureHint,
       this.toolbarSettings,
+      this.mappingFlowSettings,
       this.listButtonAccessibilityHint,
       this.listButtonAccessibilityLabel,
       this.listButtonContentDescription,
@@ -137,9 +144,19 @@ class BarcodeCountViewDefaults {
       this.singleScanButtonAccessibilityHint,
       this.singleScanButtonAccessibilityLabel,
       this.singleScanButtonContentDescription,
+      this.statusModeButtonAccessibilityHint,
+      this.statusModeButtonAccessibilityLabel,
+      this.statusModeButtonContentDescription,
       this.shouldShowListProgressBar,
       this.shouldShowTorchControl,
-      this.torchControlPosition);
+      this.torchControlPosition,
+      this.tapToUncountEnabled,
+      this.textForTapToUncountHint,
+      this.shouldShowStatusModeButton,
+      this.shouldShowStatusIconsOnScan,
+      this.shouldDisableModeOnExitButtonTapped,
+      this.hardwareTriggerSupported,
+      this.hardwareTriggerEnabled);
 
   factory BarcodeCountViewDefaults.fromJSON(Map<String, dynamic> json) {
     final style = BarcodeCountViewStyleSerializer.fromJSON(json['style'] as String);
@@ -154,20 +171,24 @@ class BarcodeCountViewDefaults {
     final shouldShowToolbar = json['shouldShowToolbar'] as bool;
     final defaultNotInListBrush = BrushDefaults.fromJSON(json['notInListBrush'] as Map<String, dynamic>).toBrush();
     final defaultRecognizedBrush = BrushDefaults.fromJSON(json['recognizedBrush'] as Map<String, dynamic>).toBrush();
-    final defaultUnrecognizedBrush =
-        BrushDefaults.fromJSON(json['unrecognizedBrush'] as Map<String, dynamic>).toBrush();
-
+    final defaultAcceptedBrush = BrushDefaults.fromJSON(json['acceptedBrush'] as Map<String, dynamic>).toBrush();
+    final defaultRejectedBrush = BrushDefaults.fromJSON(json['rejectedBrush'] as Map<String, dynamic>).toBrush();
     final shouldShowScanAreaGuides = json['shouldShowScanAreaGuides'] as bool;
     final clearHighlightsButtonText = json['clearHighlightsButtonText'];
     final exitButtonText = json['exitButtonText'];
-    final textForUnrecognizedBarcodesDetectedHint = json['textForUnrecognizedBarcodesDetectedHint'];
     final textForTapShutterToScanHint = json['textForTapShutterToScanHint'];
     final textForScanningHint = json['textForScanningHint'];
     final textForMoveCloserAndRescanHint = json['textForMoveCloserAndRescanHint'];
     final textForMoveFurtherAndRescanHint = json['textForMoveFurtherAndRescanHint'];
+    final textForBarcodesNotInListDetectedHint = json['textForBarcodesNotInListDetectedHint'] as String? ?? '';
+    final textForScreenCleanedUpHint = json['textForScreenCleanedUpHint'] as String? ?? '';
+    final textForClusteringGestureHint = json['textForClusteringGestureHint'] as String? ?? '';
 
     final toolbarSettings =
         BarcodeCountToolbarSettingsDefaults.fromJSON(json['toolbarSettings'] as Map<String, dynamic>);
+
+    final mappingFlowSettings =
+        BarcodeCountMappingFlowSettingsDefaults.fromJSON(json['mappingFlowSettings'] as Map<String, dynamic>);
 
     var listButtonAccessibilityHint = '';
     if (json.containsKey('listButtonAccessibilityHint')) {
@@ -259,9 +280,31 @@ class BarcodeCountViewDefaults {
       singleScanButtonContentDescription = json['singleScanButtonContentDescription'];
     }
 
+    var statusModeButtonAccessibilityHint = '';
+    if (json.containsKey('statusModeButtonAccessibilityHint')) {
+      statusModeButtonAccessibilityHint = json['statusModeButtonAccessibilityHint'];
+    }
+
+    var statusModeButtonAccessibilityLabel = '';
+    if (json.containsKey('statusModeButtonAccessibilityLabel')) {
+      statusModeButtonAccessibilityLabel = json['statusModeButtonAccessibilityLabel'];
+    }
+
+    var statusModeButtonContentDescription = '';
+    if (json.containsKey('statusModeButtonContentDescription')) {
+      statusModeButtonContentDescription = json['statusModeButtonContentDescription'];
+    }
+
     final shouldShowListProgressBar = json['shouldShowListProgressBar'] as bool;
     final shouldShowTorchControl = json['shouldShowTorchControl'] as bool;
     final torchControlPosition = AnchorDeserializer.fromJSON(json['torchControlPosition']);
+    final tapToUncountEnabled = json['tapToUncountEnabled'] as bool;
+    final textForTapToUncountHint = json['textForTapToUncountHint'] as String;
+    final shouldShowStatusModeButton = json['shouldShowStatusModeButton'] as bool? ?? false;
+    final shouldShowStatusIconsOnScan = json['shouldShowStatusIconsOnScan'] as bool? ?? false;
+    final shouldDisableModeOnExitButtonTapped = json['shouldDisableModeOnExitButtonTapped'] as bool? ?? true;
+    final hardwareTriggerSupported = json['hardwareTriggerSupported'] as bool? ?? false;
+    final hardwareTriggerEnabled = json['hardwareTriggerEnabled'] as bool? ?? false;
 
     return BarcodeCountViewDefaults(
         style,
@@ -276,16 +319,20 @@ class BarcodeCountViewDefaults {
         shouldShowToolbar,
         defaultNotInListBrush,
         defaultRecognizedBrush,
-        defaultUnrecognizedBrush,
+        defaultAcceptedBrush,
+        defaultRejectedBrush,
         shouldShowScanAreaGuides,
         clearHighlightsButtonText,
         exitButtonText,
-        textForUnrecognizedBarcodesDetectedHint,
         textForTapShutterToScanHint,
         textForScanningHint,
         textForMoveCloserAndRescanHint,
         textForMoveFurtherAndRescanHint,
+        textForBarcodesNotInListDetectedHint,
+        textForScreenCleanedUpHint,
+        textForClusteringGestureHint,
         toolbarSettings,
+        mappingFlowSettings,
         listButtonAccessibilityHint,
         listButtonAccessibilityLabel,
         listButtonContentDescription,
@@ -304,9 +351,19 @@ class BarcodeCountViewDefaults {
         singleScanButtonAccessibilityHint,
         singleScanButtonAccessibilityLabel,
         singleScanButtonContentDescription,
+        statusModeButtonAccessibilityHint,
+        statusModeButtonAccessibilityLabel,
+        statusModeButtonContentDescription,
         shouldShowListProgressBar,
         shouldShowTorchControl,
-        torchControlPosition);
+        torchControlPosition,
+        tapToUncountEnabled,
+        textForTapToUncountHint,
+        shouldShowStatusModeButton,
+        shouldShowStatusIconsOnScan,
+        shouldDisableModeOnExitButtonTapped,
+        hardwareTriggerSupported,
+        hardwareTriggerEnabled);
   }
 }
 
@@ -314,12 +371,23 @@ class BarcodeCountViewDefaults {
 class BarcodeCountSettingsDefaults {
   final BarcodeFilterSettings barcodeFilterSettings;
   final bool expectsOnlyUniqueBarcodes;
+  final bool disableModeWhenCaptureListCompleted;
+  final ClusteringMode clusteringMode;
+  final bool scanPreviewEnabled;
+  final bool mappingEnabled;
 
-  BarcodeCountSettingsDefaults(this.barcodeFilterSettings, this.expectsOnlyUniqueBarcodes);
+  const BarcodeCountSettingsDefaults(this.barcodeFilterSettings, this.expectsOnlyUniqueBarcodes,
+      this.disableModeWhenCaptureListCompleted, this.clusteringMode, this.scanPreviewEnabled, this.mappingEnabled);
 
   factory BarcodeCountSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     return BarcodeCountSettingsDefaults(
-        BarcodeFilterSettings.fromJSON(json['barcodeFilterSettings']), json['expectOnlyUniqueBarcodes'] as bool);
+      BarcodeFilterSettings.fromJSON(json['barcodeFilterSettings']),
+      json['expectOnlyUniqueBarcodes'] as bool,
+      json['disableModeWhenCaptureListCompleted'] as bool,
+      ClusteringMode.fromJSON(json['clusteringMode'] as String),
+      json['scanPreviewEnabled'] as bool? ?? false,
+      json['mappingEnabled'] as bool? ?? false,
+    );
   }
 }
 
@@ -346,7 +414,7 @@ class BarcodeCountToolbarSettingsDefaults {
   final String? colorSchemeButtonAccessibilityHint;
   final String? colorSchemeButtonAccessibilityLabel;
 
-  BarcodeCountToolbarSettingsDefaults._(
+  const BarcodeCountToolbarSettingsDefaults._(
       this.audioOnButtonText,
       this.audioOffButtonText,
       this.audioButtonContentDescription,
@@ -464,7 +532,7 @@ class BarcodeCountFeedbackDefaults {
   final Feedback success;
   final Feedback failure;
 
-  BarcodeCountFeedbackDefaults(this.success, this.failure);
+  const BarcodeCountFeedbackDefaults(this.success, this.failure);
 
   factory BarcodeCountFeedbackDefaults.fromJSON(Map<String, dynamic> json) {
     var successJson = json['success'];
@@ -534,5 +602,28 @@ class BarcodeCountFeedbackDefaults {
     var failure = Feedback(failureVibration, failureSound);
 
     return BarcodeCountFeedbackDefaults(success, failure);
+  }
+}
+
+@immutable
+class BarcodeCountMappingFlowSettingsDefaults {
+  final String scanBarcodesGuidanceText;
+  final String nextButtonText;
+  final String stepBackGuidanceText;
+  final String redoScanButtonText;
+  final String restartButtonText;
+  final String finishButtonText;
+
+  const BarcodeCountMappingFlowSettingsDefaults(this.scanBarcodesGuidanceText, this.nextButtonText,
+      this.stepBackGuidanceText, this.redoScanButtonText, this.restartButtonText, this.finishButtonText);
+
+  factory BarcodeCountMappingFlowSettingsDefaults.fromJSON(Map<String, dynamic> json) {
+    return BarcodeCountMappingFlowSettingsDefaults(
+        json['scanBarcodesGuidanceText'] as String,
+        json['nextButtonText'] as String,
+        json['stepBackGuidanceText'] as String,
+        json['redoScanButtonText'] as String,
+        json['restartButtonText'] as String,
+        json['finishButtonText'] as String);
   }
 }

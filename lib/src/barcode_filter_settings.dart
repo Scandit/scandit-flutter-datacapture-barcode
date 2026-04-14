@@ -19,6 +19,13 @@ class BarcodeFilterSettings implements Serializable {
 
   Set<Symbology> excludedSymbologies = {};
 
+  BarcodeFilterSettings()
+      : excludeEan13 = false,
+        excludeUpca = false,
+        excludedCodesRegex = '',
+        excludedSymbolCounts = {},
+        excludedSymbologies = {};
+
   BarcodeFilterSettings._(this.excludeEan13, this.excludeUpca, this.excludedCodesRegex, this.excludedSymbolCounts,
       this.excludedSymbologies);
 

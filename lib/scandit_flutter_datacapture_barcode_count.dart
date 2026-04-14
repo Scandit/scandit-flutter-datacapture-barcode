@@ -4,14 +4,36 @@
  * Copyright (C) 2022- Scandit AG. All rights reserved.
  */
 
+// ignore: unnecessary_library_name
 library scandit_flutter_datacapture_barcode_count;
 
-export 'src/count/barcode_count.dart'
-    show BarcodeCount, BarcodeCountCaptureList, BarcodeCountCaptureListListener, BarcodeCountListener;
+export 'src/barcode_spatial_grid.dart' show BarcodeSpatialGrid;
 export 'src/count/barcode_count_capture_list_session.dart' show BarcodeCountCaptureListSession;
 export 'src/count/barcode_count_feedback.dart' show BarcodeCountFeedback;
 export 'src/count/barcode_count_session.dart' show BarcodeCountSession;
 export 'src/count/barcode_count_settings.dart' show BarcodeCountSettings;
 export 'src/count/target_barcode.dart' show TargetBarcode;
 export 'src/count/barcode_count_view.dart'
-    show BarcodeCountView, BarcodeCountViewListener, BarcodeCountViewUiListener, BarcodeCountViewStyle;
+    show
+        BarcodeCount,
+        BarcodeCountCaptureList,
+        BarcodeCountView,
+        BarcodeCountViewListener,
+        BarcodeCountViewExtendedListener,
+        BarcodeCountViewUiListener,
+        BarcodeCountViewStyle,
+        BarcodeCountStatusProvider,
+        BarcodeCountStatusProviderCallback;
+export 'src/count/barcode_count_status.dart' show BarcodeCountStatus;
+export 'src/count/barcode_count_status_item.dart' show BarcodeCountStatusItem;
+export 'src/count/barcode_count_status_result.dart'
+    show
+        BarcodeCountStatusResult,
+        BarcodeCountStatusResultAbort,
+        BarcodeCountStatusResultError,
+        BarcodeCountStatusResultSuccess;
+export 'src/count/barcode_count_capture_list_listener.dart'
+    show BarcodeCountCaptureListListener, BarcodeCountCaptureListExtendedListener;
+export 'src/count/barcode_count_listener.dart' show BarcodeCountListener, BarcodeCountExtendedListener;
+export 'src/count/barcode_count_not_in_list_action_settings.dart' show BarcodeCountNotInListActionSettings;
+export 'src/count/barcode_count_mapping_flow_settings.dart' show BarcodeCountMappingFlowSettings;
