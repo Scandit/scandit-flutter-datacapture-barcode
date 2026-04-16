@@ -7,9 +7,13 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+import 'barcode_find_constants.dart';
 
 class BarcodeFindDefaults {
+  static MethodChannel mainChannel = const MethodChannel(BarcodeFindConstants.methodsChannelName);
+
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
   static CameraSettingsDefaults get cameraSettingsDefaults => _cameraSettingsDefaults;
@@ -24,13 +28,16 @@ class BarcodeFindDefaults {
 
   static bool _isInitialized = false;
 
-  static void initializeDefaults(Map<String, dynamic> barcodeFindDefaults) {
+  static Future<void> initializeDefaults() async {
     if (_isInitialized) return;
-    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(barcodeFindDefaults['RecommendedCameraSettings']);
-    _barcodeFindFeedbackDefaults = BarcodeFindFeedbackDefaults.fromJSON(
-        jsonDecode(barcodeFindDefaults["BarcodeFindFeedback"] as String) as Map<String, dynamic>);
-    _barcodeFindViewDefaults =
-        BarcodeFindViewDefaults.fromJSON(barcodeFindDefaults["BarcodeFindView"] as Map<String, dynamic>);
+    var result = await mainChannel.invokeMethod(BarcodeFindConstants.getBarcodeFindDefaults);
+    var json = jsonDecode(result as String);
+
+    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(json['RecommendedCameraSettings']);
+    _barcodeFindFeedbackDefaults =
+        BarcodeFindFeedbackDefaults.fromJSON(jsonDecode(json["BarcodeFindFeedback"]) as Map<String, dynamic>);
+    _barcodeFindViewDefaults = BarcodeFindViewDefaults.fromJSON(json["BarcodeFindView"] as Map<String, dynamic>);
+
     _isInitialized = true;
   }
 }

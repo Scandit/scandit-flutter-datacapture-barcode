@@ -4,9 +4,6 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-import 'package:scandit_flutter_datacapture_barcode/src/capture_preset.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/composite_type.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/usi/scan_item_definition.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import '../barcode_defaults.dart';
@@ -15,7 +12,7 @@ import '../symbology_settings.dart';
 import 'spark_scan_defaults.dart';
 
 class SparkScanSettings implements Serializable {
-  SparkScanSettings({Set<CapturePreset>? capturePresets}) : _capturePresets = capturePresets;
+  SparkScanSettings();
 
   Duration codeDuplicateFilter = SparkScanDefaults.sparkScanSettingsDefaults.codeDuplicateFilter;
 
@@ -28,12 +25,6 @@ class SparkScanSettings implements Serializable {
   Set<Symbology> get enabledSymbologies => _enabledSymbologies();
 
   ScanIntention scanIntention = SparkScanDefaults.sparkScanSettingsDefaults.scanIntention;
-
-  Set<CompositeType> enabledCompositeTypes = {};
-
-  List<ScanItemDefinition>? itemDefinitions;
-
-  final Set<CapturePreset>? _capturePresets;
 
   Set<Symbology> _enabledSymbologies() {
     return _symbologies.values.where((element) => element.isEnabled).map((e) => e.symbology).toSet().cast<Symbology>();
@@ -67,16 +58,6 @@ class SparkScanSettings implements Serializable {
     settingsForSymbology(symbology).isEnabled = enabled;
   }
 
-  void enableSymbologiesForCompositeTypes(Set<CompositeType> compositeTypes) {
-    for (var compositeType in compositeTypes) {
-      var symbologies = BarcodeDefaults.compositeTypeDescriptionsDefaults.firstWhere(
-        (element) => element.types.contains(compositeType),
-      );
-
-      enableSymbologies(symbologies.symbologies);
-    }
-  }
-
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -85,9 +66,6 @@ class SparkScanSettings implements Serializable {
       'batterySaving': batterySaving.toString(),
       'symbologies': _symbologies.map<String, Map<String, dynamic>>((key, value) => MapEntry(key, value.toMap())),
       'scanIntention': scanIntention.toString(),
-      'scanItemDefinitions': itemDefinitions?.map((e) => e.toMap()).toList(),
-      'capturePresets': _capturePresets?.map((e) => e.toString()).toList(),
-      'enabledCompositeTypes': enabledCompositeTypes.map((e) => e.toString()).toList(),
     };
   }
 }

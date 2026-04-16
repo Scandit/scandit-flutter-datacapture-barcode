@@ -7,7 +7,6 @@
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import '../aruco_dictionary.dart';
-import '../barcode_filter_settings.dart';
 import 'barcode_pick_defaults.dart';
 import '../symbology.dart';
 import '../symbology_settings.dart';
@@ -24,7 +23,6 @@ class BarcodePickSettings implements Serializable {
   bool soundEnabled = BarcodePickDefaults.barcodePickSettings.soundEnabled;
   bool cachingEnabled = BarcodePickDefaults.barcodePickSettings.cachingEnabled;
   bool hapticsEnabled = BarcodePickDefaults.barcodePickSettings.hapticsEnabled;
-  BarcodeFilterSettings filterSettings = BarcodePickDefaults.barcodePickSettings.filterSettings;
 
   SymbologySettings settingsForSymbology(Symbology symbology) {
     var identifier = symbology.toString();
@@ -72,8 +70,7 @@ class BarcodePickSettings implements Serializable {
       'soundEnabled': soundEnabled,
       'hapticEnabled': hapticsEnabled,
       'cachingEnabled': cachingEnabled,
-      'arucoDictionary': _arucoDictionary?.toMap(),
-      'barcodeFilterSettings': filterSettings.toMap()
+      'arucoDictionary': _arucoDictionary?.toMap()
     };
   }
 }
