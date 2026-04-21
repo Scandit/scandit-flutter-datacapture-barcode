@@ -5,7 +5,7 @@
  */
 
 import 'dart:convert';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
@@ -190,7 +190,7 @@ class BarcodeArViewDefaults {
         parseAnchorOrDefault(json, 'defaultMacroModeControlPosition', Anchor.topRight);
 
     return BarcodeArViewDefaults(
-      defaultCameraPosition: CameraPositionDeserializer.cameraPositionFromJSON(json['defaultCameraPosition']),
+      defaultCameraPosition: CameraPosition.fromJSON(json['defaultCameraPosition']),
       defaultSoundEnabled: json['defaultSoundEnabled'],
       defaultHapticsEnabled: json['defaultHapticsEnabled'],
       defaultTorchControlPosition: AnchorDeserializer.fromJSON(json['defaultTorchControlPosition']),

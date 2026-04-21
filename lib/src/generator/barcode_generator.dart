@@ -203,7 +203,8 @@ class _BarcodeGeneratorController extends BaseController {
   }
 
   void create() {
-    methodChannel.invokeMethod(BarcodeGeneratorFunctionNames.create, jsonEncode(barcodeGenerator.toMap()));
+    methodChannel.invokeMethod(
+        BarcodeGeneratorFunctionNames.create, {'barcodeGeneratorJson': jsonEncode(barcodeGenerator.toMap())});
   }
 }
 
