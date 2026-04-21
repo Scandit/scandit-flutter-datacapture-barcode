@@ -23,7 +23,6 @@ import 'package:scandit_flutter_datacapture_barcode/src/find/barcode_find_listen
 import 'package:scandit_flutter_datacapture_barcode/src/find/barcode_find_settings.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/find/barcode_find_transformer.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/find/barcode_find_view_ui_listener.dart';
-import 'package:scandit_flutter_datacapture_core/experimental.dart';
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
@@ -72,6 +71,20 @@ class BarcodeFindView extends StatefulWidget implements Serializable {
 
   @override
   State<StatefulWidget> createState() => _BarcodeFindViewState();
+
+  @Deprecated(
+    'There is no longer a need to manually call the widgetPaused function. This function will be removed in future SDK versions.',
+  )
+  Future<void> widgetPaused() {
+    return Future.value(null);
+  }
+
+  @Deprecated(
+    'There is no longer a need to manually call the widgetResumed function. This function will be removed in future SDK versions.',
+  )
+  Future<void> widgetResumed() {
+    return Future.value(null);
+  }
 
   Future<void> stopSearching() {
     _startSearching = false;
@@ -314,6 +327,9 @@ class BarcodeFind extends DataCaptureMode {
   }
 
   BarcodeFind(BarcodeFindSettings settings) : this._(settings);
+
+  @Deprecated('Use createRecommendedCameraSettings() instead.')
+  static CameraSettings get recommendedCameraSettings => createRecommendedCameraSettings();
 
   static CameraSettings createRecommendedCameraSettings() {
     var defaults = BarcodeFindDefaults.cameraSettingsDefaults;
@@ -640,16 +656,12 @@ class _BarcodeFindViewController extends BaseController {
   }
 }
 
-class _BarcodeFindViewState extends State<BarcodeFindView> implements CameraOwner {
+class _BarcodeFindViewState extends State<BarcodeFindView> {
   _BarcodeFindViewState();
 
   final _viewId = Random().nextInt(0x7FFFFFFF);
-  bool _isRouteActive = true;
 
   late _BarcodeFindViewController _controller;
-
-  @override
-  String get id => 'barcode-find-view-$_viewId';
 
   @override
   void initState() {
@@ -660,26 +672,6 @@ class _BarcodeFindViewState extends State<BarcodeFindView> implements CameraOwne
 
     widget._controller = _controller;
     widget._barcodeFind._controller = _controller;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _checkRouteStatus();
-  }
-
-  void _checkRouteStatus() {
-    final route = ModalRoute.of(context);
-    final wasActive = _isRouteActive;
-    _isRouteActive = route?.isCurrent == true;
-
-    if (wasActive != _isRouteActive) {
-      if (_isRouteActive) {
-        CameraOwnershipHelper.requestOwnership(CameraPosition.worldFacing, this);
-      } else {
-        CameraOwnershipHelper.releaseOwnership(CameraPosition.worldFacing, this);
-      }
-    }
   }
 
   @override

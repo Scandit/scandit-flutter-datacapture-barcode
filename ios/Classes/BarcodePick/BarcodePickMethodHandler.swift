@@ -5,9 +5,9 @@
  */
 
 import Flutter
+import scandit_flutter_datacapture_core
 import ScanditFrameworksBarcode
 import ScanditFrameworksCore
-import scandit_flutter_datacapture_core
 
 class BarcodePickMethodHandler {
     private enum FunctionNames {
@@ -29,10 +29,10 @@ class BarcodePickMethodHandler {
         static let finishPickAction = "finishPickAction"
         static let addBarcodePickListener = "addBarcodePickListener"
         static let removeBarcodePickListener = "removeBarcodePickListener"
-        static let finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest =
-            "finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest"
-        static let finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest =
-            "finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest"
+        static let finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest
+        = "finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest"
+        static let finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest
+        = "finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest"
     }
 
     private let barcodePickModule: BarcodePickModule
@@ -85,21 +85,12 @@ class BarcodePickMethodHandler {
         case FunctionNames.finishOnProductIdentifierForItems:
             let viewId = extractViewId(methodCall)
             let data = extractArgument(methodCall, key: "data", as: String.self)
-            barcodePickModule.finishProductIdentifierForItems(
-                viewId: viewId,
-                barcodePickProductProviderCallbackItemsJson: data,
-                result: FlutterFrameworkResult(reply: result)
-            )
+            barcodePickModule.finishProductIdentifierForItems(viewId: viewId, barcodePickProductProviderCallbackItemsJson: data, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.finishPickAction:
             let viewId = extractViewId(methodCall)
             let itemData = extractArgument(methodCall, key: "itemData", as: String.self)
             let actionResult = extractArgument(methodCall, key: "result", as: Bool.self)
-            barcodePickModule.finishPickAction(
-                viewId: viewId,
-                data: itemData,
-                actionResult: actionResult,
-                result: FlutterFrameworkResult(reply: result)
-            )
+            barcodePickModule.finishPickAction(viewId: viewId, data: itemData, actionResult: actionResult, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.addBarcodePickListener:
             let viewId = extractViewId(methodCall)
             barcodePickModule.addBarcodePickListener(viewId: viewId, result: FlutterFrameworkResult(reply: result))
@@ -108,39 +99,29 @@ class BarcodePickMethodHandler {
             barcodePickModule.removeBarcodePickListener(viewId: viewId, result: FlutterFrameworkResult(reply: result))
         case FunctionNames.finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest:
             guard let args = methodCall.arguments as? [String: Any?] else {
-                result(
-                    FlutterError(
-                        code: "-1",
-                        message:
-                            "Invalid argument for \(FunctionNames.finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest)",
-                        details: methodCall.arguments
-                    )
+                result(FlutterError(
+                    code: "-1",
+                    message: "Invalid argument for \(FunctionNames.finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest)",
+                    details: methodCall.arguments)
                 )
                 return
             }
             let viewId = extractViewId(methodCall)
             barcodePickModule.finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest(
-                viewId: viewId,
-                response: args,
-                result: FlutterFrameworkResult(reply: result)
+                viewId: viewId, response: args, result: FlutterFrameworkResult(reply: result)
             )
         case FunctionNames.finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest:
             guard let args = methodCall.arguments as? [String: Any?] else {
-                result(
-                    FlutterError(
-                        code: "-1",
-                        message:
-                            "Invalid argument for \(FunctionNames.finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest)",
-                        details: methodCall.arguments
-                    )
+                result(FlutterError(
+                    code: "-1",
+                    message: "Invalid argument for \(FunctionNames.finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest)",
+                    details: methodCall.arguments)
                 )
                 return
             }
             let viewId = extractViewId(methodCall)
             barcodePickModule.finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest(
-                viewId: viewId,
-                response: args,
-                result: FlutterFrameworkResult(reply: result)
+                viewId: viewId, response: args, result: FlutterFrameworkResult(reply: result)
             )
         default:
             result(FlutterMethodNotImplemented)
@@ -157,12 +138,7 @@ class BarcodePickMethodHandler {
         return value
     }
 
-    func extractArgumentOrDefault<T>(
-        _ methodCall: FlutterMethodCall,
-        key: String,
-        defaultValue: T?,
-        as type: T.Type = T.self
-    ) -> T? {
+    func extractArgumentOrDefault<T>(_ methodCall: FlutterMethodCall, key: String, defaultValue: T?, as type: T.Type = T.self) -> T? {
         guard let args = methodCall.arguments as? [String: Any] else {
             return defaultValue
         }
@@ -173,6 +149,6 @@ class BarcodePickMethodHandler {
     }
 
     func extractViewId(_ methodCall: FlutterMethodCall) -> Int {
-        extractArgument(methodCall, key: "viewId")
+        return extractArgument(methodCall, key: "viewId")
     }
 }

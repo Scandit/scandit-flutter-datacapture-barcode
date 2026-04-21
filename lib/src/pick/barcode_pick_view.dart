@@ -30,7 +30,6 @@ import 'package:scandit_flutter_datacapture_barcode/src/pick/barcode_pick_view_s
 import 'package:scandit_flutter_datacapture_barcode/src/pick/barcode_pick_view_ui_listener.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/pick/ui/barcode_pick_view_highlight_style.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/pick/ui/barcode_pick_view_highlight_style_request.dart';
-import 'package:scandit_flutter_datacapture_core/experimental.dart';
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
@@ -67,6 +66,9 @@ class BarcodePick implements Serializable {
 
   final List<BarcodePickScanningListener> _scanningListeners = [];
   final List<BarcodePickListener> _listeners = [];
+
+  @Deprecated('Use createRecommendedCameraSettings() instead.')
+  static CameraSettings get recommendedCameraSettings => createRecommendedCameraSettings();
 
   static CameraSettings createRecommendedCameraSettings() {
     var defaults = BarcodePickDefaults.cameraSettingsDefaults;
@@ -170,19 +172,12 @@ class BarcodePickView extends StatefulWidget implements Serializable {
       : super();
 
   factory BarcodePickView.forModeWithViewSettings(
-    DataCaptureContext dataCaptureContext,
-    BarcodePick barcodePick,
-    BarcodePickViewSettings viewSettings,
-  ) {
+      DataCaptureContext dataCaptureContext, BarcodePick barcodePick, BarcodePickViewSettings viewSettings) {
     return BarcodePickView._(dataCaptureContext, barcodePick, viewSettings, null);
   }
 
-  factory BarcodePickView.forModeWithViewSettingsAndCameraSettings(
-    DataCaptureContext dataCaptureContext,
-    BarcodePick barcodePick,
-    BarcodePickViewSettings viewSettings,
-    CameraSettings cameraSettings,
-  ) {
+  factory BarcodePickView.forModeWithViewSettingsAndCameraSettings(DataCaptureContext dataCaptureContext,
+      BarcodePick barcodePick, BarcodePickViewSettings viewSettings, CameraSettings cameraSettings) {
     return BarcodePickView._(dataCaptureContext, barcodePick, viewSettings, cameraSettings);
   }
 
@@ -205,6 +200,18 @@ class BarcodePickView extends StatefulWidget implements Serializable {
 
   Future<void> release() {
     return _controller?.release() ?? Future.value(null);
+  }
+
+  @Deprecated(
+      'There is no longer a need to manually call the pause function. This function will be removed in future SDK versions.')
+  Future<void> pause() {
+    return Future.value(null);
+  }
+
+  @Deprecated(
+      'There is no longer a need to manually call the resume function. This function will be removed in future SDK versions.')
+  Future<void> resume() {
+    return Future.value(null);
   }
 
   void addActionListener(BarcodePickActionListener listener) {
@@ -262,21 +269,17 @@ class BarcodePickView extends StatefulWidget implements Serializable {
         'isStarted': _isViewStarted,
         'viewId': _viewId,
       },
-      'BarcodePick': _barcodePick.toMap(),
+      'BarcodePick': _barcodePick.toMap()
     };
 
     return json;
   }
 }
 
-class _BarcodePickViewState extends State<BarcodePickView> implements CameraOwner {
+class _BarcodePickViewState extends State<BarcodePickView> {
   final int _viewId = Random().nextInt(0x7FFFFFFF);
 
   late _BarcodePickViewController _controller;
-  bool _isRouteActive = true;
-
-  @override
-  String get id => 'barcode-pick-view-$_viewId';
 
   _BarcodePickViewState();
 
@@ -291,26 +294,6 @@ class _BarcodePickViewState extends State<BarcodePickView> implements CameraOwne
     widget._barcodePick._controller = _controller;
     widget._barcodePick._productProvider.subscribeEvents();
     widget._barcodePick._productProvider.setViewId(_viewId);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _checkRouteStatus();
-  }
-
-  void _checkRouteStatus() {
-    final route = ModalRoute.of(context);
-    final wasActive = _isRouteActive;
-    _isRouteActive = route?.isCurrent == true;
-
-    if (wasActive != _isRouteActive) {
-      if (_isRouteActive) {
-        CameraOwnershipHelper.requestOwnership(CameraPosition.worldFacing, this);
-      } else {
-        CameraOwnershipHelper.releaseOwnership(CameraPosition.worldFacing, this);
-      }
-    }
   }
 
   @override
@@ -438,27 +421,19 @@ class _BarcodePickViewController extends BaseController {
   Future<void> handleViewForRequest(Map<String, dynamic> json) async {
     final requestId = num.parse(json['requestId']);
     final customView = view._barcodPickViewSettings.highlightStyle as BarcodePickViewHighlightStyleCustomView?;
-    final response = await customView?.asyncCustomViewProvider?.customViewForRequest(
-      BarcodePickViewHighlightStyleRequest.fromJSON(json),
-    );
-    methodChannel.invokeMethod(BarcodePickFunctionNames.finishViewForRequest, {
-      'viewId': view._viewId,
-      'requestId': requestId,
-      'response': response?.toMap(),
-    });
+    final response = await customView?.asyncCustomViewProvider
+        ?.customViewForRequest(BarcodePickViewHighlightStyleRequest.fromJSON(json));
+    methodChannel.invokeMethod(BarcodePickFunctionNames.finishViewForRequest,
+        {'viewId': view._viewId, 'requestId': requestId, 'response': response?.toMap()});
   }
 
   Future<void> handleStyleForRequest(Map<String, dynamic> json) async {
     final requestId = num.parse(json['requestId']);
     final dotWithIcons = view._barcodPickViewSettings.highlightStyle as BarcodePickViewHighlightStyleDotWithIcons?;
-    final response = await dotWithIcons?.asyncStyleProvider?.styleForRequest(
-      BarcodePickViewHighlightStyleRequest.fromJSON(json),
-    );
-    methodChannel.invokeMethod(BarcodePickFunctionNames.finishStyleForRequest, {
-      'viewId': view._viewId,
-      'requestId': requestId,
-      'response': jsonEncodeOrNull(response),
-    });
+    final response =
+        await dotWithIcons?.asyncStyleProvider?.styleForRequest(BarcodePickViewHighlightStyleRequest.fromJSON(json));
+    methodChannel.invokeMethod(BarcodePickFunctionNames.finishStyleForRequest,
+        {'viewId': view._viewId, 'requestId': requestId, 'response': jsonEncodeOrNull(response)});
   }
 
   Future<void> start() {
@@ -479,9 +454,8 @@ class _BarcodePickViewController extends BaseController {
 
   void addRemoveUiListener(bool add) {
     methodChannel.invokeMethod(
-      add ? BarcodePickFunctionNames.addViewUiListener : BarcodePickFunctionNames.removeViewUiListener,
-      {'viewId': view._viewId},
-    ).onError(onError);
+        add ? BarcodePickFunctionNames.addViewUiListener : BarcodePickFunctionNames.removeViewUiListener,
+        {'viewId': view._viewId}).onError(onError);
   }
 
   void addViewListener() {
@@ -516,11 +490,8 @@ class _BarcodePickViewController extends BaseController {
   }
 
   Future<void> finishPickAction(String itemData, bool result) {
-    return methodChannel.invokeMethod(BarcodePickFunctionNames.finishPickAction, {
-      'viewId': view._viewId,
-      'itemData': itemData,
-      'result': result,
-    });
+    return methodChannel.invokeMethod(
+        BarcodePickFunctionNames.finishPickAction, {'viewId': view._viewId, 'itemData': itemData, 'result': result});
   }
 
   void notifyDidFreezeScanning() {

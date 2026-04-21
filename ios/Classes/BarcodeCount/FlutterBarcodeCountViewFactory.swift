@@ -17,11 +17,9 @@ class FlutterBarcodeCountViewFactory: NSObject, FlutterPlatformViewFactory {
         super.init()
     }
 
-    func create(
-        withFrame frame: CGRect,
-        viewIdentifier viewId: Int64,
-        arguments args: Any?
-    ) -> FlutterPlatformView {
+    func create(withFrame frame: CGRect,
+                viewIdentifier viewId: Int64,
+                arguments args: Any?) -> FlutterPlatformView {
         guard let creationArgs = args as? [String: Any] else {
             Log.error("Unable to create BarcodeCountView without the JSON.")
             fatalError("Unable to create BarcodeCountView without the JSON.")

@@ -52,11 +52,20 @@ class BarcodeBatch extends DataCaptureMode {
     );
   }
 
-  BarcodeBatch._(this._settings) {
+  @Deprecated('Use createRecommendedCameraSettings() instead.')
+  static CameraSettings get recommendedCameraSettings => createRecommendedCameraSettings();
+
+  BarcodeBatch._(DataCaptureContext? context, this._settings) {
     _controller = _BarcodeBatchListenerController(this);
+    if (context != null) {
+      context.setMode(this);
+    }
   }
 
-  BarcodeBatch(BarcodeBatchSettings settings) : this._(settings);
+  BarcodeBatch(BarcodeBatchSettings settings) : this._(null, settings);
+
+  @Deprecated('Use constructor BarcodeBatch(BarcodeBatchSettings settings) instead.')
+  BarcodeBatch.forContext(DataCaptureContext context, BarcodeBatchSettings settings) : this._(context, settings);
 
   Future<void> applySettings(BarcodeBatchSettings settings) {
     _settings = settings;
@@ -140,8 +149,9 @@ class _BarcodeBatchListenerController extends BaseController {
   }
 
   Future<void> updateMode() {
-    return methodChannel.invokeMethod(BarcodeBatchFunctionNames.updateBarcodeBatchMode,
-        {'modeJson': jsonEncode(mode.toMap())}).then((value) => null, onError: onError);
+    return methodChannel
+        .invokeMethod(BarcodeBatchFunctionNames.updateBarcodeBatchMode, jsonEncode(mode.toMap()))
+        .then((value) => null, onError: onError);
   }
 
   Future<void> applyNewSettings(BarcodeBatchSettings settings) {
@@ -165,13 +175,15 @@ class _BarcodeBatchListenerController extends BaseController {
   }
 
   Future<FrameData> _getLastFrameData(BarcodeBatchSession session) {
-    return methodChannel.invokeMethod(BarcodeBatchFunctionNames.getLastFrameData, {'frameId': session.frameId}).then(
-        (value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)),
-        onError: onError);
+    return methodChannel
+        .invokeMethod(BarcodeBatchFunctionNames.getLastFrameData, session.frameId)
+        .then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: onError);
   }
 
   void setModeEnabledState(bool newValue) {
-    methodChannel.invokeMethod(BarcodeBatchFunctionNames.setModeEnabledState,
-        {'modeId': mode._modeId, 'enabled': newValue}).then((value) => null, onError: onError);
+    methodChannel.invokeMethod(BarcodeBatchFunctionNames.setModeEnabledState, {
+      'modeId': mode._modeId,
+      'enabled': newValue,
+    }).then((value) => null, onError: onError);
   }
 }

@@ -29,7 +29,6 @@ abstract class BarcodeArFunctionNames {
   static const String updateAnnotation = 'updateAnnotation';
   static const String updateHighlight = 'updateHighlight';
   static const String updateBarcodeArPopoverButtonAtIndex = 'updateBarcodeArPopoverButtonAtIndex';
-  static const String onCustomHighlightClicked = 'onCustomHighlightClicked';
 
   static const String highlightForBarcodeEvent = 'BarcodeArHighlightProvider.highlightForBarcode';
   static const String annotationForBarcodeEvent = 'BarcodeArAnnotationProvider.annotationForBarcode';
@@ -43,18 +42,6 @@ abstract class BarcodeArFunctionNames {
   static const String didTapInfoAnnotationEvent = 'BarcodeArInfoAnnotationListener.didTapInfoAnnotation';
   static const String didTapInfoAnnotationHeaderEvent = 'BarcodeArInfoAnnotationListener.didTapInfoAnnotationHeader';
   static const String didTapInfoAnnotationFooterEvent = 'BarcodeArInfoAnnotationListener.didTapInfoAnnotationFooter';
-
-  static const String didCreateBarcodeArCustomHighlight = 'BarcodeArCustomHighlight.create';
-  static const String didUpdateBarcodeArCustomHighlight = 'BarcodeArCustomHighlight.update';
-  static const String didDisposeBarcodeArCustomHighlight = 'BarcodeArCustomHighlight.dispose';
-  static const String showBarcodeArCustomHighlight = 'BarcodeArCustomHighlight.show';
-  static const String hideBarcodeArCustomHighlight = 'BarcodeArCustomHighlight.hide';
-
-  static const String didCreateBarcodeArCustomAnnotation = 'BarcodeArCustomAnnotation.create';
-  static const String didUpdateBarcodeArCustomAnnotation = 'BarcodeArCustomAnnotation.update';
-  static const String didDisposeBarcodeArCustomAnnotation = 'BarcodeArCustomAnnotation.dispose';
-  static const String showBarcodeArCustomAnnotation = 'BarcodeArCustomAnnotation.show';
-  static const String hideBarcodeArCustomAnnotation = 'BarcodeArCustomAnnotation.hide';
 
   static const String methodsChannelName = 'com.scandit.datacapture.barcode.ar/method_channel';
 }
