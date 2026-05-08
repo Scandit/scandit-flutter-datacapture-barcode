@@ -4,19 +4,20 @@
  * Copyright (C) 2022- Scandit AG. All rights reserved.
  */
 
-import 'dart:convert';
-
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import '../../scandit_flutter_datacapture_barcode.dart';
+import '../../scandit_flutter_datacapture_barcode_tracking.dart';
 import 'barcode_count_function_names.dart';
 
-class BarcodeCountSession with _PrivateBarcodeCountSession {
+@immutable
+class BarcodeCountSession {
   final _BarcodeCountSessionController _controller = _BarcodeCountSessionController();
 
-  final List<Barcode> _recognizedBarcodes;
+  final Map<int, TrackedBarcode> _recognizedBarcodes;
 
-  List<Barcode> get recognizedBarcodes => _recognizedBarcodes;
+  Map<int, TrackedBarcode> get recognizedBarcodes => _recognizedBarcodes;
 
   final int _frameSequenceId;
 
@@ -26,50 +27,36 @@ class BarcodeCountSession with _PrivateBarcodeCountSession {
 
   List<Barcode> get additionalBarcodes => _additionalBarcodes;
 
-  final int _viewId;
+  BarcodeCountSession._(this._recognizedBarcodes, this._additionalBarcodes, this._frameSequenceId);
 
-  BarcodeCountSession._(
-      this._recognizedBarcodes, this._additionalBarcodes, this._frameSequenceId, String frameId, this._viewId) {
-    _frameId = frameId;
-  }
-
-  factory BarcodeCountSession.fromJSON(Map<String, dynamic> event) {
-    final json = jsonDecode(event['session']);
-    final frameSequenceId = json['frameSequenceId'] as int;
-    final trackedCodes = (json['recognizedBarcodes'] as List).map((e) => Barcode.fromJSON(e)).toList();
-    final additionalBarcodes = (json['additionalBarcodes'] as List<dynamic>)
+  factory BarcodeCountSession.fromJSON(Map<String, dynamic> json) {
+    var frameSequenceId = json['frameSequenceId'] as int;
+    var trackedCodes = (json['recognizedBarcodes'] as Map)
+        .cast<String, Map<String, dynamic>>()
+        .map<int, TrackedBarcode>((key, value) =>
+            MapEntry(int.parse(key), TrackedBarcode.fromJSON(value, sessionFrameSequenceId: frameSequenceId)));
+    var additionalBarcodes = (json['additionalBarcodes'] as List<dynamic>)
         .cast<Map<String, dynamic>>()
         .map((e) => Barcode.fromJSON(e))
         .toList()
         .cast<Barcode>();
-    final frameId = event['frameId'] as String;
-    final viewId = event['viewId'] as int;
 
-    return BarcodeCountSession._(trackedCodes, additionalBarcodes, frameSequenceId, frameId, viewId);
+    return BarcodeCountSession._(trackedCodes, additionalBarcodes, frameSequenceId);
   }
 
   Future<void> reset() {
-    return _controller.reset(_viewId, _frameSequenceId);
+    return _controller.reset(_frameSequenceId);
   }
-}
-
-mixin _PrivateBarcodeCountSession {
-  String _frameId = "";
-
-  String get frameId => _frameId;
 }
 
 class _BarcodeCountSessionController {
   late final MethodChannel _methodChannel = _getChannel();
 
-  Future<void> reset(int viewId, int frameSequenceId) {
-    return _methodChannel.invokeMethod(BarcodeCountFunctionNames.resetBarcodeCountSession, {
-      'viewId': viewId,
-      'frameSequenceId': frameSequenceId,
-    });
+  Future<void> reset(int frameSequenceId) {
+    return _methodChannel.invokeMethod(BarcodeCountFunctionNames.resetBarcodeCountSession, frameSequenceId);
   }
 
   MethodChannel _getChannel() {
-    return const MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
+    return MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
   }
 }

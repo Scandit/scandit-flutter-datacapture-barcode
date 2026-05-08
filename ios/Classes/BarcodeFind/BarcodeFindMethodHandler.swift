@@ -40,12 +40,54 @@ class BarcodeFindMethodHandler {
     }
 
     public func methodCallHandler(methodCall: FlutterMethodCall, result: @escaping FlutterResult) {
-        let executionResult = barcodeFindModule.execute(
-            method: FlutterFrameworksMethodCall(methodCall),
-            result: FlutterFrameworkResult(reply: result)
-        )
-
-        if !executionResult {
+        switch methodCall.method {
+        case FunctionNames.getDefaults:
+            let defaults = barcodeFindModule.defaults.stringValue
+            result(defaults)
+        case FunctionNames.updateView:
+            barcodeFindModule.updateBarcodeFindView(viewJson: methodCall.arguments as! String,
+                                                    result: .create(result))
+        case FunctionNames.updateMode:
+            barcodeFindModule.updateBarcodeFindMode(modeJson: methodCall.arguments as! String,
+                                                    result: .create(result))
+        case FunctionNames.registerBarcodeFindListener:
+            barcodeFindModule.addBarcodeFindListener(result: .create(result))
+        case FunctionNames.unregisterBarcodeFindListener:
+            barcodeFindModule.removeBarcodeFindListener(result: .create(result))
+        case FunctionNames.registerBarcodeFindViewListener:
+            barcodeFindModule.addBarcodeFindViewListener(result: .create(result))
+        case FunctionNames.unregisterBarcodeFindViewListener:
+            barcodeFindModule.removeBarcodeFindViewListener(result: .create(result))
+        case FunctionNames.barcodeFindViewOnPause:
+            // No iOS API exists for this
+            result(nil)
+        case FunctionNames.barcodeFindViewOnResume:
+            barcodeFindModule.prepareSearching(result: .create(result))
+        case FunctionNames.barcodeFindSetItemList:
+            barcodeFindModule.setItemList(barcodeFindItemsJson: methodCall.arguments as! String,
+                                          result: .create(result))
+        case FunctionNames.barcodeFindViewStopSearching:
+            barcodeFindModule.stopSearching(result: .create(result))
+        case FunctionNames.barcodeFindViewPauseSearching:
+            barcodeFindModule.pauseSearching(result: .create(result))
+        case FunctionNames.barcodeFindViewStartSearching:
+            barcodeFindModule.startSearching(result: .create(result))
+        case FunctionNames.barcodeFindModeStart:
+            barcodeFindModule.startMode(result: .create(result))
+        case FunctionNames.barcodeFindModePause:
+            barcodeFindModule.pauseMode(result: .create(result))
+        case FunctionNames.barcodeFindModeStop:
+            barcodeFindModule.stopMode(result: .create(result))
+        case FunctionNames.setModeEnabledState:
+            barcodeFindModule.setModeEnabled(enabled: methodCall.arguments as! Bool)
+            result(nil)
+        case FunctionNames.setBarcodeTransformer:
+            barcodeFindModule.setBarcodeFindTransformer(result: .create(result))
+        case FunctionNames.submitBarcodeTransformerResult:
+            barcodeFindModule.submitBarcodeFindTransformerResult(transformedData: methodCall.arguments as! String?, result: .create(result))
+        case FunctionNames.updateFeedback:
+            barcodeFindModule.updateFeedback(feedbackJson: methodCall.arguments as! String, result: .create(result))
+        default:
             result(FlutterMethodNotImplemented)
         }
     }

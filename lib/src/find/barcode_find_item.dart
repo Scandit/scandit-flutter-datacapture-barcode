@@ -6,13 +6,14 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+import 'package:scandit_flutter_datacapture_core/src/widget_to_base64_converter.dart';
 
 @immutable
 class BarcodeFindItem implements Serializable {
   final BarcodeFindItemSearchOptions _searchOptions;
   final BarcodeFindItemContent? _content;
 
-  const BarcodeFindItem(this._searchOptions, this._content);
+  BarcodeFindItem(this._searchOptions, this._content);
 
   BarcodeFindItemSearchOptions get searchOptions => _searchOptions;
 
@@ -34,7 +35,7 @@ class BarcodeFindItem implements Serializable {
 class BarcodeFindItemSearchOptions implements Serializable {
   final String _barcodeData;
 
-  const BarcodeFindItemSearchOptions(this._barcodeData);
+  BarcodeFindItemSearchOptions(this._barcodeData);
 
   String get barcodeData => _barcodeData;
 
@@ -50,7 +51,7 @@ class BarcodeFindItemContent implements Serializable {
   final String? _additionalInfo;
   final Image? _image;
 
-  const BarcodeFindItemContent(this._info, this._additionalInfo, this._image);
+  BarcodeFindItemContent(this._info, this._additionalInfo, this._image);
 
   String? get info => _info;
 
