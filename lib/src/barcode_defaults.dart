@@ -6,6 +6,14 @@
 
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/ar/barcode_ar_defaults.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/batch/barcode_batch_defaults.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/capture/barcode_capture_defaults.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/count/barcode_count_defaults.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/find/barcode_find_defaults.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/pick/barcode_pick_defaults.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/selection/barcode_selection_defaults.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_defaults.dart';
 
 import 'symbology.dart';
 import 'symbology_description.dart';
@@ -19,7 +27,7 @@ class BarcodeDefaults {
   static late Map<String, SymbologySettings> _symbologySettingsDefaults;
   static late List<CompositeTypeDescription> _compositeTypeDescriptionsDefaults;
 
-  static MethodChannel channel = MethodChannel(BarcodeFunctionNames.methodsChannelName);
+  static MethodChannel channel = const MethodChannel(BarcodeFunctionNames.methodsChannelName);
 
   static bool _isInitialized = false;
 
@@ -28,6 +36,19 @@ class BarcodeDefaults {
 
     var result = await channel.invokeMethod(BarcodeFunctionNames.getDefaults);
     Map<String, dynamic> defaults = jsonDecode(result as String);
+    _loadBarcodeDefaults(defaults['Barcode'] as Map<String, dynamic>);
+    BarcodeCaptureDefaults.initializeDefaults(defaults['BarcodeCapture'] as Map<String, dynamic>);
+    BarcodeSelectionDefaults.initializeDefaults(defaults['BarcodeSelection'] as Map<String, dynamic>);
+    BarcodeBatchDefaults.initializeDefaults(defaults['BarcodeBatch'] as Map<String, dynamic>);
+    SparkScanDefaults.initializeDefaults(defaults['SparkScan'] as Map<String, dynamic>);
+    BarcodeCountDefaults.initializeDefaults(defaults['BarcodeCount'] as Map<String, dynamic>);
+    BarcodePickDefaults.initializeDefaults(defaults['BarcodePick'] as Map<String, dynamic>);
+    BarcodeFindDefaults.initializeDefaults(defaults['BarcodeFind'] as Map<String, dynamic>);
+    BarcodeArDefaults.initializeDefaults(defaults['BarcodeAr'] as Map<String, dynamic>);
+    _isInitialized = true;
+  }
+
+  static void _loadBarcodeDefaults(Map<String, dynamic> defaults) {
     _symbologyDescriptionsDefaults = (defaults['SymbologyDescriptions'] as List<dynamic>)
         .map((e) => SymbologyDescription.fromJSON(jsonDecode(e)))
         .toList()
@@ -38,8 +59,6 @@ class BarcodeDefaults {
         .map((e) => CompositeTypeDescription.fromJSON(jsonDecode(e)))
         .toList()
         .cast<CompositeTypeDescription>();
-
-    _isInitialized = true;
   }
 
   static List<SymbologyDescription> get symbologyDescriptionsDefaults => _symbologyDescriptionsDefaults;

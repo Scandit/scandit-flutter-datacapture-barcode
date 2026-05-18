@@ -4,19 +4,11 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
-import 'dart:convert';
-import 'package:meta/meta.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
-import 'package:scandit_flutter_datacapture_core/src/battery_saving_mode.dart';
-
-import 'barcode_capture_overlay.dart';
-import 'barcode_capture_function_names.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeCaptureDefaults {
-  static MethodChannel channel = MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
-
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
   static late BarcodeCaptureSettingsDefaults _barcodeCaptureSettingsDefaults;
@@ -29,32 +21,30 @@ class BarcodeCaptureDefaults {
 
   static BarcodeCaptureOverlayDefaults get barcodeCaptureOverlayDefaults => _barcodeCaptureOverlayDefaults;
 
-  static bool _isInitialized = false;
-
-  static Future<void> initializeDefaults() async {
-    if (_isInitialized) return;
-    var result = await channel.invokeMethod(BarcodeCaptureFunctionNames.getBarcodeCaptureDefaults);
-    var json = jsonDecode(result as String);
-    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(json['RecommendedCameraSettings']);
-    _barcodeCaptureSettingsDefaults = BarcodeCaptureSettingsDefaults.fromJSON(json['BarcodeCaptureSettings']);
+  static void initializeDefaults(Map<String, dynamic> barcodeCaptureDefaults) {
+    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(barcodeCaptureDefaults['RecommendedCameraSettings']);
+    _barcodeCaptureSettingsDefaults =
+        BarcodeCaptureSettingsDefaults.fromJSON(barcodeCaptureDefaults['BarcodeCaptureSettings']);
     _barcodeCaptureOverlayDefaults =
-        BarcodeCaptureOverlayDefaults.fromJSON(json['BarcodeCaptureOverlay'] as Map<String, dynamic>);
-
-    _isInitialized = true;
+        BarcodeCaptureOverlayDefaults.fromJSON(barcodeCaptureDefaults['BarcodeCaptureOverlay'] as Map<String, dynamic>);
   }
 }
 
 @immutable
 class BarcodeCaptureSettingsDefaults {
-  final int codeDuplicateFilter;
+  final Duration codeDuplicateFilter;
   final BatterySavingMode batterySaving;
   final ScanIntention scanIntention;
 
-  BarcodeCaptureSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention);
+  const BarcodeCaptureSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention);
 
   factory BarcodeCaptureSettingsDefaults.fromJSON(Map<String, dynamic> json) {
+    var durationInMillis = (json['codeDuplicateFilter'] as num).toInt();
+
+    var duration = const Duration(milliseconds: 1) * durationInMillis;
+
     return BarcodeCaptureSettingsDefaults(
-      (json['codeDuplicateFilter'] as num).toInt(),
+      duration,
       BatterySavingModeDeserializer.fromJSON(json['batterySaving'] as String),
       ScanIntentionSerializer.fromJSON(json['scanIntention'] as String),
     );
@@ -63,16 +53,12 @@ class BarcodeCaptureSettingsDefaults {
 
 @immutable
 class BarcodeCaptureOverlayDefaults {
-  final BarcodeCaptureOverlayStyle defaultStyle;
-  final Map<BarcodeCaptureOverlayStyle, Brush> brushes;
+  final Brush defaultBrush;
 
-  BarcodeCaptureOverlayDefaults(this.defaultStyle, this.brushes);
+  const BarcodeCaptureOverlayDefaults(this.defaultBrush);
 
   factory BarcodeCaptureOverlayDefaults.fromJSON(Map<String, dynamic> json) {
-    var defaultStyle = BarcodeCaptureOverlayStyleSerializer.fromJSON(json['defaultStyle'] as String);
-    var styles = (json['Brushes'] as Map<String, dynamic>).map((key, value) => MapEntry(
-        BarcodeCaptureOverlayStyleSerializer.fromJSON(key),
-        BrushDefaults.fromJSON(value as Map<String, dynamic>).toBrush()));
-    return BarcodeCaptureOverlayDefaults(defaultStyle, styles);
+    return BarcodeCaptureOverlayDefaults(
+        BrushDefaults.fromJSON(json['DefaultBrush'] as Map<String, dynamic>).toBrush());
   }
 }
