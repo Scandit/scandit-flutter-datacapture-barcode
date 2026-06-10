@@ -29,13 +29,13 @@ android {
 }
 
 dependencies {
-    def sdk_version = "8.4.0"
+    def sdk_version = "8.1.5"
 
-    println("Version of the native sdk used in this build: ${safeExtGet('frameworks_sdk_version', sdk_version)}")
+    println("Version of the native sdk used in this build: ${safeExtGet('global_sdk_version', sdk_version)}")
     if (findProject(':scandit-datacapture-frameworks-barcode') != null) {
         api project(":scandit-datacapture-frameworks-barcode")
     } else {
-        api "com.scandit.datacapture.frameworks:barcode:${safeExtGet('frameworks_sdk_version', sdk_version)}"
+        api "com.scandit.datacapture.frameworks:barcode:${safeExtGet('global_sdk_version', sdk_version)}"
     }
 
     api project(path: ':scandit_flutter_datacapture_core')

@@ -7,9 +7,8 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/selection/barcode_selection.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/selection/barcode_selection_function_names.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
@@ -211,15 +210,13 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
 
 class _BarcodeSelectionBasicOverlayController extends BaseController {
   final BarcodeSelectionBasicOverlay _overlay;
-  late final BarcodeMethodHandler barcodeMethodHandler;
 
-  _BarcodeSelectionBasicOverlayController(this._overlay) : super(BarcodeFunctionNames.methodsChannelName) {
-    barcodeMethodHandler = BarcodeMethodHandler(methodChannel);
-  }
+  _BarcodeSelectionBasicOverlayController(this._overlay) : super(BarcodeSelectionFunctionNames.methodsChannelName);
 
   Future<void> update() {
-    return barcodeMethodHandler
-        .updateBarcodeSelectionBasicOverlay(overlayJson: jsonEncode(_overlay.toMap()))
-        .then((value) => null, onError: onError);
+    return methodChannel.invokeMethod(
+      BarcodeSelectionFunctionNames.updateBarcodeSelectionBasicOverlay,
+      {'overlayJson': jsonEncode(_overlay.toMap())},
+    );
   }
 }

@@ -27,21 +27,15 @@ class BarcodeSelectionTapSelection extends BarcodeSelectionType {
 
   BarcodeSelectionTapBehavior tapBehavior;
 
-  bool shouldFreezeOnDoubleTap;
-
-  BarcodeSelectionTapSelection._(this.freezeBehavior, this.tapBehavior, this.shouldFreezeOnDoubleTap)
-      : super._('tapSelection');
+  BarcodeSelectionTapSelection._(this.freezeBehavior, this.tapBehavior) : super._('tapSelection');
 
   BarcodeSelectionTapSelection()
-      : this._(
-            BarcodeSelectionDefaults.barcodeSelectionTapSelectionDefaults.freezeBehavior,
-            BarcodeSelectionDefaults.barcodeSelectionTapSelectionDefaults.tapBehavior,
-            BarcodeSelectionDefaults.barcodeSelectionTapSelectionDefaults.shouldFreezeOnDoubleTap);
+      : this._(BarcodeSelectionDefaults.barcodeSelectionTapSelectionDefaults.freezeBehavior,
+            BarcodeSelectionDefaults.barcodeSelectionTapSelectionDefaults.tapBehavior);
 
   BarcodeSelectionTapSelection.withFreezeBehaviourAndTapBehaviour(
       BarcodeSelectionFreezeBehavior freezeBehavior, BarcodeSelectionTapBehavior tapBehavior)
-      : this._(freezeBehavior, tapBehavior,
-            BarcodeSelectionDefaults.barcodeSelectionTapSelectionDefaults.shouldFreezeOnDoubleTap);
+      : this._(freezeBehavior, tapBehavior);
 
   @override
   Map<String, dynamic> toMap() {
@@ -49,7 +43,6 @@ class BarcodeSelectionTapSelection extends BarcodeSelectionType {
     json.addAll({
       'tapBehavior': tapBehavior.toString(),
       'freezeBehavior': freezeBehavior.toString(),
-      'shouldFreezeOnDoubleTap': shouldFreezeOnDoubleTap,
     });
     return json;
   }
@@ -75,11 +68,9 @@ extension BarcodeSelectionTypeDeserializer on BarcodeSelectionType {
   static BarcodeSelectionType fromJSON(Map<String, dynamic> json) {
     switch (json['type']) {
       case 'tapSelection':
-        return BarcodeSelectionTapSelection._(
+        return BarcodeSelectionTapSelection.withFreezeBehaviourAndTapBehaviour(
             BarcodeSelectionFreezeBehaviorSerializer.fromJSON(json['freezeBehavior']),
-            BarcodeSelectionTapBehaviorSerializer.fromJSON(json['tapBehavior']),
-            json['shouldFreezeOnDoubleTap'] as bool? ??
-                BarcodeSelectionDefaults.barcodeSelectionTapSelectionDefaults.shouldFreezeOnDoubleTap);
+            BarcodeSelectionTapBehaviorSerializer.fromJSON(json['tapBehavior']));
       case 'aimerSelection':
         var aimerSelection = BarcodeSelectionAimerSelection();
         if (json.containsKey('selectionStrategy')) {

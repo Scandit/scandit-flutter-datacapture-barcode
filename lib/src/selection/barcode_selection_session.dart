@@ -7,9 +7,8 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 
+import 'barcode_selection_function_names.dart';
 import '../../scandit_flutter_datacapture_barcode.dart';
 
 class BarcodeSelectionSession with _PrivateBarcodeSelectionSession {
@@ -75,21 +74,20 @@ mixin _PrivateBarcodeSelectionSession {
 }
 
 class _BarcodeSelectionSessionController {
-  late final BarcodeMethodHandler barcodeMethodHandler = _getMethodHandler();
+  late final MethodChannel _methodChannel = _getChannel();
 
-  Future<int> getCount(int modeId, Barcode barcode) async {
+  Future<int> getCount(int modeId, Barcode barcode) {
     var selectionIdentifier = (barcode.data ?? '') + barcode.symbology.toString();
-    final count = await barcodeMethodHandler.getCountForBarcodeInBarcodeSelectionSession(
-        modeId: modeId, selectionIdentifier: selectionIdentifier);
-    return count.toInt();
+    return _methodChannel.invokeMethod<int>(BarcodeSelectionFunctionNames.getBarcodeSelectionSessionCount,
+        {'modeId': modeId, 'selectionIdentifier': selectionIdentifier}).then((value) => value ?? 0);
   }
 
   Future<void> reset(int modeId, int frameSequenceId) {
-    return barcodeMethodHandler.resetBarcodeSelectionSession(modeId: modeId).then((value) => null);
+    return _methodChannel.invokeMethod(BarcodeSelectionFunctionNames.resetBarcodeSelectionSession,
+        {'modeId': modeId, 'frameSequenceId': frameSequenceId});
   }
 
-  BarcodeMethodHandler _getMethodHandler() {
-    final channel = const MethodChannel(BarcodeFunctionNames.methodsChannelName);
-    return BarcodeMethodHandler(channel);
+  MethodChannel _getChannel() {
+    return const MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
   }
 }

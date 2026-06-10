@@ -48,8 +48,6 @@ class SparkScanViewSettings extends Serializable {
 
   Brush? smartSelectionCandidateBrush;
 
-  bool periscopeModeEnabled = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.periscopeModeEnabled;
-
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -69,7 +67,6 @@ class SparkScanViewSettings extends Serializable {
       'defaultCameraPosition': defaultCameraPosition.toString(),
       'defaultMiniPreviewSize': defaultMiniPreviewSize.toString(),
       'smartSelectionCandidateBrush': smartSelectionCandidateBrush?.toMap(),
-      'periscopeModeEnabled': periscopeModeEnabled,
     };
   }
 }

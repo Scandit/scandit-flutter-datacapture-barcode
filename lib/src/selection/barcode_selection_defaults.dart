@@ -12,12 +12,15 @@ import 'barcode_selection_basic_overlay.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'barcode_selection_type.dart';
+import 'barcode_selection_function_names.dart';
 import 'barcode_selection_tap_behaviour.dart';
 import 'barcode_selection_freeze_behaviour.dart';
 import 'barcode_selection_strategy.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeSelectionDefaults {
+  static MethodChannel channel = const MethodChannel(BarcodeSelectionFunctionNames.methodsChannelName);
+
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
   static late BarcodeSelectionSettingsDefaults _barcodeSelectionSettingsDefaults;
@@ -45,19 +48,25 @@ class BarcodeSelectionDefaults {
   static BarcodeSelectionTapSelectionDefaults get barcodeSelectionTapSelectionDefaults =>
       _barcodeSelectionTapSelectionDefaults;
 
-  static void initializeDefaults(Map<String, dynamic> barcodeSelectionDefaults) {
-    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(barcodeSelectionDefaults['RecommendedCameraSettings']);
-    _barcodeSelectionTapSelectionDefaults = BarcodeSelectionTapSelectionDefaults.fromJSON(
-        barcodeSelectionDefaults['BarcodeSelectionTapSelection'] as Map<String, dynamic>);
-    _barcodeSelectionAimerSelectionDefaults = BarcodeSelectionAimerSelectionDefaults.fromJSON(
-        barcodeSelectionDefaults['BarcodeSelectionAimerSelection'] as Map<String, dynamic>);
+  static bool _isInitialized = false;
 
-    _barcodeSelectionSettingsDefaults = BarcodeSelectionSettingsDefaults.fromJSON(
-        barcodeSelectionDefaults['BarcodeSelectionSettings'] as Map<String, dynamic>);
-    _barcodeCaptureOverlayDefaults = BarcodeSelectionBasicOverlayDefaults.fromJSON(
-        barcodeSelectionDefaults['BarcodeSelectionBasicOverlay'] as Map<String, dynamic>);
+  static Future<void> initializeDefaults() async {
+    if (_isInitialized) return;
+    var result = await channel.invokeMethod(BarcodeSelectionFunctionNames.getBarcodeSelectionDefaults);
+    var json = jsonDecode(result as String);
+    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(json['RecommendedCameraSettings']);
+    _barcodeSelectionSettingsDefaults =
+        BarcodeSelectionSettingsDefaults.fromJSON(json['BarcodeSelectionSettings'] as Map<String, dynamic>);
+    _barcodeCaptureOverlayDefaults =
+        BarcodeSelectionBasicOverlayDefaults.fromJSON(json['BarcodeSelectionBasicOverlay'] as Map<String, dynamic>);
     _barcodeSelectionFeedbackDefaults =
-        BarcodeSelectionFeedbackDefaults.fromJSON(jsonDecode(barcodeSelectionDefaults['Feedback']));
+        BarcodeSelectionFeedbackDefaults.fromJSON(jsonDecode(json['Feedback']) as Map<String, dynamic>);
+    _barcodeSelectionTapSelectionDefaults =
+        BarcodeSelectionTapSelectionDefaults.fromJSON(json['BarcodeSelectionTapSelection'] as Map<String, dynamic>);
+    _barcodeSelectionAimerSelectionDefaults =
+        BarcodeSelectionAimerSelectionDefaults.fromJSON(json['BarcodeSelectionAimerSelection'] as Map<String, dynamic>);
+
+    _isInitialized = true;
   }
 }
 
@@ -65,15 +74,13 @@ class BarcodeSelectionDefaults {
 class BarcodeSelectionTapSelectionDefaults {
   final BarcodeSelectionFreezeBehavior freezeBehavior;
   final BarcodeSelectionTapBehavior tapBehavior;
-  final bool shouldFreezeOnDoubleTap;
 
-  const BarcodeSelectionTapSelectionDefaults(this.freezeBehavior, this.tapBehavior, this.shouldFreezeOnDoubleTap);
+  const BarcodeSelectionTapSelectionDefaults(this.freezeBehavior, this.tapBehavior);
 
   factory BarcodeSelectionTapSelectionDefaults.fromJSON(Map<String, dynamic> json) {
     var freezeBehaviour = BarcodeSelectionFreezeBehaviorSerializer.fromJSON(json['defaultFreezeBehaviour']);
     var tapBehaviour = BarcodeSelectionTapBehaviorSerializer.fromJSON(json['defaultTapBehaviour']);
-    var shouldFreezeOnDoubleTap = json['shouldFreezeOnDoubleTap'] as bool? ?? true;
-    return BarcodeSelectionTapSelectionDefaults(freezeBehaviour, tapBehaviour, shouldFreezeOnDoubleTap);
+    return BarcodeSelectionTapSelectionDefaults(freezeBehaviour, tapBehaviour);
   }
 }
 
@@ -137,20 +144,17 @@ class BarcodeSelectionSettingsDefaults {
   final int codeDuplicateFilter;
   final bool singleBarcodeAutoDetectionEnabled;
   final BarcodeSelectionType selectionType;
-  final bool swipeGesturesEnabled;
 
   const BarcodeSelectionSettingsDefaults(this.codeDuplicateFilter, this.selectionType,
-      {required this.singleBarcodeAutoDetectionEnabled, required this.swipeGesturesEnabled});
+      {required this.singleBarcodeAutoDetectionEnabled});
 
   factory BarcodeSelectionSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     var codeDuplicateFilter = (json['codeDuplicateFilter'] as num).toInt();
     var singleBarcodeAutoDetectionEnabled = json['singleBarcodeAutoDetectionEnabled'] as bool;
     var selectionType =
         BarcodeSelectionTypeDeserializer.fromJSON(jsonDecode(json['selectionType']) as Map<String, dynamic>);
-    var swipeGesturesEnabled = json['swipeGesturesEnabled'] as bool? ?? true;
     return BarcodeSelectionSettingsDefaults(codeDuplicateFilter, selectionType,
-        singleBarcodeAutoDetectionEnabled: singleBarcodeAutoDetectionEnabled,
-        swipeGesturesEnabled: swipeGesturesEnabled);
+        singleBarcodeAutoDetectionEnabled: singleBarcodeAutoDetectionEnabled);
   }
 }
 

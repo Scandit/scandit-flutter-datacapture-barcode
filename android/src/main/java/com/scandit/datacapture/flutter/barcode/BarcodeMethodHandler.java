@@ -7,12 +7,8 @@ package com.scandit.datacapture.flutter.barcode;
 
 import androidx.annotation.NonNull;
 
-import com.scandit.datacapture.flutter.core.utils.FlutterMethodCall;
-import com.scandit.datacapture.flutter.core.utils.FlutterResult;
 import com.scandit.datacapture.frameworks.barcode.BarcodeModule;
-import com.scandit.datacapture.frameworks.core.CoreModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
-import com.scandit.datacapture.frameworks.core.errors.ParameterNullError;
 import com.scandit.datacapture.frameworks.core.locator.ServiceLocator;
 
 import io.flutter.plugin.common.MethodCall;
@@ -33,33 +29,7 @@ public class BarcodeMethodHandler implements MethodChannel.MethodCallHandler {
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
         if (call.method.equals("getDefaults")) {
-            result.success(new JSONObject(getBarcodeModule().getDefaults()).toString());
-            return;
-        } else if (call.method.equals("executeBarcode")) {
-            CoreModule coreModule = (CoreModule) getModule(CoreModule.class.getSimpleName());
-            if (coreModule == null) {
-                result.error("-1", "Unable to retrieve the CoreModule from the locator.", null);
-                return;
-            }
-            String moduleName = call.argument("moduleName");
-            if (moduleName == null) {
-                result.error("-1", new ParameterNullError("moduleName").getMessage(), null);
-                return;
-            }
-            FrameworkModule module = getModule(moduleName);
-            if (module == null) {
-                result.error("-1", "Unable to retrieve the module from the locator.", null);
-                return;
-            }
-            boolean executionResult = coreModule.execute(new FlutterMethodCall(call), new FlutterResult(result), module);
-            if (!executionResult) {
-                String methodName = call.argument("methodName");
-                if (methodName == null) {
-                    methodName = "unknown";
-                }
-
-                result.error("METHOD_NOT_FOUND", "Unknown Core method: " + methodName, null);
-            }
+            result.success(new JSONObject(getSharedModule().getDefaults()).toString());
             return;
         }
         result.notImplemented();
@@ -67,18 +37,14 @@ public class BarcodeMethodHandler implements MethodChannel.MethodCallHandler {
 
     private volatile BarcodeModule sharedModuleInstance;
 
-    private BarcodeModule getBarcodeModule() {
+    private BarcodeModule getSharedModule() {
         if (sharedModuleInstance == null) {
             synchronized (this) {
                 if (sharedModuleInstance == null) {
-                    sharedModuleInstance = (BarcodeModule) getModule(BarcodeModule.class.getSimpleName());
+                    sharedModuleInstance = (BarcodeModule)this.serviceLocator.resolve(BarcodeModule.class.getName());
                 }
             }
         }
         return sharedModuleInstance;
-    }
-
-    private FrameworkModule getModule(String moduleName) {
-        return this.serviceLocator.resolve(moduleName);
     }
 }
