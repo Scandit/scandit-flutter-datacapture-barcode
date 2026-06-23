@@ -11,7 +11,36 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 import 'spark_scan_defaults.dart';
 
 class SparkScanToastSettings extends Serializable {
-  SparkScanToastSettings();
+  SparkScanToastSettings(
+      {bool? toastEnabled,
+      Color? toastTextColor,
+      Color? toastBackgroundColor,
+      String? targetModeEnabledMessage,
+      String? targetModeDisabledMessage,
+      String? continuousModeEnabledMessage,
+      String? continuousModeDisabledMessage,
+      String? scanPausedMessage,
+      String? zoomedInMessage,
+      String? zoomedOutMessage,
+      String? torchEnabledMessage,
+      String? torchDisabledMessage,
+      String? userFacingCameraEnabledMessage,
+      String? worldFacingCameraEnabledMessage}) {
+    if (toastEnabled != null) this.toastEnabled = toastEnabled;
+    if (toastTextColor != null) this.toastTextColor = toastTextColor;
+    if (toastBackgroundColor != null) this.toastBackgroundColor = toastBackgroundColor;
+    if (targetModeEnabledMessage != null) this.targetModeEnabledMessage = targetModeEnabledMessage;
+    if (targetModeDisabledMessage != null) this.targetModeDisabledMessage = targetModeDisabledMessage;
+    if (continuousModeEnabledMessage != null) this.continuousModeEnabledMessage = continuousModeEnabledMessage;
+    if (continuousModeDisabledMessage != null) this.continuousModeDisabledMessage = continuousModeDisabledMessage;
+    if (scanPausedMessage != null) this.scanPausedMessage = scanPausedMessage;
+    if (zoomedInMessage != null) this.zoomedInMessage = zoomedInMessage;
+    if (zoomedOutMessage != null) this.zoomedOutMessage = zoomedOutMessage;
+    if (torchEnabledMessage != null) this.torchEnabledMessage = torchEnabledMessage;
+    if (torchDisabledMessage != null) this.torchDisabledMessage = torchDisabledMessage;
+    if (userFacingCameraEnabledMessage != null) this.userFacingCameraEnabledMessage = userFacingCameraEnabledMessage;
+    if (worldFacingCameraEnabledMessage != null) this.worldFacingCameraEnabledMessage = worldFacingCameraEnabledMessage;
+  }
 
   bool toastEnabled = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.toastEnabled;
   Color? toastTextColor =

@@ -5,6 +5,7 @@
  */
 
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_view.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_view_capture_mode.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_view_state.dart';
 
 abstract class SparkScanViewUiListener {
@@ -15,4 +16,8 @@ abstract class SparkScanViewUiListener {
   void didChangeViewState(SparkScanViewState newState);
 
   void didTapLabelCaptureButton(SparkScanView view);
+}
+
+abstract class SparkScanViewUiExtendedListener extends SparkScanViewUiListener {
+  void didChangeScanningMode(SparkScanScanningMode newScanningMode);
 }

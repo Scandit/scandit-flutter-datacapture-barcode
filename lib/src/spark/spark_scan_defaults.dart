@@ -14,13 +14,10 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/feedback.dart' as feedback;
 
-import 'spark_scan_function_names.dart';
 import 'spark_scan_view_capture_mode.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class SparkScanDefaults {
-  static MethodChannel mainChannel = const MethodChannel(SparkScanFunctionNames.methodsChannelName);
-
   static late SparkScanSettingsDefaults _sparkScanSettingsDefaults;
 
   static SparkScanSettingsDefaults get sparkScanSettingsDefaults => _sparkScanSettingsDefaults;
@@ -35,13 +32,12 @@ class SparkScanDefaults {
 
   static bool _isInitialized = false;
 
-  static Future<void> initializeDefaults() async {
+  static void initializeDefaults(Map<String, dynamic> sparkScanDefaults) {
     if (_isInitialized) return;
-    var result = await mainChannel.invokeMethod(SparkScanFunctionNames.getSparkScanDefaults);
-    var json = jsonDecode(result as String);
-    _sparkScanSettingsDefaults = SparkScanSettingsDefaults.fromJSON(json['SparkScanSettings'] as Map<String, dynamic>);
-    _sparkScanFeedbackDefaults = SparkScanFeedbackDefaults.fromJSON(json['Feedback']);
-    _sparkScanViewDefaults = SparkScanViewDefaults.fromJSON(json['SparkScanView']);
+    _sparkScanSettingsDefaults =
+        SparkScanSettingsDefaults.fromJSON(sparkScanDefaults['SparkScanSettings'] as Map<String, dynamic>);
+    _sparkScanFeedbackDefaults = SparkScanFeedbackDefaults.fromJSON(sparkScanDefaults['Feedback']);
+    _sparkScanViewDefaults = SparkScanViewDefaults.fromJSON(sparkScanDefaults['SparkScanView']);
 
     _isInitialized = true;
   }
@@ -56,8 +52,6 @@ class SparkScanViewDefaults {
   final bool barcodeFindButtonVisible;
   final bool labelCaptureButtonVisible;
   final bool targetModeButtonVisible;
-  final bool soundModeButtonVisible;
-  final bool hapticModeButtonVisible;
   final Color? toolbarBackgroundColor;
   final Color? toolbarIconActiveTintColor;
   final Color? toolbarIconInactiveTintColor;
@@ -86,8 +80,6 @@ class SparkScanViewDefaults {
       this.barcodeFindButtonVisible,
       this.labelCaptureButtonVisible,
       this.targetModeButtonVisible,
-      this.soundModeButtonVisible,
-      this.hapticModeButtonVisible,
       this.toolbarBackgroundColor,
       this.toolbarIconActiveTintColor,
       this.toolbarIconInactiveTintColor,
@@ -172,8 +164,6 @@ class SparkScanViewDefaults {
         barcodeFindButtonVisible,
         labelCaptureButtonVisible,
         targetModeButtonVisible,
-        false,
-        false,
         toolbarBackgroundColor,
         toolbarIconActiveTintColor,
         toolbarIconInactiveTintColor,
@@ -339,6 +329,7 @@ class SparkScanViewSettingsDefaults {
   final CameraPosition defaultCameraPosition;
 
   final SparkScanMiniPreviewSize defaultMiniPreviewSize;
+  final bool periscopeModeEnabled;
 
   SparkScanViewSettingsDefaults(
       this.triggerButtonCollapseTimeout,
@@ -355,7 +346,8 @@ class SparkScanViewSettingsDefaults {
       this.zoomFactorOut,
       this.inactiveStateTimeout,
       this.defaultCameraPosition,
-      this.defaultMiniPreviewSize);
+      this.defaultMiniPreviewSize,
+      this.periscopeModeEnabled);
 
   factory SparkScanViewSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     final triggerButtonCollapseTimeout = Duration(seconds: (json['triggerButtonCollapseTimeout'] as num).toInt());
@@ -398,6 +390,8 @@ class SparkScanViewSettingsDefaults {
     final defaultMiniPreviewSize =
         SparkScanMiniPreviewSizeSerializer.fromJSON(json['defaultMiniPreviewSize'] as String);
 
+    final periscopeModeEnabled = json['periscopeModeEnabled'] as bool? ?? false;
+
     return SparkScanViewSettingsDefaults(
         triggerButtonCollapseTimeout,
         defaultTorchState,
@@ -413,6 +407,7 @@ class SparkScanViewSettingsDefaults {
         zoomFactorOut,
         inactiveStateTimeout,
         defaultCameraPosition,
-        defaultMiniPreviewSize);
+        defaultMiniPreviewSize,
+        periscopeModeEnabled);
   }
 }

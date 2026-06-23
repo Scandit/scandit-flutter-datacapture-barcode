@@ -9,6 +9,10 @@ library scandit_flutter_datacapture_barcode;
 
 export 'src/scandit_flutter_datacapture_barcode.dart' show ScanditFlutterDataCaptureBarcode;
 export 'src/barcode.dart' show Barcode, LocalizedOnlyBarcode;
+export 'src/barcode_info.dart' show BarcodeInfo;
+export 'src/barcode_data_transformer.dart' show BarcodeDataTransformer;
+export 'src/cluster.dart' show Cluster;
+export 'src/capture_preset.dart' show CapturePreset;
 export 'src/symbology.dart' show Symbology, SymbologySerializer, EncodingRange, Ean13UpcaClassification;
 export 'src/symbology_description.dart' show SymbologyDescription, Range;
 export 'src/symbology_settings.dart' show SymbologySettings, Checksum;
@@ -36,3 +40,4 @@ export 'src/usi/scanned_component.dart' show ScannedComponent;
 export 'src/usi/scanned_barcode.dart' show ScannedBarcode;
 export 'src/usi/scanned_text.dart' show ScannedText;
 export 'src/usi/scanned_item.dart' show ScannedItem;
+export 'src/barcode_spatial_grid.dart' show BarcodeSpatialGrid;

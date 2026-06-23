@@ -15,23 +15,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_feedback_delegate.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_listener.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_session.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_settings.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_view_capture_mode.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_view_ui_listener.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/usi/scanned_item.dart';
 import 'package:scandit_flutter_datacapture_core/experimental.dart';
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/internal/helpers.dart';
 
 import '../barcode.dart';
 import '../barcode_plugin_events.dart';
 
 import 'spark_scan_view_settings.dart';
 import 'spark_scan_defaults.dart';
-import 'spark_scan_function_names.dart';
 import 'spark_scan_view_state.dart';
 
 class SparkScan extends DataCaptureMode {
@@ -96,12 +101,114 @@ class SparkScanView extends StatefulWidget implements Serializable {
   SparkScanViewSettings _settings;
   SparkScanViewUiListener? _uiListener;
   SparkScanFeedbackDelegate? _feedbackDelegate;
+  SparkScanFeedbackExtendedDelegate? _feedbackExtendedDelegate;
 
   bool _viewWasCreated = false;
   // set from the state
   _SparkScanViewController? _controller;
 
-  SparkScanView._(this._child, this._sparkScan, this._settings) : super();
+  SparkScanView._(
+    this._child,
+    this._sparkScan,
+    SparkScanViewSettings settings, {
+    bool? torchControlVisible,
+    bool? previewCloseControlVisible,
+    bool? scanningBehaviorButtonVisible,
+    bool? barcodeCountButtonVisible,
+    bool? barcodeFindButtonVisible,
+    bool? targetModeButtonVisible,
+    bool? labelCaptureButtonVisible,
+    bool? zoomSwitchControlVisible,
+    bool? cameraSwitchButtonVisible,
+    bool? previewSizeControlVisible,
+    bool? triggerButtonVisible,
+    Color? toolbarBackgroundColor,
+    Color? toolbarIconActiveTintColor,
+    Color? toolbarIconInactiveTintColor,
+    Color? triggerButtonCollapsedColor,
+    Color? triggerButtonExpandedColor,
+    Color? triggerButtonAnimationColor,
+    Color? triggerButtonTintColor,
+    SparkScanViewUiListener? uiListener,
+    SparkScanFeedbackDelegate? feedbackDelegate,
+    SparkScanFeedbackExtendedDelegate? feedbackExtendedDelegate,
+  })  : _settings = settings,
+        super() {
+    if (torchControlVisible != null) _torchControlVisible = torchControlVisible;
+    if (previewCloseControlVisible != null) _previewCloseControlVisible = previewCloseControlVisible;
+    if (scanningBehaviorButtonVisible != null) _scanningBehaviorButtonVisible = scanningBehaviorButtonVisible;
+    if (barcodeCountButtonVisible != null) _barcodeCountButtonVisible = barcodeCountButtonVisible;
+    if (barcodeFindButtonVisible != null) _barcodeFindButtonVisible = barcodeFindButtonVisible;
+    if (targetModeButtonVisible != null) _targetModeButtonVisible = targetModeButtonVisible;
+    if (labelCaptureButtonVisible != null) _labelCaptureButtonVisible = labelCaptureButtonVisible;
+    if (zoomSwitchControlVisible != null) _zoomSwitchControlVisible = zoomSwitchControlVisible;
+    if (cameraSwitchButtonVisible != null) _cameraSwitchButtonVisible = cameraSwitchButtonVisible;
+    if (previewSizeControlVisible != null) _previewSizeControlVisible = previewSizeControlVisible;
+    if (triggerButtonVisible != null) _triggerButtonVisible = triggerButtonVisible;
+    if (toolbarBackgroundColor != null) _toolbarBackgroundColor = toolbarBackgroundColor;
+    if (toolbarIconActiveTintColor != null) _toolbarIconActiveTintColor = toolbarIconActiveTintColor;
+    if (toolbarIconInactiveTintColor != null) _toolbarIconInactiveTintColor = toolbarIconInactiveTintColor;
+    if (triggerButtonCollapsedColor != null) _triggerButtonCollapsedColor = triggerButtonCollapsedColor;
+    if (triggerButtonExpandedColor != null) _triggerButtonExpandedColor = triggerButtonExpandedColor;
+    if (triggerButtonAnimationColor != null) _triggerButtonAnimationColor = triggerButtonAnimationColor;
+    if (triggerButtonTintColor != null) _triggerButtonTintColor = triggerButtonTintColor;
+    _uiListener = uiListener;
+    _feedbackDelegate = feedbackDelegate;
+    _feedbackExtendedDelegate = feedbackExtendedDelegate;
+  }
+
+  SparkScanView(
+    Widget child,
+    DataCaptureContext dataCaptureContext,
+    SparkScan sparkScan,
+    SparkScanViewSettings? viewSettings, {
+    bool? torchControlVisible,
+    bool? previewCloseControlVisible,
+    bool? scanningBehaviorButtonVisible,
+    bool? barcodeCountButtonVisible,
+    bool? barcodeFindButtonVisible,
+    bool? targetModeButtonVisible,
+    bool? labelCaptureButtonVisible,
+    bool? zoomSwitchControlVisible,
+    bool? cameraSwitchButtonVisible,
+    bool? previewSizeControlVisible,
+    bool? triggerButtonVisible,
+    Color? toolbarBackgroundColor,
+    Color? toolbarIconActiveTintColor,
+    Color? toolbarIconInactiveTintColor,
+    Color? triggerButtonCollapsedColor,
+    Color? triggerButtonExpandedColor,
+    Color? triggerButtonAnimationColor,
+    Color? triggerButtonTintColor,
+    SparkScanViewUiListener? uiListener,
+    SparkScanFeedbackDelegate? feedbackDelegate,
+    SparkScanFeedbackExtendedDelegate? feedbackExtendedDelegate,
+  }) : this._(
+          child,
+          sparkScan,
+          viewSettings ?? SparkScanViewSettings(),
+          torchControlVisible: torchControlVisible,
+          previewCloseControlVisible: previewCloseControlVisible,
+          scanningBehaviorButtonVisible: scanningBehaviorButtonVisible,
+          barcodeCountButtonVisible: barcodeCountButtonVisible,
+          barcodeFindButtonVisible: barcodeFindButtonVisible,
+          targetModeButtonVisible: targetModeButtonVisible,
+          labelCaptureButtonVisible: labelCaptureButtonVisible,
+          zoomSwitchControlVisible: zoomSwitchControlVisible,
+          cameraSwitchButtonVisible: cameraSwitchButtonVisible,
+          previewSizeControlVisible: previewSizeControlVisible,
+          triggerButtonVisible: triggerButtonVisible,
+          toolbarBackgroundColor: toolbarBackgroundColor,
+          toolbarIconActiveTintColor: toolbarIconActiveTintColor,
+          toolbarIconInactiveTintColor: toolbarIconInactiveTintColor,
+          triggerButtonCollapsedColor: triggerButtonCollapsedColor,
+          triggerButtonExpandedColor: triggerButtonExpandedColor,
+          triggerButtonAnimationColor: triggerButtonAnimationColor,
+          triggerButtonTintColor: triggerButtonTintColor,
+          uiListener: uiListener,
+          feedbackDelegate: feedbackDelegate,
+          feedbackExtendedDelegate: feedbackExtendedDelegate,
+        );
 
   SparkScanView.forContext(
     Widget child,
@@ -265,7 +372,19 @@ class SparkScanView extends StatefulWidget implements Serializable {
     } else {
       _controller?.unsubscribeFromFeedbackDelegateEvents();
     }
-    _controller?.setFeedbackDelegate(newValue);
+    _controller?.setFeedbackDelegate(newValue != null);
+  }
+
+  SparkScanFeedbackExtendedDelegate? get feedbackExtendedDelegate => _feedbackExtendedDelegate;
+
+  set feedbackExtendedDelegate(SparkScanFeedbackExtendedDelegate? newValue) {
+    _feedbackExtendedDelegate = newValue;
+    if (newValue != null) {
+      _controller?.subscribeToFeedbackDelegateEvents();
+    } else {
+      _controller?.unsubscribeFromFeedbackDelegateEvents();
+    }
+    _controller?.setFeedbackDelegate(newValue != null);
   }
 
   bool _previewSizeControlVisible = SparkScanDefaults.sparkScanViewDefaults.previewSizeControlVisible;
@@ -419,7 +538,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
         'triggerButtonExpandedColor': triggerButtonExpandedColor?.jsonValue,
         'triggerButtonAnimationColor': triggerButtonAnimationColor?.jsonValue,
         'triggerButtonTintColor': triggerButtonTintColor?.jsonValue,
-        'hasFeedbackDelegate': _feedbackDelegate != null,
+        'hasFeedbackDelegate': _feedbackDelegate != null || _feedbackExtendedDelegate != null,
         'hasUiListener': _uiListener != null,
         'viewId': _controller?._viewId ?? 0,
       },
@@ -428,6 +547,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
   }
 }
 
+// ignore: experimental_member_use
 class _SparkScanViewState extends State<SparkScanView> implements CameraOwner {
   late Widget platformView;
   final int _viewId = (DateTime.now().millisecondsSinceEpoch ~/ 1000).toInt();
@@ -470,8 +590,10 @@ class _SparkScanViewState extends State<SparkScanView> implements CameraOwner {
     if (wasActive != _isRouteActive) {
       if (_isRouteActive) {
         _controller.showView();
+        // ignore: experimental_member_use
         CameraOwnershipHelper.requestOwnership(CameraPosition.worldFacing, this);
       } else {
+        // ignore: experimental_member_use
         CameraOwnershipHelper.releaseOwnership(CameraPosition.worldFacing, this);
         _controller.hideView();
       }
@@ -542,7 +664,41 @@ class _SparkScanViewState extends State<SparkScanView> implements CameraOwner {
   @override
   void didUpdateWidget(SparkScanView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    oldWidget._bringViewToFront();
+    // Update controller's view reference FIRST — all subsequent controller
+    // calls (updateView, stream callbacks) must operate on the new widget.
+    _controller.view = widget;
+    // Wire controller and viewWasCreated flag to the new widget instance.
+    widget._controller = _controller;
+    widget._viewWasCreated = oldWidget._viewWasCreated;
+    if (oldWidget._sparkScan != widget._sparkScan) {
+      oldWidget._sparkScan._controller = null;
+      widget._sparkScan._controller = _controller;
+    }
+
+    // Handle feedback delegate subscription changes.
+    final hadDelegate = oldWidget._feedbackDelegate != null || oldWidget._feedbackExtendedDelegate != null;
+    final hasDelegate = widget._feedbackDelegate != null || widget._feedbackExtendedDelegate != null;
+    if (hadDelegate != hasDelegate) {
+      _controller.setFeedbackDelegate(hasDelegate);
+      if (hasDelegate) {
+        _controller.subscribeToFeedbackDelegateEvents();
+      } else {
+        _controller.unsubscribeFromFeedbackDelegateEvents();
+      }
+    }
+
+    // Handle UI listener subscription changes.
+    if (oldWidget._uiListener != widget._uiListener) {
+      if (widget._uiListener != null) {
+        _controller.subscribeUiListeners();
+      } else {
+        _controller.unsubscribeUiListeners();
+      }
+    }
+
+    // Sync all view properties to native.
+    widget._update();
+    widget._bringViewToFront();
   }
 
   @override
@@ -559,17 +715,19 @@ class _SparkScanViewController extends BaseController {
   StreamSubscription<dynamic>? _sparkScanViewSubscription;
   StreamSubscription<dynamic>? _sparkScanDelegateFeedbackSubscription;
   StreamSubscription<dynamic>? _sparkScanListenerSubscription;
-  final SparkScanView view;
+  SparkScanView view;
   final int _viewId;
+  late final BarcodeMethodHandler barcodeMethodHandler;
 
-  _SparkScanViewController._(this.view, this._viewId) : super(SparkScanFunctionNames.methodsChannelName) {
+  _SparkScanViewController._(this.view, this._viewId) : super(BarcodeFunctionNames.methodsChannelName) {
+    barcodeMethodHandler = BarcodeMethodHandler(methodChannel);
     _initialize();
   }
 
   void _initialize() {
     subscribeSparkScanListener();
 
-    if (view._feedbackDelegate != null) {
+    if (view._feedbackDelegate != null || view._feedbackExtendedDelegate != null) {
       subscribeToFeedbackDelegateEvents();
     }
 
@@ -580,23 +738,23 @@ class _SparkScanViewController extends BaseController {
 
   void subscribeUiListeners() {
     if (_sparkScanViewSubscription != null) return;
-    _sparkScanViewSubscription = BarcodePluginEvents.sparkScanEventStream.listen((event) {
-      var json = jsonDecode(event);
-      final viewId = json['viewId'] as int;
-      if (viewId != _viewId) return;
-
-      var eventName = json['event'] as String;
-
-      if (eventName == 'SparkScanViewUiListener.barcodeCountButtonTapped') {
+    _sparkScanViewSubscription = BarcodePluginEvents.sparkScanEventStream.forView(_viewId).listen((event) {
+      if (event.isEvent('SparkScanViewUiListener.barcodeCountButtonTapped')) {
         view._uiListener?.didTapBarcodeCountButton(view);
-      } else if (eventName == 'SparkScanViewUiListener.barcodeFindButtonTapped') {
+      } else if (event.isEvent('SparkScanViewUiListener.barcodeFindButtonTapped')) {
         view._uiListener?.didTapBarcodeFindButton(view);
-      } else if (eventName == 'SparkScanViewUiListener.didChangeViewState') {
-        final stateJson = json['state'] as String;
+      } else if (event.isEvent('SparkScanViewUiListener.didChangeViewState')) {
+        final stateJson = event.payload['state'] as String;
         final newState = SparkScanViewStateSerializer.fromJSON(stateJson);
         view._uiListener?.didChangeViewState(newState);
-      } else if (eventName == 'SparkScanViewUiListener.labelCaptureButtonTapped') {
+      } else if (event.isEvent('SparkScanViewUiListener.labelCaptureButtonTapped')) {
         view._uiListener?.didTapLabelCaptureButton(view);
+      } else if (event.isEvent('SparkScanViewUiListener.didChangeScanningMode')) {
+        final scanningModeJson = event.payload['scanningMode'] as Map<String, dynamic>;
+        final newScanningMode = SparkScanScanningModeSerializer.fromJSON(scanningModeJson);
+        if (view._uiListener is SparkScanViewUiExtendedListener) {
+          (view._uiListener as SparkScanViewUiExtendedListener).didChangeScanningMode(newScanningMode);
+        }
       }
     });
   }
@@ -607,49 +765,55 @@ class _SparkScanViewController extends BaseController {
   }
 
   Future<void> startScanning() {
-    return methodChannel.invokeMethod(SparkScanFunctionNames.startScanning, {'viewId': _viewId}).onError(onError);
+    return barcodeMethodHandler.startSparkScanViewScanning(viewId: _viewId).onError(onError);
   }
 
   Future<void> updateView() {
     if (!view._viewWasCreated) return Future.value();
 
-    final updateArgs = {'viewId': _viewId, 'updateJson': jsonEncode(view.toMap())};
-    return methodChannel.invokeMethod(SparkScanFunctionNames.updateView, updateArgs).onError(onError);
+    return barcodeMethodHandler
+        .updateSparkScanView(viewId: _viewId, viewJson: jsonEncode(view.toMap()))
+        .onError(onError);
   }
 
   Future<void> pauseScanning() {
-    return methodChannel.invokeMethod(SparkScanFunctionNames.pauseScanning, {'viewId': _viewId}).onError(onError);
+    return barcodeMethodHandler.pauseSparkScanViewScanning(viewId: _viewId).onError(onError);
   }
 
   Future<void> stopScanning() {
-    return methodChannel.invokeMethod(SparkScanFunctionNames.stopScanning, {'viewId': _viewId}).onError(onError);
+    return barcodeMethodHandler.stopSparkScanViewScanning(viewId: _viewId).onError(onError);
   }
 
   Future<void> showToast(String text) {
-    return methodChannel
-        .invokeMethod(SparkScanFunctionNames.showToast, {'viewId': _viewId, 'text': text}).onError(onError);
+    return barcodeMethodHandler.showSparkScanViewToast(viewId: _viewId, text: text).onError(onError);
   }
 
   void subscribeToFeedbackDelegateEvents() {
     if (_sparkScanDelegateFeedbackSubscription != null) return;
-    _sparkScanDelegateFeedbackSubscription = BarcodePluginEvents.sparkScanEventStream.listen((event) {
-      var json = jsonDecode(event);
-
-      final viewId = json['viewId'] as int;
-      if (viewId != _viewId) return;
-
-      final eventName = json['event'] as String;
-      if (eventName != 'SparkScanFeedbackDelegate.feedbackForBarcode') return;
-      var barcode = Barcode.fromJSON(jsonDecode(json['barcode']));
-      var feedback = view._feedbackDelegate?.feedbackForBarcode(barcode);
-      String? feedbackJson;
-      if (feedback != null) {
-        feedbackJson = jsonEncode(feedback.toMap());
+    _sparkScanDelegateFeedbackSubscription = BarcodePluginEvents.sparkScanEventStream.forView(_viewId).listen((event) {
+      if (event.isEvent('SparkScanFeedbackDelegate.feedbackForBarcode')) {
+        var barcode = Barcode.fromJSON(jsonDecode(event.payload['barcode']));
+        var feedback = view._feedbackDelegate?.feedbackForBarcode(barcode) ??
+            view._feedbackExtendedDelegate?.feedbackForBarcode(barcode);
+        String? feedbackJson;
+        if (feedback != null) {
+          feedbackJson = jsonEncode(feedback.toMap());
+        }
+        barcodeMethodHandler
+            .submitSparkScanFeedbackForBarcode(viewId: _viewId, feedbackJson: feedbackJson)
+            .onError(onError);
       }
-      methodChannel.invokeMethod(SparkScanFunctionNames.submitFeedbackForBarcode, {
-        'viewId': _viewId,
-        'feedbackJson': feedbackJson,
-      }).onError(onError);
+      if (event.isEvent('SparkScanFeedbackDelegate.feedbackForScannedItem')) {
+        var scannedItem = ScannedItem.fromJSON(jsonDecode(event.payload['scannedItem']));
+        var feedback = view._feedbackExtendedDelegate?.feedbackForScannedItem(scannedItem);
+        String? feedbackJson;
+        if (feedback != null) {
+          feedbackJson = jsonEncode(feedback.toMap());
+        }
+        barcodeMethodHandler
+            .submitSparkScanFeedbackForScannedItem(viewId: _viewId, feedbackJson: feedbackJson)
+            .onError(onError);
+      }
     });
   }
 
@@ -660,32 +824,25 @@ class _SparkScanViewController extends BaseController {
 
   Future<void> _bringViewToFront() {
     if (Platform.isIOS) {
-      return methodChannel.invokeMethod(SparkScanFunctionNames.bringViewToFront, {'viewId': _viewId}).onError(onError);
+      return barcodeMethodHandler.bringSparkScanViewToFront(viewId: _viewId).onError(onError);
     }
     return Future.value();
   }
 
   void setModeEnabledState(bool newValue) {
-    methodChannel.invokeMethod(SparkScanFunctionNames.setModeEnabledState,
-        {'viewId': _viewId, 'enabled': newValue}).then((value) => null, onError: onError);
+    barcodeMethodHandler.setSparkScanModeEnabledState(viewId: _viewId, isEnabled: newValue).onError(onError);
   }
 
   void subscribeSparkScanListener() {
     _setupModeListenerSubscription();
-    methodChannel.invokeMethod(SparkScanFunctionNames.addSparkScanListener, {'viewId': _viewId}).onError(onError);
+    barcodeMethodHandler.registerSparkScanListenerForEvents(viewId: _viewId).onError(onError);
   }
 
   void _setupModeListenerSubscription() {
     if (_sparkScanListenerSubscription != null) return;
-    _sparkScanListenerSubscription = BarcodePluginEvents.sparkScanEventStream.listen((event) async {
-      var json = jsonDecode(event);
-      final viewId = json['viewId'] as int;
-      if (viewId != _viewId) return;
-
-      final eventName = json['event'] as String;
-
-      if (eventName == 'SparkScanListener.didScan') {
-        var session = SparkScanSession.fromJSON(json, _viewId);
+    _sparkScanListenerSubscription = BarcodePluginEvents.sparkScanEventStream.forView(_viewId).listen((event) async {
+      if (event.isEvent('SparkScanListener.didScan')) {
+        var session = SparkScanSession.fromJSON(event.payload, _viewId);
         await _notifyListenersOfDidScan(session);
 
         try {
@@ -714,25 +871,23 @@ class _SparkScanViewController extends BaseController {
           log(error.toString());
         }
 
-        methodChannel.invokeMethod(SparkScanFunctionNames.sparkScanFinishDidScan, {
-          'viewId': _viewId,
-          'enabled': view._sparkScan.isEnabled,
-        }).then((value) => null, onError: (error) => log(error));
-      } else if (eventName == 'SparkScanListener.didUpdateSession') {
-        var session = SparkScanSession.fromJSON(json, _viewId);
+        barcodeMethodHandler
+            .finishSparkScanDidScan(viewId: _viewId, isEnabled: view._sparkScan.isEnabled)
+            .onError(onError);
+      } else if (event.isEvent('SparkScanListener.didUpdateSession')) {
+        var session = SparkScanSession.fromJSON(event.payload, _viewId);
         await _notifyListenersOfDidUpateSession(session);
 
-        methodChannel.invokeMethod(SparkScanFunctionNames.sparkScanFinishDidUpdateSession, {
-          'viewId': _viewId,
-          'enabled': view._sparkScan.isEnabled,
-        }).then((value) => null, onError: (error) => log(error));
+        barcodeMethodHandler
+            .finishSparkScanDidUpdateSession(viewId: _viewId, isEnabled: view._sparkScan.isEnabled)
+            .onError(onError);
       }
     });
   }
 
   Future<void> _notifyListenersOfDidScan(SparkScanSession session) async {
     view._sparkScan._isInCallback = true;
-    for (var listener in view._sparkScan._listeners) {
+    for (var listener in view._sparkScan._listeners.toList()) {
       await listener.didScan(view._sparkScan, session, () => _getLastFrameData(session));
     }
     view._sparkScan._isInCallback = false;
@@ -740,30 +895,33 @@ class _SparkScanViewController extends BaseController {
 
   Future<void> _notifyListenersOfDidUpateSession(SparkScanSession session) async {
     view._sparkScan._isInCallback = true;
-    for (var listener in view._sparkScan._listeners) {
-      await listener.didUpdateSession(view._sparkScan, session, () => _getLastFrameData(session));
+    // Iterate backwards to avoid allocation and handle concurrent modifications safely
+    // This is called frequently so we avoid creating a copy
+    for (var i = view._sparkScan._listeners.length - 1; i >= 0; i--) {
+      if (i < view._sparkScan._listeners.length) {
+        await view._sparkScan._listeners[i]
+            .didUpdateSession(view._sparkScan, session, () => _getLastFrameData(session));
+      }
     }
     view._sparkScan._isInCallback = false;
   }
 
   Future<FrameData> _getLastFrameData(SparkScanSession session) {
-    return methodChannel.invokeMethod(SparkScanFunctionNames.getLastFrameData, {
-      'frameId': session.frameId,
-    }).then((value) => DefaultFrameData.fromJSON(Map<String, dynamic>.from(value as Map)), onError: onError);
+    return getCoreMethodHandler()
+        .getLastFrameOrNullAsMap(frameId: session.frameId)
+        .then((value) => DefaultFrameData.fromJSON(value), onError: onError);
   }
 
   void unsubscribeSparkScanListener() {
     _sparkScanListenerSubscription?.cancel();
     _sparkScanListenerSubscription = null;
-    methodChannel.invokeMethod(
-        SparkScanFunctionNames.removeSparkScanListener, {'viewId': _viewId}).then((value) => null, onError: onError);
+    barcodeMethodHandler.unregisterSparkScanListenerForEvents(viewId: _viewId).onError(onError);
   }
 
   Future<void> updateSparkScanMode() {
-    return methodChannel.invokeMethod(SparkScanFunctionNames.updateSparkScanMode, {
-      'viewId': _viewId,
-      'updateJson': jsonEncode(view._sparkScan.toMap()),
-    }).onError(onError);
+    return barcodeMethodHandler
+        .updateSparkScanMode(viewId: _viewId, modeJson: jsonEncode(view._sparkScan.toMap()))
+        .onError(onError);
   }
 
   @override
@@ -774,23 +932,19 @@ class _SparkScanViewController extends BaseController {
     super.dispose();
   }
 
-  void setFeedbackDelegate(SparkScanFeedbackDelegate? newValue) {
-    if (newValue == null) {
-      methodChannel.invokeMethod('unregisterSparkScanFeedbackDelegateForEvents', {'viewId': _viewId});
+  void setFeedbackDelegate(bool isRegister) {
+    if (isRegister) {
+      barcodeMethodHandler.registerSparkScanFeedbackDelegateForEvents(viewId: _viewId).onError(onError);
     } else {
-      methodChannel.invokeMethod('registerSparkScanFeedbackDelegateForEvents', {'viewId': _viewId});
+      barcodeMethodHandler.unregisterSparkScanFeedbackDelegateForEvents(viewId: _viewId).onError(onError);
     }
   }
 
   void showView() {
-    methodChannel.invokeMethod('showSparkScanView', {
-      'viewId': _viewId,
-    }).onError(onError);
+    barcodeMethodHandler.showSparkScanView(viewId: _viewId).onError(onError);
   }
 
   void hideView() {
-    methodChannel.invokeMethod('hideSparkScanView', {
-      'viewId': _viewId,
-    }).onError(onError);
+    barcodeMethodHandler.hideSparkScanView(viewId: _viewId).onError(onError);
   }
 }

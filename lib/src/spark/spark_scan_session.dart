@@ -8,8 +8,9 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/usi/scanned_item.dart';
-import 'spark_scan_function_names.dart';
 
 class SparkScanSession with _PrivateSparkScanSession {
   final _SparkScanSessionController _controller = _SparkScanSessionController();
@@ -57,14 +58,13 @@ mixin _PrivateSparkScanSession {
 }
 
 class _SparkScanSessionController {
-  late final MethodChannel _methodChannel = _getChannel();
+  late final BarcodeMethodHandler methodHandler = _getMethodHandler();
 
   Future<void> reset(int frameSequenceId, int viewId) {
-    return _methodChannel.invokeMethod(
-        SparkScanFunctionNames.resetSparkScanSession, {'viewId': viewId, 'frameSequenceId': frameSequenceId});
+    return methodHandler.resetSparkScanSession(viewId: viewId);
   }
 
-  MethodChannel _getChannel() {
-    return const MethodChannel(SparkScanFunctionNames.methodsChannelName);
+  BarcodeMethodHandler _getMethodHandler() {
+    return BarcodeMethodHandler(const MethodChannel(BarcodeFunctionNames.methodsChannelName));
   }
 }
