@@ -162,6 +162,17 @@ class BarcodeFindView extends StatefulWidget implements Serializable {
     _updateNative();
   }
 
+  bool _shouldShowZoomControl = BarcodeFindDefaults.barcodeFindViewDefaults.shouldShowZoomControl;
+
+  bool get shouldShowZoomControl => _shouldShowZoomControl;
+
+  set shouldShowZoomControl(bool newValue) {
+    _shouldShowZoomControl = newValue;
+    _updateNative();
+  }
+
+  static bool get hardwareTriggerSupported => BarcodeFindDefaults.barcodeFindViewDefaults.hardwareTriggerSupported;
+
   Anchor _torchControlPosition = BarcodeFindDefaults.barcodeFindViewDefaults.torchControlPosition;
 
   Anchor get torchControlPosition => _torchControlPosition;
@@ -268,6 +279,7 @@ class BarcodeFindView extends StatefulWidget implements Serializable {
         'shouldShowFinishButton': shouldShowFinishButton,
         'shouldShowProgressBar': shouldShowProgressBar,
         'shouldShowTorchControl': shouldShowTorchControl,
+        'shouldShowZoomControl': shouldShowZoomControl,
         'torchControlPosition': torchControlPosition.toString(),
         'textForCollapseCardsButton': textForCollapseCardsButton,
         'textForAllItemsFoundSuccessfullyHint': textForAllItemsFoundSuccessfullyHint,

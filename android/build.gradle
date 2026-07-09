@@ -13,12 +13,12 @@ android {
         }
         namespace "com.scandit.datacapture.flutter.barcode"
     }
-    compileSdkVersion safeExtGet("compileSdkVersion", 33)
+    compileSdkVersion safeExtGet("compileSdkVersion", 36)
 
 
     defaultConfig {
         minSdkVersion safeExtGet("minSdkVersion", 24)
-        targetSdkVersion safeExtGet("targetSdkVersion", 33)
+        targetSdkVersion safeExtGet("targetSdkVersion", 36)
         versionCode 1
         versionName "1.0"
     }
@@ -29,7 +29,7 @@ android {
 }
 
 dependencies {
-    def sdk_version = "8.4.1"
+    def sdk_version = "8.5.0"
 
     println("Version of the native sdk used in this build: ${safeExtGet('frameworks_sdk_version', sdk_version)}")
     if (findProject(':scandit-datacapture-frameworks-barcode') != null) {

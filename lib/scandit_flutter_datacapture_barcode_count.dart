@@ -12,6 +12,7 @@ export 'src/count/barcode_count_capture_list_session.dart' show BarcodeCountCapt
 export 'src/count/barcode_count_feedback.dart' show BarcodeCountFeedback;
 export 'src/count/barcode_count_session.dart' show BarcodeCountSession;
 export 'src/count/barcode_count_settings.dart' show BarcodeCountSettings;
+export 'src/count/barcode_count_toolbar_settings.dart' show BarcodeCountToolbarSettings;
 export 'src/count/target_barcode.dart' show TargetBarcode;
 export 'src/count/barcode_count_view.dart'
     show

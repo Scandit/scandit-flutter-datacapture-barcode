@@ -185,6 +185,22 @@ class BarcodeMethodHandler {
     return await executeBarcode('BarcodeSelectionModule', 'unfreezeCameraInBarcodeSelection', params);
   }
 
+  /// Freezes the camera in barcode selection mode
+  Future<void> freezeCameraInBarcodeSelection({required int modeId}) async {
+    final params = {
+      'modeId': modeId,
+    };
+    return await executeBarcode('BarcodeSelectionModule', 'freezeCameraInBarcodeSelection', params);
+  }
+
+  /// Selects the unselected barcodes in the current selection session
+  Future<void> selectUnselectedBarcodes({required int modeId}) async {
+    final params = {
+      'modeId': modeId,
+    };
+    return await executeBarcode('BarcodeSelectionModule', 'selectUnselectedBarcodes', params);
+  }
+
   /// Resets the barcode selection
   Future<void> resetBarcodeSelection({required int modeId}) async {
     final params = {
@@ -286,6 +302,23 @@ class BarcodeMethodHandler {
     return await executeBarcode('BarcodeSelectionModule', 'resetBarcodeSelectionSession', params);
   }
 
+  /// Selects the unselected barcodes currently tracked in the barcode selection session
+  Future<void> selectUnselectedBarcodesInBarcodeSelectionSession({required int modeId}) async {
+    final params = {
+      'modeId': modeId,
+    };
+    return await executeBarcode('BarcodeSelectionModule', 'selectUnselectedBarcodesInBarcodeSelectionSession', params);
+  }
+
+  /// Returns the BarcodeSelectionLicenseInfo JSON, or null when not available
+  Future<String> getBarcodeSelectionLicenseInfo({required int modeId}) async {
+    final params = {
+      'modeId': modeId,
+    };
+    final result = await executeBarcode('BarcodeSelectionModule', 'getBarcodeSelectionLicenseInfo', params);
+    return result;
+  }
+
   /// Finish callback for barcode selection did select event
   Future<void> finishBarcodeSelectionDidSelect({required int modeId, required bool enabled}) async {
     final params = {
@@ -326,6 +359,11 @@ class BarcodeMethodHandler {
       'text': text,
     };
     return await executeBarcode('BarcodeSelectionModule', 'setTextForAimToSelectAutoHint', params);
+  }
+
+  /// Clears the brushes applied to selected barcodes
+  Future<void> clearSelectedBarcodeBrushes() async {
+    return await executeBarcode('BarcodeSelectionModule', 'clearSelectedBarcodeBrushes', {});
   }
 
   /// Removes the aimed barcode brush provider
@@ -1240,6 +1278,43 @@ class BarcodeMethodHandler {
     return await executeBarcode('BarcodePickModule', 'pickViewRelease', params);
   }
 
+  /// Selects an item with the specified data
+  Future<String> selectItemWithData({required int viewId, required String data}) async {
+    final params = {
+      'viewId': viewId,
+      'data': data,
+    };
+    final result = await executeBarcode('BarcodePickModule', 'selectItemWithData', params);
+    return result;
+  }
+
+  /// Confirms the action for an item with the specified data
+  Future<void> confirmActionForItemWithData({required int viewId, required String data}) async {
+    final params = {
+      'viewId': viewId,
+      'data': data,
+    };
+    return await executeBarcode('BarcodePickModule', 'confirmActionForItemWithData', params);
+  }
+
+  /// Cancels the action for an item with the specified data
+  Future<void> cancelActionForItemWithData({required int viewId, required String data}) async {
+    final params = {
+      'viewId': viewId,
+      'data': data,
+    };
+    return await executeBarcode('BarcodePickModule', 'cancelActionForItemWithData', params);
+  }
+
+  /// Updates the product list for the BarcodePick view
+  Future<void> updateProductList({required int viewId, required String productsJson}) async {
+    final params = {
+      'viewId': viewId,
+      'productsJson': productsJson,
+    };
+    return await executeBarcode('BarcodePickModule', 'updateProductList', params);
+  }
+
   /// Register persistent event listener for BarcodeFind view UI events
   Future<void> registerBarcodeFindViewListener({required int viewId}) async {
     final params = {
@@ -1452,6 +1527,31 @@ class BarcodeMethodHandler {
       'viewId': viewId,
     };
     return await executeBarcode('BarcodeArModule', 'unregisterBarcodeArHighlightProvider', params);
+  }
+
+  /// Register persistent event callback for BarcodeAr filter events
+  Future<void> registerBarcodeArFilter({required int viewId}) async {
+    final params = {
+      'viewId': viewId,
+    };
+    return await executeBarcode('BarcodeArModule', 'registerBarcodeArFilter', params);
+  }
+
+  /// Unregister event callback for BarcodeAr filter events
+  Future<void> unregisterBarcodeArFilter({required int viewId}) async {
+    final params = {
+      'viewId': viewId,
+    };
+    return await executeBarcode('BarcodeArModule', 'unregisterBarcodeArFilter', params);
+  }
+
+  /// Finish callback for BarcodeAr filter barcodes
+  Future<void> finishBarcodeArFilterBarcodes({required int viewId, required String filteredBarcodesJson}) async {
+    final params = {
+      'viewId': viewId,
+      'filteredBarcodesJson': filteredBarcodesJson,
+    };
+    return await executeBarcode('BarcodeArModule', 'finishBarcodeArFilterBarcodes', params);
   }
 
   /// Handles custom highlight click event

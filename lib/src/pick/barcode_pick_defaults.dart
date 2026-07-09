@@ -9,6 +9,8 @@ import 'package:scandit_flutter_datacapture_barcode/src/pick/ui/barcode_pick_vie
 import 'package:scandit_flutter_datacapture_barcode/src/symbology.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/symbology_settings.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/logo_style.dart';
 
 import 'barcode_pick_state.dart';
 
@@ -83,6 +85,8 @@ class ViewSettingsDefaults {
   final bool hardwareTriggerEnabled;
   final int? hardwareTriggerKeyCode;
   final BarcodeFilterHighlightSettings? filterHighlightSettings;
+  final LogoStyle logoStyle;
+  final Anchor logoAnchor;
 
   const ViewSettingsDefaults(
     this.initialGuidelineText,
@@ -108,6 +112,8 @@ class ViewSettingsDefaults {
     this.hardwareTriggerEnabled,
     this.hardwareTriggerKeyCode,
     this.filterHighlightSettings,
+    this.logoStyle,
+    this.logoAnchor,
   );
 
   factory ViewSettingsDefaults.fromJSON(Map<String, dynamic> json) {
@@ -146,7 +152,9 @@ class ViewSettingsDefaults {
         json['uiButtonsOffset'] != null ? DoubleWithUnit.fromJSON(jsonDecode(json['uiButtonsOffset'] as String)) : null,
         json['hardwareTriggerEnabled'] as bool,
         json['hardwareTriggerKeyCode'] as int?,
-        filterHighlightSettings);
+        filterHighlightSettings,
+        LogoStyleDeserializer.fromJSON(json['logoStyle'] as String),
+        AnchorDeserializer.fromJSON(json['logoAnchor'] as String));
   }
 }
 

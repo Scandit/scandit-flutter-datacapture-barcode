@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math';
 
+import 'package:scandit_flutter_datacapture_barcode/src/barcode.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
@@ -14,6 +15,7 @@ import 'package:scandit_flutter_datacapture_core/src/internal/generated/core_met
 
 import 'barcode_selection_defaults.dart';
 import 'barcode_selection_feedback.dart';
+import 'barcode_selection_license_info.dart';
 import 'barcode_selection_settings.dart';
 import 'barcode_selection_session.dart';
 
@@ -112,8 +114,36 @@ class BarcodeSelection extends DataCaptureMode {
     return _controller.unfreezeCamera();
   }
 
+  Future<void> freezeCamera() {
+    return _controller.freezeCamera();
+  }
+
   Future<void> reset() {
     return _controller.reset();
+  }
+
+  Future<void> selectAimedBarcode() {
+    return _controller.selectAimedBarcode();
+  }
+
+  Future<void> selectUnselectedBarcodes() {
+    return _controller.selectUnselectedBarcodes();
+  }
+
+  Future<void> unselectBarcodes(List<Barcode> barcodes) {
+    return _controller.unselectBarcodes(barcodes);
+  }
+
+  Future<void> increaseCountForBarcodes(List<Barcode> barcodes) {
+    return _controller.increaseCountForBarcodes(barcodes);
+  }
+
+  Future<void> setSelectBarcodeEnabled(Barcode barcode, bool enabled) {
+    return _controller.setSelectBarcodeEnabled(barcode, enabled);
+  }
+
+  Future<BarcodeSelectionLicenseInfo?> getBarcodeSelectionLicenseInfo() {
+    return _controller.getBarcodeSelectionLicenseInfo();
   }
 
   @override
@@ -210,6 +240,60 @@ class _BarcodeSelectionListenerController extends BaseController {
         .unfreezeCameraInBarcodeSelection(modeId: _barcodeSelection._modeId)
         .then((value) => null, onError: onError);
   }
+
+  Future<void> freezeCamera() {
+    return methodHandler
+        .freezeCameraInBarcodeSelection(modeId: _barcodeSelection._modeId)
+        .then((value) => null, onError: onError);
+  }
+
+  Future<void> selectAimedBarcode() {
+    return methodHandler.selectAimedBarcode(modeId: _barcodeSelection._modeId).then((value) => null, onError: onError);
+  }
+
+  Future<void> selectUnselectedBarcodes() {
+    return methodHandler
+        .selectUnselectedBarcodes(modeId: _barcodeSelection._modeId)
+        .then((value) => null, onError: onError);
+  }
+
+  Future<BarcodeSelectionLicenseInfo?> getBarcodeSelectionLicenseInfo() async {
+    // executeBarcode returns Future<dynamic>; the generated wrapper would
+    // declare Future<String> and crash on a null result, so call it directly.
+    final result = await methodHandler.executeBarcode(
+        'BarcodeSelectionModule', 'getBarcodeSelectionLicenseInfo', {'modeId': _barcodeSelection._modeId});
+    if (result == null) return null;
+    return BarcodeSelectionLicenseInfo.fromJSON(jsonDecode(result as String) as Map<String, dynamic>);
+  }
+
+  Future<void> unselectBarcodes(List<Barcode> barcodes) {
+    return methodHandler
+        .unselectBarcodes(
+            modeId: _barcodeSelection._modeId, barcodesJson: jsonEncode(barcodes.map(_barcodeToJson).toList()))
+        .then((value) => null, onError: onError);
+  }
+
+  Future<void> increaseCountForBarcodes(List<Barcode> barcodes) {
+    return methodHandler
+        .increaseCountForBarcodes(
+            modeId: _barcodeSelection._modeId, barcodeJson: jsonEncode(barcodes.map(_barcodeToJson).toList()))
+        .then((value) => null, onError: onError);
+  }
+
+  Future<void> setSelectBarcodeEnabled(Barcode barcode, bool enabled) {
+    return methodHandler
+        .setSelectBarcodeEnabled(
+            modeId: _barcodeSelection._modeId, barcodeJson: jsonEncode(_barcodeToJson(barcode)), enabled: enabled)
+        .then((value) => null, onError: onError);
+  }
+
+  // Projection accepted by the native bridge to identify a Barcode against the cached session.
+  Map<String, dynamic> _barcodeToJson(Barcode barcode) => {
+        'data': barcode.data,
+        'rawData': barcode.rawData,
+        'symbology': barcode.symbology.toString(),
+        'symbolCount': barcode.symbolCount,
+      };
 
   Future<void> reset() {
     return methodHandler

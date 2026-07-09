@@ -29,6 +29,8 @@ class SparkScanSettings implements Serializable {
 
   ScanIntention scanIntention = SparkScanDefaults.sparkScanSettingsDefaults.scanIntention;
 
+  SelectionMode selectionMode = SparkScanDefaults.sparkScanSettingsDefaults.selectionMode;
+
   Set<CompositeType> enabledCompositeTypes = {};
 
   List<ScanItemDefinition>? itemDefinitions;
@@ -85,6 +87,7 @@ class SparkScanSettings implements Serializable {
       'batterySaving': batterySaving.toString(),
       'symbologies': _symbologies.map<String, Map<String, dynamic>>((key, value) => MapEntry(key, value.toMap())),
       'scanIntention': scanIntention.toString(),
+      'selectionMode': selectionMode.toString(),
       'scanItemDefinitions': itemDefinitions?.map((e) => e.toMap()).toList(),
       'capturePresets': _capturePresets?.map((e) => e.toString()).toList(),
       'enabledCompositeTypes': enabledCompositeTypes.map((e) => e.toString()).toList(),

@@ -80,13 +80,17 @@ class BarcodeSelectionTapSelectionDefaults {
 @immutable
 class BarcodeSelectionAimerSelectionDefaults {
   final BarcodeSelectionStrategy selectionStrategy;
+  final BarcodeSelectionAimerBehavior aimerBehavior;
 
-  const BarcodeSelectionAimerSelectionDefaults(this.selectionStrategy);
+  const BarcodeSelectionAimerSelectionDefaults(this.selectionStrategy, this.aimerBehavior);
 
   factory BarcodeSelectionAimerSelectionDefaults.fromJSON(Map<String, dynamic> json) {
     var defaultStrategy = jsonDecode(json['defaultSelectionStrategy']);
     var selectionStrategy = BarcodeSelectionStrategyDeserializer.fromJSON(defaultStrategy as Map<String, dynamic>);
-    return BarcodeSelectionAimerSelectionDefaults(selectionStrategy);
+    var aimerBehavior = json.containsKey('defaultAimerBehavior')
+        ? BarcodeSelectionAimerBehavior.fromJSON(json['defaultAimerBehavior'] as String)
+        : BarcodeSelectionAimerBehavior.repeatSelection;
+    return BarcodeSelectionAimerSelectionDefaults(selectionStrategy, aimerBehavior);
   }
 }
 

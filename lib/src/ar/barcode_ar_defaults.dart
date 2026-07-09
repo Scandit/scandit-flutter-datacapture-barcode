@@ -16,6 +16,7 @@ import 'barcode_ar_annotation_trigger.dart';
 import 'barcode_ar_highlight.dart';
 import 'barcode_ar_info_annotation_anchor.dart';
 import 'barcode_ar_info_annotation_width_preset.dart';
+import 'barcode_ar_popover_annotation_anchor.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeArDefaults {
@@ -57,6 +58,7 @@ class BarcodeArViewDefaults {
   final double defaultBarcodeArPopoverAnnotationButtonTextSize;
   final Color defaultBarcodeArPopoverAnnotationButtonTextColor;
   final bool defaultBarcodeArPopoverAnnotationButtonEnabled;
+  final BarcodeArPopoverAnnotationAnchor defaultBarcodeArPopoverAnnotationAnchor;
   final BarcodeArAnnotationTrigger defaultStatusIconAnnotationTrigger;
   final bool defaultStatusIconAnnotationHasTip;
   final ScanditIcon defaultStatusIconAnnotationIcon;
@@ -96,6 +98,7 @@ class BarcodeArViewDefaults {
   final Anchor defaultMacroModeControlPosition;
   final double defaultResponsiveAnnotationThreshold;
   final BarcodeArAnnotationTrigger defaultResponsiveAnnotationTrigger;
+  final bool defaultHighlightIsPulsing;
 
   const BarcodeArViewDefaults({
     required this.defaultCameraPosition,
@@ -147,8 +150,10 @@ class BarcodeArViewDefaults {
     required this.defaultShouldShowMacroModeControl,
     required this.defaultMacroModeControlPosition,
     required this.defaultBarcodeArPopoverAnnotationButtonEnabled,
+    required this.defaultBarcodeArPopoverAnnotationAnchor,
     required this.defaultResponsiveAnnotationThreshold,
     required this.defaultResponsiveAnnotationTrigger,
+    required this.defaultHighlightIsPulsing,
   });
 
   factory BarcodeArViewDefaults.fromJSON(Map<String, dynamic> json) {
@@ -248,8 +253,11 @@ class BarcodeArViewDefaults {
       defaultShouldShowMacroModeControl: defaultShouldShowMacroModeControl,
       defaultMacroModeControlPosition: defaultMacroModeControlPosition,
       defaultBarcodeArPopoverAnnotationButtonEnabled: json['defaultBarcodeArPopoverAnnotationButtonEnabled'],
+      defaultBarcodeArPopoverAnnotationAnchor:
+          BarcodeArPopoverAnnotationAnchor.fromJSON(json['defaultBarcodeArPopoverAnnotationAnchor']),
       defaultResponsiveAnnotationThreshold: defaultResponsiveAnnotationThreshold,
       defaultResponsiveAnnotationTrigger: defaultResponsiveAnnotationTrigger,
+      defaultHighlightIsPulsing: json['defaultHighlightIsPulsing'] ?? false,
     );
   }
 }

@@ -17,6 +17,7 @@ import 'barcode_ar_common.dart';
 import 'barcode_ar_defaults.dart';
 import 'barcode_ar_info_annotation_anchor.dart';
 import 'barcode_ar_info_annotation_body_component.dart';
+import 'barcode_ar_popover_annotation_anchor.dart';
 
 import 'barcode_ar_info_annotation_header.dart';
 import 'barcode_ar_info_annotation_width_preset.dart';
@@ -242,6 +243,13 @@ class BarcodeArPopoverAnnotation extends BarcodeArAnnotation {
 
   bool isEntirePopoverTappable = BarcodeArDefaults.view.defaultIsEntirePopoverTappable;
 
+  BarcodeArPopoverAnnotationAnchor _anchor = BarcodeArDefaults.view.defaultBarcodeArPopoverAnnotationAnchor;
+  BarcodeArPopoverAnnotationAnchor get anchor => _anchor;
+  set anchor(BarcodeArPopoverAnnotationAnchor newValue) {
+    _anchor = newValue;
+    controller?.updateAnnotation(this);
+  }
+
   BarcodeArPopoverAnnotationListener? _listener;
   BarcodeArPopoverAnnotationListener? get listener => _listener;
   set listener(BarcodeArPopoverAnnotationListener? newValue) {
@@ -257,6 +265,7 @@ class BarcodeArPopoverAnnotation extends BarcodeArAnnotation {
   Map<String, dynamic> toMap() {
     var json = super.toMap();
     json.addAll({
+      'anchor': anchor.toString(),
       'isEntirePopoverTappable': isEntirePopoverTappable,
       'buttons': buttons.map((e) => e.toMap()).toList(),
       'hasListener': listener != null
@@ -356,7 +365,6 @@ class BarcodeArResponsiveAnnotation extends BarcodeArAnnotation {
   final BarcodeArInfoAnnotation? _farAwayAnnotation;
   double _threshold = BarcodeArDefaults.view.defaultResponsiveAnnotationThreshold;
 
-  @override
   BarcodeArResponsiveAnnotation(this._barcode, this._closeUpAnnotation, this._farAwayAnnotation)
       : super._(BarcodeArDefaults.view.defaultResponsiveAnnotationTrigger, 'barcodeArResponsiveAnnotation');
 

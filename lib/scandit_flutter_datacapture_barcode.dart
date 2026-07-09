@@ -40,4 +40,5 @@ export 'src/usi/scanned_component.dart' show ScannedComponent;
 export 'src/usi/scanned_barcode.dart' show ScannedBarcode;
 export 'src/usi/scanned_text.dart' show ScannedText;
 export 'src/usi/scanned_item.dart' show ScannedItem;
+export 'src/usi/scanned_item_identifier.dart' show ScannedItemIdentifier;
 export 'src/barcode_spatial_grid.dart' show BarcodeSpatialGrid;

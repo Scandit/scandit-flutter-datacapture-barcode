@@ -98,6 +98,8 @@ class BarcodeCountViewDefaults {
   final bool shouldDisableModeOnExitButtonTapped;
   final bool hardwareTriggerSupported;
   final bool hardwareTriggerEnabled;
+  final LogoStyle logoStyle;
+  final Anchor logoAnchor;
 
   const BarcodeCountViewDefaults(
       this.style,
@@ -156,7 +158,9 @@ class BarcodeCountViewDefaults {
       this.shouldShowStatusIconsOnScan,
       this.shouldDisableModeOnExitButtonTapped,
       this.hardwareTriggerSupported,
-      this.hardwareTriggerEnabled);
+      this.hardwareTriggerEnabled,
+      this.logoStyle,
+      this.logoAnchor);
 
   factory BarcodeCountViewDefaults.fromJSON(Map<String, dynamic> json) {
     final style = BarcodeCountViewStyleSerializer.fromJSON(json['style'] as String);
@@ -305,6 +309,8 @@ class BarcodeCountViewDefaults {
     final shouldDisableModeOnExitButtonTapped = json['shouldDisableModeOnExitButtonTapped'] as bool? ?? true;
     final hardwareTriggerSupported = json['hardwareTriggerSupported'] as bool? ?? false;
     final hardwareTriggerEnabled = json['hardwareTriggerEnabled'] as bool? ?? false;
+    final logoStyle = LogoStyle.fromJSON(json['logoStyle'] as String? ?? 'minimal');
+    final logoAnchor = AnchorDeserializer.fromJSON(json['logoAnchor']);
 
     return BarcodeCountViewDefaults(
         style,
@@ -363,7 +369,9 @@ class BarcodeCountViewDefaults {
         shouldShowStatusIconsOnScan,
         shouldDisableModeOnExitButtonTapped,
         hardwareTriggerSupported,
-        hardwareTriggerEnabled);
+        hardwareTriggerEnabled,
+        logoStyle,
+        logoAnchor);
   }
 }
 

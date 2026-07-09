@@ -5,6 +5,7 @@
  */
 
 import 'dart:convert';
+import 'dart:ui' show Color;
 
 import 'package:flutter/foundation.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
@@ -22,6 +23,10 @@ class BarcodeFindDefaults {
 
   static BarcodeFindViewDefaults get barcodeFindViewDefaults => _barcodeFindViewDefaults;
 
+  static late BarcodeFindViewSettingsDefaults _barcodeFindViewSettingsDefaults;
+
+  static BarcodeFindViewSettingsDefaults get barcodeFindViewSettingsDefaults => _barcodeFindViewSettingsDefaults;
+
   static bool _isInitialized = false;
 
   static void initializeDefaults(Map<String, dynamic> barcodeFindDefaults) {
@@ -31,7 +36,24 @@ class BarcodeFindDefaults {
         jsonDecode(barcodeFindDefaults["BarcodeFindFeedback"] as String) as Map<String, dynamic>);
     _barcodeFindViewDefaults =
         BarcodeFindViewDefaults.fromJSON(barcodeFindDefaults["BarcodeFindView"] as Map<String, dynamic>);
+    _barcodeFindViewSettingsDefaults = BarcodeFindViewSettingsDefaults.fromJSON(
+        barcodeFindDefaults["BarcodeFindViewSettings"] as Map<String, dynamic>);
     _isInitialized = true;
+  }
+}
+
+@immutable
+class BarcodeFindViewSettingsDefaults {
+  final Color progressBarStartColor;
+  final Color progressBarFinishColor;
+
+  const BarcodeFindViewSettingsDefaults(this.progressBarStartColor, this.progressBarFinishColor);
+
+  factory BarcodeFindViewSettingsDefaults.fromJSON(Map<String, dynamic> json) {
+    return BarcodeFindViewSettingsDefaults(
+      ColorDeserializer.fromRgbaHex(json['progressBarStartColor'] as String),
+      ColorDeserializer.fromRgbaHex(json['progressBarFinishColor'] as String),
+    );
   }
 }
 
@@ -44,6 +66,8 @@ class BarcodeFindViewDefaults {
   final bool shouldShowProgressBar;
   final bool shouldShowUserGuidanceView;
   final bool shouldShowTorchControl;
+  final bool shouldShowZoomControl;
+  final bool hardwareTriggerSupported;
   final String? textForAllItemsFoundSuccessfullyHint;
   final String? textForCollapseCardsButton;
   final String? textForMoveCloserToBarcodesHint;
@@ -62,6 +86,8 @@ class BarcodeFindViewDefaults {
       this.shouldShowProgressBar,
       this.shouldShowUserGuidanceView,
       this.shouldShowTorchControl,
+      this.shouldShowZoomControl,
+      this.hardwareTriggerSupported,
       this.textForAllItemsFoundSuccessfullyHint,
       this.textForCollapseCardsButton,
       this.textForMoveCloserToBarcodesHint,
@@ -83,6 +109,16 @@ class BarcodeFindViewDefaults {
       shouldShowTorchControl = json["shouldShowTorchControl"] as bool;
     }
 
+    var shouldShowZoomControl = false;
+    if (json.containsKey('shouldShowZoomControl')) {
+      shouldShowZoomControl = json["shouldShowZoomControl"] as bool;
+    }
+
+    var hardwareTriggerSupported = false;
+    if (json.containsKey('hardwareTriggerSupported')) {
+      hardwareTriggerSupported = json["hardwareTriggerSupported"] as bool;
+    }
+
     return BarcodeFindViewDefaults(
       json["shouldShowCarousel"] as bool,
       json["shouldShowFinishButton"] as bool,
@@ -91,6 +127,8 @@ class BarcodeFindViewDefaults {
       json["shouldShowProgressBar"] as bool,
       json["shouldShowUserGuidanceView"] as bool,
       shouldShowTorchControl,
+      shouldShowZoomControl,
+      hardwareTriggerSupported,
       json["textForAllItemsFoundSuccessfullyHint"] as String?,
       json["textForCollapseCardsButton"] as String?,
       json["textForMoveCloserToBarcodesHint"] as String?,

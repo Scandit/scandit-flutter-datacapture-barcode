@@ -34,6 +34,8 @@ class BarcodeCaptureSettings implements Serializable {
 
   ScanIntention scanIntention = BarcodeCaptureDefaults.barcodeCaptureSettingsDefaults.scanIntention;
 
+  SelectionMode selectionMode = BarcodeCaptureDefaults.barcodeCaptureSettingsDefaults.selectionMode;
+
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -44,6 +46,7 @@ class BarcodeCaptureSettings implements Serializable {
       'enabledCompositeTypes': enabledCompositeTypes.map((e) => e.toString()).toList(),
       'batterySaving': batterySaving.toString(),
       'scanIntention': scanIntention.toString(),
+      'selectionMode': selectionMode.toString(),
       'arucoDictionary': _arucoDictionary?.toMap()
     };
   }

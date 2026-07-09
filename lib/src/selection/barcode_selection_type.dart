@@ -6,6 +6,7 @@
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
+import 'barcode_selection_aimer_behavior.dart';
 import 'barcode_selection_defaults.dart';
 import 'barcode_selection_freeze_behaviour.dart';
 import 'barcode_selection_tap_behaviour.dart';
@@ -59,13 +60,19 @@ class BarcodeSelectionAimerSelection extends BarcodeSelectionType {
   BarcodeSelectionStrategy selectionStrategy =
       BarcodeSelectionDefaults.barcodeSelectionAimerSelectionDefaults.selectionStrategy;
 
+  BarcodeSelectionAimerBehavior aimerBehavior =
+      BarcodeSelectionDefaults.barcodeSelectionAimerSelectionDefaults.aimerBehavior;
+
   BarcodeSelectionAimerSelection() : super._('aimerSelection');
+
+  BarcodeSelectionAimerSelection.withAimerBehavior(this.aimerBehavior) : super._('aimerSelection');
 
   @override
   Map<String, dynamic> toMap() {
     var json = super.toMap();
     json.addAll({
       'selectionStrategy': selectionStrategy.toMap(),
+      'aimerBehavior': aimerBehavior.toString(),
     });
     return json;
   }
@@ -84,6 +91,9 @@ extension BarcodeSelectionTypeDeserializer on BarcodeSelectionType {
         var aimerSelection = BarcodeSelectionAimerSelection();
         if (json.containsKey('selectionStrategy')) {
           aimerSelection.selectionStrategy = BarcodeSelectionStrategyDeserializer.fromJSON(json['selectionStrategy']);
+        }
+        if (json.containsKey('aimerBehavior')) {
+          aimerSelection.aimerBehavior = BarcodeSelectionAimerBehavior.fromJSON(json['aimerBehavior'] as String);
         }
         return aimerSelection;
       default:

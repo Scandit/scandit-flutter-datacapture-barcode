@@ -117,6 +117,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
     bool? barcodeCountButtonVisible,
     bool? barcodeFindButtonVisible,
     bool? targetModeButtonVisible,
+    bool? selectionModeButtonVisible,
     bool? labelCaptureButtonVisible,
     bool? zoomSwitchControlVisible,
     bool? cameraSwitchButtonVisible,
@@ -140,6 +141,9 @@ class SparkScanView extends StatefulWidget implements Serializable {
     if (barcodeCountButtonVisible != null) _barcodeCountButtonVisible = barcodeCountButtonVisible;
     if (barcodeFindButtonVisible != null) _barcodeFindButtonVisible = barcodeFindButtonVisible;
     if (targetModeButtonVisible != null) _targetModeButtonVisible = targetModeButtonVisible;
+    // selectionModeButtonVisible shares the same underlying state and wins when both are set,
+    // matching the native deserializer behaviour.
+    if (selectionModeButtonVisible != null) _targetModeButtonVisible = selectionModeButtonVisible;
     if (labelCaptureButtonVisible != null) _labelCaptureButtonVisible = labelCaptureButtonVisible;
     if (zoomSwitchControlVisible != null) _zoomSwitchControlVisible = zoomSwitchControlVisible;
     if (cameraSwitchButtonVisible != null) _cameraSwitchButtonVisible = cameraSwitchButtonVisible;
@@ -168,6 +172,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
     bool? barcodeCountButtonVisible,
     bool? barcodeFindButtonVisible,
     bool? targetModeButtonVisible,
+    bool? selectionModeButtonVisible,
     bool? labelCaptureButtonVisible,
     bool? zoomSwitchControlVisible,
     bool? cameraSwitchButtonVisible,
@@ -193,6 +198,7 @@ class SparkScanView extends StatefulWidget implements Serializable {
           barcodeCountButtonVisible: barcodeCountButtonVisible,
           barcodeFindButtonVisible: barcodeFindButtonVisible,
           targetModeButtonVisible: targetModeButtonVisible,
+          selectionModeButtonVisible: selectionModeButtonVisible,
           labelCaptureButtonVisible: labelCaptureButtonVisible,
           zoomSwitchControlVisible: zoomSwitchControlVisible,
           cameraSwitchButtonVisible: cameraSwitchButtonVisible,
@@ -320,13 +326,26 @@ class SparkScanView extends StatefulWidget implements Serializable {
     _update();
   }
 
-  bool _targetModeButtonVisible = SparkScanDefaults.sparkScanViewDefaults.targetModeButtonVisible;
+  // targetModeButtonVisible and selectionModeButtonVisible are the same underlying
+  // native state; both accessors share one backing field.
+  bool _targetModeButtonVisible = SparkScanDefaults.sparkScanViewDefaults.selectionModeButtonVisible;
 
+  @Deprecated('Use selectionModeButtonVisible instead. Will be removed in 9.0.')
   bool get targetModeButtonVisible {
     return _targetModeButtonVisible;
   }
 
+  @Deprecated('Use selectionModeButtonVisible instead. Will be removed in 9.0.')
   set targetModeButtonVisible(bool newValue) {
+    _targetModeButtonVisible = newValue;
+    _update();
+  }
+
+  bool get selectionModeButtonVisible {
+    return _targetModeButtonVisible;
+  }
+
+  set selectionModeButtonVisible(bool newValue) {
     _targetModeButtonVisible = newValue;
     _update();
   }
@@ -525,7 +544,9 @@ class SparkScanView extends StatefulWidget implements Serializable {
         'barcodeCountButtonVisible': barcodeCountButtonVisible,
         'barcodeFindButtonVisible': barcodeFindButtonVisible,
         'labelCaptureButtonVisible': labelCaptureButtonVisible,
+        // ignore: deprecated_member_use_from_same_package
         'targetModeButtonVisible': targetModeButtonVisible,
+        'selectionModeButtonVisible': selectionModeButtonVisible,
         'toolbarIconActiveTintColor': toolbarIconActiveTintColor?.jsonValue,
         'toolbarIconInactiveTintColor': toolbarIconInactiveTintColor?.jsonValue,
         'zoomSwitchControlVisible': zoomSwitchControlVisible,

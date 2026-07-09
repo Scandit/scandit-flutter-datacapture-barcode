@@ -32,6 +32,7 @@ import 'barcode_ar_annotation.dart';
 import 'barcode_ar_annotation_provider.dart';
 import 'barcode_ar_common.dart';
 import 'barcode_ar_defaults.dart';
+import 'barcode_ar_filter.dart';
 import 'barcode_ar_function_names.dart';
 import 'barcode_ar_highlight.dart';
 import 'barcode_ar_highlight_provider.dart';
@@ -131,9 +132,21 @@ class BarcodeAr extends Serializable {
     }
   }
 
+  BarcodeArFilter? _barcodeFilter;
+
+  Future<void> setBarcodeFilter(BarcodeArFilter? filter) async {
+    _barcodeFilter = filter;
+    await _controller?.setBarcodeFilter(filter);
+  }
+
   @override
   Map<String, dynamic> toMap() {
-    return {'type': 'barcodeAr', 'settings': _settings.toMap(), 'feedback': _feedback.toMap()};
+    return {
+      'type': 'barcodeAr',
+      'settings': _settings.toMap(),
+      'feedback': _feedback.toMap(),
+      'hasBarcodeFilter': _barcodeFilter != null,
+    };
   }
 }
 
@@ -429,6 +442,23 @@ class _BarcodeArViewController extends BaseController implements BarcodeArViewCo
         barcodeMethodHandler
             .finishBarcodeArHighlightForBarcode(viewId: _view._viewId, highlightJson: jsonEncode(result))
             .onError(onError);
+      } else if (event.isEvent(BarcodeArFunctionNames.filterBarcodesEvent)) {
+        final entries = (json['barcodes'] as List).cast<Map<String, dynamic>>();
+        final barcodes = entries.map((e) => Barcode.fromJSON(jsonDecode(e['barcode'] as String))).toList();
+        final ids = entries.map((e) => e['barcodeId'] as String).toList();
+        final filter = _view._barcodeAr._barcodeFilter;
+        final filtered = filter != null ? await filter.filterBarcodes(barcodes) : barcodes;
+        final filteredIds = filtered
+            .map((fb) {
+              final idx = barcodes.indexWhere((b) => identical(b, fb));
+              return idx >= 0 ? ids[idx] : null;
+            })
+            .whereType<String>()
+            .toList();
+        barcodeMethodHandler
+            .finishBarcodeArFilterBarcodes(
+                viewId: _view._viewId, filteredBarcodesJson: jsonEncode({'barcodes': filteredIds}))
+            .onError(onError);
       } else if (event.isEvent(BarcodeArFunctionNames.annotationForBarcodeEvent)) {
         final barcodeId = json['barcodeId'] as String;
         final barcode = Barcode.fromJSON(jsonDecode(json['barcode']));
@@ -664,6 +694,14 @@ class _BarcodeArViewController extends BaseController implements BarcodeArViewCo
     if (newValue == null) {
       _annotationsCache.clear();
       _customAnnotationCache.clear();
+    }
+  }
+
+  Future<void> setBarcodeFilter(BarcodeArFilter? filter) {
+    if (filter != null) {
+      return barcodeMethodHandler.registerBarcodeArFilter(viewId: _view._viewId).onError(onError);
+    } else {
+      return barcodeMethodHandler.unregisterBarcodeArFilter(viewId: _view._viewId).onError(onError);
     }
   }
 

@@ -17,6 +17,8 @@ class SparkScanToastSettings extends Serializable {
       Color? toastBackgroundColor,
       String? targetModeEnabledMessage,
       String? targetModeDisabledMessage,
+      String? selectionModeOnMessage,
+      String? selectionModeOffMessage,
       String? continuousModeEnabledMessage,
       String? continuousModeDisabledMessage,
       String? scanPausedMessage,
@@ -29,8 +31,12 @@ class SparkScanToastSettings extends Serializable {
     if (toastEnabled != null) this.toastEnabled = toastEnabled;
     if (toastTextColor != null) this.toastTextColor = toastTextColor;
     if (toastBackgroundColor != null) this.toastBackgroundColor = toastBackgroundColor;
+    // ignore: deprecated_member_use_from_same_package
     if (targetModeEnabledMessage != null) this.targetModeEnabledMessage = targetModeEnabledMessage;
+    // ignore: deprecated_member_use_from_same_package
     if (targetModeDisabledMessage != null) this.targetModeDisabledMessage = targetModeDisabledMessage;
+    if (selectionModeOnMessage != null) this.selectionModeOnMessage = selectionModeOnMessage;
+    if (selectionModeOffMessage != null) this.selectionModeOffMessage = selectionModeOffMessage;
     if (continuousModeEnabledMessage != null) this.continuousModeEnabledMessage = continuousModeEnabledMessage;
     if (continuousModeDisabledMessage != null) this.continuousModeDisabledMessage = continuousModeDisabledMessage;
     if (scanPausedMessage != null) this.scanPausedMessage = scanPausedMessage;
@@ -47,10 +53,16 @@ class SparkScanToastSettings extends Serializable {
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.toastTextColor;
   Color? toastBackgroundColor =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.toastBackgroundColor;
+  @Deprecated('Use selectionModeOnMessage instead. Will be removed in 9.0.')
   String? targetModeEnabledMessage =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.targetModeEnabledMessage;
+  @Deprecated('Use selectionModeOffMessage instead. Will be removed in 9.0.')
   String? targetModeDisabledMessage =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.targetModeDisabledMessage;
+  String? selectionModeOnMessage =
+      SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.selectionModeOnMessage;
+  String? selectionModeOffMessage =
+      SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.selectionModeOffMessage;
   String? continuousModeEnabledMessage =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.toastSettingsDefaults.continuousModeEnabledMessage;
   String? continuousModeDisabledMessage =
@@ -76,8 +88,12 @@ class SparkScanToastSettings extends Serializable {
       'toastEnabled': toastEnabled,
       'toastTextColor': toastTextColor?.jsonValue,
       'toastBackgroundColor': toastBackgroundColor?.jsonValue,
+      // ignore: deprecated_member_use_from_same_package
       'targetModeEnabledMessage': targetModeEnabledMessage,
+      // ignore: deprecated_member_use_from_same_package
       'targetModeDisabledMessage': targetModeDisabledMessage,
+      'selectionModeOnMessage': selectionModeOnMessage,
+      'selectionModeOffMessage': selectionModeOffMessage,
       'continuousModeEnabledMessage': continuousModeEnabledMessage,
       'continuousModeDisabledMessage': continuousModeDisabledMessage,
       'scanPausedMessage': scanPausedMessage,
