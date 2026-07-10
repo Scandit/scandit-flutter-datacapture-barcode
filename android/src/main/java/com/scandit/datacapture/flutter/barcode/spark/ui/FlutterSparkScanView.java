@@ -12,10 +12,10 @@ import android.view.ViewParent;
 
 import androidx.annotation.Nullable;
 
+import com.scandit.datacapture.barcode.spark.ui.SparkScanView;
 import com.scandit.datacapture.flutter.core.ui.FlutterBasePlatformView;
 import com.scandit.datacapture.flutter.core.utils.FlutterLogInsteadOfResult;
 import com.scandit.datacapture.frameworks.barcode.spark.SparkScanModule;
-import com.scandit.datacapture.frameworks.core.result.NoopFrameworksResult;
 
 import io.flutter.embedding.android.FlutterView;
 
@@ -24,7 +24,6 @@ public class FlutterSparkScanView extends FlutterBasePlatformView {
 
     private final SparkScanModule sparkScanModule;
     private final String jsonString;
-    private int sparkScanViewId;
 
     public FlutterSparkScanView(Context context, String jsonString, SparkScanModule sparkScanModule) {
         super(context);
@@ -38,16 +37,23 @@ public class FlutterSparkScanView extends FlutterBasePlatformView {
 
         FlutterView flutterView = getFlutterView(this.getParent());
 
-        this.sparkScanViewId = sparkScanModule.addViewToContainer(flutterView, jsonString, new FlutterLogInsteadOfResult());
-        if (this.sparkScanViewId != -1) {
-            sparkScanModule.setViewLayoutParams(this.sparkScanViewId, ((View) this.getParent()).getLayoutParams());
+        sparkScanModule.addViewToContainer(flutterView, jsonString, new FlutterLogInsteadOfResult());
+        SparkScanView sparkScanView = sparkScanModule.getSparkScanView();
+
+        if (sparkScanView != null) {
+            sparkScanView.setLayoutParams(((View) this.getParent()).getLayoutParams());
+            sparkScanView.requestLayout();
         }
     }
 
     @Override
     public void onCurrentTopViewVisibleChanged(String topViewId) {
-        if (viewId.equals(topViewId) && this.sparkScanViewId != -1) {
-            sparkScanModule.dispatchWindowVisibilityChanged(this.sparkScanViewId, getVisibility());
+        if (viewId.equals(topViewId)) {
+            SparkScanView sparkScanView = sparkScanModule.getSparkScanView();
+
+            if (sparkScanView != null) {
+                sparkScanView.dispatchWindowVisibilityChanged(getVisibility());
+            }
         }
     }
 
@@ -59,7 +65,7 @@ public class FlutterSparkScanView extends FlutterBasePlatformView {
 
     @Override
     public void dispose() {
-        sparkScanModule.disposeSparkScanView(this.sparkScanViewId, new NoopFrameworksResult());
+        sparkScanModule.disposeView();
         super.dispose();
     }
 

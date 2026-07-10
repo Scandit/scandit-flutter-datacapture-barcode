@@ -14,7 +14,7 @@ class TargetBarcode implements Serializable {
 
   String get data => _data;
 
-  int get quantity => _quantity;
+  int get quantity => quantity;
 
   factory TargetBarcode.create(String data, int quantity) {
     return TargetBarcode._(data, quantity);
