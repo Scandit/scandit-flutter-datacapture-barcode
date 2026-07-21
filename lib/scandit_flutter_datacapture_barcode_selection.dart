@@ -4,10 +4,11 @@
  * Copyright (C) 2021- Scandit AG. All rights reserved.
  */
 
+// ignore: unnecessary_library_name
 library scandit_flutter_datacapture_barcode_selection;
 
-export 'src/selection/barcode_selection.dart'
-    show BarcodeSelection, BarcodeSelectionListener, BarcodeSelectionAdvancedListener;
+export 'src/selection/barcode_selection.dart' show BarcodeSelection, BarcodeSelectionListener;
+export 'src/selection/barcode_selection_aimer_behavior.dart' show BarcodeSelectionAimerBehavior;
 export 'src/selection/barcode_selection_freeze_behaviour.dart' show BarcodeSelectionFreezeBehavior;
 export 'src/selection/barcode_selection_tap_behaviour.dart' show BarcodeSelectionTapBehavior;
 export 'src/selection/barcode_selection_strategy.dart'
@@ -19,3 +20,5 @@ export 'src/selection/barcode_selection_settings.dart' show BarcodeSelectionSett
 export 'src/selection/barcode_selection_feedback.dart' show BarcodeSelectionFeedback;
 export 'src/selection/barcode_selection_basic_overlay.dart'
     show BarcodeSelectionBasicOverlay, BarcodeSelectionBasicOverlayStyle;
+export 'src/selection/barcode_selection_brush_provider.dart' show BarcodeSelectionBrushProvider;
+export 'src/selection/barcode_selection_license_info.dart' show BarcodeSelectionLicenseInfo;

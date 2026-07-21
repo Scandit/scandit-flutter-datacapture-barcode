@@ -30,6 +30,7 @@ public class FlutterBarcodeCountView extends FlutterBasePlatformView {
 
         if (view != null) {
             addView(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            this.setTag(view.getTag());
         }
     }
 
@@ -48,7 +49,7 @@ public class FlutterBarcodeCountView extends FlutterBasePlatformView {
 
     @Override
     public void dispose() {
-        barcodeCountModule.disposeBarcodeCountView();
+        barcodeCountModule.viewDisposed((int)this.getTag());
         super.dispose();
     }
 }
