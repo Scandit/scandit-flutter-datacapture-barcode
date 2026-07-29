@@ -14,10 +14,13 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/feedback.dart' as feedback;
 
+import 'spark_scan_function_names.dart';
 import 'spark_scan_view_capture_mode.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class SparkScanDefaults {
+  static MethodChannel mainChannel = const MethodChannel(SparkScanFunctionNames.methodsChannelName);
+
   static late SparkScanSettingsDefaults _sparkScanSettingsDefaults;
 
   static SparkScanSettingsDefaults get sparkScanSettingsDefaults => _sparkScanSettingsDefaults;
@@ -32,12 +35,13 @@ class SparkScanDefaults {
 
   static bool _isInitialized = false;
 
-  static void initializeDefaults(Map<String, dynamic> sparkScanDefaults) {
+  static Future<void> initializeDefaults() async {
     if (_isInitialized) return;
-    _sparkScanSettingsDefaults =
-        SparkScanSettingsDefaults.fromJSON(sparkScanDefaults['SparkScanSettings'] as Map<String, dynamic>);
-    _sparkScanFeedbackDefaults = SparkScanFeedbackDefaults.fromJSON(sparkScanDefaults['Feedback']);
-    _sparkScanViewDefaults = SparkScanViewDefaults.fromJSON(sparkScanDefaults['SparkScanView']);
+    var result = await mainChannel.invokeMethod(SparkScanFunctionNames.getSparkScanDefaults);
+    var json = jsonDecode(result as String);
+    _sparkScanSettingsDefaults = SparkScanSettingsDefaults.fromJSON(json['SparkScanSettings'] as Map<String, dynamic>);
+    _sparkScanFeedbackDefaults = SparkScanFeedbackDefaults.fromJSON(json['Feedback']);
+    _sparkScanViewDefaults = SparkScanViewDefaults.fromJSON(json['SparkScanView']);
 
     _isInitialized = true;
   }
@@ -52,7 +56,8 @@ class SparkScanViewDefaults {
   final bool barcodeFindButtonVisible;
   final bool labelCaptureButtonVisible;
   final bool targetModeButtonVisible;
-  final bool selectionModeButtonVisible;
+  final bool soundModeButtonVisible;
+  final bool hapticModeButtonVisible;
   final Color? toolbarBackgroundColor;
   final Color? toolbarIconActiveTintColor;
   final Color? toolbarIconInactiveTintColor;
@@ -81,7 +86,8 @@ class SparkScanViewDefaults {
       this.barcodeFindButtonVisible,
       this.labelCaptureButtonVisible,
       this.targetModeButtonVisible,
-      this.selectionModeButtonVisible,
+      this.soundModeButtonVisible,
+      this.hapticModeButtonVisible,
       this.toolbarBackgroundColor,
       this.toolbarIconActiveTintColor,
       this.toolbarIconInactiveTintColor,
@@ -106,7 +112,6 @@ class SparkScanViewDefaults {
     final barcodeFindButtonVisible = json['barcodeFindButtonVisible'] as bool;
     final labelCaptureButtonVisible = json['labelCaptureButtonVisible'] as bool;
     final targetModeButtonVisible = json['targetModeButtonVisible'] as bool;
-    final selectionModeButtonVisible = json['selectionModeButtonVisible'] as bool;
 
     Color? toolbarBackgroundColor;
     if (json['toolbarBackgroundColor'] != null) {
@@ -167,7 +172,8 @@ class SparkScanViewDefaults {
         barcodeFindButtonVisible,
         labelCaptureButtonVisible,
         targetModeButtonVisible,
-        selectionModeButtonVisible,
+        false,
+        false,
         toolbarBackgroundColor,
         toolbarIconActiveTintColor,
         toolbarIconInactiveTintColor,
@@ -193,8 +199,6 @@ class SparkScanToastSettingsDefaults {
   final Color? toastTextColor;
   final String? targetModeEnabledMessage;
   final String? targetModeDisabledMessage;
-  final String? selectionModeOnMessage;
-  final String? selectionModeOffMessage;
   final String? continuousModeEnabledMessage;
   final String? continuousModeDisabledMessage;
   final String? scanPausedMessage;
@@ -211,8 +215,6 @@ class SparkScanToastSettingsDefaults {
       this.toastTextColor,
       this.targetModeEnabledMessage,
       this.targetModeDisabledMessage,
-      this.selectionModeOnMessage,
-      this.selectionModeOffMessage,
       this.continuousModeEnabledMessage,
       this.continuousModeDisabledMessage,
       this.scanPausedMessage,
@@ -238,8 +240,6 @@ class SparkScanToastSettingsDefaults {
 
     final targetModeEnabledMessage = json['targetModeEnabledMessage'] as String?;
     final targetModeDisabledMessage = json['targetModeDisabledMessage'] as String?;
-    final selectionModeOnMessage = json['selectionModeOnMessage'] as String?;
-    final selectionModeOffMessage = json['selectionModeOffMessage'] as String?;
     final continuousModeEnabledMessage = json['continuousModeEnabledMessage'] as String?;
     final continuousModeDisabledMessage = json['continuousModeDisabledMessage'] as String?;
     final scanPausedMessage = json['scanPausedMessage'] as String?;
@@ -256,8 +256,6 @@ class SparkScanToastSettingsDefaults {
         toastTextColor,
         targetModeEnabledMessage,
         targetModeDisabledMessage,
-        selectionModeOnMessage,
-        selectionModeOffMessage,
         continuousModeEnabledMessage,
         continuousModeDisabledMessage,
         scanPausedMessage,
@@ -275,21 +273,16 @@ class SparkScanSettingsDefaults {
   final Duration codeDuplicateFilter;
   final BatterySavingMode batterySaving;
   final ScanIntention scanIntention;
-  final SelectionMode selectionMode;
 
-  const SparkScanSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention, this.selectionMode);
+  const SparkScanSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention);
 
   factory SparkScanSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     var durationInMillis = (json['codeDuplicateFilter'] as num).toInt();
 
     var duration = const Duration(milliseconds: 1) * durationInMillis;
 
-    return SparkScanSettingsDefaults(
-      duration,
-      BatterySavingModeDeserializer.fromJSON(json['batterySaving'] as String),
-      ScanIntentionSerializer.fromJSON(json['scanIntention'] as String),
-      SelectionMode.fromJSON(json['selectionMode'] as String),
-    );
+    return SparkScanSettingsDefaults(duration, BatterySavingModeDeserializer.fromJSON(json['batterySaving'] as String),
+        ScanIntentionSerializer.fromJSON(json['scanIntention'] as String));
   }
 }
 
@@ -346,7 +339,6 @@ class SparkScanViewSettingsDefaults {
   final CameraPosition defaultCameraPosition;
 
   final SparkScanMiniPreviewSize defaultMiniPreviewSize;
-  final bool periscopeModeEnabled;
 
   SparkScanViewSettingsDefaults(
       this.triggerButtonCollapseTimeout,
@@ -363,8 +355,7 @@ class SparkScanViewSettingsDefaults {
       this.zoomFactorOut,
       this.inactiveStateTimeout,
       this.defaultCameraPosition,
-      this.defaultMiniPreviewSize,
-      this.periscopeModeEnabled);
+      this.defaultMiniPreviewSize);
 
   factory SparkScanViewSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     final triggerButtonCollapseTimeout = Duration(seconds: (json['triggerButtonCollapseTimeout'] as num).toInt());
@@ -407,8 +398,6 @@ class SparkScanViewSettingsDefaults {
     final defaultMiniPreviewSize =
         SparkScanMiniPreviewSizeSerializer.fromJSON(json['defaultMiniPreviewSize'] as String);
 
-    final periscopeModeEnabled = json['periscopeModeEnabled'] as bool? ?? false;
-
     return SparkScanViewSettingsDefaults(
         triggerButtonCollapseTimeout,
         defaultTorchState,
@@ -424,7 +413,6 @@ class SparkScanViewSettingsDefaults {
         zoomFactorOut,
         inactiveStateTimeout,
         defaultCameraPosition,
-        defaultMiniPreviewSize,
-        periscopeModeEnabled);
+        defaultMiniPreviewSize);
   }
 }

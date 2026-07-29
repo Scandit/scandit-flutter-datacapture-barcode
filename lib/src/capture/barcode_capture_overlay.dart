@@ -6,13 +6,12 @@
 
 import 'dart:convert';
 
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/capture/barcode_capture.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/capture/barcode_capture_defaults.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
+import 'barcode_capture_function_names.dart';
 
 class BarcodeCaptureOverlay extends DataCaptureOverlay {
   static final _noViewfinder = {'type': 'none'};
@@ -93,14 +92,13 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
 
 class _BarcodeCaptureOverlayController extends BaseController {
   final BarcodeCaptureOverlay _overlay;
-  late final BarcodeMethodHandler barcodeMethodHandler;
-  _BarcodeCaptureOverlayController(this._overlay) : super(BarcodeFunctionNames.methodsChannelName) {
-    barcodeMethodHandler = BarcodeMethodHandler(methodChannel);
-  }
+
+  _BarcodeCaptureOverlayController(this._overlay) : super(BarcodeCaptureFunctionNames.methodsChannelName);
 
   Future<void> update() {
-    return barcodeMethodHandler
-        .updateBarcodeCaptureOverlay(viewId: _overlay._dataCaptureViewId, overlayJson: jsonEncode(_overlay.toMap()))
-        .onError(onError);
+    return methodChannel.invokeMethod(BarcodeCaptureFunctionNames.updateBarcodeCaptureOverlay, {
+      'viewId': _overlay._dataCaptureViewId,
+      'overlayJson': jsonEncode(_overlay.toMap()),
+    });
   }
 }

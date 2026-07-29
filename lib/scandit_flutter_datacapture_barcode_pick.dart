@@ -15,10 +15,8 @@ export 'src/pick/barcode_pick_product_provider.dart'
         BarcodePickProductProviderCallback,
         BarcodePickAsyncMapperProductProviderCallback;
 export 'src/pick/barcode_pick_product.dart' show BarcodePickProduct;
-export 'src/pick/barcode_pick_session.dart' show BarcodePickSession;
 export 'src/pick/barcode_pick_scanning_session.dart' show BarcodePickScanningSession;
 export 'src/pick/barcode_pick_settings.dart' show BarcodePickSettings;
-export 'src/pick/barcode_pick_action.dart' show BarcodePickAction;
 export 'src/pick/barcode_pick_state.dart' show BarcodePickState;
 export 'src/pick/ui/barcode_pick_view_highlight_style.dart'
     show
@@ -29,8 +27,7 @@ export 'src/pick/ui/barcode_pick_view_highlight_style.dart'
         BarcodePickViewHighlightStyleRectangularWithIcons,
         BarcodePickViewHighlightStyleCustomView,
         BarcodePickViewHighlightStyleCustomViewProvider,
-        BarcodePickViewHighlightStyleCustomViewResponse,
-        BarcodePickViewHighlightStyleAsyncProvider;
+        BarcodePickViewHighlightStyleCustomViewResponse;
 export 'src/pick/barcode_pick_view_settings.dart' show BarcodePickViewSettings;
 export 'src/pick/barcode_pick_view.dart' show BarcodePick, BarcodePickView, BarcodePickActionCallback;
 export 'src/pick/barcode_pick_listener.dart' show BarcodePickListener;

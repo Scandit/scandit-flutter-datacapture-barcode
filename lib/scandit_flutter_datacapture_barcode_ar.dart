@@ -29,18 +29,15 @@ export 'src/ar/barcode_ar_annotation.dart'
         BarcodeArPopoverAnnotationButton,
         BarcodeArPopoverAnnotationListener,
         BarcodeArStatusIconAnnotation,
-        BarcodeArCustomAnnotation,
-        BarcodeArResponsiveAnnotation;
+        BarcodeArCustomAnnotation;
 export 'src/ar/barcode_ar_annotation_trigger.dart'
     show BarcodeArAnnotationTrigger, BarcodeArAnnotationTriggerSerializer;
 export 'src/ar/barcode_ar_info_annotation_width_preset.dart'
     show BarcodeArInfoAnnotationWidthPreset, BarcodeArInfoAnnotationWidthPresetSerializer;
 export 'src/ar/barcode_ar_info_annotation_anchor.dart'
     show BarcodeArInfoAnnotationAnchor, BarcodeArInfoAnnotationAnchorSerializer;
-export 'src/ar/barcode_ar_popover_annotation_anchor.dart' show BarcodeArPopoverAnnotationAnchor;
 export 'src/ar/barcode_ar_annotation_provider.dart' show BarcodeArAnnotationProvider;
 export 'src/ar/barcode_ar_info_annotation_body_component.dart' show BarcodeArInfoAnnotationBodyComponent;
 export 'src/ar/barcode_ar_info_annotation_header.dart' show BarcodeArInfoAnnotationHeader;
 export 'src/ar/barcode_ar_info_annotation_footer.dart' show BarcodeArInfoAnnotationFooter;
 export 'src/ar/barcode_ar_highlight_provider.dart' show BarcodeArHighlightProvider;
-export 'src/ar/barcode_ar_filter.dart' show BarcodeArFilter;

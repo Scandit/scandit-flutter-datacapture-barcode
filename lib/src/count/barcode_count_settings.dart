@@ -15,18 +15,7 @@ class BarcodeCountSettings implements Serializable {
 
   final Map<String, dynamic> _properties = {};
 
-  late final bool _scanPreviewEnabled;
-
-  bool disableModeWhenCaptureListCompleted =
-      BarcodeCountDefaults.barcodeCountSettingsDefaults.disableModeWhenCaptureListCompleted;
-
-  ClusteringMode clusteringMode = BarcodeCountDefaults.barcodeCountSettingsDefaults.clusteringMode;
-
-  bool mappingEnabled = BarcodeCountDefaults.barcodeCountSettingsDefaults.mappingEnabled;
-
-  BarcodeCountSettings({bool? scanPreviewEnabled}) {
-    _scanPreviewEnabled = scanPreviewEnabled ?? BarcodeCountDefaults.barcodeCountSettingsDefaults.scanPreviewEnabled;
-  }
+  BarcodeCountSettings();
 
   SymbologySettings settingsForSymbology(Symbology symbology) {
     var identifier = symbology.toString();
@@ -72,18 +61,13 @@ class BarcodeCountSettings implements Serializable {
     return _properties[name] as T;
   }
 
-  bool get scanPreviewEnabled => _scanPreviewEnabled;
-
   @override
   Map<String, dynamic> toMap() {
     return {
       'symbologies': _symbologies.map<String, Map<String, dynamic>>((key, value) => MapEntry(key, value.toMap())),
       'properties': _properties,
       'expectOnlyUniqueBarcodes': expectsOnlyUniqueBarcodes,
-      'barcodeFilterSettings': _filterSettings.toMap(),
-      'disableModeWhenCaptureListCompleted': disableModeWhenCaptureListCompleted,
-      'clusteringMode': clusteringMode.toString(),
-      'scanPreviewEnabled': _scanPreviewEnabled,
+      'filterSettings': _filterSettings.toMap()
     };
   }
 }
