@@ -17,6 +17,9 @@ export 'src/generator/barcode_generator.dart'
         DataMatrixBarcodeGeneratorBuilder,
         Ean13BarcodeGeneratorBuilder,
         InterleavedTwoOfFiveBarcodeGeneratorBuilder,
+        Pdf417BarcodeGeneratorBuilder,
+        Pdf417CompactionMode,
+        Pdf417Dimensions,
         QrCodeBarcodeGeneratorBuilder,
         UpcaBarcodeGeneratorBuilder;
 export 'src/generator/qr_code_crrection_level.dart' show QrCodeErrorCorrectionLevel;

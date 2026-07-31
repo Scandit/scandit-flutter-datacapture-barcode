@@ -13,15 +13,13 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 import 'package:scandit_flutter_datacapture_core/src/map_helper.dart';
 
 import 'barcode_ar_annotation_trigger.dart';
-import 'barcode_ar_function_names.dart';
 import 'barcode_ar_highlight.dart';
 import 'barcode_ar_info_annotation_anchor.dart';
 import 'barcode_ar_info_annotation_width_preset.dart';
+import 'barcode_ar_popover_annotation_anchor.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeArDefaults {
-  static MethodChannel channel = const MethodChannel(BarcodeArFunctionNames.methodsChannelName);
-
   static late CameraSettingsDefaults _recommendedCameraSettings;
 
   static CameraSettingsDefaults get recommendedCameraSettings => _recommendedCameraSettings;
@@ -36,14 +34,12 @@ class BarcodeArDefaults {
 
   static bool _isInitialized = false;
 
-  static Future<void> initializeDefaults() async {
+  static void initializeDefaults(Map<String, dynamic> barcodeArDefaults) {
     if (_isInitialized) return;
-    var result = await channel.invokeMethod(BarcodeArFunctionNames.getDefaults);
-    var json = jsonDecode(result as String);
-    _recommendedCameraSettings = CameraSettingsDefaults.fromJSON(json['RecommendedCameraSettings']);
-    _feedbackDefaults = BarcodeArFeedbackDefaults.fromJSON(jsonDecode(json['barcodeArFeedback']));
-    _view = BarcodeArViewDefaults.fromJSON(json['BarcodeArView']);
-
+    _recommendedCameraSettings = CameraSettingsDefaults.fromJSON(barcodeArDefaults['RecommendedCameraSettings']);
+    _feedbackDefaults =
+        BarcodeArFeedbackDefaults.fromJSON(jsonDecode(barcodeArDefaults['barcodeArFeedback']) as Map<String, dynamic>);
+    _view = BarcodeArViewDefaults.fromJSON(barcodeArDefaults['BarcodeArView']);
     _isInitialized = true;
   }
 }
@@ -62,6 +58,7 @@ class BarcodeArViewDefaults {
   final double defaultBarcodeArPopoverAnnotationButtonTextSize;
   final Color defaultBarcodeArPopoverAnnotationButtonTextColor;
   final bool defaultBarcodeArPopoverAnnotationButtonEnabled;
+  final BarcodeArPopoverAnnotationAnchor defaultBarcodeArPopoverAnnotationAnchor;
   final BarcodeArAnnotationTrigger defaultStatusIconAnnotationTrigger;
   final bool defaultStatusIconAnnotationHasTip;
   final ScanditIcon defaultStatusIconAnnotationIcon;
@@ -99,6 +96,9 @@ class BarcodeArViewDefaults {
   final ScanditIcon? defaultInfoAnnotationBodyElementRightIcon;
   final bool defaultShouldShowMacroModeControl;
   final Anchor defaultMacroModeControlPosition;
+  final double defaultResponsiveAnnotationThreshold;
+  final BarcodeArAnnotationTrigger defaultResponsiveAnnotationTrigger;
+  final bool defaultHighlightIsPulsing;
 
   const BarcodeArViewDefaults({
     required this.defaultCameraPosition,
@@ -150,6 +150,10 @@ class BarcodeArViewDefaults {
     required this.defaultShouldShowMacroModeControl,
     required this.defaultMacroModeControlPosition,
     required this.defaultBarcodeArPopoverAnnotationButtonEnabled,
+    required this.defaultBarcodeArPopoverAnnotationAnchor,
+    required this.defaultResponsiveAnnotationThreshold,
+    required this.defaultResponsiveAnnotationTrigger,
+    required this.defaultHighlightIsPulsing,
   });
 
   factory BarcodeArViewDefaults.fromJSON(Map<String, dynamic> json) {
@@ -188,6 +192,10 @@ class BarcodeArViewDefaults {
     bool defaultShouldShowMacroModeControl = json['defaultShouldShowMacroModeControl'] ?? false;
     Anchor defaultMacroModeControlPosition =
         parseAnchorOrDefault(json, 'defaultMacroModeControlPosition', Anchor.topRight);
+
+    double defaultResponsiveAnnotationThreshold = parseDouble(json, 'defaultResponsiveAnnotationThreshold') ?? 0.0;
+    BarcodeArAnnotationTrigger defaultResponsiveAnnotationTrigger =
+        BarcodeArAnnotationTriggerSerializer.fromJSON(json['defaultResponsiveAnnotationTrigger']);
 
     return BarcodeArViewDefaults(
       defaultCameraPosition: CameraPosition.fromJSON(json['defaultCameraPosition']),
@@ -245,6 +253,11 @@ class BarcodeArViewDefaults {
       defaultShouldShowMacroModeControl: defaultShouldShowMacroModeControl,
       defaultMacroModeControlPosition: defaultMacroModeControlPosition,
       defaultBarcodeArPopoverAnnotationButtonEnabled: json['defaultBarcodeArPopoverAnnotationButtonEnabled'],
+      defaultBarcodeArPopoverAnnotationAnchor:
+          BarcodeArPopoverAnnotationAnchor.fromJSON(json['defaultBarcodeArPopoverAnnotationAnchor']),
+      defaultResponsiveAnnotationThreshold: defaultResponsiveAnnotationThreshold,
+      defaultResponsiveAnnotationTrigger: defaultResponsiveAnnotationTrigger,
+      defaultHighlightIsPulsing: json['defaultHighlightIsPulsing'] ?? false,
     );
   }
 }
