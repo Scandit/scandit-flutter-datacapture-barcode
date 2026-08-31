@@ -11,6 +11,8 @@ import 'package:scandit_flutter_datacapture_barcode/src/ar/barcode_ar_defaults.d
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 class BarcodeArInfoAnnotationBodyComponent with ChangeNotifier implements Serializable {
+  BarcodeArInfoAnnotationBodyComponent();
+
   String? _text;
   String? get text => _text;
   set text(String? newValue) {

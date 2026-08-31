@@ -5,6 +5,7 @@
  */
 
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 import 'package:flutter/widgets.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/ar/barcode_ar_info_annotation_footer.dart';
@@ -18,6 +19,7 @@ import 'barcode_ar_defaults.dart';
 import 'barcode_ar_info_annotation_anchor.dart';
 import 'barcode_ar_info_annotation_body_component.dart';
 import 'barcode_ar_popover_annotation_anchor.dart';
+import 'barcode_ar_status_icon_annotation_anchor.dart';
 
 import 'barcode_ar_info_annotation_header.dart';
 import 'barcode_ar_info_annotation_width_preset.dart';
@@ -71,6 +73,15 @@ class BarcodeArInfoAnnotation extends BarcodeArAnnotation {
 
   BarcodeArInfoAnnotation(this._barcode)
       : super._(BarcodeArDefaults.view.defaultInfoAnnotationTrigger, 'barcodeArInfoAnnotation');
+
+  @override
+  BarcodeArAnnotationTrigger get annotationTrigger => _annotationTrigger;
+
+  @override
+  set annotationTrigger(BarcodeArAnnotationTrigger newValue) {
+    _annotationTrigger = newValue;
+    controller?.updateAnnotation(this);
+  }
 
   bool _hasTip = BarcodeArDefaults.view.defaultInfoAnnotationHasTip;
   bool get hasTip => _hasTip;
@@ -241,7 +252,21 @@ class BarcodeArPopoverAnnotation extends BarcodeArAnnotation {
     controller?.updateBarcodeArPopoverButtonAtIndex(this, buttonIndex);
   }
 
-  bool isEntirePopoverTappable = BarcodeArDefaults.view.defaultIsEntirePopoverTappable;
+  @override
+  BarcodeArAnnotationTrigger get annotationTrigger => _annotationTrigger;
+
+  @override
+  set annotationTrigger(BarcodeArAnnotationTrigger newValue) {
+    _annotationTrigger = newValue;
+    controller?.updateAnnotation(this);
+  }
+
+  bool _isEntirePopoverTappable = BarcodeArDefaults.view.defaultIsEntirePopoverTappable;
+  bool get isEntirePopoverTappable => _isEntirePopoverTappable;
+  set isEntirePopoverTappable(bool newValue) {
+    _isEntirePopoverTappable = newValue;
+    controller?.updateAnnotation(this);
+  }
 
   BarcodeArPopoverAnnotationAnchor _anchor = BarcodeArDefaults.view.defaultBarcodeArPopoverAnnotationAnchor;
   BarcodeArPopoverAnnotationAnchor get anchor => _anchor;
@@ -280,6 +305,15 @@ class BarcodeArStatusIconAnnotation extends BarcodeArAnnotation {
   BarcodeArStatusIconAnnotation(this._barcode)
       : super._(BarcodeArDefaults.view.defaultStatusIconAnnotationTrigger, 'barcodeArStatusIconAnnotation');
 
+  @override
+  BarcodeArAnnotationTrigger get annotationTrigger => _annotationTrigger;
+
+  @override
+  set annotationTrigger(BarcodeArAnnotationTrigger newValue) {
+    _annotationTrigger = newValue;
+    controller?.updateAnnotation(this);
+  }
+
   bool _hasTip = BarcodeArDefaults.view.defaultStatusIconAnnotationHasTip;
   bool get hasTip => _hasTip;
   set hasTip(bool newValue) {
@@ -315,6 +349,13 @@ class BarcodeArStatusIconAnnotation extends BarcodeArAnnotation {
     controller?.updateAnnotation(this);
   }
 
+  BarcodeArStatusIconAnnotationAnchor _anchor = BarcodeArDefaults.view.defaultStatusIconAnnotationAnchor;
+  BarcodeArStatusIconAnnotationAnchor get anchor => _anchor;
+  set anchor(BarcodeArStatusIconAnnotationAnchor newValue) {
+    _anchor = newValue;
+    controller?.updateAnnotation(this);
+  }
+
   Barcode get barcode => _barcode;
 
   @override
@@ -326,6 +367,7 @@ class BarcodeArStatusIconAnnotation extends BarcodeArAnnotation {
       'text': text,
       'textColor': textColor.jsonValue,
       'backgroundColor': backgroundColor.jsonValue,
+      'anchor': anchor.toString(),
     });
     return json;
   }
@@ -361,21 +403,88 @@ class BarcodeArCustomAnnotation extends BarcodeArAnnotation {
 class BarcodeArResponsiveAnnotation extends BarcodeArAnnotation {
   final Barcode _barcode;
 
-  final BarcodeArInfoAnnotation? _closeUpAnnotation;
-  final BarcodeArInfoAnnotation? _farAwayAnnotation;
-  double _threshold = BarcodeArDefaults.view.defaultResponsiveAnnotationThreshold;
+  final Map<double, BarcodeArInfoAnnotation?> _annotationsByThreshold;
 
-  BarcodeArResponsiveAnnotation(this._barcode, this._closeUpAnnotation, this._farAwayAnnotation)
-      : super._(BarcodeArDefaults.view.defaultResponsiveAnnotationTrigger, 'barcodeArResponsiveAnnotation');
+  // True when built through the deprecated two-annotation constructor. Only such an instance
+  // has a meaningful single `threshold`, so only there may the deprecated setter rebuild the
+  // map — on a map-constructed instance rebuilding would discard states 3..N.
+  final bool _usesLegacyTwoStateApi;
 
-  BarcodeArInfoAnnotation? get closeUpAnnotation => _closeUpAnnotation;
+  /// Constructs a new responsive annotation whose displayed variation depends on the barcode's
+  /// area relative to the view. Each key is the area-ratio upper bound (in the range (0.0, 1.0])
+  /// at or below which the associated annotation is shown; ranges are evaluated from far to
+  /// close. A null value suppresses the annotation in that range. Keys outside (0.0, 1.0] are
+  /// dropped with a warning.
+  BarcodeArResponsiveAnnotation.withAnnotationsByThreshold(
+      this._barcode, Map<double, BarcodeArInfoAnnotation?> annotationsByThreshold)
+      : _annotationsByThreshold = _validate(annotationsByThreshold),
+        _usesLegacyTwoStateApi = false,
+        super._(BarcodeArDefaults.view.defaultResponsiveAnnotationTrigger, 'barcodeArResponsiveAnnotation');
 
-  BarcodeArInfoAnnotation? get farAwayAnnotation => _farAwayAnnotation;
+  @Deprecated('Use the constructor that accepts an annotationsByThreshold map instead. Will be removed in 9.0.')
+  BarcodeArResponsiveAnnotation(
+      this._barcode, BarcodeArInfoAnnotation? closeUpAnnotation, BarcodeArInfoAnnotation? farAwayAnnotation)
+      : _annotationsByThreshold = _validate({
+          BarcodeArDefaults.view.defaultResponsiveAnnotationThreshold: farAwayAnnotation,
+          1.0: closeUpAnnotation,
+        }),
+        _usesLegacyTwoStateApi = true,
+        super._(BarcodeArDefaults.view.defaultResponsiveAnnotationTrigger, 'barcodeArResponsiveAnnotation');
 
-  double get threshold => _threshold;
+  static Map<double, BarcodeArInfoAnnotation?> _validate(Map<double, BarcodeArInfoAnnotation?> input) {
+    var result = <double, BarcodeArInfoAnnotation?>{};
+    for (final entry in input.entries) {
+      if (entry.key <= 0 || entry.key > 1) {
+        developer.log('Threshold ${entry.key} is out of range (0, 1] and will be ignored.',
+            name: 'BarcodeArResponsiveAnnotation.annotationsByThreshold');
+        continue;
+      }
+      result[entry.key] = entry.value;
+    }
+    var sortedKeys = result.keys.toList()..sort();
+    return {for (final key in sortedKeys) key: result[key]};
+  }
 
+  /// The annotations keyed by the area-ratio upper bound (in (0.0, 1.0]) at or below which each
+  /// is shown, ordered by ascending threshold. A null value means no annotation is shown in that
+  /// range.
+  Map<double, BarcodeArInfoAnnotation?> get annotationsByThreshold => Map.unmodifiable(_annotationsByThreshold);
+
+  @Deprecated('Use annotationsByThreshold instead. Will be removed in 9.0.')
+  BarcodeArInfoAnnotation? get closeUpAnnotation => _annotationsByThreshold[1.0];
+
+  @Deprecated('Use annotationsByThreshold instead. Will be removed in 9.0.')
+  BarcodeArInfoAnnotation? get farAwayAnnotation => _legacyFarAwayEntry()?.value;
+
+  // The lowest-threshold entry that isn't the close-up (1.0) slot; this is what the legacy
+  // 2-arg constructor mapped to farAwayAnnotation/threshold, and what the legacy toMap keys
+  // are derived from.
+  MapEntry<double, BarcodeArInfoAnnotation?>? _legacyFarAwayEntry() {
+    for (final entry in _annotationsByThreshold.entries) {
+      if (entry.key != 1.0) {
+        return entry;
+      }
+    }
+    return null;
+  }
+
+  @Deprecated('Use annotationsByThreshold instead. Will be removed in 9.0.')
+  double get threshold => _legacyFarAwayEntry()?.key ?? BarcodeArDefaults.view.defaultResponsiveAnnotationThreshold;
+
+  @Deprecated('Use annotationsByThreshold instead. Will be removed in 9.0.')
   set threshold(double newValue) {
-    _threshold = newValue;
+    if (!_usesLegacyTwoStateApi) {
+      developer.log(
+          'The deprecated threshold cannot be set on an annotation built with annotationsByThreshold. '
+          'Rebuild the annotation with the desired thresholds instead.',
+          name: 'BarcodeArResponsiveAnnotation.threshold');
+      return;
+    }
+    var farAway = _legacyFarAwayEntry()?.value;
+    var closeUp = _annotationsByThreshold[1.0];
+    _annotationsByThreshold
+      ..clear()
+      ..addAll(_validate({newValue: farAway, 1.0: closeUp}));
     controller?.updateAnnotation(this);
   }
 
@@ -392,24 +501,32 @@ class BarcodeArResponsiveAnnotation extends BarcodeArAnnotation {
 
   @override
   Map<String, dynamic> toMap() {
-    // Propagate controller and barcodeId to child annotations before serialization
-    if (_closeUpAnnotation != null) {
-      _closeUpAnnotation.controller = controller;
-      _closeUpAnnotation.barcodeId = barcodeId;
-    }
-    if (_farAwayAnnotation != null) {
-      _farAwayAnnotation.controller = controller;
-      _farAwayAnnotation.barcodeId = barcodeId;
+    // Propagate controller and barcodeId to every child annotation before serialization.
+    for (final annotation in _annotationsByThreshold.values) {
+      if (annotation != null) {
+        annotation.controller = controller;
+        annotation.barcodeId = barcodeId;
+      }
     }
 
     var json = super.toMap();
-    if (_closeUpAnnotation != null) {
-      json['closeUpAnnotation'] = _closeUpAnnotation.toMap();
+    json['annotationsByThreshold'] = {
+      for (final entry in _annotationsByThreshold.entries) entry.key.toString(): entry.value?.toMap()
+    };
+
+    // Legacy keys, kept for the shared native parsers (and the jsmobile TS layer that reuses
+    // them), which still read closeUpAnnotation/farAwayAnnotation/threshold directly.
+    var closeUp = _annotationsByThreshold[1.0];
+    if (closeUp != null) {
+      json['closeUpAnnotation'] = closeUp.toMap();
     }
-    if (_farAwayAnnotation != null) {
-      json['farAwayAnnotation'] = _farAwayAnnotation.toMap();
+    var farAwayEntry = _legacyFarAwayEntry();
+    var farAway = farAwayEntry?.value;
+    if (farAway != null) {
+      json['farAwayAnnotation'] = farAway.toMap();
     }
-    json['threshold'] = _threshold;
+    json['threshold'] = farAwayEntry?.key ?? BarcodeArDefaults.view.defaultResponsiveAnnotationThreshold;
+
     return json;
   }
 }

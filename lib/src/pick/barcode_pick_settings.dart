@@ -73,7 +73,7 @@ class BarcodePickSettings implements Serializable {
       'hapticEnabled': hapticsEnabled,
       'cachingEnabled': cachingEnabled,
       'arucoDictionary': _arucoDictionary?.toMap(),
-      'barcodeFilterSettings': filterSettings.toMap()
+      'filterSettings': filterSettings.toMap()
     };
   }
 }

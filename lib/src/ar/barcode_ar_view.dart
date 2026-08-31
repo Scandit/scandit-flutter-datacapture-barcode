@@ -286,6 +286,69 @@ class BarcodeArView extends StatefulWidget implements Serializable {
     _updateNative();
   }
 
+  PointWithUnit? _torchControlOffset;
+
+  PointWithUnit? get torchControlOffset => _torchControlOffset;
+
+  set torchControlOffset(PointWithUnit? newValue) {
+    _torchControlOffset = newValue;
+    _updateNative();
+  }
+
+  PointWithUnit? _zoomControlOffset;
+
+  PointWithUnit? get zoomControlOffset => _zoomControlOffset;
+
+  set zoomControlOffset(PointWithUnit? newValue) {
+    _zoomControlOffset = newValue;
+    _updateNative();
+  }
+
+  PointWithUnit? _cameraSwitchControlOffset;
+
+  PointWithUnit? get cameraSwitchControlOffset => _cameraSwitchControlOffset;
+
+  set cameraSwitchControlOffset(PointWithUnit? newValue) {
+    _cameraSwitchControlOffset = newValue;
+    _updateNative();
+  }
+
+  PointWithUnit? _macroModeControlOffset;
+
+  PointWithUnit? get macroModeControlOffset => _macroModeControlOffset;
+
+  set macroModeControlOffset(PointWithUnit? newValue) {
+    _macroModeControlOffset = newValue;
+    _updateNative();
+  }
+
+  LogoStyle _logoStyle = BarcodeArDefaults.view.defaultLogoStyle;
+
+  LogoStyle get logoStyle => _logoStyle;
+
+  set logoStyle(LogoStyle newValue) {
+    _logoStyle = newValue;
+    _updateNative();
+  }
+
+  Anchor _logoAnchor = BarcodeArDefaults.view.defaultLogoAnchor;
+
+  Anchor get logoAnchor => _logoAnchor;
+
+  set logoAnchor(Anchor newValue) {
+    _logoAnchor = newValue;
+    _updateNative();
+  }
+
+  PointWithUnit _logoOffset = BarcodeArDefaults.view.defaultLogoOffset;
+
+  PointWithUnit get logoOffset => _logoOffset;
+
+  set logoOffset(PointWithUnit newValue) {
+    _logoOffset = newValue;
+    _updateNative();
+  }
+
   bool _isStarted = true;
 
   Future<void> start() {
@@ -321,6 +384,10 @@ class BarcodeArView extends StatefulWidget implements Serializable {
 
   @override
   Map<String, dynamic> toMap() {
+    final torchControlOffset = _torchControlOffset;
+    final zoomControlOffset = _zoomControlOffset;
+    final cameraSwitchControlOffset = _cameraSwitchControlOffset;
+    final macroModeControlOffset = _macroModeControlOffset;
     return <String, dynamic>{
       'View': {
         'shouldShowTorchControl': shouldShowTorchControl,
@@ -331,6 +398,13 @@ class BarcodeArView extends StatefulWidget implements Serializable {
         'cameraSwitchControlPosition': cameraSwitchControlPosition.toString(),
         'shouldShowMacroModeControl': shouldShowMacroModeControl,
         'macroModeControlPosition': macroModeControlPosition.toString(),
+        if (torchControlOffset != null) 'torchControlOffset': torchControlOffset.toMap(),
+        if (zoomControlOffset != null) 'zoomControlOffset': zoomControlOffset.toMap(),
+        if (cameraSwitchControlOffset != null) 'cameraSwitchControlOffset': cameraSwitchControlOffset.toMap(),
+        if (macroModeControlOffset != null) 'macroModeControlOffset': macroModeControlOffset.toMap(),
+        'logoStyle': logoStyle.toString(),
+        'logoAnchor': logoAnchor.toString(),
+        'logoOffset': logoOffset.toMap(),
         'hasModeListener': _barcodeAr._listeners.isNotEmpty,
         'hasUiListener': _viewUIListener != null,
         'hasHighlightProvider': _highlightProvider != null,
@@ -550,6 +624,14 @@ class _BarcodeArViewController extends BaseController implements BarcodeArViewCo
 
   BarcodeArInfoAnnotation? _getInfoAnnotationFromEvent(Map<String, dynamic> json) {
     final barcodeId = json['barcodeId'] as String;
+    final responsiveAnnotationThreshold = json['responsiveAnnotationThreshold'] as num?;
+
+    if (responsiveAnnotationThreshold != null) {
+      final responsiveAnnotation = _annotationsCache[barcodeId] as BarcodeArResponsiveAnnotation?;
+      return responsiveAnnotation?.annotationsByThreshold[responsiveAnnotationThreshold.toDouble()];
+    }
+
+    // Legacy fallback for native builds that only emit responsiveAnnotationType.
     final responsiveAnnotationType = json['responsiveAnnotationType'] as String?;
 
     if (responsiveAnnotationType == 'closeUp') {
@@ -779,13 +861,10 @@ class _BarcodeArViewController extends BaseController implements BarcodeArViewCo
   }
 
   StreamSubscription _listenForModeEvents() {
-    return _barcodeArSubscription = BarcodePluginEvents.barcodeArEventStream.listen((event) async {
-      var payload = jsonDecode(event as String);
-
-      final viewId = payload['viewId'] as int;
-      if (viewId != _view._viewId) return;
-
-      if (payload['event'] as String == BarcodeArListener._barcodeArListenerDidUpdateSession) {
+    return _barcodeArSubscription =
+        BarcodePluginEvents.barcodeArEventStream.forView(_view._viewId).listen((event) async {
+      if (event.isEvent(BarcodeArListener._barcodeArListenerDidUpdateSession)) {
+        final payload = event.payload;
         if (_view._barcodeAr._listeners.isNotEmpty && payload.containsKey('session')) {
           var session = BarcodeArSession.fromJSON(payload);
           await _notifyDidUpdateListeners(session);

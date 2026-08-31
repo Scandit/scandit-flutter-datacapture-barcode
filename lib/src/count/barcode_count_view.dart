@@ -75,7 +75,22 @@ abstract class BarcodeCountViewListener {
 abstract class BarcodeCountViewExtendedListener extends BarcodeCountViewListener {
   static const String _didTapClusterEventName = 'BarcodeCountViewListener.didTapCluster';
 
+  static const String _iconForRecognizedBarcodeEventName = 'BarcodeCountViewListener.iconForRecognizedBarcode';
+  static const String _iconForRecognizedBarcodeNotInListEventName =
+      'BarcodeCountViewListener.iconForRecognizedBarcodeNotInList';
+  static const String _iconForAcceptedBarcodeEventName = 'BarcodeCountViewListener.iconForAcceptedBarcode';
+  static const String _iconForRejectedBarcodeEventName = 'BarcodeCountViewListener.iconForRejectedBarcode';
+
   void didTapCluster(BarcodeCountView view, Cluster cluster) {}
+
+  BarcodeCountIcon? iconForRecognizedBarcode(BarcodeCountView view, TrackedBarcode trackedBarcode) =>
+      BarcodeCountView.defaultRecognizedIcon;
+  BarcodeCountIcon? iconForRecognizedBarcodeNotInList(BarcodeCountView view, TrackedBarcode trackedBarcode) =>
+      BarcodeCountView.defaultNotInListIcon;
+  BarcodeCountIcon? iconForAcceptedBarcode(BarcodeCountView view, TrackedBarcode trackedBarcode) =>
+      BarcodeCountView.defaultAcceptedIcon;
+  BarcodeCountIcon? iconForRejectedBarcode(BarcodeCountView view, TrackedBarcode trackedBarcode) =>
+      BarcodeCountView.defaultRejectedIcon;
 }
 
 abstract class BarcodeCountViewUiListener {
@@ -246,6 +261,22 @@ class BarcodeCountView extends StatefulWidget implements Serializable {
 
   static Brush get defaultNotInListBrush {
     return BarcodeCountDefaults.viewDefaults.defaultNotInListBrush;
+  }
+
+  static BarcodeCountIcon get defaultRecognizedIcon {
+    return BarcodeCountDefaults.viewDefaults.defaultRecognizedIcon;
+  }
+
+  static BarcodeCountIcon get defaultNotInListIcon {
+    return BarcodeCountDefaults.viewDefaults.defaultNotInListIcon;
+  }
+
+  static BarcodeCountIcon get defaultAcceptedIcon {
+    return BarcodeCountDefaults.viewDefaults.defaultAcceptedIcon;
+  }
+
+  static BarcodeCountIcon get defaultRejectedIcon {
+    return BarcodeCountDefaults.viewDefaults.defaultRejectedIcon;
   }
 
   Brush? _recognizedBrush = BarcodeCountDefaults.viewDefaults.defaultRecognizedBrush;
@@ -1137,6 +1168,14 @@ class _BarcodeCountViewController extends BaseController {
         _handleBrushForRecognizedBarcodeEvent(event.payload);
       } else if (event.isEvent(BarcodeCountViewListener._brushForRecognizedBarcodeNotInListEventName)) {
         _handleBrushForRecognizedBarcodeNotInListEvent(event.payload);
+      } else if (event.isEvent(BarcodeCountViewExtendedListener._iconForRecognizedBarcodeEventName)) {
+        _handleIconForRecognizedBarcodeEvent(event.payload);
+      } else if (event.isEvent(BarcodeCountViewExtendedListener._iconForRecognizedBarcodeNotInListEventName)) {
+        _handleIconForRecognizedBarcodeNotInListEvent(event.payload);
+      } else if (event.isEvent(BarcodeCountViewExtendedListener._iconForAcceptedBarcodeEventName)) {
+        _handleIconForAcceptedBarcodeEvent(event.payload);
+      } else if (event.isEvent(BarcodeCountViewExtendedListener._iconForRejectedBarcodeEventName)) {
+        _handleIconForRejectedBarcodeEvent(event.payload);
       } else if (event.isEvent(BarcodeCountViewListener._didTapFilteredBarcodeEventName)) {
         view.listener
             ?.didTapFilteredBarcode(view, TrackedBarcode.fromJSON(jsonDecode(event.payload['trackedBarcode'])));
@@ -1206,6 +1245,61 @@ class _BarcodeCountViewController extends BaseController {
         viewId: view._viewId,
         trackedBarcodeId: trackedBarcode.identifier,
         brushJson: brush?.toMap() != null ? jsonEncode(brush?.toMap()) : null);
+  }
+
+  // Icon callbacks live on the opt-in BarcodeCountViewExtendedListener. When the registered
+  // listener does not implement it, the SDK default icon is returned so the native highlight is
+  // unchanged for plain BarcodeCountViewListener consumers.
+  void _handleIconForRecognizedBarcodeEvent(dynamic json) {
+    var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
+    var listener = view.listener;
+    var icon = listener is BarcodeCountViewExtendedListener
+        ? listener.iconForRecognizedBarcode(view, trackedBarcode)
+        : BarcodeCountView.defaultRecognizedIcon;
+
+    barcodeMethodHandler.finishBarcodeCountIconForRecognizedBarcode(
+        viewId: view._viewId,
+        trackedBarcodeId: trackedBarcode.identifier,
+        iconJson: icon?.toMap() != null ? jsonEncode(icon?.toMap()) : null);
+  }
+
+  void _handleIconForRecognizedBarcodeNotInListEvent(dynamic json) {
+    var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
+    var listener = view.listener;
+    var icon = listener is BarcodeCountViewExtendedListener
+        ? listener.iconForRecognizedBarcodeNotInList(view, trackedBarcode)
+        : BarcodeCountView.defaultNotInListIcon;
+
+    barcodeMethodHandler.finishBarcodeCountIconForRecognizedBarcodeNotInList(
+        viewId: view._viewId,
+        trackedBarcodeId: trackedBarcode.identifier,
+        iconJson: icon?.toMap() != null ? jsonEncode(icon?.toMap()) : null);
+  }
+
+  void _handleIconForAcceptedBarcodeEvent(dynamic json) {
+    var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
+    var listener = view.listener;
+    var icon = listener is BarcodeCountViewExtendedListener
+        ? listener.iconForAcceptedBarcode(view, trackedBarcode)
+        : BarcodeCountView.defaultAcceptedIcon;
+
+    barcodeMethodHandler.finishBarcodeCountIconForAcceptedBarcode(
+        viewId: view._viewId,
+        trackedBarcodeId: trackedBarcode.identifier,
+        iconJson: icon?.toMap() != null ? jsonEncode(icon?.toMap()) : null);
+  }
+
+  void _handleIconForRejectedBarcodeEvent(dynamic json) {
+    var trackedBarcode = TrackedBarcode.fromJSON(jsonDecode(json['trackedBarcode']));
+    var listener = view.listener;
+    var icon = listener is BarcodeCountViewExtendedListener
+        ? listener.iconForRejectedBarcode(view, trackedBarcode)
+        : BarcodeCountView.defaultRejectedIcon;
+
+    barcodeMethodHandler.finishBarcodeCountIconForRejectedBarcode(
+        viewId: view._viewId,
+        trackedBarcodeId: trackedBarcode.identifier,
+        iconJson: icon?.toMap() != null ? jsonEncode(icon?.toMap()) : null);
   }
 
   Future<void> clearHighlights() {

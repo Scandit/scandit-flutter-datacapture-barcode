@@ -18,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_feedback_delegate.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_license_info.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_listener.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_session.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_settings.dart';
@@ -81,6 +82,10 @@ class SparkScan extends DataCaptureMode {
 
   Future<void> _didChange() {
     return _controller?.updateSparkScanMode() ?? Future.value();
+  }
+
+  Future<SparkScanLicenseInfo?> getSparkScanLicenseInfo() {
+    return _controller?.getSparkScanLicenseInfo() ?? Future.value(null);
   }
 
   @override
@@ -943,6 +948,15 @@ class _SparkScanViewController extends BaseController {
     return barcodeMethodHandler
         .updateSparkScanMode(viewId: _viewId, modeJson: jsonEncode(view._sparkScan.toMap()))
         .onError(onError);
+  }
+
+  Future<SparkScanLicenseInfo?> getSparkScanLicenseInfo() async {
+    // executeBarcode returns Future<dynamic>; the generated wrapper would
+    // declare Future<String> and crash on a null result, so call it directly.
+    final result =
+        await barcodeMethodHandler.executeBarcode('SparkScanModule', 'getSparkScanLicenseInfo', {'viewId': _viewId});
+    if (result == null) return null;
+    return SparkScanLicenseInfo.fromJSON(jsonDecode(result as String) as Map<String, dynamic>);
   }
 
   @override

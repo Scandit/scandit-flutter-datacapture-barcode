@@ -11,12 +11,15 @@ import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/map_helper.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/logo_style.dart';
 
 import 'barcode_ar_annotation_trigger.dart';
 import 'barcode_ar_highlight.dart';
 import 'barcode_ar_info_annotation_anchor.dart';
 import 'barcode_ar_info_annotation_width_preset.dart';
 import 'barcode_ar_popover_annotation_anchor.dart';
+import 'barcode_ar_status_icon_annotation_anchor.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeArDefaults {
@@ -32,6 +35,10 @@ class BarcodeArDefaults {
 
   static BarcodeArViewDefaults get view => _view;
 
+  static late BarcodeArSettingsDefaults _settings;
+
+  static BarcodeArSettingsDefaults get settings => _settings;
+
   static bool _isInitialized = false;
 
   static void initializeDefaults(Map<String, dynamic> barcodeArDefaults) {
@@ -40,7 +47,21 @@ class BarcodeArDefaults {
     _feedbackDefaults =
         BarcodeArFeedbackDefaults.fromJSON(jsonDecode(barcodeArDefaults['barcodeArFeedback']) as Map<String, dynamic>);
     _view = BarcodeArViewDefaults.fromJSON(barcodeArDefaults['BarcodeArView']);
+    _settings = BarcodeArSettingsDefaults.fromJSON(barcodeArDefaults['BarcodeArSettings']);
     _isInitialized = true;
+  }
+}
+
+@immutable
+class BarcodeArSettingsDefaults {
+  final bool expectsOnlyUniqueBarcodes;
+
+  const BarcodeArSettingsDefaults({required this.expectsOnlyUniqueBarcodes});
+
+  factory BarcodeArSettingsDefaults.fromJSON(Map<String, dynamic> json) {
+    return BarcodeArSettingsDefaults(
+      expectsOnlyUniqueBarcodes: json['expectOnlyUniqueBarcodes'] as bool,
+    );
   }
 }
 
@@ -60,6 +81,10 @@ class BarcodeArViewDefaults {
   final bool defaultBarcodeArPopoverAnnotationButtonEnabled;
   final BarcodeArPopoverAnnotationAnchor defaultBarcodeArPopoverAnnotationAnchor;
   final BarcodeArAnnotationTrigger defaultStatusIconAnnotationTrigger;
+  final BarcodeArStatusIconAnnotationAnchor defaultStatusIconAnnotationAnchor;
+  final LogoStyle defaultLogoStyle;
+  final Anchor defaultLogoAnchor;
+  final PointWithUnit defaultLogoOffset;
   final bool defaultStatusIconAnnotationHasTip;
   final ScanditIcon defaultStatusIconAnnotationIcon;
   final Color defaultStatusIconAnnotationTextColor;
@@ -113,6 +138,10 @@ class BarcodeArViewDefaults {
     required this.defaultBarcodeArPopoverAnnotationButtonTextSize,
     required this.defaultBarcodeArPopoverAnnotationButtonTextColor,
     required this.defaultStatusIconAnnotationTrigger,
+    required this.defaultStatusIconAnnotationAnchor,
+    required this.defaultLogoStyle,
+    required this.defaultLogoAnchor,
+    required this.defaultLogoOffset,
     required this.defaultStatusIconAnnotationHasTip,
     required this.defaultStatusIconAnnotationIcon,
     required this.defaultStatusIconAnnotationTextColor,
@@ -168,6 +197,13 @@ class BarcodeArViewDefaults {
     var defaultStatusIconAnnotationTrigger =
         BarcodeArAnnotationTriggerSerializer.fromJSON(json['defaultStatusIconAnnotationTrigger']);
 
+    var defaultStatusIconAnnotationAnchor =
+        BarcodeArStatusIconAnnotationAnchor.fromJSON(json['defaultStatusIconAnnotationAnchor'] as String);
+
+    var defaultLogoStyle = LogoStyleDeserializer.fromJSON(json['defaultLogoStyle']);
+    var defaultLogoAnchor = AnchorDeserializer.fromJSON(json['defaultLogoAnchor']);
+    var defaultLogoOffset = PointWithUnit.fromJSON(jsonDecode(json['defaultLogoOffset']));
+
     var defaultStatusIconAnnotationIcon = ScanditIcon.fromJSON(jsonDecode(json['defaultStatusIconAnnotationIcon']));
 
     var defaultStatusIconAnnotationTextColor = parseColor(json, 'defaultStatusIconAnnotationTextColor')!;
@@ -211,6 +247,10 @@ class BarcodeArViewDefaults {
           parseDouble(json, 'defaultBarcodeArPopoverAnnotationButtonTextSize') ?? 0.0,
       defaultBarcodeArPopoverAnnotationButtonTextColor: defaultBarcodeArPopoverAnnotationButtonTextColor,
       defaultStatusIconAnnotationTrigger: defaultStatusIconAnnotationTrigger,
+      defaultStatusIconAnnotationAnchor: defaultStatusIconAnnotationAnchor,
+      defaultLogoStyle: defaultLogoStyle,
+      defaultLogoAnchor: defaultLogoAnchor,
+      defaultLogoOffset: defaultLogoOffset,
       defaultStatusIconAnnotationHasTip: json['defaultStatusIconAnnotationHasTip'] as bool,
       defaultStatusIconAnnotationIcon: defaultStatusIconAnnotationIcon,
       defaultStatusIconAnnotationTextColor: defaultStatusIconAnnotationTextColor,

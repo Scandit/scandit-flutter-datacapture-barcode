@@ -18,6 +18,7 @@ import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.da
 import 'package:scandit_flutter_datacapture_core/src/internal/helpers.dart';
 
 import 'barcode_batch_defaults.dart';
+import 'barcode_batch_license_info.dart';
 import 'barcode_batch_session.dart';
 import 'barcode_batch_settings.dart';
 
@@ -87,6 +88,10 @@ class BarcodeBatch extends DataCaptureMode {
     }
   }
 
+  Future<BarcodeBatchLicenseInfo?> getBarcodeBatchLicenseInfo() {
+    return _controller.getBarcodeBatchLicenseInfo();
+  }
+
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -148,6 +153,15 @@ class _BarcodeBatchListenerController extends BaseController {
 
   Future<void> updateMode() {
     return barcodeMethodHandler.updateBarcodeBatchMode(modeJson: jsonEncode(mode.toMap())).onError(onError);
+  }
+
+  Future<BarcodeBatchLicenseInfo?> getBarcodeBatchLicenseInfo() async {
+    // executeBarcode returns Future<dynamic>; the generated wrapper would
+    // declare Future<String> and crash on a null result, so call it directly.
+    final result = await barcodeMethodHandler
+        .executeBarcode('BarcodeBatchModule', 'getBarcodeBatchLicenseInfo', {'modeId': mode._modeId});
+    if (result == null) return null;
+    return BarcodeBatchLicenseInfo.fromJSON(jsonDecode(result as String) as Map<String, dynamic>);
   }
 
   Future<void> applyNewSettings(BarcodeBatchSettings settings) {
