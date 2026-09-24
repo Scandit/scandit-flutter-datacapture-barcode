@@ -5,7 +5,6 @@
  */
 
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_view.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_view_capture_mode.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_view_state.dart';
 
 abstract class SparkScanViewUiListener {
@@ -14,10 +13,19 @@ abstract class SparkScanViewUiListener {
   void didTapBarcodeCountButton(SparkScanView view);
 
   void didChangeViewState(SparkScanViewState newState);
-
-  void didTapLabelCaptureButton(SparkScanView view);
 }
 
-abstract class SparkScanViewUiExtendedListener extends SparkScanViewUiListener {
-  void didChangeScanningMode(SparkScanScanningMode newScanningMode);
+/// @deprecated This class is deprecated.
+/// Starting from version 8.0 of the plugins, the `didTapLabelCaptureButton`
+/// method will be included directly in [SparkScanViewUiListener].
+@Deprecated('This class is deprecated. '
+    'Starting from version 8.0 of the plugins, the didTapLabelCaptureButton '
+    'method will be included directly in SparkScanViewUiListener.')
+abstract class ExtendedSparkScanViewUiListener extends SparkScanViewUiListener {
+  /// Called when the label capture button is tapped.
+  ///
+  /// @deprecated This method will be moved to [SparkScanViewUiListener] in version 8.0.
+  /// Continue using this method for now, but prepare to migrate to [SparkScanViewUiListener]
+  /// in the next major version.
+  void didTapLabelCaptureButton(SparkScanView view);
 }

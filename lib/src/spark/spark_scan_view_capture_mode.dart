@@ -44,7 +44,6 @@ abstract class SparkScanScanningMode extends Serializable {
   }
 }
 
-@Deprecated('Use SparkScanSettings.selectionMode = SelectionMode.on instead. Will be removed in 9.0.')
 class SparkScanScanningModeTarget extends SparkScanScanningMode {
   SparkScanScanningModeTarget.fromPreviewBehavior(
       SparkScanScanningBehavior scanningBehavior, SparkScanPreviewBehavior previewBehavior)
@@ -59,7 +58,6 @@ class SparkScanScanningModeTarget extends SparkScanScanningMode {
   }
 }
 
-@Deprecated('Use SparkScanSettings.selectionMode = SelectionMode.off instead. Will be removed in 9.0.')
 class SparkScanScanningModeDefault extends SparkScanScanningMode {
   SparkScanScanningModeDefault.fromPreviewBehavior(
       SparkScanScanningBehavior scanningBehavior, SparkScanPreviewBehavior previewBehavior)
@@ -79,12 +77,10 @@ extension SparkScanScanningModeSerializer on SparkScanScanningMode {
     var scanningModeType = json['type'];
     switch (scanningModeType) {
       case 'default':
-        // ignore: deprecated_member_use_from_same_package
         return SparkScanScanningModeDefault.fromPreviewBehavior(
             SparkScanScanningBehaviorDeserializer.fromJSON(json['settings']['scanningBehavior'].toString()),
             SparkScanPreviewBehaviorDeserializer.fromJSON(json['settings']['previewBehavior'].toString()));
       case 'target':
-        // ignore: deprecated_member_use_from_same_package
         return SparkScanScanningModeTarget.fromPreviewBehavior(
             SparkScanScanningBehaviorDeserializer.fromJSON(json['settings']['scanningBehavior'].toString()),
             SparkScanPreviewBehaviorDeserializer.fromJSON(json['settings']['previewBehavior'].toString()));

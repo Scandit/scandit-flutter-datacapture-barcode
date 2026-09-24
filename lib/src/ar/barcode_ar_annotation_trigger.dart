@@ -6,8 +6,7 @@
 
 enum BarcodeArAnnotationTrigger {
   highlightTap('highlightTap'),
-  highlightTapAndBarcodeScan('highlightTapAndBarcodeScan'),
-  barcodeScan('barcodeScan');
+  highlightTapAndBarcodeScan('highlightTapAndBarcodeScan');
 
   const BarcodeArAnnotationTrigger(this._name);
 

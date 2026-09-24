@@ -9,6 +9,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.scandit.datacapture.flutter.barcode.ar.ui.BarcodeArPlatformViewFactory;
+import com.scandit.datacapture.flutter.barcode.capture.BarcodeCaptureMethodHandler;
+import com.scandit.datacapture.flutter.barcode.ar.BarcodeArMethodHandler;
+import com.scandit.datacapture.flutter.barcode.count.BarcodeCountMethodHandler;
+import com.scandit.datacapture.flutter.barcode.find.BarcodeFindMethodHandler;
+import com.scandit.datacapture.flutter.barcode.generator.BarcodeGeneratorMethodHandler;
+import com.scandit.datacapture.flutter.barcode.pick.BarcodePickMethodHandler;
+import com.scandit.datacapture.flutter.barcode.selection.BarcodeSelectionMethodHandler;
+import com.scandit.datacapture.flutter.barcode.spark.SparkScanMethodHandler;
+import com.scandit.datacapture.flutter.barcode.batch.BarcodeBatchMethodHandler;
 import com.scandit.datacapture.flutter.barcode.count.ui.BarcodeCountPlatformViewFactory;
 import com.scandit.datacapture.flutter.barcode.find.ui.BarcodeFindPlatformViewFactory;
 import com.scandit.datacapture.flutter.barcode.pick.ui.BarcodePickPlatformViewFactory;
@@ -23,6 +32,9 @@ import com.scandit.datacapture.frameworks.barcode.find.BarcodeFindModule;
 import com.scandit.datacapture.frameworks.barcode.generator.BarcodeGeneratorModule;
 import com.scandit.datacapture.frameworks.barcode.pick.BarcodePickModule;
 import com.scandit.datacapture.frameworks.barcode.selection.BarcodeSelectionModule;
+import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionAimedBrushProvider;
+import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionListener;
+import com.scandit.datacapture.frameworks.barcode.selection.listeners.FrameworksBarcodeSelectionTrackedBrushProvider;
 import com.scandit.datacapture.frameworks.barcode.spark.SparkScanModule;
 import com.scandit.datacapture.frameworks.barcode.batch.BarcodeBatchModule;
 import com.scandit.datacapture.frameworks.core.FrameworkModule;
@@ -36,21 +48,21 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodChannel;
 
 public class ScanditFlutterDataCaptureBarcodeProxyPlugin extends BaseFlutterPlugin implements FlutterPlugin, ActivityAware {
-    private final static FlutterEmitter barcodeBatchEmitter = new FlutterEmitter("com.scandit.datacapture.barcode.batch/event_channel");
+    private final static FlutterEmitter barcodeBatchEmitter = new FlutterEmitter(BarcodeBatchMethodHandler.EVENT_CHANNEL_NAME);
 
-    private final static FlutterEmitter sparkScanEmitter = new FlutterEmitter("com.scandit.datacapture.barcode.spark/event_channel");
+    private final static FlutterEmitter sparkScanEmitter = new FlutterEmitter(SparkScanMethodHandler.EVENT_CHANNEL_NAME);
 
-    private final static FlutterEmitter barcodeSelectionEmitter = new FlutterEmitter("com.scandit.datacapture.barcode.selection/event_channel");
+    private final static FlutterEmitter barcodeSelectionEmitter = new FlutterEmitter(BarcodeSelectionMethodHandler.EVENT_CHANNEL_NAME);
 
-    private final static FlutterEmitter barcodeCountEmitter = new FlutterEmitter("com.scandit.datacapture.barcode.count/event_channel");
+    private final static FlutterEmitter barcodeCountEmitter = new FlutterEmitter(BarcodeCountMethodHandler.EVENT_CHANNEL_NAME);
 
-    private final static FlutterEmitter barcodeCaptureEmitter = new FlutterEmitter("com.scandit.datacapture.barcode.capture/event_channel");
+    private final static FlutterEmitter barcodeCaptureEmitter = new FlutterEmitter(BarcodeCaptureMethodHandler.EVENT_CHANNEL_NAME);
 
-    private final static FlutterEmitter barcodeFindEmitter = new FlutterEmitter("com.scandit.datacapture.barcode.find/event_channel");
+    private final static FlutterEmitter barcodeFindEmitter = new FlutterEmitter(BarcodeFindMethodHandler.EVENT_CHANNEL_NAME);
 
-    private final static FlutterEmitter barcodePickEmitter = new FlutterEmitter("com.scandit.datacapture.barcode.pick/event_channel");
+    private final static FlutterEmitter barcodePickEmitter = new FlutterEmitter(BarcodePickMethodHandler.EVENT_CHANNEL_NAME);
 
-    private final static FlutterEmitter barcodeArEmitter = new FlutterEmitter("com.scandit.datacapture.barcode.ar/event_channel");
+    private final static FlutterEmitter barcodeArEmitter = new FlutterEmitter(BarcodeArMethodHandler.EVENT_CHANNEL_NAME);
 
     private static final AtomicInteger activePluginInstances = new AtomicInteger(0);
 
@@ -128,6 +140,75 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin extends BaseFlutterPlug
                 new BarcodeMethodHandler(serviceLocator)
         );
         registerChannel(barcodeMethodChannel);
+
+        // Barcode capture method channel
+        MethodChannel barcodeCaptureMethodChannel = createChannel(binding,
+                BarcodeCaptureMethodHandler.METHOD_CHANNEL_NAME
+        );
+        barcodeCaptureMethodChannel.setMethodCallHandler(
+                new BarcodeCaptureMethodHandler(serviceLocator)
+        );
+        registerChannel(barcodeCaptureMethodChannel);
+
+        // Barcode selection method channel
+        MethodChannel barcodeSelectionMethodChannel = createChannel(binding,
+                BarcodeSelectionMethodHandler.METHOD_CHANNEL_NAME
+        );
+        barcodeSelectionMethodChannel.setMethodCallHandler(new BarcodeSelectionMethodHandler(serviceLocator));
+        registerChannel(barcodeSelectionMethodChannel);
+
+        // Barcode count method channel
+        MethodChannel barcodeCountMethodChannel = createChannel(binding,
+                BarcodeCountMethodHandler.METHOD_CHANNEL_NAME
+        );
+        barcodeCountMethodChannel.setMethodCallHandler(new BarcodeCountMethodHandler(serviceLocator));
+        registerChannel(barcodeCountMethodChannel);
+
+        // Barcode batch method channel
+        MethodChannel barcodeBatchMethodChannel = createChannel(binding,
+                BarcodeBatchMethodHandler.METHOD_CHANNEL_NAME
+        );
+        barcodeBatchMethodChannel.setMethodCallHandler(
+                new BarcodeBatchMethodHandler(serviceLocator)
+        );
+        registerChannel(barcodeBatchMethodChannel);
+
+        // SparkScan method channel
+        MethodChannel sparkScanMethodChannel = createChannel(binding,
+                SparkScanMethodHandler.METHOD_CHANNEL_NAME
+        );
+        sparkScanMethodChannel.setMethodCallHandler(new SparkScanMethodHandler(serviceLocator));
+        registerChannel(sparkScanMethodChannel);
+
+        // Barcode find method channel
+        MethodChannel barcodeFindMethodChannel = createChannel(binding,
+                BarcodeFindMethodHandler.METHOD_CHANNEL_NAME
+        );
+        barcodeFindMethodChannel.setMethodCallHandler(new BarcodeFindMethodHandler(serviceLocator));
+        registerChannel(barcodeFindMethodChannel);
+
+        // Barcode Pick method channel
+        MethodChannel barcodePickMethodChannel = createChannel(binding,
+                BarcodePickMethodHandler.METHOD_CHANNEL_NAME
+        );
+        barcodePickMethodChannel.setMethodCallHandler(new BarcodePickMethodHandler(serviceLocator));
+        registerChannel(barcodePickMethodChannel);
+
+        // Barcode check method channel
+        MethodChannel barcodeCheckMethodChannel = createChannel(
+                binding,
+                BarcodeArMethodHandler.METHOD_CHANNEL_NAME
+        );
+        barcodeCheckMethodChannel.setMethodCallHandler(new BarcodeArMethodHandler(serviceLocator));
+        registerChannel(barcodeCheckMethodChannel);
+
+        // Barcode generator
+        MethodChannel barcodeGeneratorMethodChannel = createChannel(
+                binding,
+                BarcodeGeneratorMethodHandler.METHOD_CHANNEL_NAME
+        );
+        barcodeGeneratorMethodChannel.setMethodCallHandler(new BarcodeGeneratorMethodHandler(serviceLocator));
+        registerChannel(barcodeGeneratorMethodChannel);
     }
 
     protected void setupPlatformViewRegistry(FlutterPluginBinding binding, ServiceLocator<FrameworkModule> serviceLocator) {
@@ -214,7 +295,7 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin extends BaseFlutterPlug
         BarcodeBatchModule barcodeBatchModule = resolveModule(BarcodeBatchModule.class);
         if (barcodeBatchModule != null) return;
 
-        barcodeBatchModule = BarcodeBatchModule.create(barcodeBatchEmitter, null);
+        barcodeBatchModule = BarcodeBatchModule.create(barcodeBatchEmitter);
         barcodeBatchModule.onCreate(binding.getApplicationContext());
 
         registerModule(barcodeBatchModule);
@@ -234,7 +315,11 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin extends BaseFlutterPlug
         BarcodeSelectionModule barcodeSelectionModule = resolveModule(BarcodeSelectionModule.class);
         if (barcodeSelectionModule != null) return;
 
-        barcodeSelectionModule = BarcodeSelectionModule.create(barcodeSelectionEmitter);
+        barcodeSelectionModule = BarcodeSelectionModule.create(
+                FrameworksBarcodeSelectionListener.create(barcodeSelectionEmitter),
+                new FrameworksBarcodeSelectionAimedBrushProvider(barcodeSelectionEmitter),
+                new FrameworksBarcodeSelectionTrackedBrushProvider(barcodeSelectionEmitter)
+        );
         barcodeSelectionModule.onCreate(binding.getApplicationContext());
 
         registerModule(barcodeSelectionModule);

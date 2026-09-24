@@ -11,11 +11,7 @@ class TrackedBarcode {
   final Barcode _barcode;
   Barcode get barcode => _barcode;
 
-  // Not final: patched in place by updateLocationFromJSON when a repeat advanced-overlay event
-  // carries only {identifier, location} for a TrackedBarcode whose full JSON has already been
-  // emitted once, so the same TrackedBarcode instance a widget builder already holds can be
-  // refreshed to the current-frame location.
-  Quadrilateral _location;
+  final Quadrilateral _location;
   Quadrilateral get location => _location;
 
   final int _identifier;
@@ -31,12 +27,5 @@ class TrackedBarcode {
     var identifier = int.parse(json['identifier'] as String);
 
     return TrackedBarcode._(barcode, location, identifier, sessionFrameSequenceId);
-  }
-
-  /// Patches this instance's location in place from a repeat advanced-overlay event payload.
-  /// Keeps the same TrackedBarcode object identity that callers may already hold (e.g. a
-  /// previously-built overlay widget), refreshed to the current-frame location.
-  void updateLocationFromJSON(Map<String, dynamic> json) {
-    _location = Quadrilateral.fromJSON(json);
   }
 }

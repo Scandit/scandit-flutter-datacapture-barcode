@@ -6,7 +6,6 @@
 
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import '../barcode.dart';
@@ -69,17 +68,10 @@ class BarcodeArCircleHighlight extends BarcodeArHighlight {
     controller?.updateHighlight(this);
   }
 
-  bool _isPulsing;
-  bool get isPulsing => _isPulsing;
-  set isPulsing(bool newValue) {
-    _isPulsing = newValue;
-    controller?.updateHighlight(this);
-  }
-
   final Barcode _barcode;
   final BarcodeArCircleHighlightPreset _preset;
 
-  BarcodeArCircleHighlight._(this._barcode, this._preset, this._brush, this._icon, this._size, this._isPulsing)
+  BarcodeArCircleHighlight._(this._barcode, this._preset, this._brush, this._icon, this._size)
       : super._('barcodeArCircleHighlight');
 
   BarcodeArCircleHighlight(Barcode barcode, BarcodeArCircleHighlightPreset preset)
@@ -88,8 +80,7 @@ class BarcodeArCircleHighlight extends BarcodeArHighlight {
             preset,
             BarcodeArDefaults.view.circleHighlightPresets.get(preset).defaultBrush,
             BarcodeArDefaults.view.defaultHighlightIcon,
-            BarcodeArDefaults.view.circleHighlightPresets.get(preset).defaultSize,
-            BarcodeArDefaults.view.defaultHighlightIsPulsing);
+            BarcodeArDefaults.view.circleHighlightPresets.get(preset).defaultSize);
 
   Barcode get barcode => _barcode;
 
@@ -100,7 +91,6 @@ class BarcodeArCircleHighlight extends BarcodeArHighlight {
     json['brush'] = jsonEncode(brush.toMap());
     json['icon'] = icon != null ? jsonEncode(icon!.toMap()) : null;
     json['size'] = size;
-    json['isPulsing'] = isPulsing;
     return json;
   }
 }
@@ -135,25 +125,6 @@ class BarcodeArRectangleHighlight extends BarcodeArHighlight {
     var json = super.toMap();
     json['brush'] = jsonEncode(brush.toMap());
     json['icon'] = icon != null ? jsonEncode(icon!.toMap()) : null;
-    return json;
-  }
-}
-
-class BarcodeArCustomHighlight extends BarcodeArHighlight {
-  final Widget _child;
-  final Barcode _barcode;
-
-  BarcodeArCustomHighlight._(this._barcode, this._child) : super._('barcodeArCustomHighlight');
-
-  BarcodeArCustomHighlight({required Barcode barcode, required Widget child}) : this._(barcode, child);
-
-  Barcode get barcode => _barcode;
-
-  Widget get child => _child;
-
-  @override
-  Map<String, dynamic> toMap() {
-    var json = super.toMap();
     return json;
   }
 }

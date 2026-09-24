@@ -41,8 +41,6 @@ class BarcodePickViewSettings extends Serializable {
   int? hardwareTriggerKeyCode = BarcodePickDefaults.viewSettingsDefaults.hardwareTriggerKeyCode;
   BarcodeFilterHighlightSettings? filterHighlightSettings =
       BarcodePickDefaults.viewSettingsDefaults.filterHighlightSettings;
-  LogoStyle logoStyle = BarcodePickDefaults.viewSettingsDefaults.logoStyle;
-  Anchor logoAnchor = BarcodePickDefaults.viewSettingsDefaults.logoAnchor;
 
   @override
   Map<String, dynamic> toMap() {
@@ -70,8 +68,6 @@ class BarcodePickViewSettings extends Serializable {
       'hardwareTriggerKeyCode': hardwareTriggerKeyCode,
       'filterHighlightSettings': filterHighlightSettings?.toMap(),
       'uiButtonsOffset': jsonEncodeOrNull(uiButtonsOffset),
-      'logoStyle': logoStyle.toString(),
-      'logoAnchor': logoAnchor.toString(),
     };
   }
 }

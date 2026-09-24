@@ -18,7 +18,6 @@ class SparkScanViewSettings extends Serializable {
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.triggerButtonCollapseTimeout;
 
   TorchState defaultTorchState = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.defaultTorchState;
-  @Deprecated('Use SparkScanSettings.selectionMode instead. Will be removed in 9.0.')
   SparkScanScanningMode defaultScanningMode =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.defaultScanningMode;
 
@@ -30,6 +29,39 @@ class SparkScanViewSettings extends Serializable {
   bool hardwareTriggerEnabled = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.hardwareTriggerEnabled;
   int? hardwareTriggerKeyCode = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.hardwareTriggerKeyCode;
   bool visualFeedbackEnabled = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.visualFeedbackEnabled;
+
+  bool _ignoreDragLimits = true;
+
+  @Deprecated('There is no drag limit anymore.')
+  bool get ignoreDragLimits => _ignoreDragLimits;
+
+  @Deprecated('There is no drag limit anymore.')
+  set ignoreDragLimits(bool newValue) {
+    // ignore set
+    _ignoreDragLimits = true;
+  }
+
+  double _targetZoomFactorOut = 0.0;
+
+  @Deprecated('Use zoomFactorOut instead')
+  double get targetZoomFactorOut => _targetZoomFactorOut;
+
+  @Deprecated('Use zoomFactorOut instead')
+  set targetZoomFactorOut(double newValue) {
+    // ignore set
+    _targetZoomFactorOut = 0.0;
+  }
+
+  double _targetZoomFactorIn = 0.0;
+
+  @Deprecated('Use zoomFactorIn instead')
+  double get targetZoomFactorIn => _targetZoomFactorIn;
+
+  @Deprecated('Use zoomFactorIn instead')
+  set targetZoomFactorIn(double newValue) {
+    // ignore set
+    _targetZoomFactorIn = 0.0;
+  }
 
   double zoomFactorIn = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.zoomFactorIn;
 
@@ -47,22 +79,11 @@ class SparkScanViewSettings extends Serializable {
   SparkScanMiniPreviewSize defaultMiniPreviewSize =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.defaultMiniPreviewSize;
 
-  Brush? selectionModeCandidateBrush;
-
-  @Deprecated('Use selectionModeCandidateBrush instead. Will be removed in 9.0.')
-  Brush? get smartSelectionCandidateBrush => selectionModeCandidateBrush;
-
-  @Deprecated('Use selectionModeCandidateBrush instead. Will be removed in 9.0.')
-  set smartSelectionCandidateBrush(Brush? value) => selectionModeCandidateBrush = value;
-
-  bool periscopeModeEnabled = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.periscopeModeEnabled;
-
   @override
   Map<String, dynamic> toMap() {
     return {
       'triggerButtonCollapseTimeout': triggerButtonCollapseTimeout.inSeconds,
       'defaultTorchState': defaultTorchState.toString(),
-      // ignore: deprecated_member_use_from_same_package
       'defaultScanningMode': defaultScanningMode.toMap(),
       'holdToScanEnabled': holdToScanEnabled,
       'soundEnabled': soundEnabled,
@@ -76,8 +97,6 @@ class SparkScanViewSettings extends Serializable {
       'shouldShowOnTopAlways': shouldShowOnTopAlways,
       'defaultCameraPosition': defaultCameraPosition.toString(),
       'defaultMiniPreviewSize': defaultMiniPreviewSize.toString(),
-      'selectionModeCandidateBrush': selectionModeCandidateBrush?.toMap(),
-      'periscopeModeEnabled': periscopeModeEnabled,
     };
   }
 }

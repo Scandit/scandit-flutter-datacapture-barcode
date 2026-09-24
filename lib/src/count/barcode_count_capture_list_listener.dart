@@ -10,7 +10,3 @@ import 'package:scandit_flutter_datacapture_barcode/src/count/barcode_count_view
 abstract class BarcodeCountCaptureListListener {
   void didUpdateSession(BarcodeCountCaptureList barcodeCountCaptureList, BarcodeCountCaptureListSession session);
 }
-
-abstract class BarcodeCountCaptureListExtendedListener extends BarcodeCountCaptureListListener {
-  void didCompleteCaptureList(BarcodeCountCaptureList barcodeCountCaptureList, BarcodeCountCaptureListSession session);
-}
