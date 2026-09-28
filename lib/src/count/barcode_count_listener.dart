@@ -10,5 +10,11 @@ import 'package:scandit_flutter_datacapture_barcode/src/count/barcode_count_view
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 abstract class BarcodeCountListener {
-  Future<void> didScan(BarcodeCount barcodeCount, BarcodeCountSession session, Future<FrameData> getFrameData());
+  Future<void> didScan(
+      BarcodeCount barcodeCount, BarcodeCountSession session, Future<FrameData> Function() getFrameData);
+}
+
+abstract class BarcodeCountExtendedListener extends BarcodeCountListener {
+  void didUpdateSession(
+      BarcodeCount barcodeCount, BarcodeCountSession session, Future<FrameData> Function() getFrameData);
 }

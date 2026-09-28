@@ -4,19 +4,12 @@
  * Copyright (C) 2024- Scandit AG. All rights reserved.
  */
 
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
-import 'dart:convert';
-
 import 'barcode_ar_defaults.dart';
-import 'barcode_ar_function_names.dart';
 
-class BarcodeArFeedback implements Serializable {
-  late _BarcodeArFeedbackController _controller;
-
-  BarcodeArFeedback() {
-    _controller = _BarcodeArFeedbackController(this);
-  }
+class BarcodeArFeedback extends ChangeNotifier implements Serializable {
+  BarcodeArFeedback();
 
   Feedback _scanned = BarcodeArDefaults.feedbackDefaults.scanned;
 
@@ -39,22 +32,11 @@ class BarcodeArFeedback implements Serializable {
   static BarcodeArFeedback get defaultFeedback => BarcodeArFeedback();
 
   void _update() {
-    _controller.updateFeedback();
+    notifyListeners();
   }
 
   @override
   Map<String, dynamic> toMap() {
     return {'scanned': scanned.toMap(), 'tapped': tapped.toMap()};
-  }
-}
-
-class _BarcodeArFeedbackController {
-  final MethodChannel _methodChannel = const MethodChannel(BarcodeArFunctionNames.methodsChannelName);
-  final BarcodeArFeedback _feedback;
-
-  _BarcodeArFeedbackController(this._feedback);
-
-  Future<void> updateFeedback() {
-    return _methodChannel.invokeMethod(BarcodeArFunctionNames.updateFeedback, jsonEncode(_feedback.toMap()));
   }
 }

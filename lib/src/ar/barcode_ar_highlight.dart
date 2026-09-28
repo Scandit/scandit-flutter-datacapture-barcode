@@ -6,6 +6,7 @@
 
 import 'dart:convert';
 
+import 'package:flutter/widgets.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import '../barcode.dart';
@@ -125,6 +126,25 @@ class BarcodeArRectangleHighlight extends BarcodeArHighlight {
     var json = super.toMap();
     json['brush'] = jsonEncode(brush.toMap());
     json['icon'] = icon != null ? jsonEncode(icon!.toMap()) : null;
+    return json;
+  }
+}
+
+class BarcodeArCustomHighlight extends BarcodeArHighlight {
+  final Widget _child;
+  final Barcode _barcode;
+
+  BarcodeArCustomHighlight._(this._barcode, this._child) : super._('barcodeArCustomHighlight');
+
+  BarcodeArCustomHighlight({required Barcode barcode, required Widget child}) : this._(barcode, child);
+
+  Barcode get barcode => _barcode;
+
+  Widget get child => _child;
+
+  @override
+  Map<String, dynamic> toMap() {
+    var json = super.toMap();
     return json;
   }
 }

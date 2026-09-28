@@ -49,7 +49,7 @@ public class FlutterBarcodePickView extends FlutterBasePlatformView {
 
     @Override
     public void dispose() {
-        barcodePickModule.releasePickView((int)this.getTag(), new FlutterLogInsteadOfResult());
+        barcodePickModule.pickViewRelease((int)this.getTag(), new FlutterLogInsteadOfResult());
         removeAllViews();
         super.dispose();
     }

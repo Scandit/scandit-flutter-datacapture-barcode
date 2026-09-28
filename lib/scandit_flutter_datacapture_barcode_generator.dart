@@ -4,6 +4,7 @@
  * Copyright (C) 2025- Scandit AG. All rights reserved.
  */
 
+// ignore: unnecessary_library_name
 library scandit_flutter_datacapture_barcode_generator;
 
 export 'src/generator/barcode_generator.dart'
@@ -16,6 +17,9 @@ export 'src/generator/barcode_generator.dart'
         DataMatrixBarcodeGeneratorBuilder,
         Ean13BarcodeGeneratorBuilder,
         InterleavedTwoOfFiveBarcodeGeneratorBuilder,
+        Pdf417BarcodeGeneratorBuilder,
+        Pdf417CompactionMode,
+        Pdf417Dimensions,
         QrCodeBarcodeGeneratorBuilder,
         UpcaBarcodeGeneratorBuilder;
 export 'src/generator/qr_code_crrection_level.dart' show QrCodeErrorCorrectionLevel;

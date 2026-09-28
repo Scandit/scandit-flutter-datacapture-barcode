@@ -11,6 +11,7 @@ import '../symbology.dart';
 import '../symbology_settings.dart';
 import 'barcode_capture_defaults.dart';
 import '../composite_type.dart';
+import '../aruco_dictionary.dart';
 
 class BarcodeCaptureSettings implements Serializable {
   BarcodeCaptureSettings();
@@ -23,17 +24,11 @@ class BarcodeCaptureSettings implements Serializable {
 
   final Map<String, SymbologySettings> _symbologies = {};
 
+  ArucoDictionary? _arucoDictionary;
+
   Set<Symbology> get enabledSymbologies => _enabledSymbologies();
 
   Set<CompositeType> enabledCompositeTypes = {};
-
-  @Deprecated('Use batterySaving instead.')
-  BatterySavingMode get batterySavingMode => batterySaving;
-
-  @Deprecated('Use batterySaving instead.')
-  set batterySavingMode(BatterySavingMode newValue) {
-    batterySaving = newValue;
-  }
 
   BatterySavingMode batterySaving = BarcodeCaptureDefaults.barcodeCaptureSettingsDefaults.batterySaving;
 
@@ -49,6 +44,7 @@ class BarcodeCaptureSettings implements Serializable {
       'enabledCompositeTypes': enabledCompositeTypes.map((e) => e.toString()).toList(),
       'batterySaving': batterySaving.toString(),
       'scanIntention': scanIntention.toString(),
+      'arucoDictionary': _arucoDictionary?.toMap()
     };
   }
 
@@ -86,10 +82,15 @@ class BarcodeCaptureSettings implements Serializable {
 
   void enableSymbologiesForCompositeTypes(Set<CompositeType> compositeTypes) {
     for (var compositeType in compositeTypes) {
-      var symbologies = BarcodeDefaults.compositeTypeDescriptionsDefaults
-          .firstWhere((element) => element.types.contains(compositeType));
+      var symbologies = BarcodeDefaults.compositeTypeDescriptionsDefaults.firstWhere(
+        (element) => element.types.contains(compositeType),
+      );
 
       enableSymbologies(symbologies.symbologies);
     }
+  }
+
+  void setArucoDictionary(ArucoDictionary dictionary) {
+    _arucoDictionary = dictionary;
   }
 }

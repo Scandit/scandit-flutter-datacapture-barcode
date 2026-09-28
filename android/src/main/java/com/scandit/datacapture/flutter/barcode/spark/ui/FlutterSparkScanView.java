@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import com.scandit.datacapture.flutter.core.ui.FlutterBasePlatformView;
 import com.scandit.datacapture.flutter.core.utils.FlutterLogInsteadOfResult;
 import com.scandit.datacapture.frameworks.barcode.spark.SparkScanModule;
+import com.scandit.datacapture.frameworks.core.result.NoopFrameworksResult;
 
 import io.flutter.embedding.android.FlutterView;
 
@@ -58,7 +59,7 @@ public class FlutterSparkScanView extends FlutterBasePlatformView {
 
     @Override
     public void dispose() {
-        sparkScanModule.disposeView(this.sparkScanViewId);
+        sparkScanModule.disposeSparkScanView(this.sparkScanViewId, new NoopFrameworksResult());
         super.dispose();
     }
 

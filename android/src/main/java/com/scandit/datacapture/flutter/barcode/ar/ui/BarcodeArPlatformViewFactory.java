@@ -45,7 +45,7 @@ public class BarcodeArPlatformViewFactory extends PlatformViewFactory {
             throw new IllegalArgumentException("Unable to create the BarcodeArView without the json.");
         }
 
-        BarcodeArModule module = (BarcodeArModule) this.serviceLocator.resolve(BarcodeArModule.class.getName());
+        BarcodeArModule module = (BarcodeArModule) this.serviceLocator.resolve(BarcodeArModule.class.getSimpleName());
         if (module == null) {
             throw new IllegalArgumentException("Unable to create the BarcodeFindView. Barcode Find module not initialized.");
         }

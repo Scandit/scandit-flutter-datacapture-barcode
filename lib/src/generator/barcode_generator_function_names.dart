@@ -5,10 +5,8 @@
  */
 
 abstract class BarcodeGeneratorFunctionNames {
-  static const String generateFromData = 'generateFromBytesToBytes';
-  static const String generateFromText = 'generateToBytes';
-  static const String dispose = 'disposeGenerator';
-  static const String create = 'createGenerator';
-
-  static const String methodsChannelName = 'com.scandit.datacapture.barcode.generator/method_channel';
+  static const String generateFromData = 'generateFromBase64EncodedDataToBytes';
+  static const String generateFromText = 'generateFromStringToBytes';
+  static const String dispose = 'disposeBarcodeGenerator';
+  static const String create = 'createBarcodeGenerator';
 }
