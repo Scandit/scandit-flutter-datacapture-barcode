@@ -11,6 +11,7 @@ export 'src/spark/spark_scan_session.dart' show SparkScanSession;
 export 'src/spark/spark_scan_settings.dart' show SparkScanSettings;
 
 export 'src/spark/spark_scan_view.dart' show SparkScanView, SparkScan;
+export 'src/spark/spark_scan_license_info.dart' show SparkScanLicenseInfo;
 export 'src/spark/spark_scan_listener.dart' show SparkScanListener;
 export 'src/spark/spark_scan_view_ui_listener.dart' show SparkScanViewUiListener, SparkScanViewUiExtendedListener;
 export 'src/spark/spark_scan_feedback_delegate.dart' show SparkScanFeedbackDelegate, SparkScanFeedbackExtendedDelegate;

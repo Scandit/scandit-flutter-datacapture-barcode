@@ -18,6 +18,7 @@ import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.d
 
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/pick/barcode_pick_action.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/pick/barcode_pick_action_listener.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/pick/internal/barcode_pick_consts.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/pick/barcode_pick_defaults.dart';
@@ -134,6 +135,22 @@ class BarcodePick implements Serializable {
     if (_listeners.isEmpty) {
       _controller?.unsubscribeBarcodePickListener();
     }
+  }
+
+  Future<BarcodePickAction> selectItemWithData(String data) async {
+    final controller = _controller;
+    if (controller == null) {
+      return BarcodePickAction.none;
+    }
+    return controller.selectItemWithData(data);
+  }
+
+  Future<void> confirmActionForItemWithData(String data) async {
+    return _controller?.confirmActionForItemWithData(data) ?? Future.value();
+  }
+
+  Future<void> cancelActionForItemWithData(String data) async {
+    return _controller?.cancelActionForItemWithData(data) ?? Future.value();
   }
 
   @override
@@ -478,6 +495,19 @@ class _BarcodePickViewController extends BaseController {
 
   Future<void> release() {
     return barcodeMethodHandler.pickViewRelease(viewId: view._viewId);
+  }
+
+  Future<BarcodePickAction> selectItemWithData(String data) async {
+    final result = await barcodeMethodHandler.selectItemWithData(viewId: view._viewId, data: data);
+    return BarcodePickAction.fromJSON(result);
+  }
+
+  Future<void> confirmActionForItemWithData(String data) {
+    return barcodeMethodHandler.confirmActionForItemWithData(viewId: view._viewId, data: data);
+  }
+
+  Future<void> cancelActionForItemWithData(String data) {
+    return barcodeMethodHandler.cancelActionForItemWithData(viewId: view._viewId, data: data);
   }
 
   void addRemoveUiListener(bool add) {

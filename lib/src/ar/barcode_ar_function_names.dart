@@ -7,6 +7,7 @@
 abstract class BarcodeArFunctionNames {
   static const String highlightForBarcodeEvent = 'BarcodeArHighlightProvider.highlightForBarcode';
   static const String annotationForBarcodeEvent = 'BarcodeArAnnotationProvider.annotationForBarcode';
+  static const String filterBarcodesEvent = 'BarcodeArFilter.filterBarcodes';
 
   static const String didTapPopoverEvent = 'BarcodeArPopoverAnnotationListener.didTapPopover';
   static const String didTapPopoverButtonEvent = 'BarcodeArPopoverAnnotationListener.didTapPopoverButton';
@@ -29,4 +30,6 @@ abstract class BarcodeArFunctionNames {
   static const String didDisposeBarcodeArCustomAnnotation = 'BarcodeArCustomAnnotation.dispose';
   static const String showBarcodeArCustomAnnotation = 'BarcodeArCustomAnnotation.show';
   static const String hideBarcodeArCustomAnnotation = 'BarcodeArCustomAnnotation.hide';
+
+  static const String barcodeArAugmentationsEvicted = 'BarcodeArAugmentations.evicted';
 }

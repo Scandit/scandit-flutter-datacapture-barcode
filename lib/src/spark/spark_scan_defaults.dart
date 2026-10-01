@@ -52,6 +52,7 @@ class SparkScanViewDefaults {
   final bool barcodeFindButtonVisible;
   final bool labelCaptureButtonVisible;
   final bool targetModeButtonVisible;
+  final bool selectionModeButtonVisible;
   final Color? toolbarBackgroundColor;
   final Color? toolbarIconActiveTintColor;
   final Color? toolbarIconInactiveTintColor;
@@ -80,6 +81,7 @@ class SparkScanViewDefaults {
       this.barcodeFindButtonVisible,
       this.labelCaptureButtonVisible,
       this.targetModeButtonVisible,
+      this.selectionModeButtonVisible,
       this.toolbarBackgroundColor,
       this.toolbarIconActiveTintColor,
       this.toolbarIconInactiveTintColor,
@@ -104,6 +106,7 @@ class SparkScanViewDefaults {
     final barcodeFindButtonVisible = json['barcodeFindButtonVisible'] as bool;
     final labelCaptureButtonVisible = json['labelCaptureButtonVisible'] as bool;
     final targetModeButtonVisible = json['targetModeButtonVisible'] as bool;
+    final selectionModeButtonVisible = json['selectionModeButtonVisible'] as bool;
 
     Color? toolbarBackgroundColor;
     if (json['toolbarBackgroundColor'] != null) {
@@ -164,6 +167,7 @@ class SparkScanViewDefaults {
         barcodeFindButtonVisible,
         labelCaptureButtonVisible,
         targetModeButtonVisible,
+        selectionModeButtonVisible,
         toolbarBackgroundColor,
         toolbarIconActiveTintColor,
         toolbarIconInactiveTintColor,
@@ -189,6 +193,8 @@ class SparkScanToastSettingsDefaults {
   final Color? toastTextColor;
   final String? targetModeEnabledMessage;
   final String? targetModeDisabledMessage;
+  final String? selectionModeOnMessage;
+  final String? selectionModeOffMessage;
   final String? continuousModeEnabledMessage;
   final String? continuousModeDisabledMessage;
   final String? scanPausedMessage;
@@ -205,6 +211,8 @@ class SparkScanToastSettingsDefaults {
       this.toastTextColor,
       this.targetModeEnabledMessage,
       this.targetModeDisabledMessage,
+      this.selectionModeOnMessage,
+      this.selectionModeOffMessage,
       this.continuousModeEnabledMessage,
       this.continuousModeDisabledMessage,
       this.scanPausedMessage,
@@ -230,6 +238,8 @@ class SparkScanToastSettingsDefaults {
 
     final targetModeEnabledMessage = json['targetModeEnabledMessage'] as String?;
     final targetModeDisabledMessage = json['targetModeDisabledMessage'] as String?;
+    final selectionModeOnMessage = json['selectionModeOnMessage'] as String?;
+    final selectionModeOffMessage = json['selectionModeOffMessage'] as String?;
     final continuousModeEnabledMessage = json['continuousModeEnabledMessage'] as String?;
     final continuousModeDisabledMessage = json['continuousModeDisabledMessage'] as String?;
     final scanPausedMessage = json['scanPausedMessage'] as String?;
@@ -246,6 +256,8 @@ class SparkScanToastSettingsDefaults {
         toastTextColor,
         targetModeEnabledMessage,
         targetModeDisabledMessage,
+        selectionModeOnMessage,
+        selectionModeOffMessage,
         continuousModeEnabledMessage,
         continuousModeDisabledMessage,
         scanPausedMessage,
@@ -263,16 +275,21 @@ class SparkScanSettingsDefaults {
   final Duration codeDuplicateFilter;
   final BatterySavingMode batterySaving;
   final ScanIntention scanIntention;
+  final SelectionMode selectionMode;
 
-  const SparkScanSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention);
+  const SparkScanSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention, this.selectionMode);
 
   factory SparkScanSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     var durationInMillis = (json['codeDuplicateFilter'] as num).toInt();
 
     var duration = const Duration(milliseconds: 1) * durationInMillis;
 
-    return SparkScanSettingsDefaults(duration, BatterySavingModeDeserializer.fromJSON(json['batterySaving'] as String),
-        ScanIntentionSerializer.fromJSON(json['scanIntention'] as String));
+    return SparkScanSettingsDefaults(
+      duration,
+      BatterySavingModeDeserializer.fromJSON(json['batterySaving'] as String),
+      ScanIntentionSerializer.fromJSON(json['scanIntention'] as String),
+      SelectionMode.fromJSON(json['selectionMode'] as String),
+    );
   }
 }
 

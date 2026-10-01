@@ -18,6 +18,7 @@ import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.da
 import 'package:scandit_flutter_datacapture_core/src/internal/helpers.dart';
 
 import 'barcode_capture_defaults.dart';
+import 'barcode_capture_license_info.dart';
 import 'barcode_capture_settings.dart';
 import 'barcode_capture_session.dart';
 
@@ -96,6 +97,10 @@ class BarcodeCapture extends DataCaptureMode {
     if (_listeners.isEmpty) {
       _controller.unsubscribeListeners();
     }
+  }
+
+  Future<BarcodeCaptureLicenseInfo?> getBarcodeCaptureLicenseInfo() {
+    return _controller.getBarcodeCaptureLicenseInfo();
   }
 
   @override
@@ -191,6 +196,15 @@ class _BarcodeCaptureListenerController extends BaseController {
         .updateBarcodeCaptureFeedback(
             modeId: _barcodeCapture._modeId, feedbackJson: jsonEncode(_barcodeCapture.feedback.toMap()))
         .onError(onError);
+  }
+
+  Future<BarcodeCaptureLicenseInfo?> getBarcodeCaptureLicenseInfo() async {
+    // executeBarcode returns Future<dynamic>; the generated wrapper would
+    // declare Future<String> and crash on a null result, so call it directly.
+    final result = await barcodeMethodHandler
+        .executeBarcode('BarcodeCaptureModule', 'getBarcodeCaptureLicenseInfo', {'modeId': _barcodeCapture._modeId});
+    if (result == null) return null;
+    return BarcodeCaptureLicenseInfo.fromJSON(jsonDecode(result as String) as Map<String, dynamic>);
   }
 
   void unsubscribeListeners() {

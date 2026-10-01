@@ -69,10 +69,17 @@ class BarcodeArCircleHighlight extends BarcodeArHighlight {
     controller?.updateHighlight(this);
   }
 
+  bool _isPulsing;
+  bool get isPulsing => _isPulsing;
+  set isPulsing(bool newValue) {
+    _isPulsing = newValue;
+    controller?.updateHighlight(this);
+  }
+
   final Barcode _barcode;
   final BarcodeArCircleHighlightPreset _preset;
 
-  BarcodeArCircleHighlight._(this._barcode, this._preset, this._brush, this._icon, this._size)
+  BarcodeArCircleHighlight._(this._barcode, this._preset, this._brush, this._icon, this._size, this._isPulsing)
       : super._('barcodeArCircleHighlight');
 
   BarcodeArCircleHighlight(Barcode barcode, BarcodeArCircleHighlightPreset preset)
@@ -81,7 +88,8 @@ class BarcodeArCircleHighlight extends BarcodeArHighlight {
             preset,
             BarcodeArDefaults.view.circleHighlightPresets.get(preset).defaultBrush,
             BarcodeArDefaults.view.defaultHighlightIcon,
-            BarcodeArDefaults.view.circleHighlightPresets.get(preset).defaultSize);
+            BarcodeArDefaults.view.circleHighlightPresets.get(preset).defaultSize,
+            BarcodeArDefaults.view.defaultHighlightIsPulsing);
 
   Barcode get barcode => _barcode;
 
@@ -92,6 +100,7 @@ class BarcodeArCircleHighlight extends BarcodeArHighlight {
     json['brush'] = jsonEncode(brush.toMap());
     json['icon'] = icon != null ? jsonEncode(icon!.toMap()) : null;
     json['size'] = size;
+    json['isPulsing'] = isPulsing;
     return json;
   }
 }

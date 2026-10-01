@@ -162,12 +162,53 @@ class BarcodeFindView extends StatefulWidget implements Serializable {
     _updateNative();
   }
 
+  bool _shouldShowZoomControl = BarcodeFindDefaults.barcodeFindViewDefaults.shouldShowZoomControl;
+
+  bool get shouldShowZoomControl => _shouldShowZoomControl;
+
+  set shouldShowZoomControl(bool newValue) {
+    _shouldShowZoomControl = newValue;
+    _updateNative();
+  }
+
+  static bool get hardwareTriggerSupported => BarcodeFindDefaults.barcodeFindViewDefaults.hardwareTriggerSupported;
+
   Anchor _torchControlPosition = BarcodeFindDefaults.barcodeFindViewDefaults.torchControlPosition;
 
   Anchor get torchControlPosition => _torchControlPosition;
 
   set torchControlPosition(Anchor newValue) {
     _torchControlPosition = newValue;
+    _updateNative();
+  }
+
+  LogoStyle _logoStyle = BarcodeFindDefaults.barcodeFindViewDefaults.logoStyle;
+
+  LogoStyle get logoStyle => _logoStyle;
+
+  set logoStyle(LogoStyle newValue) {
+    _logoStyle = newValue;
+    _updateNative();
+  }
+
+  Anchor _logoAnchor = BarcodeFindDefaults.barcodeFindViewDefaults.logoAnchor;
+
+  Anchor get logoAnchor => _logoAnchor;
+
+  set logoAnchor(Anchor newValue) {
+    _logoAnchor = newValue;
+    _updateNative();
+  }
+
+  /// The desired camera state when BarcodeFind stops searching.
+  ///
+  /// iOS only — this property has no effect on Android.
+  FrameSourceState _cameraStateOnStop = BarcodeFindDefaults.barcodeFindViewDefaults.cameraStateOnStop;
+
+  FrameSourceState get cameraStateOnStop => _cameraStateOnStop;
+
+  set cameraStateOnStop(FrameSourceState newValue) {
+    _cameraStateOnStop = newValue;
     _updateNative();
   }
 
@@ -268,7 +309,12 @@ class BarcodeFindView extends StatefulWidget implements Serializable {
         'shouldShowFinishButton': shouldShowFinishButton,
         'shouldShowProgressBar': shouldShowProgressBar,
         'shouldShowTorchControl': shouldShowTorchControl,
+        'shouldShowZoomControl': shouldShowZoomControl,
         'torchControlPosition': torchControlPosition.toString(),
+        'logoStyle': logoStyle.toString(),
+        'logoAnchor': logoAnchor.toString(),
+        // cameraStateOnStop is an iOS-only native API on BarcodeFindView.
+        if (Platform.isIOS) 'cameraStateOnStop': cameraStateOnStop.toString(),
         'textForCollapseCardsButton': textForCollapseCardsButton,
         'textForAllItemsFoundSuccessfullyHint': textForAllItemsFoundSuccessfullyHint,
         'textForPointAtBarcodesToSearchHint': textForPointAtBarcodesToSearchHint,

@@ -42,6 +42,10 @@ class BarcodeSelectionSession with _PrivateBarcodeSelectionSession {
     return _controller.getCount(_modeId, barcode);
   }
 
+  Future<void> selectUnselectedBarcodes() {
+    return _controller.selectUnselectedBarcodes(_modeId);
+  }
+
   factory BarcodeSelectionSession.fromJSON(Map<String, dynamic> event) {
     var json = jsonDecode(event['session']);
 
@@ -86,6 +90,10 @@ class _BarcodeSelectionSessionController {
 
   Future<void> reset(int modeId, int frameSequenceId) {
     return barcodeMethodHandler.resetBarcodeSelectionSession(modeId: modeId).then((value) => null);
+  }
+
+  Future<void> selectUnselectedBarcodes(int modeId) {
+    return barcodeMethodHandler.selectUnselectedBarcodesInBarcodeSelectionSession(modeId: modeId).then((value) => null);
   }
 
   BarcodeMethodHandler _getMethodHandler() {

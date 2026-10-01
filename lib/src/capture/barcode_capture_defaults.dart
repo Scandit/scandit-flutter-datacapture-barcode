@@ -35,8 +35,10 @@ class BarcodeCaptureSettingsDefaults {
   final Duration codeDuplicateFilter;
   final BatterySavingMode batterySaving;
   final ScanIntention scanIntention;
+  final SelectionMode selectionMode;
 
-  const BarcodeCaptureSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention);
+  const BarcodeCaptureSettingsDefaults(
+      this.codeDuplicateFilter, this.batterySaving, this.scanIntention, this.selectionMode);
 
   factory BarcodeCaptureSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     var durationInMillis = (json['codeDuplicateFilter'] as num).toInt();
@@ -47,6 +49,7 @@ class BarcodeCaptureSettingsDefaults {
       duration,
       BatterySavingModeDeserializer.fromJSON(json['batterySaving'] as String),
       ScanIntentionSerializer.fromJSON(json['scanIntention'] as String),
+      SelectionMode.fromJSON(json['selectionMode'] as String),
     );
   }
 }

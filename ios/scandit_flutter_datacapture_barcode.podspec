@@ -14,7 +14,14 @@ spm_enabled = lambda {
     if File.exist?(plugins_file)
       begin
         dependencies_hash = JSON.parse(File.read(plugins_file))
-        return dependencies_hash.dig("swift_package_manager_enabled", "ios") == true
+        return false unless dependencies_hash.is_a?(Hash)
+
+        # Flutter < 3.29 writes a flat boolean here, Flutter >= 3.29 a
+        # per-platform hash; these plugins support flutter >= 3.22.0.
+        spm_value = dependencies_hash["swift_package_manager_enabled"]
+        return spm_value["ios"] == true if spm_value.is_a?(Hash)
+
+        return spm_value == true
       rescue JSON::ParserError
         return false
       end
@@ -47,7 +54,7 @@ Pod::Spec.new do |s|
   # Only add native framework dependency when not using SPM
   # SPM handles these dependencies via Package.swift
   unless spm_enabled
-  s.dependency "scandit-datacapture-frameworks-barcode", '= 8.4.2'
+  s.dependency "scandit-datacapture-frameworks-barcode", '= 8.6.1'
   end
 
   # Flutter.framework does not contain a i386 slice.

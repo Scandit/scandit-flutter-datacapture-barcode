@@ -59,6 +59,13 @@ class BarcodePickAsyncMapperProductProvider
       Set<BarcodePickProduct> productsToPick, BarcodePickAsyncMapperProductProviderCallback callback)
       : this._(productsToPick, callback);
 
+  Future<void> updateProductList(Set<BarcodePickProduct> products) {
+    _productsToPick
+      ..clear()
+      ..addEntries(products.map((p) => MapEntry(p.identifier, p.quantityToPick)));
+    return _controller.updateProductList(_productsToPick);
+  }
+
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -87,6 +94,14 @@ class _BarcodePickAsyncMapperProductProviderController {
             BarcodePickProductProviderCallback._(this));
       }
     });
+  }
+
+  Future<void> updateProductList(Map<String, int> productsToPick) {
+    if (_viewId == 0) {
+      // View not yet attached; the next view mount will pick up the products map via toMap().
+      return Future.value();
+    }
+    return barcodeMethodHandler.updateProductList(viewId: _viewId, productsJson: jsonEncode(productsToPick));
   }
 
   void finishOnProductIdentifierForItems(List<BarcodePickProductProviderCallbackItem> data) {

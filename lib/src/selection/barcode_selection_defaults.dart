@@ -80,13 +80,17 @@ class BarcodeSelectionTapSelectionDefaults {
 @immutable
 class BarcodeSelectionAimerSelectionDefaults {
   final BarcodeSelectionStrategy selectionStrategy;
+  final BarcodeSelectionAimerBehavior aimerBehavior;
 
-  const BarcodeSelectionAimerSelectionDefaults(this.selectionStrategy);
+  const BarcodeSelectionAimerSelectionDefaults(this.selectionStrategy, this.aimerBehavior);
 
   factory BarcodeSelectionAimerSelectionDefaults.fromJSON(Map<String, dynamic> json) {
     var defaultStrategy = jsonDecode(json['defaultSelectionStrategy']);
     var selectionStrategy = BarcodeSelectionStrategyDeserializer.fromJSON(defaultStrategy as Map<String, dynamic>);
-    return BarcodeSelectionAimerSelectionDefaults(selectionStrategy);
+    var aimerBehavior = json.containsKey('defaultAimerBehavior')
+        ? BarcodeSelectionAimerBehavior.fromJSON(json['defaultAimerBehavior'] as String)
+        : BarcodeSelectionAimerBehavior.repeatSelection;
+    return BarcodeSelectionAimerSelectionDefaults(selectionStrategy, aimerBehavior);
   }
 }
 
@@ -138,9 +142,12 @@ class BarcodeSelectionSettingsDefaults {
   final bool singleBarcodeAutoDetectionEnabled;
   final BarcodeSelectionType selectionType;
   final bool swipeGesturesEnabled;
+  final bool tapGestureForSelectionEnabled;
 
   const BarcodeSelectionSettingsDefaults(this.codeDuplicateFilter, this.selectionType,
-      {required this.singleBarcodeAutoDetectionEnabled, required this.swipeGesturesEnabled});
+      {required this.singleBarcodeAutoDetectionEnabled,
+      required this.swipeGesturesEnabled,
+      required this.tapGestureForSelectionEnabled});
 
   factory BarcodeSelectionSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     var codeDuplicateFilter = (json['codeDuplicateFilter'] as num).toInt();
@@ -148,9 +155,11 @@ class BarcodeSelectionSettingsDefaults {
     var selectionType =
         BarcodeSelectionTypeDeserializer.fromJSON(jsonDecode(json['selectionType']) as Map<String, dynamic>);
     var swipeGesturesEnabled = json['swipeGesturesEnabled'] as bool? ?? true;
+    var tapGestureForSelectionEnabled = json['tapGestureForSelectionEnabled'] as bool;
     return BarcodeSelectionSettingsDefaults(codeDuplicateFilter, selectionType,
         singleBarcodeAutoDetectionEnabled: singleBarcodeAutoDetectionEnabled,
-        swipeGesturesEnabled: swipeGesturesEnabled);
+        swipeGesturesEnabled: swipeGesturesEnabled,
+        tapGestureForSelectionEnabled: tapGestureForSelectionEnabled);
   }
 }
 
