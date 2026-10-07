@@ -18,7 +18,6 @@ class SparkScanViewSettings extends Serializable {
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.triggerButtonCollapseTimeout;
 
   TorchState defaultTorchState = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.defaultTorchState;
-  @Deprecated('Use SparkScanSettings.selectionMode instead. Will be removed in 9.0.')
   SparkScanScanningMode defaultScanningMode =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.defaultScanningMode;
 
@@ -47,22 +46,13 @@ class SparkScanViewSettings extends Serializable {
   SparkScanMiniPreviewSize defaultMiniPreviewSize =
       SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.defaultMiniPreviewSize;
 
-  Brush? selectionModeCandidateBrush;
-
-  @Deprecated('Use selectionModeCandidateBrush instead. Will be removed in 9.0.')
-  Brush? get smartSelectionCandidateBrush => selectionModeCandidateBrush;
-
-  @Deprecated('Use selectionModeCandidateBrush instead. Will be removed in 9.0.')
-  set smartSelectionCandidateBrush(Brush? value) => selectionModeCandidateBrush = value;
-
-  bool periscopeModeEnabled = SparkScanDefaults.sparkScanViewDefaults.viewSettingsDefaults.periscopeModeEnabled;
+  Brush? smartSelectionCandidateBrush;
 
   @override
   Map<String, dynamic> toMap() {
     return {
       'triggerButtonCollapseTimeout': triggerButtonCollapseTimeout.inSeconds,
       'defaultTorchState': defaultTorchState.toString(),
-      // ignore: deprecated_member_use_from_same_package
       'defaultScanningMode': defaultScanningMode.toMap(),
       'holdToScanEnabled': holdToScanEnabled,
       'soundEnabled': soundEnabled,
@@ -76,8 +66,7 @@ class SparkScanViewSettings extends Serializable {
       'shouldShowOnTopAlways': shouldShowOnTopAlways,
       'defaultCameraPosition': defaultCameraPosition.toString(),
       'defaultMiniPreviewSize': defaultMiniPreviewSize.toString(),
-      'selectionModeCandidateBrush': selectionModeCandidateBrush?.toMap(),
-      'periscopeModeEnabled': periscopeModeEnabled,
+      'smartSelectionCandidateBrush': smartSelectionCandidateBrush?.toMap(),
     };
   }
 }

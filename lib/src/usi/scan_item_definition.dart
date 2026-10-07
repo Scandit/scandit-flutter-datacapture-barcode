@@ -18,8 +18,6 @@ class ScanItemDefinition implements Serializable {
 
   ScanItemDefinition(this._identifier, this._components);
 
-  ScanItemDefinition.fromComponents(this._components) : _identifier = ScanItemIdentifier();
-
   ScanItemIdentifier get identifier => _identifier;
 
   List<ScanComponentDefinition> get components => _components;

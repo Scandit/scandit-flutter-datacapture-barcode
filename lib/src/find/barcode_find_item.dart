@@ -33,23 +33,14 @@ class BarcodeFindItem implements Serializable {
 @immutable
 class BarcodeFindItemSearchOptions implements Serializable {
   final String _barcodeData;
-  final Brush? _brush;
 
-  const BarcodeFindItemSearchOptions(this._barcodeData) : _brush = null;
-
-  const BarcodeFindItemSearchOptions.withBrush(this._barcodeData, this._brush);
+  const BarcodeFindItemSearchOptions(this._barcodeData);
 
   String get barcodeData => _barcodeData;
 
-  Brush? get brush => _brush;
-
   @override
   Map<String, dynamic> toMap() {
-    final json = <String, dynamic>{'barcodeData': barcodeData};
-    if (_brush != null) {
-      json['brush'] = _brush.toMap();
-    }
-    return json;
+    return {'barcodeData': barcodeData};
   }
 }
 

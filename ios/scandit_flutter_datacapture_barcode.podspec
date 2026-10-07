@@ -1,39 +1,10 @@
 # TODO: https://jira.scandit.com/browse/SDC-5384
 
 require "yaml"
-require "json"
 
 pubspec = YAML.load_file(File.join("..", "pubspec.yaml"))
 
 version = pubspec["version"]
-
-spm_enabled = lambda {
-  current_path = File.expand_path(__dir__)
-  12.times do
-    plugins_file = File.join(current_path, ".flutter-plugins-dependencies")
-    if File.exist?(plugins_file)
-      begin
-        dependencies_hash = JSON.parse(File.read(plugins_file))
-        return false unless dependencies_hash.is_a?(Hash)
-
-        # Flutter < 3.29 writes a flat boolean here, Flutter >= 3.29 a
-        # per-platform hash; these plugins support flutter >= 3.22.0.
-        spm_value = dependencies_hash["swift_package_manager_enabled"]
-        return spm_value["ios"] == true if spm_value.is_a?(Hash)
-
-        return spm_value == true
-      rescue JSON::ParserError
-        return false
-      end
-    end
-
-    parent = File.dirname(current_path)
-    break if parent == current_path
-    current_path = parent
-  end
-
-  false
-}.call
 
 Pod::Spec.new do |s|
   s.name                    = pubspec["name"]
@@ -45,18 +16,13 @@ Pod::Spec.new do |s|
   s.platforms               = { :ios => "15.0" }
   s.source                  = { :path => "." }
   s.swift_version           = "5.0"
-  s.source_files            = "scandit_flutter_datacapture_barcode/Sources/scandit_flutter_datacapture_barcode/**/*.{h,m,swift}"
+  s.source_files            = "Classes/**/*.{h,m,swift}"
   s.requires_arc            = true
 
   s.dependency "Flutter"
   s.dependency "scandit_flutter_datacapture_core", "= #{version}"
+  s.dependency "scandit-datacapture-frameworks-barcode", '= 8.1.7'
 
-  # Only add native framework dependency when not using SPM
-  # SPM handles these dependencies via Package.swift
-  unless spm_enabled
-  s.dependency "scandit-datacapture-frameworks-barcode", '= 8.6.1'
-  end
-
-  # Flutter.framework does not contain a i386 slice.
-  s.pod_target_xcconfig = { "DEFINES_MODULE" => "YES", "EXCLUDED_ARCHS[sdk=iphonesimulator*]" => "i386" }
+  # Flutter.framework does not contain a i386 slice. Only x86_64 simulators are supported.
+  s.pod_target_xcconfig = { "DEFINES_MODULE" => "YES", "VALID_ARCHS[sdk=iphonesimulator*]" => "x86_64" }
 end

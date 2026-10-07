@@ -8,12 +8,11 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
 
+import 'barcode_generator_function_names.dart';
 import 'qr_code_crrection_level.dart';
 
 class BarcodeGenerator extends Serializable implements DataCaptureComponent {
@@ -74,10 +73,6 @@ class BarcodeGenerator extends Serializable implements DataCaptureComponent {
     return AztecBarcodeGeneratorBuilder._();
   }
 
-  static Pdf417BarcodeGeneratorBuilder pdf417BarcodeGeneratorBuilder(DataCaptureContext dataCaptureContext) {
-    return Pdf417BarcodeGeneratorBuilder._();
-  }
-
   // Method to dispose of the barcode generator
   void dispose() {
     _controller.dispose();
@@ -88,22 +83,12 @@ class BarcodeGenerator extends Serializable implements DataCaptureComponent {
     return {
       'type': _type,
       'id': _id,
-      'errorCorrectionLevel': _options.pdf417ErrorCorrectionLevel ?? _options.errorCorrectionLevel?.name,
+      'errorCorrectionLevel': _options.errorCorrectionLevel?.name,
       'versionNumber': _options.versionNumber,
       'minimumErrorCorrectionPercent': _options.minimumErrorCorrectionPercent,
       'layers': _options.layers,
       'backgroundColor': _options.backgroundColor?.jsonValue,
       'foregroundColor': _options.foregroundColor?.jsonValue,
-      'compact': _options.compact,
-      'compactionMode': _options.compactionMode?.name,
-      'dimensions': _options.dimensions != null
-          ? {
-              'minCols': _options.dimensions!.minCols,
-              'maxCols': _options.dimensions!.maxCols,
-              'minRows': _options.dimensions!.minRows,
-              'maxRows': _options.dimensions!.maxRows,
-            }
-          : null,
     };
   }
 }
@@ -182,65 +167,17 @@ class AztecBarcodeGeneratorBuilder extends BarcodeGeneratorBuilder<AztecBarcodeG
   }
 }
 
-enum Pdf417CompactionMode {
-  auto,
-  text,
-  byte,
-  numeric,
-}
-
-class Pdf417Dimensions {
-  final int? minCols;
-  final int? maxCols;
-  final int? minRows;
-  final int? maxRows;
-
-  const Pdf417Dimensions({int? minCols, int? maxCols, int? minRows, int? maxRows})
-      : this._(
-          minCols: minCols,
-          maxCols: maxCols,
-          minRows: minRows,
-          maxRows: maxRows,
-        );
-
-  const Pdf417Dimensions._({this.minCols, this.maxCols, this.minRows, this.maxRows});
-}
-
-class Pdf417BarcodeGeneratorBuilder extends BarcodeGeneratorBuilder<Pdf417BarcodeGeneratorBuilder> {
-  Pdf417BarcodeGeneratorBuilder._() : super._('pdf417Generator');
-
-  Pdf417BarcodeGeneratorBuilder withErrorCorrectionLevel(int errorCorrectionLevel) {
-    _options.pdf417ErrorCorrectionLevel = errorCorrectionLevel;
-    return this;
-  }
-
-  Pdf417BarcodeGeneratorBuilder withCompact(bool compact) {
-    _options.compact = compact;
-    return this;
-  }
-
-  Pdf417BarcodeGeneratorBuilder withCompactionMode(Pdf417CompactionMode compactionMode) {
-    _options.compactionMode = compactionMode;
-    return this;
-  }
-
-  Pdf417BarcodeGeneratorBuilder withDimensions(Pdf417Dimensions dimensions) {
-    _options.dimensions = dimensions;
-    return this;
-  }
-}
-
 class _BarcodeGeneratorController extends BaseController {
   final BarcodeGenerator barcodeGenerator;
-  late final BarcodeMethodHandler barcodeMethodHandler;
 
-  _BarcodeGeneratorController(this.barcodeGenerator) : super(BarcodeFunctionNames.methodsChannelName) {
-    barcodeMethodHandler = BarcodeMethodHandler(methodChannel);
-  }
+  _BarcodeGeneratorController(this.barcodeGenerator) : super(BarcodeGeneratorFunctionNames.methodsChannelName);
 
   Future<Image> generateFromData(Uint8List data, double imageWidth) async {
-    final result = await barcodeMethodHandler.generateFromBaseEncodedDataToBytes(
-        generatorId: barcodeGenerator.id, data: data, imageWidth: imageWidth.toInt());
+    var result = await methodChannel.invokeMethod<Uint8List>(BarcodeGeneratorFunctionNames.generateFromData, {
+      'generatorId': barcodeGenerator.id,
+      'data': data,
+      'imageWidth': imageWidth,
+    });
     if (result == null) {
       throw Exception('Failed to generate barcode');
     }
@@ -248,8 +185,11 @@ class _BarcodeGeneratorController extends BaseController {
   }
 
   Future<Image> generateFromText(String text, double imageWidth) async {
-    final result = await barcodeMethodHandler.generateFromStringToBytes(
-        generatorId: barcodeGenerator.id, text: text, imageWidth: imageWidth.toInt());
+    var result = await methodChannel.invokeMethod<Uint8List>(BarcodeGeneratorFunctionNames.generateFromText, {
+      'generatorId': barcodeGenerator.id,
+      'text': text,
+      'imageWidth': imageWidth,
+    });
     if (result == null) {
       throw Exception('Failed to generate barcode');
     }
@@ -258,12 +198,13 @@ class _BarcodeGeneratorController extends BaseController {
 
   @override
   void dispose() {
-    barcodeMethodHandler.disposeBarcodeGenerator(generatorId: barcodeGenerator.id);
+    methodChannel.invokeMethod(BarcodeGeneratorFunctionNames.dispose, {'generatorId': barcodeGenerator.id});
     super.dispose();
   }
 
   void create() {
-    barcodeMethodHandler.createBarcodeGenerator(barcodeGeneratorJson: jsonEncode(barcodeGenerator.toMap()));
+    methodChannel.invokeMethod(
+        BarcodeGeneratorFunctionNames.create, {'barcodeGeneratorJson': jsonEncode(barcodeGenerator.toMap())});
   }
 }
 
@@ -274,10 +215,6 @@ class _BarcodeGeneratorCreationOptions {
   int? versionNumber;
   int? minimumErrorCorrectionPercent;
   int? layers;
-  int? pdf417ErrorCorrectionLevel;
-  bool? compact;
-  Pdf417CompactionMode? compactionMode;
-  Pdf417Dimensions? dimensions;
 
   _BarcodeGeneratorCreationOptions();
 }

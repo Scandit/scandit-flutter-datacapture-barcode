@@ -4,20 +4,14 @@
  * Copyright (C) 2021- Scandit AG. All rights reserved.
  */
 
-import 'dart:async';
 import 'dart:convert';
-import 'dart:developer' as developer;
 
 import 'package:flutter/services.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/selection/barcode_selection.dart';
-import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/selection/barcode_selection_function_names.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
-import 'barcode_selection_brush_provider.dart';
 import 'barcode_selection_defaults.dart';
 
 enum BarcodeSelectionBasicOverlayStyle {
@@ -57,18 +51,6 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
   BarcodeSelectionBasicOverlay(BarcodeSelection mode, {BarcodeSelectionBasicOverlayStyle? style})
       : this._(mode, style ?? BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.defaultStyle);
 
-  static Brush defaultTrackedBrushForStyle(BarcodeSelectionBasicOverlayStyle style) =>
-      BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.brushes[style]!.trackedBrush;
-
-  static Brush defaultAimedBrushForStyle(BarcodeSelectionBasicOverlayStyle style) =>
-      BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.brushes[style]!.aimedBrush;
-
-  static Brush defaultSelectedBrushForStyle(BarcodeSelectionBasicOverlayStyle style) =>
-      BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.brushes[style]!.selectedBrush;
-
-  static Brush defaultSelectingBrushForStyle(BarcodeSelectionBasicOverlayStyle style) =>
-      BarcodeSelectionDefaults.barcodeSelectionBasicOverlayDefaults.brushes[style]!.selectingBrush;
-
   DataCaptureView? _view;
 
   @override
@@ -78,22 +60,12 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
   set view(DataCaptureView? newValue) {
     if (newValue == null) {
       _view = null;
-      _controller?.dispose();
       _controller = null;
       return;
     }
 
     _view = newValue;
-    if (_controller == null) {
-      final controller = _BarcodeSelectionBasicOverlayController(this);
-      _controller = controller;
-      if (_aimedBarcodeBrushProvider != null) {
-        controller.setAimedBarcodeBrushProvider(_aimedBarcodeBrushProvider);
-      }
-      if (_trackedBarcodeBrushProvider != null) {
-        controller.setTrackedBarcodeBrushProvider(_trackedBarcodeBrushProvider);
-      }
-    }
+    _controller ??= _BarcodeSelectionBasicOverlayController(this);
   }
 
   late Brush _trackedBrush;
@@ -169,55 +141,37 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
 
   String? _textForSelectOrDoubleTapToFreezeHint;
 
-  Future<void> setTextForSelectOrDoubleTapToFreezeHint(String text) async {
+  Future<void> setTextForSelectOrDoubleTapToFreezeHint(String text) {
     _textForSelectOrDoubleTapToFreezeHint = text;
-    await _controller?.update();
+    return _controller?.update() ?? Future.value();
   }
 
   String? _textForTapToSelectHint;
 
-  Future<void> setTextForTapToSelectHint(String text) async {
+  Future<void> setTextForTapToSelectHint(String text) {
     _textForTapToSelectHint = text;
-    await _controller?.update();
+    return _controller?.update() ?? Future.value();
   }
 
   String? _textForDoubleTapToUnfreezeHint;
 
-  Future<void> setTextForDoubleTapToUnfreezeHint(String text) async {
+  Future<void> setTextForDoubleTapToUnfreezeHint(String text) {
     _textForDoubleTapToUnfreezeHint = text;
-    await _controller?.update();
+    return _controller?.update() ?? Future.value();
   }
 
   String? _textForTapAnywhereToSelectHint;
 
-  Future<void> setTextForTapAnywhereToSelectHint(String text) async {
+  Future<void> setTextForTapAnywhereToSelectHint(String text) {
     _textForTapAnywhereToSelectHint = text;
-    await _controller?.update();
+    return _controller?.update() ?? Future.value();
   }
 
   String? _textForAimToSelectAutoHint;
 
-  Future<void> setTextForAimToSelectAutoHint(String text) async {
+  Future<void> setTextForAimToSelectAutoHint(String text) {
     _textForAimToSelectAutoHint = text;
-    await _controller?.update();
-  }
-
-  Future<void> clearSelectedBarcodeBrushes() async {
-    await _controller?.clearSelectedBarcodeBrushes();
-  }
-
-  BarcodeSelectionBrushProvider? _aimedBarcodeBrushProvider;
-
-  Future<void> setAimedBarcodeBrushProvider(BarcodeSelectionBrushProvider? brushProvider) async {
-    _aimedBarcodeBrushProvider = brushProvider;
-    await _controller?.setAimedBarcodeBrushProvider(brushProvider);
-  }
-
-  BarcodeSelectionBrushProvider? _trackedBarcodeBrushProvider;
-
-  Future<void> setTrackedBarcodeBrushProvider(BarcodeSelectionBrushProvider? brushProvider) async {
-    _trackedBarcodeBrushProvider = brushProvider;
-    await _controller?.setTrackedBarcodeBrushProvider(brushProvider);
+    return _controller?.update() ?? Future.value();
   }
 
   @override
@@ -233,8 +187,6 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
       'viewfinder': _viewfinder.toMap(),
       'style': style.toString(),
       'frozenBackgroundColor': _frozenBackgroundColor.jsonValue,
-      'hasAimedBrushProvider': _aimedBarcodeBrushProvider != null,
-      'hasTrackedBrushProvider': _trackedBarcodeBrushProvider != null,
     });
     if (_textForSelectOrDoubleTapToFreezeHint != null) {
       json['textForSelectOrDoubleTapToFreezeHint'] = _textForSelectOrDoubleTapToFreezeHint;
@@ -257,89 +209,14 @@ class BarcodeSelectionBasicOverlay extends DataCaptureOverlay {
 }
 
 class _BarcodeSelectionBasicOverlayController extends BaseController {
-  static const String _brushForAimedBarcodeEventName = 'BarcodeSelectionAimedBrushProvider.brushForBarcode';
-  static const String _brushForTrackedBarcodeEventName = 'BarcodeSelectionTrackedBrushProvider.brushForBarcode';
-
   final BarcodeSelectionBasicOverlay _overlay;
-  late final BarcodeMethodHandler barcodeMethodHandler;
 
-  StreamSubscription<dynamic>? _brushProviderSubscription;
-
-  _BarcodeSelectionBasicOverlayController(this._overlay) : super(BarcodeFunctionNames.methodsChannelName) {
-    barcodeMethodHandler = BarcodeMethodHandler(methodChannel);
-  }
+  _BarcodeSelectionBasicOverlayController(this._overlay) : super(BarcodeSelectionFunctionNames.methodsChannelName);
 
   Future<void> update() {
-    return barcodeMethodHandler
-        .updateBarcodeSelectionBasicOverlay(overlayJson: jsonEncode(_overlay.toMap()))
-        .then((value) => null, onError: onError);
-  }
-
-  Future<void> clearSelectedBarcodeBrushes() {
-    return barcodeMethodHandler.clearSelectedBarcodeBrushes().then((value) => null, onError: onError);
-  }
-
-  Future<void> setAimedBarcodeBrushProvider(BarcodeSelectionBrushProvider? provider) async {
-    if (provider == null) {
-      await barcodeMethodHandler.removeAimedBarcodeBrushProvider().catchError(onError);
-    } else {
-      _ensureBrushProviderSubscription();
-      await barcodeMethodHandler.setAimedBarcodeBrushProvider().catchError(onError);
-    }
-    _maybeCancelBrushProviderSubscription();
-  }
-
-  Future<void> setTrackedBarcodeBrushProvider(BarcodeSelectionBrushProvider? provider) async {
-    if (provider == null) {
-      await barcodeMethodHandler.removeTrackedBarcodeBrushProvider().catchError(onError);
-    } else {
-      _ensureBrushProviderSubscription();
-      await barcodeMethodHandler.setTrackedBarcodeBrushProvider().catchError(onError);
-    }
-    _maybeCancelBrushProviderSubscription();
-  }
-
-  void _ensureBrushProviderSubscription() {
-    if (_brushProviderSubscription != null) return;
-    _brushProviderSubscription = BarcodePluginEvents.barcodeSelectionEventStream.asFlutterEvents().listen((event) {
-      if (event.isEvent(_brushForAimedBarcodeEventName)) {
-        _handleBrushForBarcodeEvent(event.payload, _overlay._aimedBarcodeBrushProvider, aimed: true);
-      } else if (event.isEvent(_brushForTrackedBarcodeEventName)) {
-        _handleBrushForBarcodeEvent(event.payload, _overlay._trackedBarcodeBrushProvider, aimed: false);
-      }
-    });
-  }
-
-  void _maybeCancelBrushProviderSubscription() {
-    if (_overlay._aimedBarcodeBrushProvider != null || _overlay._trackedBarcodeBrushProvider != null) return;
-    _brushProviderSubscription?.cancel();
-    _brushProviderSubscription = null;
-  }
-
-  void _handleBrushForBarcodeEvent(
-    Map<String, dynamic> payload,
-    BarcodeSelectionBrushProvider? provider, {
-    required bool aimed,
-  }) {
-    if (provider == null) return;
-    final barcodeJson = payload['barcode'] as String?;
-    if (barcodeJson == null) return;
-    final barcode = Barcode.fromJSON(jsonDecode(barcodeJson) as Map<String, dynamic>);
-    final selectionIdentifier = (barcode.data ?? '') + barcode.symbology.toString();
-    final brush = provider.brushForBarcode(barcode);
-    final brushJson = brush == null ? null : jsonEncode(brush.toMap());
-    final finish = aimed
-        ? barcodeMethodHandler.finishBrushForAimedBarcodeCallback(
-            selectionIdentifier: selectionIdentifier, brushJson: brushJson)
-        : barcodeMethodHandler.finishBrushForTrackedBarcodeCallback(
-            selectionIdentifier: selectionIdentifier, brushJson: brushJson);
-    finish.catchError((error) => developer.log(error.toString()));
-  }
-
-  @override
-  void dispose() {
-    _brushProviderSubscription?.cancel();
-    _brushProviderSubscription = null;
-    super.dispose();
+    return methodChannel.invokeMethod(
+      BarcodeSelectionFunctionNames.updateBarcodeSelectionBasicOverlay,
+      {'overlayJson': jsonEncode(_overlay.toMap())},
+    );
   }
 }

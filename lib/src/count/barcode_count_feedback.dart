@@ -4,13 +4,20 @@
  * Copyright (C) 2022- Scandit AG. All rights reserved.
  */
 
-import 'package:flutter/foundation.dart';
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
 import 'barcode_count_defaults.dart';
+import 'barcode_count_function_names.dart';
 
-class BarcodeCountFeedback extends ChangeNotifier implements Serializable {
-  BarcodeCountFeedback() : super();
+class BarcodeCountFeedback implements Serializable {
+  late _BarcodeCountFeedbackController _controller;
+
+  BarcodeCountFeedback() {
+    _controller = _BarcodeCountFeedbackController(this);
+  }
 
   Feedback _success = BarcodeCountDefaults.barcodeCountFeedbackDefaults.success;
 
@@ -33,11 +40,22 @@ class BarcodeCountFeedback extends ChangeNotifier implements Serializable {
   static BarcodeCountFeedback get defaultFeedback => BarcodeCountFeedback();
 
   void _update() {
-    notifyListeners();
+    _controller.updateFeedback();
   }
 
   @override
   Map<String, dynamic> toMap() {
     return {'success': success.toMap(), 'failure': failure.toMap()};
+  }
+}
+
+class _BarcodeCountFeedbackController {
+  final MethodChannel _methodChannel = const MethodChannel(BarcodeCountFunctionNames.methodsChannelName);
+  final BarcodeCountFeedback _feedback;
+
+  _BarcodeCountFeedbackController(this._feedback);
+
+  Future<void> updateFeedback() {
+    return _methodChannel.invokeMethod(BarcodeCountFunctionNames.updateFeedback, jsonEncode(_feedback.toMap()));
   }
 }
