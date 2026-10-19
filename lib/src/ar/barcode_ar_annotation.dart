@@ -17,6 +17,7 @@ import 'barcode_ar_common.dart';
 import 'barcode_ar_defaults.dart';
 import 'barcode_ar_info_annotation_anchor.dart';
 import 'barcode_ar_info_annotation_body_component.dart';
+import 'barcode_ar_popover_annotation_anchor.dart';
 
 import 'barcode_ar_info_annotation_header.dart';
 import 'barcode_ar_info_annotation_width_preset.dart';
@@ -242,6 +243,13 @@ class BarcodeArPopoverAnnotation extends BarcodeArAnnotation {
 
   bool isEntirePopoverTappable = BarcodeArDefaults.view.defaultIsEntirePopoverTappable;
 
+  BarcodeArPopoverAnnotationAnchor _anchor = BarcodeArDefaults.view.defaultBarcodeArPopoverAnnotationAnchor;
+  BarcodeArPopoverAnnotationAnchor get anchor => _anchor;
+  set anchor(BarcodeArPopoverAnnotationAnchor newValue) {
+    _anchor = newValue;
+    controller?.updateAnnotation(this);
+  }
+
   BarcodeArPopoverAnnotationListener? _listener;
   BarcodeArPopoverAnnotationListener? get listener => _listener;
   set listener(BarcodeArPopoverAnnotationListener? newValue) {
@@ -257,6 +265,7 @@ class BarcodeArPopoverAnnotation extends BarcodeArAnnotation {
   Map<String, dynamic> toMap() {
     var json = super.toMap();
     json.addAll({
+      'anchor': anchor.toString(),
       'isEntirePopoverTappable': isEntirePopoverTappable,
       'buttons': buttons.map((e) => e.toMap()).toList(),
       'hasListener': listener != null
@@ -345,6 +354,62 @@ class BarcodeArCustomAnnotation extends BarcodeArAnnotation {
   @override
   Map<String, dynamic> toMap() {
     var json = super.toMap();
+    return json;
+  }
+}
+
+class BarcodeArResponsiveAnnotation extends BarcodeArAnnotation {
+  final Barcode _barcode;
+
+  final BarcodeArInfoAnnotation? _closeUpAnnotation;
+  final BarcodeArInfoAnnotation? _farAwayAnnotation;
+  double _threshold = BarcodeArDefaults.view.defaultResponsiveAnnotationThreshold;
+
+  BarcodeArResponsiveAnnotation(this._barcode, this._closeUpAnnotation, this._farAwayAnnotation)
+      : super._(BarcodeArDefaults.view.defaultResponsiveAnnotationTrigger, 'barcodeArResponsiveAnnotation');
+
+  BarcodeArInfoAnnotation? get closeUpAnnotation => _closeUpAnnotation;
+
+  BarcodeArInfoAnnotation? get farAwayAnnotation => _farAwayAnnotation;
+
+  double get threshold => _threshold;
+
+  set threshold(double newValue) {
+    _threshold = newValue;
+    controller?.updateAnnotation(this);
+  }
+
+  Barcode get barcode => _barcode;
+
+  @override
+  BarcodeArAnnotationTrigger get annotationTrigger => _annotationTrigger;
+
+  @override
+  set annotationTrigger(BarcodeArAnnotationTrigger newValue) {
+    _annotationTrigger = newValue;
+    controller?.updateAnnotation(this);
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    // Propagate controller and barcodeId to child annotations before serialization
+    if (_closeUpAnnotation != null) {
+      _closeUpAnnotation.controller = controller;
+      _closeUpAnnotation.barcodeId = barcodeId;
+    }
+    if (_farAwayAnnotation != null) {
+      _farAwayAnnotation.controller = controller;
+      _farAwayAnnotation.barcodeId = barcodeId;
+    }
+
+    var json = super.toMap();
+    if (_closeUpAnnotation != null) {
+      json['closeUpAnnotation'] = _closeUpAnnotation.toMap();
+    }
+    if (_farAwayAnnotation != null) {
+      json['farAwayAnnotation'] = _farAwayAnnotation.toMap();
+    }
+    json['threshold'] = _threshold;
     return json;
   }
 }

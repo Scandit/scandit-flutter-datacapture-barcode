@@ -4,17 +4,11 @@
  * Copyright (C) 2020- Scandit AG. All rights reserved.
  */
 
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
-
-import 'barcode_capture_function_names.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeCaptureDefaults {
-  static MethodChannel channel = const MethodChannel(BarcodeCaptureFunctionNames.methodsChannelName);
-
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
   static late BarcodeCaptureSettingsDefaults _barcodeCaptureSettingsDefaults;
@@ -27,18 +21,12 @@ class BarcodeCaptureDefaults {
 
   static BarcodeCaptureOverlayDefaults get barcodeCaptureOverlayDefaults => _barcodeCaptureOverlayDefaults;
 
-  static bool _isInitialized = false;
-
-  static Future<void> initializeDefaults() async {
-    if (_isInitialized) return;
-    var result = await channel.invokeMethod(BarcodeCaptureFunctionNames.getBarcodeCaptureDefaults);
-    var json = jsonDecode(result as String);
-    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(json['RecommendedCameraSettings']);
-    _barcodeCaptureSettingsDefaults = BarcodeCaptureSettingsDefaults.fromJSON(json['BarcodeCaptureSettings']);
+  static void initializeDefaults(Map<String, dynamic> barcodeCaptureDefaults) {
+    _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(barcodeCaptureDefaults['RecommendedCameraSettings']);
+    _barcodeCaptureSettingsDefaults =
+        BarcodeCaptureSettingsDefaults.fromJSON(barcodeCaptureDefaults['BarcodeCaptureSettings']);
     _barcodeCaptureOverlayDefaults =
-        BarcodeCaptureOverlayDefaults.fromJSON(json['BarcodeCaptureOverlay'] as Map<String, dynamic>);
-
-    _isInitialized = true;
+        BarcodeCaptureOverlayDefaults.fromJSON(barcodeCaptureDefaults['BarcodeCaptureOverlay'] as Map<String, dynamic>);
   }
 }
 
@@ -47,8 +35,10 @@ class BarcodeCaptureSettingsDefaults {
   final Duration codeDuplicateFilter;
   final BatterySavingMode batterySaving;
   final ScanIntention scanIntention;
+  final SelectionMode selectionMode;
 
-  const BarcodeCaptureSettingsDefaults(this.codeDuplicateFilter, this.batterySaving, this.scanIntention);
+  const BarcodeCaptureSettingsDefaults(
+      this.codeDuplicateFilter, this.batterySaving, this.scanIntention, this.selectionMode);
 
   factory BarcodeCaptureSettingsDefaults.fromJSON(Map<String, dynamic> json) {
     var durationInMillis = (json['codeDuplicateFilter'] as num).toInt();
@@ -59,6 +49,7 @@ class BarcodeCaptureSettingsDefaults {
       duration,
       BatterySavingModeDeserializer.fromJSON(json['batterySaving'] as String),
       ScanIntentionSerializer.fromJSON(json['scanIntention'] as String),
+      SelectionMode.fromJSON(json['selectionMode'] as String),
     );
   }
 }

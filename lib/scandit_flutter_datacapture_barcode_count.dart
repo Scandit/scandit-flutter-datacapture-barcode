@@ -7,10 +7,12 @@
 // ignore: unnecessary_library_name
 library scandit_flutter_datacapture_barcode_count;
 
+export 'src/barcode_spatial_grid.dart' show BarcodeSpatialGrid;
 export 'src/count/barcode_count_capture_list_session.dart' show BarcodeCountCaptureListSession;
 export 'src/count/barcode_count_feedback.dart' show BarcodeCountFeedback;
 export 'src/count/barcode_count_session.dart' show BarcodeCountSession;
 export 'src/count/barcode_count_settings.dart' show BarcodeCountSettings;
+export 'src/count/barcode_count_toolbar_settings.dart' show BarcodeCountToolbarSettings;
 export 'src/count/target_barcode.dart' show TargetBarcode;
 export 'src/count/barcode_count_view.dart'
     show
@@ -18,6 +20,7 @@ export 'src/count/barcode_count_view.dart'
         BarcodeCountCaptureList,
         BarcodeCountView,
         BarcodeCountViewListener,
+        BarcodeCountViewExtendedListener,
         BarcodeCountViewUiListener,
         BarcodeCountViewStyle,
         BarcodeCountStatusProvider,
@@ -30,5 +33,8 @@ export 'src/count/barcode_count_status_result.dart'
         BarcodeCountStatusResultAbort,
         BarcodeCountStatusResultError,
         BarcodeCountStatusResultSuccess;
-export 'src/count/barcode_count_capture_list_listener.dart' show BarcodeCountCaptureListListener;
-export 'src/count/barcode_count_listener.dart' show BarcodeCountListener;
+export 'src/count/barcode_count_capture_list_listener.dart'
+    show BarcodeCountCaptureListListener, BarcodeCountCaptureListExtendedListener;
+export 'src/count/barcode_count_listener.dart' show BarcodeCountListener, BarcodeCountExtendedListener;
+export 'src/count/barcode_count_not_in_list_action_settings.dart' show BarcodeCountNotInListActionSettings;
+export 'src/count/barcode_count_mapping_flow_settings.dart' show BarcodeCountMappingFlowSettings;

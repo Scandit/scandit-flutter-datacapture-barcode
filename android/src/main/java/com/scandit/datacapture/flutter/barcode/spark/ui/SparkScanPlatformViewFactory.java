@@ -45,7 +45,7 @@ public class SparkScanPlatformViewFactory extends PlatformViewFactory {
             throw new IllegalArgumentException("Unable to create the SparkScanView without the json.");
         }
 
-        SparkScanModule sparkScanModule = (SparkScanModule) this.serviceLocator.resolve(SparkScanModule.class.getName());
+        SparkScanModule sparkScanModule = (SparkScanModule) this.serviceLocator.resolve(SparkScanModule.class.getSimpleName());
         if (sparkScanModule == null) {
             throw new IllegalArgumentException("Unable to create the SparkScanView. SparkScan module not initialized.");
         }

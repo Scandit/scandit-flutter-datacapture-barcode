@@ -44,6 +44,8 @@ class BarcodeCountToolbarSettings implements Serializable {
   String? colorSchemeButtonAccessibilityLabel =
       BarcodeCountDefaults.viewDefaults.toolbarSettings.colorSchemeButtonAccessibilityLabel;
 
+  BarcodeCountToolbarSettings();
+
   @override
   Map<String, dynamic> toMap() {
     return {
