@@ -7,6 +7,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_filter_settings.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/count/barcode_count_icon.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/count/barcode_count_view.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
@@ -55,6 +56,10 @@ class BarcodeCountViewDefaults {
   final Brush defaultRecognizedBrush;
   final Brush defaultAcceptedBrush;
   final Brush defaultRejectedBrush;
+  final BarcodeCountIcon defaultRecognizedIcon;
+  final BarcodeCountIcon defaultNotInListIcon;
+  final BarcodeCountIcon defaultAcceptedIcon;
+  final BarcodeCountIcon defaultRejectedIcon;
   final bool shouldShowScanAreaGuides;
   final String clearHighlightsButtonText;
   final String exitButtonText;
@@ -116,6 +121,10 @@ class BarcodeCountViewDefaults {
       this.defaultRecognizedBrush,
       this.defaultAcceptedBrush,
       this.defaultRejectedBrush,
+      this.defaultRecognizedIcon,
+      this.defaultNotInListIcon,
+      this.defaultAcceptedIcon,
+      this.defaultRejectedIcon,
       this.shouldShowScanAreaGuides,
       this.clearHighlightsButtonText,
       this.exitButtonText,
@@ -177,6 +186,10 @@ class BarcodeCountViewDefaults {
     final defaultRecognizedBrush = BrushDefaults.fromJSON(json['recognizedBrush'] as Map<String, dynamic>).toBrush();
     final defaultAcceptedBrush = BrushDefaults.fromJSON(json['acceptedBrush'] as Map<String, dynamic>).toBrush();
     final defaultRejectedBrush = BrushDefaults.fromJSON(json['rejectedBrush'] as Map<String, dynamic>).toBrush();
+    final defaultRecognizedIcon = _iconFromDefaults(json['defaultRecognizedIcon']);
+    final defaultNotInListIcon = _iconFromDefaults(json['defaultNotInListIcon']);
+    final defaultAcceptedIcon = _iconFromDefaults(json['defaultAcceptedIcon']);
+    final defaultRejectedIcon = _iconFromDefaults(json['defaultRejectedIcon']);
     final shouldShowScanAreaGuides = json['shouldShowScanAreaGuides'] as bool;
     final clearHighlightsButtonText = json['clearHighlightsButtonText'];
     final exitButtonText = json['exitButtonText'];
@@ -327,6 +340,10 @@ class BarcodeCountViewDefaults {
         defaultRecognizedBrush,
         defaultAcceptedBrush,
         defaultRejectedBrush,
+        defaultRecognizedIcon,
+        defaultNotInListIcon,
+        defaultAcceptedIcon,
+        defaultRejectedIcon,
         shouldShowScanAreaGuides,
         clearHighlightsButtonText,
         exitButtonText,
@@ -634,4 +651,13 @@ class BarcodeCountMappingFlowSettingsDefaults {
         json['restartButtonText'] as String,
         json['finishButtonText'] as String);
   }
+}
+
+// Tolerant of platforms that don't (yet) serialize the default icons: falls back to an
+// empty BarcodeCountIcon instead of crashing on a missing key during defaults parsing.
+BarcodeCountIcon _iconFromDefaults(dynamic json) {
+  if (json is Map<String, dynamic>) {
+    return BarcodeCountIcon.fromJSON(json);
+  }
+  return BarcodeCountIcon();
 }

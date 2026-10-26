@@ -9,6 +9,7 @@ library scandit_flutter_datacapture_barcode_batch;
 
 export 'src/tracked_barcode.dart' show TrackedBarcode;
 export 'src/batch/barcode_batch.dart' show BarcodeBatch, BarcodeBatchListener;
+export 'src/batch/barcode_batch_license_info.dart' show BarcodeBatchLicenseInfo;
 export 'src/batch/barcode_batch_settings.dart' show BarcodeBatchSettings;
 export 'src/batch/barcode_batch_session.dart' show BarcodeBatchSession;
 export 'src/batch/barcode_batch_advanced_overlay.dart'

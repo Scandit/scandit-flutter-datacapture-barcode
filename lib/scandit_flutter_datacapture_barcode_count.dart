@@ -38,3 +38,4 @@ export 'src/count/barcode_count_capture_list_listener.dart'
 export 'src/count/barcode_count_listener.dart' show BarcodeCountListener, BarcodeCountExtendedListener;
 export 'src/count/barcode_count_not_in_list_action_settings.dart' show BarcodeCountNotInListActionSettings;
 export 'src/count/barcode_count_mapping_flow_settings.dart' show BarcodeCountMappingFlowSettings;
+export 'src/count/barcode_count_icon.dart' show BarcodeCountIcon;

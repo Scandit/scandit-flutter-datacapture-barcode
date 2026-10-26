@@ -25,6 +25,9 @@ class BarcodeSelectionSettings implements Serializable {
 
   bool swipeGesturesEnabled = BarcodeSelectionDefaults.barcodeSelectionSettingsDefaults.swipeGesturesEnabled;
 
+  bool tapGestureForSelectionEnabled =
+      BarcodeSelectionDefaults.barcodeSelectionSettingsDefaults.tapGestureForSelectionEnabled;
+
   final Map<String, dynamic> _properties = {};
 
   final Map<String, SymbologySettings> _symbologies = {};
@@ -40,6 +43,7 @@ class BarcodeSelectionSettings implements Serializable {
       'singleBarcodeAutoDetectionEnabled': singleBarcodeAutoDetection,
       'selectionType': selectionType.toMap(),
       'swipeGesturesEnabled': swipeGesturesEnabled,
+      'tapGestureForSelectionEnabled': tapGestureForSelectionEnabled,
     };
   }
 
