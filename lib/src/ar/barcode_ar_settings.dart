@@ -9,15 +9,10 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 import '../symbology.dart';
 import '../symbology_settings.dart';
 import '../barcode_defaults.dart';
-import 'barcode_ar_defaults.dart';
 
 class BarcodeArSettings implements Serializable {
   final Map<String, dynamic> _properties = {};
   final Map<String, SymbologySettings> _symbologies = {};
-
-  BarcodeArSettings();
-
-  bool expectsOnlyUniqueBarcodes = BarcodeArDefaults.settings.expectsOnlyUniqueBarcodes;
 
   Set<Symbology> get enabledSymbologies => _enabledSymbologies();
 
@@ -61,7 +56,6 @@ class BarcodeArSettings implements Serializable {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'properties': _properties,
-      'expectOnlyUniqueBarcodes': expectsOnlyUniqueBarcodes,
       'symbologies': _symbologies.map((key, value) => MapEntry(key, value.toMap()))
     };
   }

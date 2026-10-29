@@ -30,6 +30,4 @@ abstract class BarcodeArFunctionNames {
   static const String didDisposeBarcodeArCustomAnnotation = 'BarcodeArCustomAnnotation.dispose';
   static const String showBarcodeArCustomAnnotation = 'BarcodeArCustomAnnotation.show';
   static const String hideBarcodeArCustomAnnotation = 'BarcodeArCustomAnnotation.hide';
-
-  static const String barcodeArAugmentationsEvicted = 'BarcodeArAugmentations.evicted';
 }

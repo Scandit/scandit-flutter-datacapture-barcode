@@ -77,9 +77,6 @@ class BarcodeFindViewDefaults {
   final Anchor torchControlPosition;
   final String? textForItemListUpdatedHint;
   final String? textForItemListUpdatedWhenPausedHint;
-  final LogoStyle logoStyle;
-  final Anchor logoAnchor;
-  final FrameSourceState cameraStateOnStop;
 
   const BarcodeFindViewDefaults(
       this.shouldShowCarousel,
@@ -99,10 +96,7 @@ class BarcodeFindViewDefaults {
       this.textForTapShutterToResumeSearchHint,
       this.torchControlPosition,
       this.textForItemListUpdatedHint,
-      this.textForItemListUpdatedWhenPausedHint,
-      this.logoStyle,
-      this.logoAnchor,
-      this.cameraStateOnStop);
+      this.textForItemListUpdatedWhenPausedHint);
 
   factory BarcodeFindViewDefaults.fromJSON(Map<String, dynamic> json) {
     var torchControlPosition = Anchor.topLeft;
@@ -125,12 +119,6 @@ class BarcodeFindViewDefaults {
       hardwareTriggerSupported = json["hardwareTriggerSupported"] as bool;
     }
 
-    var logoStyle = LogoStyle.fromJSON(json['logoStyle'] as String);
-    var logoAnchor = AnchorDeserializer.fromJSON(json['logoAnchor'] as String);
-
-    // cameraStateOnStop is iOS-only; the Android defaults do not emit it.
-    var cameraStateOnStop = FrameSourceState.fromJSON(json['cameraStateOnStop'] as String? ?? 'off');
-
     return BarcodeFindViewDefaults(
       json["shouldShowCarousel"] as bool,
       json["shouldShowFinishButton"] as bool,
@@ -150,9 +138,6 @@ class BarcodeFindViewDefaults {
       torchControlPosition,
       json["textForItemListUpdatedHint"] as String?,
       json["textForItemListUpdatedWhenPausedHint"] as String?,
-      logoStyle,
-      logoAnchor,
-      cameraStateOnStop,
     );
   }
 }
