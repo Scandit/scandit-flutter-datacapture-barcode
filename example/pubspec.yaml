@@ -1,0 +1,29 @@
+name: scandit_flutter_datacapture_barcode_example
+description: Demonstrates how to use the scandit_flutter_datacapture_barcode plugin.
+
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+  flutter: '>=3.44.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  material_ui: '>=1.0.0 <1.4.0'
+
+  scandit_flutter_datacapture_barcode:
+    path: ../
+  scandit_flutter_datacapture_core:
+    path: ../../scandit-flutter-datacapture-core
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  config:
+    enable-swift-package-manager: true

@@ -108,10 +108,12 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
     private static func setupBarcodeCaptureModule(
         with registrar: FlutterPluginRegistrar
     ) -> BarcodeCaptureModule {
-        let emitter = FlutterEventEmitter(
-            eventChannel: FlutterEventChannel(
-                name: "com.scandit.datacapture.barcode.capture/event_channel",
-                binaryMessenger: registrar.messenger()
+        let emitter = RegistryEmitter(
+            platformEmitter: FlutterEventEmitter(
+                eventChannel: FlutterEventChannel(
+                    name: "com.scandit.datacapture.barcode.capture/event_channel",
+                    binaryMessenger: registrar.messenger()
+                )
             )
         )
         let module = BarcodeCaptureModule(emitter: emitter)
@@ -124,10 +126,12 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
     private static func setupBarcodeBatchModule(
         with registrar: FlutterPluginRegistrar
     ) -> BarcodeBatchModule {
-        let emitter = FlutterEventEmitter(
-            eventChannel: FlutterEventChannel(
-                name: "com.scandit.datacapture.barcode.batch/event_channel",
-                binaryMessenger: registrar.messenger()
+        let emitter = RegistryEmitter(
+            platformEmitter: FlutterEventEmitter(
+                eventChannel: FlutterEventChannel(
+                    name: "com.scandit.datacapture.barcode.batch/event_channel",
+                    binaryMessenger: registrar.messenger()
+                )
             )
         )
         let module = BarcodeBatchModule(emitter: emitter, viewFromJsonResolver: nil)
@@ -140,10 +144,12 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
     private static func setupBarcodeSelectionModule(
         with registrar: FlutterPluginRegistrar
     ) -> BarcodeSelectionModule {
-        let emitter = FlutterEventEmitter(
-            eventChannel: FlutterEventChannel(
-                name: "com.scandit.datacapture.barcode.selection/event_channel",
-                binaryMessenger: registrar.messenger()
+        let emitter = RegistryEmitter(
+            platformEmitter: FlutterEventEmitter(
+                eventChannel: FlutterEventChannel(
+                    name: "com.scandit.datacapture.barcode.selection/event_channel",
+                    binaryMessenger: registrar.messenger()
+                )
             )
         )
         let module = BarcodeSelectionModule(
@@ -164,10 +170,12 @@ public class ScanditFlutterDataCaptureBarcode: NSObject, FlutterPlugin {
     private static func setupBarcodeCountModule(
         with registrar: FlutterPluginRegistrar
     ) -> BarcodeCountModule {
-        let emitter = FlutterEventEmitter(
-            eventChannel: FlutterEventChannel(
-                name: "com.scandit.datacapture.barcode.count/event_channel",
-                binaryMessenger: registrar.messenger()
+        let emitter = RegistryEmitter(
+            platformEmitter: FlutterEventEmitter(
+                eventChannel: FlutterEventChannel(
+                    name: "com.scandit.datacapture.barcode.count/event_channel",
+                    binaryMessenger: registrar.messenger()
+                )
             )
         )
         let module = BarcodeCountModule(emitter: emitter)

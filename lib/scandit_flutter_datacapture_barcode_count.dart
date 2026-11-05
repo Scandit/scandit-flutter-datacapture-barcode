@@ -11,6 +11,7 @@ export 'src/barcode_spatial_grid.dart' show BarcodeSpatialGrid;
 export 'src/count/barcode_count_capture_list_session.dart' show BarcodeCountCaptureListSession;
 export 'src/count/barcode_count_feedback.dart' show BarcodeCountFeedback;
 export 'src/count/barcode_count_session.dart' show BarcodeCountSession;
+export 'src/count/barcode_count_session_snapshot.dart' show BarcodeCountSessionSnapshot;
 export 'src/count/barcode_count_settings.dart' show BarcodeCountSettings;
 export 'src/count/barcode_count_toolbar_settings.dart' show BarcodeCountToolbarSettings;
 export 'src/count/target_barcode.dart' show TargetBarcode;
@@ -22,6 +23,7 @@ export 'src/count/barcode_count_view.dart'
         BarcodeCountViewListener,
         BarcodeCountViewExtendedListener,
         BarcodeCountViewUiListener,
+        BarcodeCountViewUiExtendedListener,
         BarcodeCountViewStyle,
         BarcodeCountStatusProvider,
         BarcodeCountStatusProviderCallback;
@@ -38,3 +40,4 @@ export 'src/count/barcode_count_capture_list_listener.dart'
 export 'src/count/barcode_count_listener.dart' show BarcodeCountListener, BarcodeCountExtendedListener;
 export 'src/count/barcode_count_not_in_list_action_settings.dart' show BarcodeCountNotInListActionSettings;
 export 'src/count/barcode_count_mapping_flow_settings.dart' show BarcodeCountMappingFlowSettings;
+export 'src/count/barcode_count_icon.dart' show BarcodeCountIcon;

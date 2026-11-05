@@ -5,18 +5,181 @@
  */
 
 import 'dart:convert';
+import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/map_helper.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/logo_style.dart';
 
+import '../generated/barcode_generated_defaults.dart';
 import 'barcode_ar_annotation_trigger.dart';
 import 'barcode_ar_highlight.dart';
 import 'barcode_ar_info_annotation_anchor.dart';
 import 'barcode_ar_info_annotation_width_preset.dart';
 import 'barcode_ar_popover_annotation_anchor.dart';
+import 'barcode_ar_status_icon_annotation_anchor.dart';
+
+// Picks the platform-split value of a generated default. Kept private per
+// file, mirroring core's and id's own copies.
+T _platformDefault<T>({required T android, required T ios}) => Platform.isIOS ? ios : android;
+
+// Builds a Brush from a generated flat {fillColor, strokeColor, strokeWidth}
+// default literal - the shape BrushDefaults.fromJSON consumes on the native path.
+Brush _buildStaticBrush(Map<String, Object?> json) {
+  final fillColor = ColorDeserializer.fromRgbaHex(json['fillColor'] as String? ?? '#00000000');
+  final strokeColor = ColorDeserializer.fromRgbaHex(json['strokeColor'] as String? ?? '#00000000');
+  final strokeWidth = (json['strokeWidth'] as num?)?.toDouble() ?? 0.0;
+  return Brush(fillColor, strokeColor, strokeWidth);
+}
+
+// Builds a Feedback from a generated {vibration, sound} default literal.
+// Mirrors BarcodeArFeedbackDefaults.fromJSON's vibration mapping.
+Feedback _buildStaticFeedback(Map<String, Object?> json) {
+  final vibrationJson = json['vibration'] as Map<String, Object?>?;
+  final soundJson = json['sound'] as Map<String, Object?>?;
+
+  Vibration? vibration;
+  if (vibrationJson != null) {
+    switch (vibrationJson['type']) {
+      case 'selectionHaptic':
+        vibration = Vibration.selectionHapticFeedback;
+        break;
+      case 'successHaptic':
+        vibration = Vibration.successHapticFeedback;
+        break;
+      default:
+        vibration = Vibration.defaultVibration;
+    }
+  }
+
+  Sound? sound;
+  if (soundJson != null) {
+    sound = soundJson.containsKey('resource') ? Sound(soundJson['resource'] as String?) : Sound(null);
+  }
+
+  return Feedback(vibration, sound);
+}
+
+BarcodeArSettingsDefaults _buildStaticBarcodeArSettingsDefaults() {
+  return BarcodeArSettingsDefaults(
+      expectsOnlyUniqueBarcodes: BarcodeArSettingsGeneratedDefaults.expectOnlyUniqueBarcodes);
+}
+
+BarcodeArFeedbackDefaults _buildStaticBarcodeArFeedbackDefaults() {
+  return BarcodeArFeedbackDefaults(
+    _buildStaticFeedback(_platformDefault(
+      android: BarcodeArFeedbackGeneratedDefaults.scannedAndroid,
+      ios: BarcodeArFeedbackGeneratedDefaults.scannedIos,
+    )),
+    _buildStaticFeedback(_platformDefault(
+      android: BarcodeArFeedbackGeneratedDefaults.tappedAndroid,
+      ios: BarcodeArFeedbackGeneratedDefaults.tappedIos,
+    )),
+  );
+}
+
+BarcodeArCircleHighlightPresetsDefaults _buildStaticCircleHighlightPresets(Map<String, Object?> json) {
+  return BarcodeArCircleHighlightPresetsDefaults(json.map((key, value) {
+    final preset = value as Map<String, Object?>;
+    return MapEntry(
+      BarcodeArCircleHighlightPresetSerializer.fromJSON(key),
+      BarcodeArCircleHighlightDefaults(
+        _buildStaticBrush(preset['brush'] as Map<String, Object?>),
+        (preset['size'] as num).toDouble(),
+      ),
+    );
+  }));
+}
+
+BarcodeArViewDefaults _buildStaticBarcodeArViewDefaults() {
+  // The highlight brush colours are platform-split: the Android wrapper rounds
+  // native's float channels half-up while iOS truncates (#00FFFF73 vs #00FFFF72).
+  final highlight = _platformDefault(
+    android: BarcodeArViewGeneratedDefaults.highlightAndroid,
+    ios: BarcodeArViewGeneratedDefaults.highlightIos,
+  );
+  const popover = BarcodeArViewGeneratedDefaults.popoverAnnotation;
+  const statusIcon = BarcodeArViewGeneratedDefaults.statusIconAnnotation;
+  // Platform-split: the info annotation background is white at 80% alpha on
+  // Android (0xCC) and fully opaque on iOS.
+  final info = _platformDefault(
+    android: BarcodeArViewGeneratedDefaults.infoAnnotationAndroid,
+    ios: BarcodeArViewGeneratedDefaults.infoAnnotationIos,
+  );
+  final header = info['header'] as Map<String, Object?>;
+  final footer = info['footer'] as Map<String, Object?>;
+  final bodyElement = info['bodyElement'] as Map<String, Object?>;
+  const responsive = BarcodeArViewGeneratedDefaults.responsiveAnnotation;
+
+  return BarcodeArViewDefaults(
+    defaultCameraPosition: CameraPosition.fromJSON(BarcodeArViewGeneratedDefaults.defaultCameraPosition),
+    defaultSoundEnabled: BarcodeArViewGeneratedDefaults.soundEnabled,
+    defaultHapticsEnabled: BarcodeArViewGeneratedDefaults.hapticEnabled,
+    defaultTorchControlPosition: AnchorDeserializer.fromJSON(BarcodeArViewGeneratedDefaults.torchControlPosition),
+    defaultZoomControlPosition: AnchorDeserializer.fromJSON(BarcodeArViewGeneratedDefaults.zoomControlPosition),
+    defaultCameraSwitchControlPosition:
+        AnchorDeserializer.fromJSON(BarcodeArViewGeneratedDefaults.cameraSwitchControlPosition),
+    defaultShouldShowTorchControl: BarcodeArViewGeneratedDefaults.shouldShowTorchControl,
+    defaultRectangleHighlightBrush: _buildStaticBrush(highlight['rectangleBrush'] as Map<String, Object?>),
+    defaultPopoverAnnotationTrigger: BarcodeArAnnotationTriggerSerializer.fromJSON(popover['trigger'] as String),
+    defaultBarcodeArPopoverAnnotationButtonTextSize: (popover['buttonTextSize'] as num).toDouble(),
+    defaultBarcodeArPopoverAnnotationButtonTextColor:
+        ColorDeserializer.fromRgbaHex(popover['buttonTextColor'] as String),
+    defaultStatusIconAnnotationTrigger: BarcodeArAnnotationTriggerSerializer.fromJSON(statusIcon['trigger'] as String),
+    defaultStatusIconAnnotationAnchor: BarcodeArStatusIconAnnotationAnchor.fromJSON(statusIcon['anchor'] as String),
+    defaultLogoStyle: LogoStyleDeserializer.fromJSON(BarcodeArViewGeneratedDefaults.logoStyle),
+    defaultLogoAnchor: AnchorDeserializer.fromJSON(BarcodeArViewGeneratedDefaults.logoAnchor),
+    defaultLogoOffset: PointWithUnit.fromJSON(BarcodeArViewGeneratedDefaults.logoOffset),
+    defaultStatusIconAnnotationHasTip: statusIcon['hasTip'] as bool,
+    defaultStatusIconAnnotationIcon:
+        ScanditIcon.fromJSON((statusIcon['icon'] as Map<String, Object?>).cast<String, dynamic>()),
+    defaultStatusIconAnnotationTextColor: ColorDeserializer.fromRgbaHex(statusIcon['textColor'] as String),
+    defaultStatusIconAnnotationBackgroundColor: ColorDeserializer.fromRgbaHex(statusIcon['backgroundColor'] as String),
+    defaultHighlightIcon: null,
+    defaultIsEntirePopoverTappable: popover['isEntirePopoverTappable'] as bool,
+    defaultStatusIconAnnotationText: statusIcon['text'] as String?,
+    circleHighlightPresets: _buildStaticCircleHighlightPresets(highlight['circlePresets'] as Map<String, Object?>),
+    defaultShouldShowZoomControl: BarcodeArViewGeneratedDefaults.shouldShowZoomControl,
+    defaultShouldShowCameraSwitchControl: BarcodeArViewGeneratedDefaults.shouldShowCameraSwitchControl,
+    defaultInfoAnnotationWidth: BarcodeArInfoAnnotationWidthPresetSerializer.fromJSON(info['width'] as String),
+    defaultInfoAnnotationBackgroundColor: ColorDeserializer.fromRgbaHex(info['backgroundColor'] as String),
+    defaultInfoAnnotationHasTip: info['hasTip'] as bool,
+    defaultInfoAnnotationAnchor: BarcodeArInfoAnnotationAnchorSerializer.fromJSON(info['anchor'] as String),
+    defaultInfoAnnotationTrigger: BarcodeArAnnotationTriggerSerializer.fromJSON(info['trigger'] as String),
+    defaultInfoAnnotationHeaderBackgroundColor: ColorDeserializer.fromRgbaHex(header['backgroundColor'] as String),
+    defaultInfoAnnotationHeaderTextSize: (header['textSize'] as num).toDouble(),
+    defaultInfoAnnotationHeaderTextColor: ColorDeserializer.fromRgbaHex(header['textColor'] as String),
+    defaultInfoAnnotationFooterBackgroundColor: ColorDeserializer.fromRgbaHex(footer['backgroundColor'] as String),
+    defaultInfoAnnotationFooterTextSize: (footer['textSize'] as num).toDouble(),
+    defaultInfoAnnotationFooterTextColor: ColorDeserializer.fromRgbaHex(footer['textColor'] as String),
+    defaultInfoAnnotationBodyElementTextSize: (bodyElement['textSize'] as num).toDouble(),
+    defaultInfoAnnotationBodyElementTextColor: ColorDeserializer.fromRgbaHex(bodyElement['textColor'] as String),
+    defaultInfoAnnotationBodyElementLeftIconTappable: bodyElement['leftIconTappable'] as bool,
+    defaultInfoAnnotationBodyElementRightIconTappable: bodyElement['rightIconTappable'] as bool,
+    defaultInfoAnnotationEntireAnnotationTappable: info['isEntireAnnotationTappable'] as bool,
+    defaultInfoAnnotationHeaderIcon: null,
+    defaultInfoAnnotationHeaderText: header['text'] as String?,
+    defaultInfoAnnotationFooterIcon: null,
+    defaultInfoAnnotationFooterText: footer['text'] as String?,
+    defaultInfoAnnotationBodyElementText: bodyElement['text'] as String?,
+    defaultInfoAnnotationBodyElementStyledText: bodyElement['styledText'] as String?,
+    defaultInfoAnnotationBodyElementLeftIcon: null,
+    defaultInfoAnnotationBodyElementRightIcon: null,
+    defaultShouldShowMacroModeControl: BarcodeArViewGeneratedDefaults.shouldShowMacroModeControl,
+    defaultMacroModeControlPosition:
+        AnchorDeserializer.fromJSON(BarcodeArViewGeneratedDefaults.macroModeControlPosition),
+    defaultBarcodeArPopoverAnnotationButtonEnabled: popover['buttonEnabled'] as bool,
+    defaultBarcodeArPopoverAnnotationAnchor: BarcodeArPopoverAnnotationAnchor.fromJSON(popover['anchor'] as String),
+    defaultResponsiveAnnotationThreshold: (responsive['threshold'] as num).toDouble(),
+    defaultResponsiveAnnotationTrigger: BarcodeArAnnotationTriggerSerializer.fromJSON(responsive['trigger'] as String),
+    defaultHighlightIsPulsing: highlight['isPulsing'] as bool,
+  );
+}
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeArDefaults {
@@ -24,23 +187,41 @@ class BarcodeArDefaults {
 
   static CameraSettingsDefaults get recommendedCameraSettings => _recommendedCameraSettings;
 
-  static late BarcodeArFeedbackDefaults _feedbackDefaults;
+  // Statically sourced from generated/barcode_generated_defaults.dart - byte
+  // identical to the native getDefaults() response, available immediately, no
+  // method-channel round trip needed. See SDC-32174.
+  static final BarcodeArFeedbackDefaults _feedbackDefaults = _buildStaticBarcodeArFeedbackDefaults();
 
   static BarcodeArFeedbackDefaults get feedbackDefaults => _feedbackDefaults;
 
-  static late BarcodeArViewDefaults _view;
+  static final BarcodeArViewDefaults _view = _buildStaticBarcodeArViewDefaults();
 
   static BarcodeArViewDefaults get view => _view;
 
+  static final BarcodeArSettingsDefaults _settings = _buildStaticBarcodeArSettingsDefaults();
+
+  static BarcodeArSettingsDefaults get settings => _settings;
+
   static bool _isInitialized = false;
 
+  // RecommendedCameraSettings stays fully dynamic - see the id package.
   static void initializeDefaults(Map<String, dynamic> barcodeArDefaults) {
     if (_isInitialized) return;
     _recommendedCameraSettings = CameraSettingsDefaults.fromJSON(barcodeArDefaults['RecommendedCameraSettings']);
-    _feedbackDefaults =
-        BarcodeArFeedbackDefaults.fromJSON(jsonDecode(barcodeArDefaults['barcodeArFeedback']) as Map<String, dynamic>);
-    _view = BarcodeArViewDefaults.fromJSON(barcodeArDefaults['BarcodeArView']);
     _isInitialized = true;
+  }
+}
+
+@immutable
+class BarcodeArSettingsDefaults {
+  final bool expectsOnlyUniqueBarcodes;
+
+  const BarcodeArSettingsDefaults({required this.expectsOnlyUniqueBarcodes});
+
+  factory BarcodeArSettingsDefaults.fromJSON(Map<String, dynamic> json) {
+    return BarcodeArSettingsDefaults(
+      expectsOnlyUniqueBarcodes: json['expectOnlyUniqueBarcodes'] as bool,
+    );
   }
 }
 
@@ -60,6 +241,10 @@ class BarcodeArViewDefaults {
   final bool defaultBarcodeArPopoverAnnotationButtonEnabled;
   final BarcodeArPopoverAnnotationAnchor defaultBarcodeArPopoverAnnotationAnchor;
   final BarcodeArAnnotationTrigger defaultStatusIconAnnotationTrigger;
+  final BarcodeArStatusIconAnnotationAnchor defaultStatusIconAnnotationAnchor;
+  final LogoStyle defaultLogoStyle;
+  final Anchor defaultLogoAnchor;
+  final PointWithUnit defaultLogoOffset;
   final bool defaultStatusIconAnnotationHasTip;
   final ScanditIcon defaultStatusIconAnnotationIcon;
   final Color defaultStatusIconAnnotationTextColor;
@@ -113,6 +298,10 @@ class BarcodeArViewDefaults {
     required this.defaultBarcodeArPopoverAnnotationButtonTextSize,
     required this.defaultBarcodeArPopoverAnnotationButtonTextColor,
     required this.defaultStatusIconAnnotationTrigger,
+    required this.defaultStatusIconAnnotationAnchor,
+    required this.defaultLogoStyle,
+    required this.defaultLogoAnchor,
+    required this.defaultLogoOffset,
     required this.defaultStatusIconAnnotationHasTip,
     required this.defaultStatusIconAnnotationIcon,
     required this.defaultStatusIconAnnotationTextColor,
@@ -168,6 +357,13 @@ class BarcodeArViewDefaults {
     var defaultStatusIconAnnotationTrigger =
         BarcodeArAnnotationTriggerSerializer.fromJSON(json['defaultStatusIconAnnotationTrigger']);
 
+    var defaultStatusIconAnnotationAnchor =
+        BarcodeArStatusIconAnnotationAnchor.fromJSON(json['defaultStatusIconAnnotationAnchor'] as String);
+
+    var defaultLogoStyle = LogoStyleDeserializer.fromJSON(json['defaultLogoStyle']);
+    var defaultLogoAnchor = AnchorDeserializer.fromJSON(json['defaultLogoAnchor']);
+    var defaultLogoOffset = PointWithUnit.fromJSON(jsonDecode(json['defaultLogoOffset']));
+
     var defaultStatusIconAnnotationIcon = ScanditIcon.fromJSON(jsonDecode(json['defaultStatusIconAnnotationIcon']));
 
     var defaultStatusIconAnnotationTextColor = parseColor(json, 'defaultStatusIconAnnotationTextColor')!;
@@ -211,6 +407,10 @@ class BarcodeArViewDefaults {
           parseDouble(json, 'defaultBarcodeArPopoverAnnotationButtonTextSize') ?? 0.0,
       defaultBarcodeArPopoverAnnotationButtonTextColor: defaultBarcodeArPopoverAnnotationButtonTextColor,
       defaultStatusIconAnnotationTrigger: defaultStatusIconAnnotationTrigger,
+      defaultStatusIconAnnotationAnchor: defaultStatusIconAnnotationAnchor,
+      defaultLogoStyle: defaultLogoStyle,
+      defaultLogoAnchor: defaultLogoAnchor,
+      defaultLogoOffset: defaultLogoOffset,
       defaultStatusIconAnnotationHasTip: json['defaultStatusIconAnnotationHasTip'] as bool,
       defaultStatusIconAnnotationIcon: defaultStatusIconAnnotationIcon,
       defaultStatusIconAnnotationTextColor: defaultStatusIconAnnotationTextColor,

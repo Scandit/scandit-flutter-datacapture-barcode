@@ -4,11 +4,22 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
+import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/schema_types.dart'
+    show buildSparkScanScanningMode;
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_preview_behavior.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
+/// The capture mode type of the [SparkScanView].
+///
+/// Added in version 6.20.0
 enum SparkScanScanningBehavior {
+  /// Barcode capturing session is stopped after each scan.
+  ///
+  /// Added in version 6.20.0
   single('single'),
+  /// Keeps the barcode capturing session active for longer time.
+  ///
+  /// Added in version 6.20.0
   continuous('continuous');
 
   const SparkScanScanningBehavior(this._name);
@@ -25,6 +36,9 @@ extension SparkScanScanningBehaviorDeserializer on SparkScanScanningBehavior {
   }
 }
 
+/// The base class for setting a default scanning mode to [SparkScanViewSettings]. Can be either [SparkScanScanningModeTarget] or [SparkScanScanningModeDefault].
+///
+/// Added in version 6.20.0
 abstract class SparkScanScanningMode extends Serializable {
   final SparkScanScanningBehavior _scanningBehavior;
   final SparkScanPreviewBehavior _previewBehavior;
@@ -34,41 +48,65 @@ abstract class SparkScanScanningMode extends Serializable {
 
   @override
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      "type": _type,
-      "settings": {
+    return buildSparkScanScanningMode(
+      type: _type,
+      settings: {
         "scanningBehavior": _scanningBehavior.toString(),
         "previewBehavior": _previewBehavior.toString(),
-      }
-    };
+      },
+    );
   }
 }
 
+/// Target scanning mode. This is meant and optimized to scan codes further away.
+///
+/// Added in version 6.20.0
 @Deprecated('Use SparkScanSettings.selectionMode = SelectionMode.on instead. Will be removed in 9.0.')
 class SparkScanScanningModeTarget extends SparkScanScanningMode {
+  /// Constructs a new target scanning mode with the provided capture mode and preview behavior.
+  ///
+  /// Added in version 6.23.0
   SparkScanScanningModeTarget.fromPreviewBehavior(
       SparkScanScanningBehavior scanningBehavior, SparkScanPreviewBehavior previewBehavior)
       : super._('target', scanningBehavior, previewBehavior);
 
+  /// The scanning mode provided in the constructor.
+  ///
+  /// Added in version 6.20.0
   SparkScanScanningBehavior get scanningBehavior {
     return _scanningBehavior;
   }
 
+  /// The preview behavior provided in the constructor.
+  ///
+  /// Added in version 6.23.0
   SparkScanPreviewBehavior get previewBehavior {
     return _previewBehavior;
   }
 }
 
+/// This is the standard scanning mode for SparkScan.
+///
+/// Added in version 6.20.0
 @Deprecated('Use SparkScanSettings.selectionMode = SelectionMode.off instead. Will be removed in 9.0.')
 class SparkScanScanningModeDefault extends SparkScanScanningMode {
+  /// Constructs a new default scanning mode with the provided capture mode and preview behavior.
+  ///
+  /// Added in version 6.23.0
   SparkScanScanningModeDefault.fromPreviewBehavior(
       SparkScanScanningBehavior scanningBehavior, SparkScanPreviewBehavior previewBehavior)
       : super._('default', scanningBehavior, previewBehavior);
 
+  /// The scanning mode provided in the constructor.
+  ///
+  /// Added in version 6.20.0
   SparkScanScanningBehavior get scanningBehavior {
     return _scanningBehavior;
   }
 
+  /// The preview behavior provided in the constructor.
+  ///
+  /// Added in version 6.23.0
   SparkScanPreviewBehavior get previewBehavior {
     return _previewBehavior;
   }

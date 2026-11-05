@@ -1,0 +1,47 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+    id "com.scandit.datacapture.gradle-code-quality-plugin"
+}
+
+scanditCodeQuality {
+    detekt {
+        inputFilesDir = file('../../../android').toString()
+    }
+}
+
+android {
+    namespace "com.scandit.scandit_flutter_datacapture_barcode_example"
+    compileSdk 36
+    ndkVersion '27.0.12077973'
+
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+
+    defaultConfig {
+        applicationId "com.scandit.scandit_flutter_datacapture_barcode_example"
+        minSdkVersion 24
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+flutter {
+    source '../..'
+}

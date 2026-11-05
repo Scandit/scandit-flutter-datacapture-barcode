@@ -4,9 +4,21 @@
  * Copyright (C) 2021- Scandit AG. All rights reserved.
  */
 
+/// An enumeration of composite code presets.
+///
+/// Added in version 6.7.0
 enum CompositeType {
+  /// Composite Code A
+  ///
+  /// Added in version 6.7.0
   a('A'),
+  /// Composite Code B
+  ///
+  /// Added in version 6.7.0
   b('B'),
+  /// Composite Code C
+  ///
+  /// Added in version 6.7.0
   c('C');
 
   const CompositeType(this._name);

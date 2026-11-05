@@ -4,6 +4,9 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
+// ignore_for_file: must_be_immutable - packaging injects doc comments above the
+// class, which detaches a line-level ignore from the class it applies to.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -11,13 +14,25 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/schema_types.dart'
+    show
+        SparkScanFeedbackDelegateFeedbackForBarcode,
+        SparkScanFeedbackDelegateFeedbackForScannedItem,
+        SparkScanListenerDidScan,
+        SparkScanListenerDidUpdateSession,
+        SparkScanViewUiListenerBarcodeCountButtonTapped,
+        SparkScanViewUiListenerBarcodeFindButtonTapped,
+        SparkScanViewUiListenerDidChangeScanningMode,
+        SparkScanViewUiListenerDidChangeViewState,
+        SparkScanViewUiListenerLabelCaptureButtonTapped;
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_feedback_delegate.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_license_info.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_listener.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_session.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/spark/spark_scan_settings.dart';
@@ -39,6 +54,11 @@ import 'spark_scan_view_settings.dart';
 import 'spark_scan_defaults.dart';
 import 'spark_scan_view_state.dart';
 
+/// Capture mode that implements SparkScan.
+///
+/// This capture mode uses the *barcode scanning* capability. It cannot be used together with other capture modes that require the same capabilities, e.g. [BarcodeCapture].
+///
+/// Added in version 6.20.0
 class SparkScan extends DataCaptureMode {
   bool _enabled = true;
   bool _isInCallback = false;
@@ -49,11 +69,28 @@ class SparkScan extends DataCaptureMode {
 
   SparkScan._(this._settings);
 
+  /// Constructs a new SparkScan mode with the provided settings.
+  ///
+  /// Added in version 6.20.0
   SparkScan({SparkScanSettings? settings}) : this._(settings ?? SparkScanSettings());
 
+  /// This flag indicates whether the SparkScan mode is currently processing frames to recognise barcodes.
+  ///
+  /// Changing this property from *false* to *true* causes the connected [SparkScanView] to start its scanning flow.
+  ///
+  /// Changing this property from *true* to *false* causes the connected [SparkScanView] to stop its scanning flow and go to idle mode.
+  ///
+  /// Added in version 6.20.0
   @override
   bool get isEnabled => _enabled;
 
+  /// This flag indicates whether the SparkScan mode is currently processing frames to recognise barcodes.
+  ///
+  /// Changing this property from *false* to *true* causes the connected [SparkScanView] to start its scanning flow.
+  ///
+  /// Changing this property from *true* to *false* causes the connected [SparkScanView] to stop its scanning flow and go to idle mode.
+  ///
+  /// Added in version 6.20.0
   @override
   set isEnabled(bool newValue) {
     _enabled = newValue;
@@ -63,11 +100,19 @@ class SparkScan extends DataCaptureMode {
     _controller?.setModeEnabledState(newValue);
   }
 
+  /// Asynchronously applies the new settings to the barcode scanner. If the scanner is currently running, the task will complete when the next frame is processed, and will use the new settings for that frame. If the scanner is currently *not* running, the task will complete as soon as the settings have been stored and won’t wait until the next frame is going to be processed.
+  ///
+  /// Added in version 6.20.0
   Future<void> applySettings(SparkScanSettings settings) {
     _settings = settings;
     return _didChange();
   }
 
+  /// Adds the listener to this SparkScan instance.
+  ///
+  /// In case the same listener is already observing this instance, calling this method will not add the listener again.
+  ///
+  /// Added in version 6.20.0
   void addListener(SparkScanListener listener) {
     if (_listeners.contains(listener)) {
       return;
@@ -75,12 +120,24 @@ class SparkScan extends DataCaptureMode {
     _listeners.add(listener);
   }
 
+  /// Removes a previously added listener from this SparkScan instance.
+  ///
+  /// In case the listener is not currently observing this instance, calling this method has no effect.
+  ///
+  /// Added in version 6.20.0
   void removeListener(SparkScanListener listener) {
     _listeners.remove(listener);
   }
 
   Future<void> _didChange() {
     return _controller?.updateSparkScanMode() ?? Future.value();
+  }
+
+  /// Async getter for the SparkScan license info. Returns *null* until the mode has been added to a [DataCaptureContext] with a license that covers SparkScan.
+  ///
+  /// Added in version 8.6.0
+  Future<SparkScanLicenseInfo?> getSparkScanLicenseInfo() {
+    return _controller?.getSparkScanLicenseInfo() ?? Future.value(null);
   }
 
   @override
@@ -94,7 +151,11 @@ class SparkScan extends DataCaptureMode {
   }
 }
 
-// ignore: must_be_immutable
+/// [SparkScan] comes with a ready-to-use UI and scanning modes that are purpose-built to tackle high-volume scanning at close range. The SparkScanView integrates with any app without requiring app redesign or customization. It includes:
+///
+/// camera preview screenlarge-sized scan buttonquick access toolbar to adjust scanning settings
+///
+/// Added in version 6.20.0
 class SparkScanView extends StatefulWidget implements Serializable {
   final Widget _child;
   final SparkScan _sparkScan;
@@ -161,6 +222,25 @@ class SparkScanView extends StatefulWidget implements Serializable {
     _feedbackExtendedDelegate = feedbackExtendedDelegate;
   }
 
+  /// Constructs a new SparkScan view using a declarative style. All view configuration — button visibility, toolbar colors, and delegates — can be supplied directly as named constructor parameters. Any parameter left as `null` uses the SDK default for that property.
+  ///
+  /// Prefer this constructor when building reactive UIs where the view configuration is derived from state: pass updated values on each rebuild and the view will reconcile them automatically.
+  ///
+  /// ```dart
+  /// SparkScanView(
+  ///   yourWidgetBody,
+  ///   dataCaptureContext,
+  ///   sparkScan,
+  ///   viewSettings,
+  ///   torchControlVisible: true,
+  ///   barcodeCountButtonVisible: false,
+  ///   toolbarBackgroundColor: Colors.black,
+  ///   feedbackExtendedDelegate: myFeedbackDelegate,
+  ///   uiListener: myUiListener,
+  /// );
+  /// ```
+  ///
+  /// Added in version 8.4.0
   SparkScanView(
     Widget child,
     DataCaptureContext dataCaptureContext,
@@ -225,25 +305,50 @@ class SparkScanView extends StatefulWidget implements Serializable {
   // we require the DCContext only to make sure the user created/initialized it
   : this._(child, sparkScan, settings ?? SparkScanViewSettings());
 
+  /// Implemented from [StatefulWidget](https://api.flutter.dev/flutter/widgets/StatefulWidget-class.html). Called by the Flutter framework.
+  ///
+  /// Added in version 6.20.0
   @override
   State<StatefulWidget> createState() {
     return _SparkScanViewState();
   }
 
+  /// Returns the default brush used by the overlay.
+  ///
+  /// Added in version 6.20.0
   static Brush get defaultBrush {
     return SparkScanDefaults.sparkScanViewDefaults.defaultBrush;
   }
 
+  /// Returns whether the device supports listening for hardware button events. This is true for devices with api >= 28.
+  ///
+  /// This method is only supported on Android devices.
+  ///
+  /// Added in version 6.20.0
   static bool get hardwareTriggerSupported {
     return SparkScanDefaults.sparkScanViewDefaults.hardwareTriggerSupported;
   }
 
   bool _torchControlVisible = SparkScanDefaults.sparkScanViewDefaults.torchControlVisible;
 
+  /// Indicates whether the torch control should be shown to the user.
+  ///
+  /// Default is *true*.
+  ///
+  /// If [SparkScanViewSettings.defaultTorchState] is set to [TorchState.auto], torch control is hidden.
+  ///
+  /// Added in version 7.0.0
   bool get torchControlVisible {
     return _torchControlVisible;
   }
 
+  /// Indicates whether the torch control should be shown to the user.
+  ///
+  /// Default is *true*.
+  ///
+  /// If [SparkScanViewSettings.defaultTorchState] is set to [TorchState.auto], torch control is hidden.
+  ///
+  /// Added in version 7.0.0
   set torchControlVisible(bool newValue) {
     _torchControlVisible = newValue;
     _update();
@@ -251,10 +356,20 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   bool _previewCloseControlVisible = SparkScanDefaults.sparkScanViewDefaults.previewCloseControlVisible;
 
+  /// Indicates whether the mini preview close control should be shown to the user.
+  ///
+  /// Default is *true*.
+  ///
+  /// Added in version 7.0.0
   bool get previewCloseControlVisible {
     return _previewCloseControlVisible;
   }
 
+  /// Indicates whether the mini preview close control should be shown to the user.
+  ///
+  /// Default is *true*.
+  ///
+  /// Added in version 7.0.0
   set previewCloseControlVisible(bool newValue) {
     _previewCloseControlVisible = newValue;
     _update();
@@ -262,10 +377,20 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   bool _scanningBehaviorButtonVisible = SparkScanDefaults.sparkScanViewDefaults.scanningBehaviorButtonVisible;
 
+  /// Indicates whether the scanning behavior button should be shown to the user.
+  ///
+  /// Default is *false*.
+  ///
+  /// Added in version 6.20.0
   bool get scanningBehaviorButtonVisible {
     return _scanningBehaviorButtonVisible;
   }
 
+  /// Indicates whether the scanning behavior button should be shown to the user.
+  ///
+  /// Default is *false*.
+  ///
+  /// Added in version 6.20.0
   set scanningBehaviorButtonVisible(bool newValue) {
     _scanningBehaviorButtonVisible = newValue;
     _update();
@@ -273,10 +398,20 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   Color? _toolbarBackgroundColor = SparkScanDefaults.sparkScanViewDefaults.toolbarBackgroundColor;
 
+  /// Sets the toolbar background color.
+  ///
+  /// Default is *null*.
+  ///
+  /// Added in version 6.20.0
   Color? get toolbarBackgroundColor {
     return _toolbarBackgroundColor;
   }
 
+  /// Sets the toolbar background color.
+  ///
+  /// Default is *null*.
+  ///
+  /// Added in version 6.20.0
   set toolbarBackgroundColor(Color? newValue) {
     _toolbarBackgroundColor = newValue;
     _update();
@@ -284,10 +419,20 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   Color? _toolbarIconActiveTintColor = SparkScanDefaults.sparkScanViewDefaults.toolbarIconActiveTintColor;
 
+  /// Sets the toolbar icon active color.
+  ///
+  /// Default is *null*.
+  ///
+  /// Added in version 6.20.0
   Color? get toolbarIconActiveTintColor {
     return _toolbarIconActiveTintColor;
   }
 
+  /// Sets the toolbar icon active color.
+  ///
+  /// Default is *null*.
+  ///
+  /// Added in version 6.20.0
   set toolbarIconActiveTintColor(Color? newValue) {
     _toolbarIconActiveTintColor = newValue;
     _update();
@@ -295,10 +440,20 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   Color? _toolbarIconInactiveTintColor = SparkScanDefaults.sparkScanViewDefaults.toolbarIconInactiveTintColor;
 
+  /// Sets the toolbar icon inactive color.
+  ///
+  /// Default is *null*.
+  ///
+  /// Added in version 6.20.0
   Color? get toolbarIconInactiveTintColor {
     return _toolbarIconInactiveTintColor;
   }
 
+  /// Sets the toolbar icon inactive color.
+  ///
+  /// Default is *null*.
+  ///
+  /// Added in version 6.20.0
   set toolbarIconInactiveTintColor(Color? newValue) {
     _toolbarIconInactiveTintColor = newValue;
     _update();
@@ -306,10 +461,20 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   bool _barcodeCountButtonVisible = SparkScanDefaults.sparkScanViewDefaults.barcodeCountButtonVisible;
 
+  /// Indicates whether the barcode count button should be shown to the user.
+  ///
+  /// Default is *false*.
+  ///
+  /// Added in version 6.20.0
   bool get barcodeCountButtonVisible {
     return _barcodeCountButtonVisible;
   }
 
+  /// Indicates whether the barcode count button should be shown to the user.
+  ///
+  /// Default is *false*.
+  ///
+  /// Added in version 6.20.0
   set barcodeCountButtonVisible(bool newValue) {
     _barcodeCountButtonVisible = newValue;
     _update();
@@ -317,10 +482,20 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   bool _barcodeFindButtonVisible = SparkScanDefaults.sparkScanViewDefaults.barcodeFindButtonVisible;
 
+  /// Indicates whether the barcode find button should be shown to the user.
+  ///
+  /// Default is *false*.
+  ///
+  /// Added in version 6.26.0
   bool get barcodeFindButtonVisible {
     return _barcodeFindButtonVisible;
   }
 
+  /// Indicates whether the barcode find button should be shown to the user.
+  ///
+  /// Default is *false*.
+  ///
+  /// Added in version 6.26.0
   set barcodeFindButtonVisible(bool newValue) {
     _barcodeFindButtonVisible = newValue;
     _update();
@@ -330,21 +505,45 @@ class SparkScanView extends StatefulWidget implements Serializable {
   // native state; both accessors share one backing field.
   bool _targetModeButtonVisible = SparkScanDefaults.sparkScanViewDefaults.selectionModeButtonVisible;
 
+  /// Indicates whether the target mode button should be shown to the user.
+  ///
+  /// Default is *false*.
+  ///
+  /// Added in version 6.20.0
   @Deprecated('Use selectionModeButtonVisible instead. Will be removed in 9.0.')
   bool get targetModeButtonVisible {
     return _targetModeButtonVisible;
   }
 
+  /// Indicates whether the target mode button should be shown to the user.
+  ///
+  /// Default is *false*.
+  ///
+  /// Added in version 6.20.0
   @Deprecated('Use selectionModeButtonVisible instead. Will be removed in 9.0.')
   set targetModeButtonVisible(bool newValue) {
     _targetModeButtonVisible = newValue;
     _update();
   }
 
+  /// Indicates whether the selection mode button should be shown to the user. The button toggles [SparkScanSettings.selectionMode] between [SelectionMode.on] and [SelectionMode.off].
+  ///
+  /// Renamed replacement for the deprecated [SparkScanView.targetModeButtonVisible]. Both properties share the same underlying state; when a deserialised JSON snapshot contains both keys, `selectionModeButtonVisible` wins.
+  ///
+  /// Default is *false*.
+  ///
+  /// Added in version 8.5.0
   bool get selectionModeButtonVisible {
     return _targetModeButtonVisible;
   }
 
+  /// Indicates whether the selection mode button should be shown to the user. The button toggles [SparkScanSettings.selectionMode] between [SelectionMode.on] and [SelectionMode.off].
+  ///
+  /// Renamed replacement for the deprecated [SparkScanView.targetModeButtonVisible]. Both properties share the same underlying state; when a deserialised JSON snapshot contains both keys, `selectionModeButtonVisible` wins.
+  ///
+  /// Default is *false*.
+  ///
+  /// Added in version 8.5.0
   set selectionModeButtonVisible(bool newValue) {
     _targetModeButtonVisible = newValue;
     _update();
@@ -352,10 +551,20 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   bool _labelCaptureButtonVisible = SparkScanDefaults.sparkScanViewDefaults.labelCaptureButtonVisible;
 
+  /// Indicates whether the label capture button should be shown to the user.
+  ///
+  /// Default is *false*.
+  ///
+  /// Added in version 7.4.0
   bool get labelCaptureButtonVisible {
     return _labelCaptureButtonVisible;
   }
 
+  /// Indicates whether the label capture button should be shown to the user.
+  ///
+  /// Default is *false*.
+  ///
+  /// Added in version 7.4.0
   set labelCaptureButtonVisible(bool newValue) {
     _labelCaptureButtonVisible = newValue;
     _update();
@@ -363,15 +572,28 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   bool _zoomSwitchControlVisible = SparkScanDefaults.sparkScanViewDefaults.zoomSwitchControlVisible;
 
+  /// Indicates whether the zoom switch control should be shown to the user.
+  ///
+  /// Default is *true*.
+  ///
+  /// Added in version 6.20.0
   bool get zoomSwitchControlVisible {
     return _zoomSwitchControlVisible;
   }
 
+  /// Indicates whether the zoom switch control should be shown to the user.
+  ///
+  /// Default is *true*.
+  ///
+  /// Added in version 6.20.0
   set zoomSwitchControlVisible(bool newValue) {
     _zoomSwitchControlVisible = newValue;
     _update();
   }
 
+  /// Sets the listener which is called whenever a barcode find button or barcode count button is tapped from the toolbar.
+  ///
+  /// Added in version 6.20.0
   void setListener(SparkScanViewUiListener? listener) {
     if (listener != null) {
       _controller?.subscribeUiListeners();
@@ -382,8 +604,14 @@ class SparkScanView extends StatefulWidget implements Serializable {
     _update();
   }
 
+  /// Sets the feedback delegate. If no delegate is set, the default SparkScanBarcodeFeedback.Success ([Success]) feedback is emitted.
+  ///
+  /// Added in version 6.23.0
   SparkScanFeedbackDelegate? get feedbackDelegate => _feedbackDelegate;
 
+  /// Sets the feedback delegate. If no delegate is set, the default SparkScanBarcodeFeedback.Success ([Success]) feedback is emitted.
+  ///
+  /// Added in version 6.23.0
   set feedbackDelegate(SparkScanFeedbackDelegate? newValue) {
     _feedbackDelegate = newValue;
     if (newValue != null) {
@@ -394,8 +622,14 @@ class SparkScanView extends StatefulWidget implements Serializable {
     _controller?.setFeedbackDelegate(newValue != null);
   }
 
+  /// Sets the feedback extended delegate. This is an extension of [SparkScanFeedbackDelegate] that adds support for SparkScanFeedbackExtendedDelegate.feedbackForScannedItem(). This interface was introduced to avoid breaking changes for existing implementations. Users should use either [SparkScanView.feedbackDelegate] or [SparkScanView.feedbackExtendedDelegate], but not both. If no delegate is set, the default SparkScanBarcodeFeedback.Success ([Success]) feedback is emitted. This property will be removed in a future release.
+  ///
+  /// Added in version 8.2.0
   SparkScanFeedbackExtendedDelegate? get feedbackExtendedDelegate => _feedbackExtendedDelegate;
 
+  /// Sets the feedback extended delegate. This is an extension of [SparkScanFeedbackDelegate] that adds support for SparkScanFeedbackExtendedDelegate.feedbackForScannedItem(). This interface was introduced to avoid breaking changes for existing implementations. Users should use either [SparkScanView.feedbackDelegate] or [SparkScanView.feedbackExtendedDelegate], but not both. If no delegate is set, the default SparkScanBarcodeFeedback.Success ([Success]) feedback is emitted. This property will be removed in a future release.
+  ///
+  /// Added in version 8.2.0
   set feedbackExtendedDelegate(SparkScanFeedbackExtendedDelegate? newValue) {
     _feedbackExtendedDelegate = newValue;
     if (newValue != null) {
@@ -408,8 +642,18 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   bool _previewSizeControlVisible = SparkScanDefaults.sparkScanViewDefaults.previewSizeControlVisible;
 
+  /// Indicates whether the mini preview size control should be shown to the user.
+  ///
+  /// Default is *true*.
+  ///
+  /// Added in version 6.23.0
   bool get previewSizeControlVisible => _previewSizeControlVisible;
 
+  /// Indicates whether the mini preview size control should be shown to the user.
+  ///
+  /// Default is *true*.
+  ///
+  /// Added in version 6.23.0
   set previewSizeControlVisible(bool newValue) {
     _previewSizeControlVisible = newValue;
     _update();
@@ -417,10 +661,24 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   bool _cameraSwitchButtonVisible = SparkScanDefaults.sparkScanViewDefaults.cameraSwitchButtonVisible;
 
+  /// Indicates whether the camera switch button should be shown to the user.
+  ///
+  /// Default is *false*.
+  ///
+  /// This API is still in beta and may change in future versions of Scandit Data Capture SDK.
+  ///
+  /// Added in version 6.24.0
   bool get cameraSwitchButtonVisible {
     return _cameraSwitchButtonVisible;
   }
 
+  /// Indicates whether the camera switch button should be shown to the user.
+  ///
+  /// Default is *false*.
+  ///
+  /// This API is still in beta and may change in future versions of Scandit Data Capture SDK.
+  ///
+  /// Added in version 6.24.0
   set cameraSwitchButtonVisible(bool newValue) {
     _cameraSwitchButtonVisible = newValue;
     _update();
@@ -428,10 +686,16 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   Color? _triggerButtonCollapsedColor = SparkScanDefaults.sparkScanViewDefaults.triggerButtonCollapsedColor;
 
+  /// Sets the background color of the trigger button when button is collapsed.
+  ///
+  /// Added in version 7.0.0
   Color? get triggerButtonCollapsedColor {
     return _triggerButtonCollapsedColor;
   }
 
+  /// Sets the background color of the trigger button when button is collapsed.
+  ///
+  /// Added in version 7.0.0
   set triggerButtonCollapsedColor(Color? newValue) {
     _triggerButtonCollapsedColor = newValue;
     _update();
@@ -439,10 +703,16 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   Color? _triggerButtonExpandedColor = SparkScanDefaults.sparkScanViewDefaults.triggerButtonExpandedColor;
 
+  /// Sets the background color of the trigger button when button is expanded.
+  ///
+  /// Added in version 7.0.0
   Color? get triggerButtonExpandedColor {
     return _triggerButtonExpandedColor;
   }
 
+  /// Sets the background color of the trigger button when button is expanded.
+  ///
+  /// Added in version 7.0.0
   set triggerButtonExpandedColor(Color? newValue) {
     _triggerButtonExpandedColor = newValue;
     _update();
@@ -450,10 +720,16 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   Color? _triggerButtonAnimationColor = SparkScanDefaults.sparkScanViewDefaults.triggerButtonAnimationColor;
 
+  /// Sets the color of the pulsing animation around the trigger button, which is shown when the scanner is active.
+  ///
+  /// Added in version 7.0.0
   Color? get triggerButtonAnimationColor {
     return _triggerButtonAnimationColor;
   }
 
+  /// Sets the color of the pulsing animation around the trigger button, which is shown when the scanner is active.
+  ///
+  /// Added in version 7.0.0
   set triggerButtonAnimationColor(Color? newValue) {
     _triggerButtonAnimationColor = newValue;
     _update();
@@ -461,10 +737,16 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   Color? _triggerButtonTintColor = SparkScanDefaults.sparkScanViewDefaults.triggerButtonTintColor;
 
+  /// Sets the trigger button tint color.
+  ///
+  /// Added in version 7.0.0
   Color? get triggerButtonTintColor {
     return _triggerButtonTintColor;
   }
 
+  /// Sets the trigger button tint color.
+  ///
+  /// Added in version 7.0.0
   set triggerButtonTintColor(Color? newValue) {
     _triggerButtonTintColor = newValue;
     _update();
@@ -472,29 +754,56 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   bool _triggerButtonVisible = SparkScanDefaults.sparkScanViewDefaults.triggerButtonVisible;
 
+  /// Indicates whether the trigger button should be shown to the user.
+  ///
+  /// Default is *true*.
+  ///
+  /// Added in version 7.0.0
   bool get triggerButtonVisible {
     return _triggerButtonVisible;
   }
 
+  /// Indicates whether the trigger button should be shown to the user.
+  ///
+  /// Default is *true*.
+  ///
+  /// Added in version 7.0.0
   set triggerButtonVisible(bool newValue) {
     _triggerButtonVisible = newValue;
     _update();
   }
 
+  /// Starts the scanning process. You can call this method if you want to trigger the scanning process without any user interaction.
+  ///
+  /// Added in version 6.20.0
   Future<void> startScanning() async {
     return _controller?.startScanning() ?? Future.value(null);
   }
 
+  /// Pauses the scanning process. You can call this method if you want to trigger pausing the scanning process without any user interaction.
+  ///
+  /// Added in version 6.20.0
   Future<void> pauseScanning() async {
     await _controller?.pauseScanning();
   }
 
+  /// Added in version 7.6.2
   Future<void> stopScanning() async {
     await _controller?.stopScanning();
   }
 
+  /// Shows a toast with text inside the mini preview.
+  ///
+  /// Added in version 6.20.0
   Future<void> showToast(String text) async {
     await _controller?.showToast(text);
+  }
+
+  /// Returns the currently used SparkScanScanningMode.
+  ///
+  /// Added in version 8.7.0
+  Future<SparkScanScanningMode> getScanningMode() async {
+    return await _controller?.getScanningMode() ?? _settings.defaultScanningMode;
   }
 
   Future<void> _update() async {
@@ -507,6 +816,9 @@ class SparkScanView extends StatefulWidget implements Serializable {
 
   String? _triggerButtonImage = SparkScanDefaults.sparkScanViewDefaults.triggerButtonImage;
 
+  /// The image displayed in the trigger button.
+  ///
+  /// Added in version 7.0.0
   Image? get triggerButtonImage {
     var base64EncodedImage = _triggerButtonImage;
     if (base64EncodedImage == null) return null;
@@ -515,6 +827,9 @@ class SparkScanView extends StatefulWidget implements Serializable {
     return Image.memory(base64Decode(normalized));
   }
 
+  /// The image displayed in the trigger button.
+  ///
+  /// Added in version 7.0.0
   set triggerButtonImage(Image? newValue) {
     if (newValue == null) {
       _triggerButtonImage = null;
@@ -528,6 +843,9 @@ class SparkScanView extends StatefulWidget implements Serializable {
     });
   }
 
+  /// Sets the image to use for the trigger button.
+  ///
+  /// Added in version 7.0.0
   Future<void> setTriggerButtonImage(Uint8List image) {
     _triggerButtonImage = base64Encode(image);
     return _controller?.updateView() ?? Future.value(null);
@@ -761,17 +1079,21 @@ class _SparkScanViewController extends BaseController {
     if (_sparkScanViewSubscription != null) return;
     _sparkScanViewSubscription = BarcodePluginEvents.sparkScanEventStream.forView(_viewId).listen((event) {
       if (event.isEvent('SparkScanViewUiListener.barcodeCountButtonTapped')) {
+        SparkScanViewUiListenerBarcodeCountButtonTapped.fromJson(event.payload);
         view._uiListener?.didTapBarcodeCountButton(view);
       } else if (event.isEvent('SparkScanViewUiListener.barcodeFindButtonTapped')) {
+        SparkScanViewUiListenerBarcodeFindButtonTapped.fromJson(event.payload);
         view._uiListener?.didTapBarcodeFindButton(view);
       } else if (event.isEvent('SparkScanViewUiListener.didChangeViewState')) {
-        final stateJson = event.payload['state'] as String;
-        final newState = SparkScanViewStateSerializer.fromJSON(stateJson);
+        final payload = SparkScanViewUiListenerDidChangeViewState.fromJson(event.payload);
+        final newState = SparkScanViewStateSerializer.fromJSON(payload.state);
         view._uiListener?.didChangeViewState(newState);
       } else if (event.isEvent('SparkScanViewUiListener.labelCaptureButtonTapped')) {
+        SparkScanViewUiListenerLabelCaptureButtonTapped.fromJson(event.payload);
         view._uiListener?.didTapLabelCaptureButton(view);
       } else if (event.isEvent('SparkScanViewUiListener.didChangeScanningMode')) {
-        final scanningModeJson = event.payload['scanningMode'] as Map<String, dynamic>;
+        final payload = SparkScanViewUiListenerDidChangeScanningMode.fromJson(event.payload);
+        final scanningModeJson = jsonDecode(payload.scanningMode) as Map<String, dynamic>;
         final newScanningMode = SparkScanScanningModeSerializer.fromJSON(scanningModeJson);
         if (view._uiListener is SparkScanViewUiExtendedListener) {
           (view._uiListener as SparkScanViewUiExtendedListener).didChangeScanningMode(newScanningMode);
@@ -811,31 +1133,92 @@ class _SparkScanViewController extends BaseController {
 
   void subscribeToFeedbackDelegateEvents() {
     if (_sparkScanDelegateFeedbackSubscription != null) return;
-    _sparkScanDelegateFeedbackSubscription = BarcodePluginEvents.sparkScanEventStream.forView(_viewId).listen((event) {
+    _sparkScanDelegateFeedbackSubscription =
+        BarcodePluginEvents.sparkScanEventStream.forView(_viewId).listen((event) async {
       if (event.isEvent('SparkScanFeedbackDelegate.feedbackForBarcode')) {
-        var barcode = Barcode.fromJSON(jsonDecode(event.payload['barcode']));
-        var feedback = view._feedbackDelegate?.feedbackForBarcode(barcode) ??
-            view._feedbackExtendedDelegate?.feedbackForBarcode(barcode);
+        // Blocks a native thread awaiting a reply: parse tolerantly, and submit in a `finally`
+        // so the ack always fires.
         String? feedbackJson;
-        if (feedback != null) {
-          feedbackJson = jsonEncode(feedback.toMap());
+        try {
+          final payload = _parsePayloadTolerantly<SparkScanFeedbackDelegateFeedbackForBarcode?>(
+            event.payload,
+            (raw) => SparkScanFeedbackDelegateFeedbackForBarcode.fromJson(raw),
+            (raw) {
+              final map = raw as Map<String, dynamic>;
+              return map.containsKey('barcode')
+                  ? SparkScanFeedbackDelegateFeedbackForBarcode(barcode: map['barcode'] as String, viewId: _viewId)
+                  : null;
+            },
+            'feedbackForBarcode',
+          );
+          if (payload != null) {
+            var barcode = Barcode.fromJSON(jsonDecode(payload.barcode));
+            var feedback = view._feedbackDelegate?.feedbackForBarcode(barcode) ??
+                view._feedbackExtendedDelegate?.feedbackForBarcode(barcode);
+            if (feedback != null) {
+              feedbackJson = jsonEncode(feedback.toMap());
+            }
+          }
+        } catch (error) {
+          log('SparkScanView feedbackForBarcode failed: $error');
+        } finally {
+          barcodeMethodHandler
+              .submitSparkScanFeedbackForBarcode(viewId: _viewId, feedbackJson: feedbackJson)
+              .onError(onError);
         }
-        barcodeMethodHandler
-            .submitSparkScanFeedbackForBarcode(viewId: _viewId, feedbackJson: feedbackJson)
-            .onError(onError);
       }
       if (event.isEvent('SparkScanFeedbackDelegate.feedbackForScannedItem')) {
-        var scannedItem = ScannedItem.fromJSON(jsonDecode(event.payload['scannedItem']));
-        var feedback = view._feedbackExtendedDelegate?.feedbackForScannedItem(scannedItem);
+        // Blocks a native thread awaiting a reply: parse tolerantly, and submit in a `finally`
+        // so the ack always fires.
         String? feedbackJson;
-        if (feedback != null) {
-          feedbackJson = jsonEncode(feedback.toMap());
+        try {
+          final payload = _parsePayloadTolerantly<SparkScanFeedbackDelegateFeedbackForScannedItem?>(
+            event.payload,
+            (raw) => SparkScanFeedbackDelegateFeedbackForScannedItem.fromJson(raw),
+            (raw) {
+              final map = raw as Map<String, dynamic>;
+              return map.containsKey('scannedItem')
+                  ? SparkScanFeedbackDelegateFeedbackForScannedItem(
+                      scannedItem: map['scannedItem'] as String, viewId: _viewId)
+                  : null;
+            },
+            'feedbackForScannedItem',
+          );
+          if (payload != null) {
+            var scannedItem = ScannedItem.fromJSON(jsonDecode(payload.scannedItem));
+            var feedback = view._feedbackExtendedDelegate?.feedbackForScannedItem(scannedItem);
+            if (feedback != null) {
+              feedbackJson = jsonEncode(feedback.toMap());
+            }
+          }
+        } catch (error) {
+          log('SparkScanView feedbackForScannedItem failed: $error');
+        } finally {
+          barcodeMethodHandler
+              .submitSparkScanFeedbackForScannedItem(viewId: _viewId, feedbackJson: feedbackJson)
+              .onError(onError);
         }
-        barcodeMethodHandler
-            .submitSparkScanFeedbackForScannedItem(viewId: _viewId, feedbackJson: feedbackJson)
-            .onError(onError);
       }
     });
+  }
+
+  // Tolerant parsing is limited to the four events that block a native thread awaiting a reply
+  // (feedbackForBarcode, feedbackForScannedItem, didUpdateSession, didScan): a payload that
+  // fails schema validation is logged and passed through unvalidated (the caller re-derives
+  // what it needs straight from the raw map) rather than thrown, so the ack still fires
+  // promptly instead of surfacing only after the native-side timeout.
+  T _parsePayloadTolerantly<T>(
+    Map<String, dynamic> raw,
+    T Function(Object?) parse,
+    T Function(Object?) fallback,
+    String event,
+  ) {
+    try {
+      return parse(raw);
+    } catch (error) {
+      log('SparkScanView $event payload failed schema validation: $error');
+      return fallback(raw);
+    }
   }
 
   void unsubscribeFromFeedbackDelegateEvents() {
@@ -863,10 +1246,25 @@ class _SparkScanViewController extends BaseController {
     if (_sparkScanListenerSubscription != null) return;
     _sparkScanListenerSubscription = BarcodePluginEvents.sparkScanEventStream.forView(_viewId).listen((event) async {
       if (event.isEvent('SparkScanListener.didScan')) {
-        var session = SparkScanSession.fromJSON(event.payload, _viewId);
-        await _notifyListenersOfDidScan(session);
-
+        // Blocks a native thread for 2000 ms on failure to reply: parse tolerantly, and finish
+        // in a `finally` so the ack always fires.
         try {
+          final parsed = _parsePayloadTolerantly<SparkScanListenerDidScan>(
+            event.payload,
+            (raw) => SparkScanListenerDidScan.fromJson(raw),
+            (raw) {
+              final map = raw as Map<String, dynamic>;
+              return SparkScanListenerDidScan(
+                session: map['session'] as String,
+                frameId: map['frameId'] as String?,
+                viewId: _viewId,
+              );
+            },
+            'didScan',
+          );
+          var session = SparkScanSession.fromJSON({'session': parsed.session, 'frameId': parsed.frameId}, _viewId);
+          await _notifyListenersOfDidScan(session);
+
           if (session.newlyRecognizedItems.isNotEmpty) {
             for (final definition in view._sparkScan._settings.itemDefinitions ?? []) {
               final onScan = definition.onScan;
@@ -889,19 +1287,38 @@ class _SparkScanViewController extends BaseController {
             }
           }
         } catch (error) {
-          log(error.toString());
+          log('SparkScanView didScan failed: $error');
+        } finally {
+          barcodeMethodHandler
+              .finishSparkScanDidScan(viewId: _viewId, isEnabled: view._sparkScan.isEnabled)
+              .onError(onError);
         }
-
-        barcodeMethodHandler
-            .finishSparkScanDidScan(viewId: _viewId, isEnabled: view._sparkScan.isEnabled)
-            .onError(onError);
       } else if (event.isEvent('SparkScanListener.didUpdateSession')) {
-        var session = SparkScanSession.fromJSON(event.payload, _viewId);
-        await _notifyListenersOfDidUpateSession(session);
-
-        barcodeMethodHandler
-            .finishSparkScanDidUpdateSession(viewId: _viewId, isEnabled: view._sparkScan.isEnabled)
-            .onError(onError);
+        // Blocks a native thread for 2000 ms on failure to reply: parse tolerantly, and finish
+        // in a `finally` so the ack always fires.
+        try {
+          final parsed = _parsePayloadTolerantly<SparkScanListenerDidUpdateSession>(
+            event.payload,
+            (raw) => SparkScanListenerDidUpdateSession.fromJson(raw),
+            (raw) {
+              final map = raw as Map<String, dynamic>;
+              return SparkScanListenerDidUpdateSession(
+                session: map['session'] as String,
+                frameId: map['frameId'] as String?,
+                viewId: _viewId,
+              );
+            },
+            'didUpdateSession',
+          );
+          var session = SparkScanSession.fromJSON({'session': parsed.session, 'frameId': parsed.frameId}, _viewId);
+          await _notifyListenersOfDidUpateSession(session);
+        } catch (error) {
+          log('SparkScanView didUpdateSession failed: $error');
+        } finally {
+          barcodeMethodHandler
+              .finishSparkScanDidUpdateSession(viewId: _viewId, isEnabled: view._sparkScan.isEnabled)
+              .onError(onError);
+        }
       }
     });
   }
@@ -943,6 +1360,21 @@ class _SparkScanViewController extends BaseController {
     return barcodeMethodHandler
         .updateSparkScanMode(viewId: _viewId, modeJson: jsonEncode(view._sparkScan.toMap()))
         .onError(onError);
+  }
+
+  Future<SparkScanLicenseInfo?> getSparkScanLicenseInfo() async {
+    // executeBarcode returns Future<dynamic>; the generated wrapper would
+    // declare Future<String> and crash on a null result, so call it directly.
+    final result =
+        await barcodeMethodHandler.executeBarcode('SparkScanModule', 'getSparkScanLicenseInfo', {'viewId': _viewId});
+    if (result == null) return null;
+    return SparkScanLicenseInfo.fromJSON(jsonDecode(result as String) as Map<String, dynamic>);
+  }
+
+  Future<SparkScanScanningMode?> getScanningMode() async {
+    final result = await barcodeMethodHandler.getSparkScanScanningMode(viewId: _viewId);
+    if (result == null) return null;
+    return SparkScanScanningModeSerializer.fromJSON(jsonDecode(result) as Map<String, dynamic>);
   }
 
   @override

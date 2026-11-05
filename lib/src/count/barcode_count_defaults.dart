@@ -4,11 +4,220 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-import 'dart:convert';
+import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_filter_settings.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/count/barcode_count_icon.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/count/barcode_count_view.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+
+import '../generated/barcode_generated_defaults.dart';
+
+// Picks the platform-split value of a generated default. Kept private per
+// file, mirroring core's and id's own copies.
+T _platformDefault<T>({required T android, required T ios}) => Platform.isIOS ? ios : android;
+
+// Builds a Brush from a generated flat {fillColor, strokeColor, strokeWidth}
+// default literal - the shape BrushDefaults.fromJSON consumes on the native path.
+Brush _buildStaticBrush(Map<String, Object?> json) {
+  final fillColor = ColorDeserializer.fromRgbaHex(json['fillColor'] as String? ?? '#00000000');
+  final strokeColor = ColorDeserializer.fromRgbaHex(json['strokeColor'] as String? ?? '#00000000');
+  final strokeWidth = (json['strokeWidth'] as num?)?.toDouble() ?? 0.0;
+  return Brush(fillColor, strokeColor, strokeWidth);
+}
+
+// Builds a Feedback from a generated {vibration, sound} default literal.
+// Mirrors BarcodeCountFeedbackDefaults.fromJSON, which maps every vibration
+// type other than selectionHaptic/successHaptic (e.g. iOS' failureHaptic) onto
+// the default vibration - preserved here deliberately.
+Feedback _buildStaticFeedback(Map<String, Object?> json) {
+  final vibrationJson = json['vibration'] as Map<String, Object?>?;
+  final soundJson = json['sound'] as Map<String, Object?>?;
+
+  Vibration? vibration;
+  if (vibrationJson != null) {
+    switch (vibrationJson['type']) {
+      case 'selectionHaptic':
+        vibration = Vibration.selectionHapticFeedback;
+        break;
+      case 'successHaptic':
+        vibration = Vibration.successHapticFeedback;
+        break;
+      default:
+        vibration = Vibration.defaultVibration;
+    }
+  }
+
+  Sound? sound;
+  if (soundJson != null) {
+    sound = soundJson.containsKey('resource') ? Sound(soundJson['resource'] as String?) : Sound(null);
+  }
+
+  return Feedback(vibration, sound);
+}
+
+BarcodeCountSettingsDefaults _buildStaticBarcodeCountSettingsDefaults() {
+  return BarcodeCountSettingsDefaults(
+    // The generated barcodeFilterSettings const is an empty object, i.e. a
+    // freshly constructed BarcodeFilterSettings with every exclusion unset.
+    BarcodeFilterSettings(),
+    BarcodeCountSettingsGeneratedDefaults.expectOnlyUniqueBarcodes,
+    BarcodeCountSettingsGeneratedDefaults.disableModeWhenCaptureListCompleted,
+    ClusteringMode.fromJSON(BarcodeCountSettingsGeneratedDefaults.clusteringMode),
+    BarcodeCountSettingsGeneratedDefaults.scanPreviewEnabled,
+    BarcodeCountSettingsGeneratedDefaults.mappingEnabled,
+  );
+}
+
+BarcodeCountFeedbackDefaults _buildStaticBarcodeCountFeedbackDefaults() {
+  return BarcodeCountFeedbackDefaults(
+    _buildStaticFeedback(_platformDefault(
+      android: BarcodeCountFeedbackGeneratedDefaults.successAndroid,
+      ios: BarcodeCountFeedbackGeneratedDefaults.successIos,
+    )),
+    _buildStaticFeedback(_platformDefault(
+      android: BarcodeCountFeedbackGeneratedDefaults.failureAndroid,
+      ios: BarcodeCountFeedbackGeneratedDefaults.failureIos,
+    )),
+  );
+}
+
+// Builds the statically sourceable portion of BarcodeCountToolbarSettingsDefaults.
+// The 12 accessibility strings are localized and absent from the generated
+// consts, so they resolve to null - exactly what the JSON path produces for an
+// absent key - until initializeDefaults replaces the object from native.
+BarcodeCountToolbarSettingsDefaults _buildStaticBarcodeCountToolbarSettingsDefaults() {
+  return BarcodeCountToolbarSettingsDefaults._(
+    BarcodeCountToolbarSettingsGeneratedDefaults.audioOnButtonText,
+    BarcodeCountToolbarSettingsGeneratedDefaults.audioOffButtonText,
+    null,
+    null,
+    null,
+    // Android says "Haptic on/off" where iOS says "Vibration on/off".
+    _platformDefault(
+      android: BarcodeCountToolbarSettingsGeneratedDefaults.vibrationOnButtonTextAndroid,
+      ios: BarcodeCountToolbarSettingsGeneratedDefaults.vibrationOnButtonTextIos,
+    ),
+    _platformDefault(
+      android: BarcodeCountToolbarSettingsGeneratedDefaults.vibrationOffButtonTextAndroid,
+      ios: BarcodeCountToolbarSettingsGeneratedDefaults.vibrationOffButtonTextIos,
+    ),
+    null,
+    null,
+    null,
+    BarcodeCountToolbarSettingsGeneratedDefaults.strapModeOnButtonText,
+    BarcodeCountToolbarSettingsGeneratedDefaults.strapModeOffButtonText,
+    null,
+    null,
+    null,
+    BarcodeCountToolbarSettingsGeneratedDefaults.colorSchemeOnButtonText,
+    BarcodeCountToolbarSettingsGeneratedDefaults.colorSchemeOffButtonText,
+    null,
+    null,
+    null,
+  );
+}
+
+BarcodeCountMappingFlowSettingsDefaults _buildStaticBarcodeCountMappingFlowSettingsDefaults() {
+  return BarcodeCountMappingFlowSettingsDefaults(
+    BarcodeCountMappingFlowSettingsGeneratedDefaults.scanBarcodesGuidanceText,
+    BarcodeCountMappingFlowSettingsGeneratedDefaults.nextButtonText,
+    BarcodeCountMappingFlowSettingsGeneratedDefaults.stepBackGuidanceText,
+    BarcodeCountMappingFlowSettingsGeneratedDefaults.redoScanButtonText,
+    BarcodeCountMappingFlowSettingsGeneratedDefaults.restartButtonText,
+    BarcodeCountMappingFlowSettingsGeneratedDefaults.finishButtonText,
+  );
+}
+
+// Builds the statically sourceable portion of BarcodeCountViewDefaults. The
+// four default icons (native asset handles), the localized
+// textForScreenCleanedUpHint / textForClusteringGestureHint and the
+// device-probed hardwareTriggerSupported flag are NOT in the generated consts,
+// so they take the same values the JSON path uses for an absent key (an empty
+// BarcodeCountIcon / '' / false) until initializeDefaults replaces the whole
+// object from the native response.
+BarcodeCountViewDefaults _buildStaticBarcodeCountViewDefaults() {
+  // The highlight brush colours are platform-split: the Android wrapper rounds
+  // native's float channels half-up while iOS truncates (#0062FF vs #0061FF).
+  return BarcodeCountViewDefaults(
+    BarcodeCountViewStyleSerializer.fromJSON(BarcodeCountViewGeneratedDefaults.style),
+    BarcodeCountViewGeneratedDefaults.shouldShowUserGuidanceView,
+    BarcodeCountViewGeneratedDefaults.shouldShowListButton,
+    BarcodeCountViewGeneratedDefaults.shouldShowExitButton,
+    BarcodeCountViewGeneratedDefaults.shouldShowShutterButton,
+    BarcodeCountViewGeneratedDefaults.shouldShowHints,
+    BarcodeCountViewGeneratedDefaults.shouldShowClearHighlightsButton,
+    BarcodeCountViewGeneratedDefaults.shouldShowSingleScanButton,
+    BarcodeCountViewGeneratedDefaults.shouldShowFloatingShutterButton,
+    BarcodeCountViewGeneratedDefaults.shouldShowToolbar,
+    _buildStaticBrush(_platformDefault(
+      android: BarcodeCountViewGeneratedDefaults.notInListBrushAndroid,
+      ios: BarcodeCountViewGeneratedDefaults.notInListBrushIos,
+    )),
+    _buildStaticBrush(_platformDefault(
+      android: BarcodeCountViewGeneratedDefaults.recognizedBrushAndroid,
+      ios: BarcodeCountViewGeneratedDefaults.recognizedBrushIos,
+    )),
+    _buildStaticBrush(_platformDefault(
+      android: BarcodeCountViewGeneratedDefaults.acceptedBrushAndroid,
+      ios: BarcodeCountViewGeneratedDefaults.acceptedBrushIos,
+    )),
+    _buildStaticBrush(_platformDefault(
+      android: BarcodeCountViewGeneratedDefaults.rejectedBrushAndroid,
+      ios: BarcodeCountViewGeneratedDefaults.rejectedBrushIos,
+    )),
+    BarcodeCountIcon(),
+    BarcodeCountIcon(),
+    BarcodeCountIcon(),
+    BarcodeCountIcon(),
+    BarcodeCountViewGeneratedDefaults.shouldShowScanAreaGuides,
+    BarcodeCountViewGeneratedDefaults.clearHighlightsButtonText,
+    BarcodeCountViewGeneratedDefaults.exitButtonText,
+    BarcodeCountViewGeneratedDefaults.textForTapShutterToScanHint,
+    BarcodeCountViewGeneratedDefaults.textForScanningHint,
+    BarcodeCountViewGeneratedDefaults.textForMoveCloserAndRescanHint,
+    BarcodeCountViewGeneratedDefaults.textForMoveFurtherAndRescanHint,
+    BarcodeCountViewGeneratedDefaults.textForBarcodesNotInListDetectedHint,
+    '',
+    '',
+    _buildStaticBarcodeCountToolbarSettingsDefaults(),
+    _buildStaticBarcodeCountMappingFlowSettingsDefaults(),
+    BarcodeCountViewGeneratedDefaults.listButtonAccessibilityHint,
+    BarcodeCountViewGeneratedDefaults.listButtonAccessibilityLabel,
+    BarcodeCountViewGeneratedDefaults.listButtonContentDescription,
+    BarcodeCountViewGeneratedDefaults.exitButtonAccessibilityHint,
+    BarcodeCountViewGeneratedDefaults.exitButtonAccessibilityLabel,
+    BarcodeCountViewGeneratedDefaults.exitButtonContentDescription,
+    BarcodeCountViewGeneratedDefaults.shutterButtonAccessibilityHint,
+    BarcodeCountViewGeneratedDefaults.shutterButtonAccessibilityLabel,
+    BarcodeCountViewGeneratedDefaults.shutterButtonContentDescription,
+    BarcodeCountViewGeneratedDefaults.floatingShutterButtonAccessibilityHint,
+    BarcodeCountViewGeneratedDefaults.floatingShutterButtonAccessibilityLabel,
+    BarcodeCountViewGeneratedDefaults.floatingShutterButtonContentDescription,
+    BarcodeCountViewGeneratedDefaults.clearHighlightsButtonAccessibilityHint,
+    BarcodeCountViewGeneratedDefaults.clearHighlightsButtonAccessibilityLabel,
+    BarcodeCountViewGeneratedDefaults.clearHighlightsButtonContentDescription,
+    BarcodeCountViewGeneratedDefaults.singleScanButtonAccessibilityHint,
+    BarcodeCountViewGeneratedDefaults.singleScanButtonAccessibilityLabel,
+    BarcodeCountViewGeneratedDefaults.singleScanButtonContentDescription,
+    BarcodeCountViewGeneratedDefaults.statusModeButtonAccessibilityHint,
+    BarcodeCountViewGeneratedDefaults.statusModeButtonAccessibilityLabel,
+    BarcodeCountViewGeneratedDefaults.statusModeButtonContentDescription,
+    BarcodeCountViewGeneratedDefaults.shouldShowListProgressBar,
+    BarcodeCountViewGeneratedDefaults.shouldShowTorchControl,
+    AnchorDeserializer.fromJSON(BarcodeCountViewGeneratedDefaults.torchControlPosition),
+    BarcodeCountViewGeneratedDefaults.tapToUncountEnabled,
+    BarcodeCountViewGeneratedDefaults.textForTapToUncountHint,
+    BarcodeCountViewGeneratedDefaults.shouldShowStatusModeButton,
+    BarcodeCountViewGeneratedDefaults.shouldShowStatusIconsOnScan,
+    BarcodeCountViewGeneratedDefaults.shouldDisableModeOnExitButtonTapped,
+    false,
+    BarcodeCountViewGeneratedDefaults.hardwareTriggerEnabled,
+    LogoStyle.fromJSON(BarcodeCountViewGeneratedDefaults.logoStyle),
+    AnchorDeserializer.fromJSON(BarcodeCountViewGeneratedDefaults.logoAnchor),
+  );
+}
 
 // ignore: avoid_classes_with_only_static_members
 class BarcodeCountDefaults {
@@ -16,25 +225,29 @@ class BarcodeCountDefaults {
 
   static CameraSettingsDefaults get cameraSettingsDefaults => _cameraSettingsDefaults;
 
-  static late BarcodeCountSettingsDefaults _barcodeCountSettingsDefaults;
+  // Statically sourced from generated/barcode_generated_defaults.dart - byte
+  // identical to the native getDefaults() response, available immediately, no
+  // method-channel round trip needed. See SDC-32174.
+  static final BarcodeCountSettingsDefaults _barcodeCountSettingsDefaults = _buildStaticBarcodeCountSettingsDefaults();
 
   static BarcodeCountSettingsDefaults get barcodeCountSettingsDefaults => _barcodeCountSettingsDefaults;
 
-  static late BarcodeCountFeedbackDefaults _barcodeCountFeedbackDefaults;
+  static final BarcodeCountFeedbackDefaults _barcodeCountFeedbackDefaults = _buildStaticBarcodeCountFeedbackDefaults();
 
   static BarcodeCountFeedbackDefaults get barcodeCountFeedbackDefaults => _barcodeCountFeedbackDefaults;
 
-  static late BarcodeCountViewDefaults _viewDefaults;
+  // Not `final`: the default icons, the localized hint texts, the toolbar
+  // accessibility strings and hardwareTriggerSupported can only come from
+  // native, so initializeDefaults still replaces this object.
+  static BarcodeCountViewDefaults _viewDefaults = _buildStaticBarcodeCountViewDefaults();
 
   static BarcodeCountViewDefaults get viewDefaults => _viewDefaults;
 
+  // Residual dynamic set: RecommendedCameraSettings (see the id package) and
+  // the BarcodeCountView icons / localized texts / accessibility strings /
+  // hardware-trigger probe.
   static void initializeDefaults(Map<String, dynamic> barcodeCountDefaults) {
     _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(barcodeCountDefaults['RecommendedCameraSettings']);
-
-    _barcodeCountSettingsDefaults =
-        BarcodeCountSettingsDefaults.fromJSON(barcodeCountDefaults["BarcodeCountSettings"] as Map<String, dynamic>);
-    _barcodeCountFeedbackDefaults = BarcodeCountFeedbackDefaults.fromJSON(
-        jsonDecode(barcodeCountDefaults["BarcodeCountFeedback"]) as Map<String, dynamic>);
     _viewDefaults = BarcodeCountViewDefaults.fromJSON(barcodeCountDefaults["BarcodeCountView"] as Map<String, dynamic>);
   }
 }
@@ -55,6 +268,10 @@ class BarcodeCountViewDefaults {
   final Brush defaultRecognizedBrush;
   final Brush defaultAcceptedBrush;
   final Brush defaultRejectedBrush;
+  final BarcodeCountIcon defaultRecognizedIcon;
+  final BarcodeCountIcon defaultNotInListIcon;
+  final BarcodeCountIcon defaultAcceptedIcon;
+  final BarcodeCountIcon defaultRejectedIcon;
   final bool shouldShowScanAreaGuides;
   final String clearHighlightsButtonText;
   final String exitButtonText;
@@ -116,6 +333,10 @@ class BarcodeCountViewDefaults {
       this.defaultRecognizedBrush,
       this.defaultAcceptedBrush,
       this.defaultRejectedBrush,
+      this.defaultRecognizedIcon,
+      this.defaultNotInListIcon,
+      this.defaultAcceptedIcon,
+      this.defaultRejectedIcon,
       this.shouldShowScanAreaGuides,
       this.clearHighlightsButtonText,
       this.exitButtonText,
@@ -177,6 +398,10 @@ class BarcodeCountViewDefaults {
     final defaultRecognizedBrush = BrushDefaults.fromJSON(json['recognizedBrush'] as Map<String, dynamic>).toBrush();
     final defaultAcceptedBrush = BrushDefaults.fromJSON(json['acceptedBrush'] as Map<String, dynamic>).toBrush();
     final defaultRejectedBrush = BrushDefaults.fromJSON(json['rejectedBrush'] as Map<String, dynamic>).toBrush();
+    final defaultRecognizedIcon = _iconFromDefaults(json['defaultRecognizedIcon']);
+    final defaultNotInListIcon = _iconFromDefaults(json['defaultNotInListIcon']);
+    final defaultAcceptedIcon = _iconFromDefaults(json['defaultAcceptedIcon']);
+    final defaultRejectedIcon = _iconFromDefaults(json['defaultRejectedIcon']);
     final shouldShowScanAreaGuides = json['shouldShowScanAreaGuides'] as bool;
     final clearHighlightsButtonText = json['clearHighlightsButtonText'];
     final exitButtonText = json['exitButtonText'];
@@ -327,6 +552,10 @@ class BarcodeCountViewDefaults {
         defaultRecognizedBrush,
         defaultAcceptedBrush,
         defaultRejectedBrush,
+        defaultRecognizedIcon,
+        defaultNotInListIcon,
+        defaultAcceptedIcon,
+        defaultRejectedIcon,
         shouldShowScanAreaGuides,
         clearHighlightsButtonText,
         exitButtonText,
@@ -634,4 +863,13 @@ class BarcodeCountMappingFlowSettingsDefaults {
         json['restartButtonText'] as String,
         json['finishButtonText'] as String);
   }
+}
+
+// Tolerant of platforms that don't (yet) serialize the default icons: falls back to an
+// empty BarcodeCountIcon instead of crashing on a missing key during defaults parsing.
+BarcodeCountIcon _iconFromDefaults(dynamic json) {
+  if (json is Map<String, dynamic>) {
+    return BarcodeCountIcon.fromJSON(json);
+  }
+  return BarcodeCountIcon();
 }

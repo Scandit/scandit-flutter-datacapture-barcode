@@ -18,18 +18,22 @@ android {
 
     defaultConfig {
         minSdkVersion safeExtGet("minSdkVersion", 24)
-        targetSdkVersion safeExtGet("targetSdkVersion", 36)
         versionCode 1
         versionName "1.0"
     }
 
-    lintOptions {
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    lint {
         abortOnError false
     }
 }
 
 dependencies {
-    def sdk_version = "8.5.5"
+    def sdk_version = "8.7.0"
 
     println("Version of the native sdk used in this build: ${safeExtGet('frameworks_sdk_version', sdk_version)}")
     if (findProject(':scandit-datacapture-frameworks-barcode') != null) {

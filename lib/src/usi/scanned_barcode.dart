@@ -8,6 +8,11 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 
 import '../../scandit_flutter_datacapture_barcode.dart';
 
+/// A scanned barcode component in the item-based scanning APIs. This class represents a detected and decoded barcode with all its associated data and metadata.
+///
+/// ScannedBarcode implements the [ScannedComponent] protocol, providing a unique identifier and location information, along with barcode-specific properties such as symbology, payload data, and decoding metadata.
+///
+/// Added in version 8.1.0
 class ScannedBarcode implements ScannedComponent<BarcodeIdentifier> {
   final ScannedComponentIdentifier _identifier;
   final BarcodeIdentifier _definitionIdentifier;
@@ -39,33 +44,72 @@ class ScannedBarcode implements ScannedComponent<BarcodeIdentifier> {
     this._isStructuredAppend,
   );
 
+  /// The unique identifier for this instance of the barcode component.
+  ///
+  /// Added in version 8.1.0
   @override
   ScannedComponentIdentifier get identifier => _identifier;
 
+  /// The unique identifier for the definition of this barcode component.
+  ///
+  /// Added in version 8.1.0
   @override
   BarcodeIdentifier get definitionIdentifier => _definitionIdentifier;
 
+  /// The location of the barcode as a quadrilateral.
+  ///
+  /// Added in version 8.1.0
   @override
   Quadrilateral get location => _location;
 
+  /// The symbology of the scanned barcode.
+  ///
+  /// Added in version 8.1.0
   Symbology get symbology => _symbology;
 
+  /// The data of this barcode as a unicode string. May be *null* for barcodes containing non-printable characters, or characters that cannot be represented as unicode code points, or nul-bytes in the middle of the string
+  ///
+  /// Added in version 8.1.0
   String? get payloadString => _payloadString;
 
+  /// The add-on payload string if the barcode has an add-on. *null* if the barcode does not have an add-on.
+  ///
+  /// Added in version 8.1.0
   String? get addOnPayloadString => _addOnPayloadString;
 
+  /// The composite payload string if the barcode is part of a composite barcode. *null* if the barcode is not composite.
+  ///
+  /// Added in version 8.1.0
   String? get compositePayloadString => _compositePayloadString;
 
+  /// *True* for codes that carry GS1 data.
+  ///
+  /// Added in version 8.1.0
   bool get isGS1DataCarrier => _isGS1DataCarrier;
 
+  /// Flag to hint whether the barcode is part of a composite code.
+  ///
+  /// Added in version 8.1.0
   CompositeFlag get compositeFlag => _compositeFlag;
 
+  /// Whether the recognized code is color inverted (printed bright on dark background).
+  ///
+  /// Added in version 8.1.0
   bool get isColorInverted => _isColorInverted;
 
+  /// The symbol count of this barcode.
+  ///
+  /// Added in version 8.1.0
   int get symbolCount => _symbolCount;
 
+  /// Id of the frame from which this barcode information was obtained.
+  ///
+  /// Added in version 8.1.0
   int get frameId => _frameId;
 
+  /// Whether the barcode is a structured append barcode.
+  ///
+  /// Added in version 8.1.0
   bool get isStructuredAppend => _isStructuredAppend;
 
   factory ScannedBarcode.fromJSON(Map<String, dynamic> json) {

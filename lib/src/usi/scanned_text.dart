@@ -10,6 +10,11 @@ import 'scanned_component.dart';
 import 'scanned_component_identifier.dart';
 import 'text_identifier.dart';
 
+/// A scanned text component in the item-based scanning APIs. This class represents detected and recognized text with its associated location and identification information.
+///
+/// ScannedText implements the [ScannedComponent] protocol, providing a unique identifier and location information, along with the recognized text content.
+///
+/// Added in version 8.1.0
 class ScannedText implements ScannedComponent<TextIdentifier> {
   final ScannedComponentIdentifier _identifier;
   final TextIdentifier _definitionIdentifier;
@@ -18,15 +23,27 @@ class ScannedText implements ScannedComponent<TextIdentifier> {
 
   ScannedText._(this._identifier, this._definitionIdentifier, this._location, this._text);
 
+  /// The unique identifier for this instance of the text component.
+  ///
+  /// Added in version 8.1.0
   @override
   ScannedComponentIdentifier get identifier => _identifier;
 
+  /// The unique identifier for the definition of this text component.
+  ///
+  /// Added in version 8.1.0
   @override
   TextIdentifier get definitionIdentifier => _definitionIdentifier;
 
+  /// The location of the text in the image as a quadrilateral.
+  ///
+  /// Added in version 8.1.0
   @override
   Quadrilateral get location => _location;
 
+  /// The recognized text content.
+  ///
+  /// Added in version 8.1.0
   String get text => _text;
 
   factory ScannedText.fromJSON(Map<String, dynamic> json) {

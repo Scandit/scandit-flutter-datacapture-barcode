@@ -4,10 +4,25 @@
  * Copyright (C) 2024- Scandit AG. All rights reserved.
  */
 
+/// The available anchor options for an info annotation.
+///
+/// Added in version 7.1.0
 enum BarcodeArInfoAnnotationAnchor {
+  /// The annotation is anchored at its top-center point.
+  ///
+  /// Added in version 7.1.0
   top('top'),
+  /// The annotation is anchored at its bottom-center point.
+  ///
+  /// Added in version 7.1.0
   bottom('bottom'),
+  /// The annotation is anchored at its left edge.
+  ///
+  /// Added in version 7.1.0
   left('left'),
+  /// The annotation is anchored at its right edge.
+  ///
+  /// Added in version 7.1.0
   right('right');
 
   const BarcodeArInfoAnnotationAnchor(this._name);

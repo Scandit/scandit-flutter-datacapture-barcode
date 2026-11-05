@@ -4,40 +4,137 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
-import 'dart:convert';
+import 'dart:io' show Platform;
 import 'dart:ui' show Color;
 
 import 'package:flutter/foundation.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
+
+import '../generated/barcode_generated_defaults.dart';
+
+// Picks the platform-split value of a generated default. Kept private per
+// file, mirroring core's and id's own copies.
+T _platformDefault<T>({required T android, required T ios}) => Platform.isIOS ? ios : android;
+
+// Builds a Feedback from a generated {vibration, sound} default literal,
+// mirroring BarcodeFindFeedbackDefaults.fromJSON's vibration mapping.
+Feedback _buildStaticFeedback(Map<String, Object?> json) {
+  final vibrationJson = json['vibration'] as Map<String, Object?>?;
+  final soundJson = json['sound'] as Map<String, Object?>?;
+
+  Vibration? vibration;
+  if (vibrationJson != null) {
+    switch (vibrationJson['type']) {
+      case 'selectionHaptic':
+        vibration = Vibration.selectionHapticFeedback;
+        break;
+      case 'successHaptic':
+        vibration = Vibration.successHapticFeedback;
+        break;
+      case 'impactHaptic':
+        vibration = Vibration.impactHapticFeedback;
+        break;
+      default:
+        vibration = Vibration.defaultVibration;
+    }
+  }
+
+  Sound? sound;
+  if (soundJson != null) {
+    sound = soundJson.containsKey('resource') ? Sound(soundJson['resource'] as String?) : Sound(null);
+  }
+
+  return Feedback(vibration, sound);
+}
+
+BarcodeFindFeedbackDefaults _buildStaticBarcodeFindFeedbackDefaults() {
+  return BarcodeFindFeedbackDefaults(
+    _buildStaticFeedback(_platformDefault(
+      android: BarcodeFindFeedbackGeneratedDefaults.foundAndroid,
+      ios: BarcodeFindFeedbackGeneratedDefaults.foundIos,
+    )),
+    _buildStaticFeedback(BarcodeFindFeedbackGeneratedDefaults.itemListUpdated),
+  );
+}
+
+BarcodeFindViewSettingsDefaults _buildStaticBarcodeFindViewSettingsDefaults() {
+  // The progress-bar colours are platform-split: Android's wrapper emits a
+  // 0.9 alpha (#E5) where iOS emits the opaque #FF.
+  return BarcodeFindViewSettingsDefaults(
+    ColorDeserializer.fromRgbaHex(_platformDefault(
+      android: BarcodeFindViewSettingsGeneratedDefaults.progressBarStartColorAndroid,
+      ios: BarcodeFindViewSettingsGeneratedDefaults.progressBarStartColorIos,
+    )),
+    ColorDeserializer.fromRgbaHex(_platformDefault(
+      android: BarcodeFindViewSettingsGeneratedDefaults.progressBarFinishColorAndroid,
+      ios: BarcodeFindViewSettingsGeneratedDefaults.progressBarFinishColorIos,
+    )),
+  );
+}
+
+// Builds the statically sourceable portion of BarcodeFindViewDefaults. The
+// localized `textFor*Hint` strings and the device-probed
+// hardwareTriggerSupported flag are NOT in the generated consts, so they take
+// the same values the JSON path uses for an absent key (null / false) until
+// initializeDefaults replaces the whole object from the native response.
+BarcodeFindViewDefaults _buildStaticBarcodeFindViewDefaults() {
+  return BarcodeFindViewDefaults(
+    BarcodeFindViewGeneratedDefaults.shouldShowCarousel,
+    BarcodeFindViewGeneratedDefaults.shouldShowFinishButton,
+    BarcodeFindViewGeneratedDefaults.shouldShowHints,
+    BarcodeFindViewGeneratedDefaults.shouldShowPauseButton,
+    BarcodeFindViewGeneratedDefaults.shouldShowProgressBar,
+    BarcodeFindViewGeneratedDefaults.shouldShowUserGuidanceView,
+    BarcodeFindViewGeneratedDefaults.shouldShowTorchControl,
+    BarcodeFindViewGeneratedDefaults.shouldShowZoomControl,
+    false,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    AnchorDeserializer.fromJSON(BarcodeFindViewGeneratedDefaults.torchControlPosition),
+    null,
+    null,
+    LogoStyle.fromJSON(BarcodeFindViewGeneratedDefaults.logoStyle),
+    AnchorDeserializer.fromJSON(BarcodeFindViewGeneratedDefaults.logoAnchor),
+    FrameSourceState.fromJSON(BarcodeFindViewGeneratedDefaults.cameraStateOnStop),
+  );
+}
 
 class BarcodeFindDefaults {
   static late CameraSettingsDefaults _cameraSettingsDefaults;
 
   static CameraSettingsDefaults get cameraSettingsDefaults => _cameraSettingsDefaults;
 
-  static late BarcodeFindFeedbackDefaults _barcodeFindFeedbackDefaults;
+  // Statically sourced from generated/barcode_generated_defaults.dart - byte
+  // identical to the native getDefaults() response, available immediately, no
+  // method-channel round trip needed. See SDC-32174.
+  static final BarcodeFindFeedbackDefaults _barcodeFindFeedbackDefaults = _buildStaticBarcodeFindFeedbackDefaults();
 
   static BarcodeFindFeedbackDefaults get barcodeFindFeedbackDefaults => _barcodeFindFeedbackDefaults;
 
-  static late BarcodeFindViewDefaults _barcodeFindViewDefaults;
+  // Not `final`: the localized hint texts and hardwareTriggerSupported can only
+  // come from native, so initializeDefaults still replaces this object.
+  static BarcodeFindViewDefaults _barcodeFindViewDefaults = _buildStaticBarcodeFindViewDefaults();
 
   static BarcodeFindViewDefaults get barcodeFindViewDefaults => _barcodeFindViewDefaults;
 
-  static late BarcodeFindViewSettingsDefaults _barcodeFindViewSettingsDefaults;
+  static final BarcodeFindViewSettingsDefaults _barcodeFindViewSettingsDefaults =
+      _buildStaticBarcodeFindViewSettingsDefaults();
 
   static BarcodeFindViewSettingsDefaults get barcodeFindViewSettingsDefaults => _barcodeFindViewSettingsDefaults;
 
   static bool _isInitialized = false;
 
+  // Residual dynamic set: RecommendedCameraSettings (see the id package) and
+  // the BarcodeFindView localized texts / hardware-trigger probe.
   static void initializeDefaults(Map<String, dynamic> barcodeFindDefaults) {
     if (_isInitialized) return;
     _cameraSettingsDefaults = CameraSettingsDefaults.fromJSON(barcodeFindDefaults['RecommendedCameraSettings']);
-    _barcodeFindFeedbackDefaults = BarcodeFindFeedbackDefaults.fromJSON(
-        jsonDecode(barcodeFindDefaults["BarcodeFindFeedback"] as String) as Map<String, dynamic>);
     _barcodeFindViewDefaults =
         BarcodeFindViewDefaults.fromJSON(barcodeFindDefaults["BarcodeFindView"] as Map<String, dynamic>);
-    _barcodeFindViewSettingsDefaults = BarcodeFindViewSettingsDefaults.fromJSON(
-        barcodeFindDefaults["BarcodeFindViewSettings"] as Map<String, dynamic>);
     _isInitialized = true;
   }
 }
@@ -77,6 +174,9 @@ class BarcodeFindViewDefaults {
   final Anchor torchControlPosition;
   final String? textForItemListUpdatedHint;
   final String? textForItemListUpdatedWhenPausedHint;
+  final LogoStyle logoStyle;
+  final Anchor logoAnchor;
+  final FrameSourceState cameraStateOnStop;
 
   const BarcodeFindViewDefaults(
       this.shouldShowCarousel,
@@ -96,7 +196,10 @@ class BarcodeFindViewDefaults {
       this.textForTapShutterToResumeSearchHint,
       this.torchControlPosition,
       this.textForItemListUpdatedHint,
-      this.textForItemListUpdatedWhenPausedHint);
+      this.textForItemListUpdatedWhenPausedHint,
+      this.logoStyle,
+      this.logoAnchor,
+      this.cameraStateOnStop);
 
   factory BarcodeFindViewDefaults.fromJSON(Map<String, dynamic> json) {
     var torchControlPosition = Anchor.topLeft;
@@ -119,6 +222,12 @@ class BarcodeFindViewDefaults {
       hardwareTriggerSupported = json["hardwareTriggerSupported"] as bool;
     }
 
+    var logoStyle = LogoStyle.fromJSON(json['logoStyle'] as String);
+    var logoAnchor = AnchorDeserializer.fromJSON(json['logoAnchor'] as String);
+
+    // cameraStateOnStop is iOS-only; the Android defaults do not emit it.
+    var cameraStateOnStop = FrameSourceState.fromJSON(json['cameraStateOnStop'] as String? ?? 'off');
+
     return BarcodeFindViewDefaults(
       json["shouldShowCarousel"] as bool,
       json["shouldShowFinishButton"] as bool,
@@ -138,6 +247,9 @@ class BarcodeFindViewDefaults {
       torchControlPosition,
       json["textForItemListUpdatedHint"] as String?,
       json["textForItemListUpdatedWhenPausedHint"] as String?,
+      logoStyle,
+      logoAnchor,
+      cameraStateOnStop,
     );
   }
 }

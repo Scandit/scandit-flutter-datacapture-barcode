@@ -8,14 +8,26 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 
 import 'symbology.dart';
 
+/// A class used to instantiate a barcode with the specified information. Can be used to create [Barcode] mocks for unit testing.
+///
+/// Added in version 8.3.0
 class BarcodeInfo implements Serializable {
   late Symbology _symbology;
+  /// The symbology of the barcode.
+  ///
+  /// Added in version 8.3.0
   Symbology get symbology => _symbology;
 
   late String _data;
+  /// The data of a barcode as a unicode string.
+  ///
+  /// Added in version 8.3.0
   String get data => _data;
 
   late Quadrilateral _location;
+  /// The location of the code. For more info see [Barcode]
+  ///
+  /// Added in version 8.3.0
   Quadrilateral get location => _location;
 
   BarcodeInfo._({required Symbology symbology, required String data, required Quadrilateral location}) {
@@ -24,6 +36,7 @@ class BarcodeInfo implements Serializable {
     _location = location;
   }
 
+  /// Added in version 8.3.0
   factory BarcodeInfo.create(Symbology symbology, String data, [Quadrilateral? location]) {
     return BarcodeInfo._(
         symbology: symbology,

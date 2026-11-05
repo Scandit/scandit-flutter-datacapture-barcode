@@ -6,30 +6,50 @@
 
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_spatial_grid.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/cluster.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/internal/logging/logging_method_channel.dart';
 
+/// The count session contains all the currently tracked barcodes and changes that were made specifically in the last processed frame.
+///
+/// The count session should only be accessed from within didScan() to which it is provided as an argument. It is not safe to be accessed from anywhere else since it may be concurrently modified.Specifically no reference to [BarcodeCountSession.recognizedBarcodes] should be kept and traversed outside of didScan(). Instead a copy of the lists should be made to avoid concurrent modification. The individual tracked barcodes can be referenced without copying as they are not further modified.
+///
+/// Added in version 6.17.0
 class BarcodeCountSession with _PrivateBarcodeCountSession {
   final _BarcodeCountSessionController _controller = _BarcodeCountSessionController();
 
   final List<Barcode> _recognizedBarcodes;
 
+  /// A list containing all currently recognized barcodes.
+  ///
+  /// Added in version 7.0.0
   List<Barcode> get recognizedBarcodes => _recognizedBarcodes;
 
   final int _frameSequenceId;
 
+  /// The identifier of the current frame sequence.
+  ///
+  /// As long as there is no interruptions of frames coming from the camera, the [BarcodeCountSession.frameSequenceId] will stay the same.
+  ///
+  /// Added in version 6.17.0
   int get frameSequenceId => _frameSequenceId;
 
   final List<Barcode> _additionalBarcodes;
 
+  /// The array of additional barcodes injected with [BarcodeCount.setAdditionalBarcodes].
+  ///
+  /// Added in version 6.17.0
   List<Barcode> get additionalBarcodes => _additionalBarcodes;
 
   final List<Cluster> _recognizedClusters;
 
+  /// A list containing all currently recognized clusters.
+  ///
+  /// Added in version 8.3.0
   List<Cluster> get recognizedClusters => _recognizedClusters;
 
   final int _viewId;
@@ -81,14 +101,27 @@ class BarcodeCountSession with _PrivateBarcodeCountSession {
         trackedCodes, additionalBarcodes, recognizedClusters, frameSequenceId, frameId, viewId);
   }
 
+  /// Resets the barcode count session, effectively clearing the history of recognized barcodes. This function should only be called inside the listeners’ callback.
+  ///
+  /// Added in version 6.17.0
   Future<void> reset() {
     return _controller.reset(_viewId, _frameSequenceId);
   }
 
+  /// Computes the spatial map with the current session data. If a value is returned by this method the scanning is automatically suspended. Returns *null* if [BarcodeCountSettings.mappingEnabled] is *false*.
+  ///
+  /// The Barcode Count mapping API is still in beta and may change in future versions of Scandit Data Capture SDK.
+  ///
+  /// Added in version 8.3.0
   Future<BarcodeSpatialGrid?> getSpatialMap() {
     return _controller.getSpatialMap(_viewId);
   }
 
+  /// Computes the spatial map with the current session data, using the passed values as hints. If a value is returned by this method the scanning is automatically suspended. Returns *null* if [BarcodeCountSettings.mappingEnabled] is *false*.
+  ///
+  /// The Barcode Count mapping API is still in beta and may change in future versions of Scandit Data Capture SDK.
+  ///
+  /// Added in version 8.3.0
   Future<BarcodeSpatialGrid?> getSpatialMapWithHints(int expectedNumberOfRows, int expectedNumberOfColumns) {
     return _controller.getSpatialMapWithHints(_viewId, expectedNumberOfRows, expectedNumberOfColumns);
   }
@@ -126,6 +159,6 @@ class _BarcodeCountSessionController {
   }
 
   BarcodeMethodHandler _getMethodHandler() {
-    return BarcodeMethodHandler(const MethodChannel(BarcodeFunctionNames.methodsChannelName));
+    return BarcodeMethodHandler(const LoggingMethodChannel(BarcodeFunctionNames.methodsChannelName));
   }
 }

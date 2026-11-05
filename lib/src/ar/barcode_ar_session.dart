@@ -6,12 +6,16 @@
 
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/internal/logging/logging_method_channel.dart';
 
 import '../tracked_barcode.dart';
 
+/// The Barcode AR session holds the ongoing state of a running [BarcodeAr].
+///
+/// Added in version 7.1.0
 class BarcodeArSession with _PrivatecBarcodeArSession {
   final _BarcodeArSessionController _controller = _BarcodeArSessionController();
 
@@ -20,14 +24,23 @@ class BarcodeArSession with _PrivatecBarcodeArSession {
   final Map<int, TrackedBarcode> _trackedBarcodes;
 
   BarcodeArSession._(
-      this._addedTrackedBarcodes, this._removedTrackedBarcodes, this._trackedBarcodes, String frameId, this._viewId) {
+      this._addedTrackedBarcodes, this._removedTrackedBarcodes, this._trackedBarcodes, String? frameId, this._viewId) {
     _frameId = frameId;
   }
 
+  /// Newly tracked barcodes.
+  ///
+  /// Added in version 7.1.0
   List<TrackedBarcode> get addedTrackedBarcodes => _addedTrackedBarcodes;
 
+  /// An array of identifiers of lost barcodes that were removed in the last frame.
+  ///
+  /// Added in version 7.1.0
   List<int> get removedTrackedBarcodes => _removedTrackedBarcodes;
 
+  /// A map from identifiers to barcodes. It contains all currently tracked barcodes.
+  ///
+  /// Added in version 7.1.0
   Map<int, TrackedBarcode> get trackedBarcodes => _trackedBarcodes;
 
   final int _viewId;
@@ -44,21 +57,24 @@ class BarcodeArSession with _PrivatecBarcodeArSession {
     if (json['removedTrackedBarcodes'] != null) {
       removedTrackedBarcodes = (json['removedTrackedBarcodes'] as List).map((id) => int.parse(id)).toList();
     }
-    final frameId = event['frameId'] as String;
+    final frameId = event['frameId'] as String?;
     final viewId = event['viewId'] as int;
 
     return BarcodeArSession._(addedTrackedCodes, removedTrackedBarcodes, allTrackedBarcodes, frameId, viewId);
   }
 
+  /// Resets the session, clearing all barcodes and their states.
+  ///
+  /// Added in version 7.1.0
   Future<void> reset() {
     return _controller.reset(_viewId);
   }
 }
 
 mixin _PrivatecBarcodeArSession {
-  String _frameId = "";
+  String? _frameId;
 
-  String get frameId => _frameId;
+  String? get frameId => _frameId;
 }
 
 class _BarcodeArSessionController {
@@ -69,6 +85,6 @@ class _BarcodeArSessionController {
   }
 
   BarcodeMethodHandler _getBarcodeMethodHandler() {
-    return BarcodeMethodHandler(const MethodChannel(BarcodeFunctionNames.methodsChannelName));
+    return BarcodeMethodHandler(const LoggingMethodChannel(BarcodeFunctionNames.methodsChannelName));
   }
 }

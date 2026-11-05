@@ -37,7 +37,7 @@ class BarcodeMethodHandler {
   }
 
   /// Generates a barcode image from base64 encoded data
-  Future<String> generateFromBaseEncodedData(
+  Future<String> generateFromBase64EncodedData(
       {required String generatorId, required String data, required int imageWidth}) async {
     final params = {
       'generatorId': generatorId,
@@ -61,7 +61,7 @@ class BarcodeMethodHandler {
   }
 
   /// Generates a barcode image from byte array data and returns raw bytes
-  Future<Uint8List?> generateFromBaseEncodedDataToBytes(
+  Future<Uint8List?> generateFromBase64EncodedDataToBytes(
       {required String generatorId, required Uint8List data, required int imageWidth}) async {
     final params = {
       'generatorId': generatorId,
@@ -113,6 +113,24 @@ class BarcodeMethodHandler {
       'modeId': modeId,
     };
     return await executeBarcode('BarcodeCaptureModule', 'unregisterBarcodeCaptureListenerForEvents', params);
+  }
+
+  /// Register persistent event listener for barcode capture adaptive recognition service events
+  Future<void> registerBarcodeCaptureAdaptiveRecognitionServiceListener({required int modeId}) async {
+    final params = {
+      'modeId': modeId,
+    };
+    return await executeBarcode(
+        'BarcodeCaptureModule', 'registerBarcodeCaptureAdaptiveRecognitionServiceListener', params);
+  }
+
+  /// Unregister event listener for barcode capture adaptive recognition service events
+  Future<void> unregisterBarcodeCaptureAdaptiveRecognitionServiceListener({required int modeId}) async {
+    final params = {
+      'modeId': modeId,
+    };
+    return await executeBarcode(
+        'BarcodeCaptureModule', 'unregisterBarcodeCaptureAdaptiveRecognitionServiceListener', params);
   }
 
   /// Finish callback for barcode capture did update session event
@@ -308,15 +326,6 @@ class BarcodeMethodHandler {
       'modeId': modeId,
     };
     return await executeBarcode('BarcodeSelectionModule', 'selectUnselectedBarcodesInBarcodeSelectionSession', params);
-  }
-
-  /// Returns the BarcodeSelectionLicenseInfo JSON, or null when not available
-  Future<String> getBarcodeSelectionLicenseInfo({required int modeId}) async {
-    final params = {
-      'modeId': modeId,
-    };
-    final result = await executeBarcode('BarcodeSelectionModule', 'getBarcodeSelectionLicenseInfo', params);
-    return result;
   }
 
   /// Finish callback for barcode selection did select event
@@ -682,6 +691,50 @@ class BarcodeMethodHandler {
     return await executeBarcode('BarcodeCountModule', 'finishBarcodeCountBrushForRejectedBarcode', params);
   }
 
+  /// Finish callback for recognized barcode icon
+  Future<void> finishBarcodeCountIconForRecognizedBarcode(
+      {required int viewId, String? iconJson, required int trackedBarcodeId}) async {
+    final params = {
+      'viewId': viewId,
+      if (iconJson != null) 'iconJson': iconJson,
+      'trackedBarcodeId': trackedBarcodeId,
+    };
+    return await executeBarcode('BarcodeCountModule', 'finishBarcodeCountIconForRecognizedBarcode', params);
+  }
+
+  /// Finish callback for recognized barcode not in list icon
+  Future<void> finishBarcodeCountIconForRecognizedBarcodeNotInList(
+      {required int viewId, String? iconJson, required int trackedBarcodeId}) async {
+    final params = {
+      'viewId': viewId,
+      if (iconJson != null) 'iconJson': iconJson,
+      'trackedBarcodeId': trackedBarcodeId,
+    };
+    return await executeBarcode('BarcodeCountModule', 'finishBarcodeCountIconForRecognizedBarcodeNotInList', params);
+  }
+
+  /// Finish callback for accepted barcode icon
+  Future<void> finishBarcodeCountIconForAcceptedBarcode(
+      {required int viewId, String? iconJson, required int trackedBarcodeId}) async {
+    final params = {
+      'viewId': viewId,
+      if (iconJson != null) 'iconJson': iconJson,
+      'trackedBarcodeId': trackedBarcodeId,
+    };
+    return await executeBarcode('BarcodeCountModule', 'finishBarcodeCountIconForAcceptedBarcode', params);
+  }
+
+  /// Finish callback for rejected barcode icon
+  Future<void> finishBarcodeCountIconForRejectedBarcode(
+      {required int viewId, String? iconJson, required int trackedBarcodeId}) async {
+    final params = {
+      'viewId': viewId,
+      if (iconJson != null) 'iconJson': iconJson,
+      'trackedBarcodeId': trackedBarcodeId,
+    };
+    return await executeBarcode('BarcodeCountModule', 'finishBarcodeCountIconForRejectedBarcode', params);
+  }
+
   /// Shows the BarcodeCount view
   Future<void> showBarcodeCountView({required int viewId}) async {
     final params = {
@@ -754,6 +807,23 @@ class BarcodeMethodHandler {
       'viewId': viewId,
     };
     return await executeBarcode('BarcodeCountModule', 'unregisterBarcodeCountAsyncListener', params);
+  }
+
+  /// Register persistent event listener for barcode count adaptive recognition service events
+  Future<void> registerBarcodeCountAdaptiveRecognitionServiceListener({required int viewId}) async {
+    final params = {
+      'viewId': viewId,
+    };
+    return await executeBarcode('BarcodeCountModule', 'registerBarcodeCountAdaptiveRecognitionServiceListener', params);
+  }
+
+  /// Unregister event listener for barcode count adaptive recognition service events
+  Future<void> unregisterBarcodeCountAdaptiveRecognitionServiceListener({required int viewId}) async {
+    final params = {
+      'viewId': viewId,
+    };
+    return await executeBarcode(
+        'BarcodeCountModule', 'unregisterBarcodeCountAdaptiveRecognitionServiceListener', params);
   }
 
   /// Finish callback for BarcodeCount on scan event
@@ -863,6 +933,14 @@ class BarcodeMethodHandler {
       'viewId': viewId,
     };
     return await executeBarcode('BarcodeCountModule', 'addBarcodeCountStatusProvider', params);
+  }
+
+  /// Stops delivering barcode count status requests to the framework
+  Future<void> removeBarcodeCountStatusProvider({required int viewId}) async {
+    final params = {
+      'viewId': viewId,
+    };
+    return await executeBarcode('BarcodeCountModule', 'removeBarcodeCountStatusProvider', params);
   }
 
   /// Submits the barcode count status provider callback
@@ -1020,6 +1098,16 @@ class BarcodeMethodHandler {
       'viewId': viewId,
     };
     return await executeBarcode('SparkScanModule', 'resetSparkScanSession', params);
+  }
+
+  /// Returns the SparkScanScanningMode JSON of the view, or null when not available
+  Future<String?> getSparkScanScanningMode({required int viewId}) async {
+    final params = {
+      'viewId': viewId,
+    };
+    final result = await executeBarcode('SparkScanModule', 'getSparkScanScanningMode', params);
+    if (result == null) return null;
+    return result;
   }
 
   /// Updates the SparkScan mode configuration
@@ -1521,6 +1609,22 @@ class BarcodeMethodHandler {
     return await executeBarcode('BarcodeArModule', 'registerBarcodeArHighlightProvider', params);
   }
 
+  /// Register persistent event listener for BarcodeAr augmentation eviction events
+  Future<void> registerBarcodeArAugmentationsListener({required int viewId}) async {
+    final params = {
+      'viewId': viewId,
+    };
+    return await executeBarcode('BarcodeArModule', 'registerBarcodeArAugmentationsListener', params);
+  }
+
+  /// Unregister event listener for BarcodeAr augmentation eviction events
+  Future<void> unregisterBarcodeArAugmentationsListener({required int viewId}) async {
+    final params = {
+      'viewId': viewId,
+    };
+    return await executeBarcode('BarcodeArModule', 'unregisterBarcodeArAugmentationsListener', params);
+  }
+
   /// Unregister event listener for BarcodeAr highlight provider events
   Future<void> unregisterBarcodeArHighlightProvider({required int viewId}) async {
     final params = {
@@ -1585,6 +1689,22 @@ class BarcodeMethodHandler {
       'viewId': viewId,
     };
     return await executeBarcode('BarcodeArModule', 'barcodeArViewPause', params);
+  }
+
+  /// Shows the BarcodeAr view
+  Future<void> showBarcodeArView({required int viewId}) async {
+    final params = {
+      'viewId': viewId,
+    };
+    return await executeBarcode('BarcodeArModule', 'showBarcodeArView', params);
+  }
+
+  /// Hides the BarcodeAr view
+  Future<void> hideBarcodeArView({required int viewId}) async {
+    final params = {
+      'viewId': viewId,
+    };
+    return await executeBarcode('BarcodeArModule', 'hideBarcodeArView', params);
   }
 
   /// Resets the BarcodeAr view

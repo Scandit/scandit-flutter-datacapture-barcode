@@ -6,25 +6,45 @@
 
 import 'dart:convert';
 
-import 'package:flutter/services.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
+// ignore: implementation_imports
+import 'package:scandit_flutter_datacapture_core/src/internal/logging/logging_method_channel.dart';
 
 import '../../scandit_flutter_datacapture_barcode.dart';
 
+/// Holds the ongoing state of a running [BarcodeSelection]. An instance of this class is passed to BarcodeSelectionListener.didUpdateSelection() when new barcodes are selected or currently selected barcodes are unselected.
+///
+/// The barcode selection session should only be accessed from within didUpdateSelection() to which it is provided as an argument. It is not safe to be accessed from anywhere else since it may be concurrently modified.Specifically no reference to [BarcodeSelectionSession.selectedBarcodes] should be kept and traversed outside of didUpdateSelection(). Instead a copy of the list should be made to avoid concurrent modification. The individual barcodes can be referenced without copying as they are not further modified.
+///
+/// Added in version 6.10.0
 class BarcodeSelectionSession with _PrivateBarcodeSelectionSession {
   final List<Barcode> _selectedBarcodes;
   final List<Barcode> _newlySelectedBarcodes;
   final List<Barcode> _newlyUnselectedBarcodes;
   final _BarcodeSelectionSessionController _controller = _BarcodeSelectionSessionController();
 
+  /// List of codes that were newly selected in the last processed frame.
+  ///
+  /// Added in version 6.10.0
   List<Barcode> get newlySelectedBarcodes => _newlySelectedBarcodes;
 
+  /// List of currently selected codes.
+  ///
+  /// Added in version 6.10.0
   List<Barcode> get selectedBarcodes => _selectedBarcodes;
 
+  /// List of codes that were unselected in the last processed frame.
+  ///
+  /// Added in version 6.10.0
   List<Barcode> get newlyUnselectedBarcodes => _newlyUnselectedBarcodes;
 
   final int _frameSequenceId;
+  /// The identifier of the current frame sequence.
+  ///
+  /// As long as there is no interruptions of frames coming from the camera, the [BarcodeSelectionSession.frameSequenceId] will stay the same.
+  ///
+  /// Added in version 6.10.0
   int get frameSequenceId => _frameSequenceId;
 
   final int _modeId;
@@ -34,14 +54,23 @@ class BarcodeSelectionSession with _PrivateBarcodeSelectionSession {
     _frameId = frameId;
   }
 
+  /// Resets the barcode selection session, effectively clearing the history of selected codes. This function should only be called inside the listeners’ callback. To call it from another thread, use [BarcodeSelection.reset].
+  ///
+  /// Added in version 6.10.0
   Future<void> reset() {
     return _controller.reset(_modeId, _frameSequenceId);
   }
 
+  /// Returns how many times the given [Barcode] was selected.
+  ///
+  /// Added in version 6.10.0
   Future<int> getCount(Barcode barcode) {
     return _controller.getCount(_modeId, barcode);
   }
 
+  /// Select all the unselected barcodes that are currently being tracked in this barcode selection session.
+  ///
+  /// Added in version 8.5.0
   Future<void> selectUnselectedBarcodes() {
     return _controller.selectUnselectedBarcodes(_modeId);
   }
@@ -97,7 +126,7 @@ class _BarcodeSelectionSessionController {
   }
 
   BarcodeMethodHandler _getMethodHandler() {
-    final channel = const MethodChannel(BarcodeFunctionNames.methodsChannelName);
+    final channel = const LoggingMethodChannel(BarcodeFunctionNames.methodsChannelName);
     return BarcodeMethodHandler(channel);
   }
 }

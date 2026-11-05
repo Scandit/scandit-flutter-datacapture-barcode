@@ -9,6 +9,7 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 import 'aruco_dictionary_preset.dart';
 import 'aruco_marker.dart';
 
+/// Added in version 6.22.0
 class ArucoDictionary implements Serializable {
   final ArucoDictionaryPreset? _preset;
   final int? _markerSize;
@@ -20,6 +21,11 @@ class ArucoDictionary implements Serializable {
     return ArucoDictionary._(preset, null, null);
   }
 
+  /// Constructs an [ArucoDictionary] using custom data.
+  ///
+  /// - *markerSize* is the length of the side of the barcode. For a 5 by 5 marker it will be 5.
+  ///
+  /// Added in version 6.22.0
   factory ArucoDictionary.createWithMarkers(int markerSize, List<ArucoMarker> markers) {
     return ArucoDictionary._(null, markerSize, markers);
   }
