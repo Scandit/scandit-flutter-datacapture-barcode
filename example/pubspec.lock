@@ -166,14 +166,14 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "8.7.0"
+    version: "8.7.1"
   scandit_flutter_datacapture_core:
     dependency: "direct main"
     description:
       path: "../../scandit-flutter-datacapture-core"
       relative: true
     source: path
-    version: "8.7.0"
+    version: "8.7.1"
   sky_engine:
     dependency: transitive
     description: flutter
