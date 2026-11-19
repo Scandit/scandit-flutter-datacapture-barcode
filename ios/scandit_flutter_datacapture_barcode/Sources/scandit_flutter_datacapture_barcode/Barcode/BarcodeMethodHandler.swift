@@ -11,7 +11,7 @@ import scandit_flutter_datacapture_core
 
 class BarcodeMethodHandler {
     private enum FunctionNames {
-        static let getDynamicDefaults = "getDynamicDefaults"
+        static let getDefaults = "getDefaults"
     }
 
     private let barcodeModule: BarcodeModule
@@ -22,9 +22,21 @@ class BarcodeMethodHandler {
 
     func methodCallHandler(methodCall: FlutterMethodCall, result: @escaping FlutterResult) {
         switch methodCall.method {
-        // Only the defaults Dart cannot source from its generated static consts.
-        case FunctionNames.getDynamicDefaults:
-            self.reply(defaults: self.barcodeModule.getDynamicDefaults(), result: result)
+        case FunctionNames.getDefaults:
+            do {
+                let defaultsJSONString = String(
+                    data: try JSONSerialization.data(
+                        withJSONObject: self.barcodeModule.getDefaults(),
+                        options: []
+                    ),
+                    encoding: .utf8
+                )
+                result(defaultsJSONString)
+            } catch let error as NSError {
+                result(
+                    FlutterError(code: "-1", message: "Unable to load the defaults. \(error)", details: error.domain)
+                )
+            }
         case "executeBarcode":
             guard let args = methodCall.params(), let moduleName = methodCall.stringValue(for: "moduleName", from: args)
             else {
@@ -69,23 +81,6 @@ class BarcodeMethodHandler {
 
         default:
             result(FlutterMethodNotImplemented)
-        }
-    }
-
-    private func reply(defaults: [String: Any?], result: @escaping FlutterResult) {
-        do {
-            let defaultsJSONString = String(
-                data: try JSONSerialization.data(
-                    withJSONObject: defaults,
-                    options: []
-                ),
-                encoding: .utf8
-            )
-            result(defaultsJSONString)
-        } catch let error as NSError {
-            result(
-                FlutterError(code: "-1", message: "Unable to load the defaults. \(error)", details: error.domain)
-            )
         }
     }
 }

@@ -6,15 +6,9 @@
 
 import '../symbology.dart';
 
-/// Contains information about barcode-capture-specific licensing.
-///
-/// Added in version 8.6.0
 class BarcodeCaptureLicenseInfo {
   final Set<Symbology> _licensedSymbologies;
 
-  /// Which symbologies are licensed and can be used for barcode capture.
-  ///
-  /// Added in version 8.6.0
   Set<Symbology> get licensedSymbologies => _licensedSymbologies;
 
   BarcodeCaptureLicenseInfo._(this._licensedSymbologies);
