@@ -9,6 +9,7 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 
 import 'barcode_find_defaults.dart';
 
+/// Added in version 6.22.0
 class BarcodeFindViewSettings implements Serializable {
   final Color _inListItemColor;
   final Color _notInListItemColor;
@@ -19,6 +20,9 @@ class BarcodeFindViewSettings implements Serializable {
   final bool _hardwareTriggerEnabled;
   final int? _hardwareTriggerKeyCode;
 
+  /// Constructs a new BarcodeFind view settings to use when creating an instance of the [BarcodeFindView].
+  ///
+  /// Added in version 6.22.0
   BarcodeFindViewSettings(this._inListItemColor, this._notInListItemColor, this._soundEnabled, this._hapticEnabled)
       : _progressBarStartColor = BarcodeFindDefaults.barcodeFindViewSettingsDefaults.progressBarStartColor,
         _progressBarFinishColor = BarcodeFindDefaults.barcodeFindViewSettingsDefaults.progressBarFinishColor,
@@ -56,20 +60,52 @@ class BarcodeFindViewSettings implements Serializable {
     this._hardwareTriggerKeyCode,
   );
 
+  /// The color for the overlay of an item that is in the list of items to find.
+  ///
+  /// Default is #2EC1CE.
+  ///
+  /// Added in version 6.22.0
   Color get inListItemColor => _inListItemColor;
 
+  /// The color for the overlay of an item that is not in the list of items to find.
+  ///
+  /// Default is #FFFFFF.
+  ///
+  /// Added in version 6.22.0
   Color get notInListItemColor => _notInListItemColor;
 
+  /// The color used at the start of the progress bar. The progress bar will diplay a gradient from [BarcodeFindViewSettings.progressBarStartColor] to [BarcodeFindViewSettings.progressBarFinishColor].
+  ///
+  /// Default is #2EC1CE.
+  ///
+  /// Added in version 8.5.0
   Color get progressBarStartColor => _progressBarStartColor;
 
+  /// The color used at the end of the progress bar. The progress bar will diplay a gradient from [BarcodeFindViewSettings.progressBarStartColor] to [BarcodeFindViewSettings.progressBarFinishColor].
+  ///
+  /// Default is #97e0e6.
+  ///
+  /// Added in version 8.5.0
   Color get progressBarFinishColor => _progressBarFinishColor;
 
+  /// Indicates whether audio feedback should be enabled.
+  ///
+  /// Default is *true*.
+  ///
+  /// Added in version 6.22.0
   bool get soundEnabled => _soundEnabled;
 
+  /// Indicates whether haptic feedback should be enabled.
+  ///
+  /// Default is *true*.
+  ///
+  /// Added in version 6.22.0
   bool get hapticEnabled => _hapticEnabled;
 
+  /// Added in version 8.5.0
   bool get hardwareTriggerEnabled => _hardwareTriggerEnabled;
 
+  /// Added in version 8.5.0
   int? get hardwareTriggerKeyCode => _hardwareTriggerKeyCode;
 
   @override

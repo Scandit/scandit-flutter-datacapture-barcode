@@ -14,6 +14,11 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
 
+/// Overlay for the [BarcodeCapture] capture mode that displays recognized barcodes on top of a data capture view ([DataCaptureView]).
+///
+/// The appearance of the visualized barcodes can be configured or turned off completely through the [BarcodeCaptureOverlay.brush] property.
+///
+/// Added in version 6.7.0
 class BarcodeCaptureOverlay extends DataCaptureOverlay {
   static final _noViewfinder = {'type': 'none'};
 
@@ -25,13 +30,22 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
 
   BarcodeCaptureOverlay._(this._mode) : super('barcodeCapture');
 
+  /// Constructs a new BarcodeCaptureOverlay. For the overlay to be displayed on screen, it must be added to a [DataCaptureView].
+  ///
+  /// Added in version 7.6.0
   BarcodeCaptureOverlay(BarcodeCapture mode) : this._(mode);
 
   int get _dataCaptureViewId => _view?.viewId ?? -1;
 
+  /// The view this data capture overlay is attached to. When the data capture overlay is currently not attached to a view, *null* is returned.
+  ///
+  /// Added in version 6.7.0
   @override
   DataCaptureView? get view => _view;
 
+  /// The view this data capture overlay is attached to. When the data capture overlay is currently not attached to a view, *null* is returned.
+  ///
+  /// Added in version 6.7.0
   @override
   set view(DataCaptureView? newValue) {
     if (newValue == null) {
@@ -46,8 +60,14 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
 
   Brush _brush = BarcodeCaptureDefaults.barcodeCaptureOverlayDefaults.defaultBrush;
 
+  /// The brush used for visualizing a recognized barcode in the UI. To turn off drawing of locations, set the brush to use both a transparent fill and stroke color. By default, the brush has a transparent fill color, a “Scandit”-blue stroke color, and a stroke width of 1.
+  ///
+  /// Added in version 6.7.0
   Brush get brush => _brush;
 
+  /// The brush used for visualizing a recognized barcode in the UI. To turn off drawing of locations, set the brush to use both a transparent fill and stroke color. By default, the brush has a transparent fill color, a “Scandit”-blue stroke color, and a stroke width of 1.
+  ///
+  /// Added in version 6.7.0
   set brush(Brush newValue) {
     _brush = newValue;
     _controller?.update();
@@ -55,8 +75,14 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
 
   bool _shouldShowScanAreaGuides = false;
 
+  /// Whether to show scan area guides on top of the preview. This property is useful during development to visualize the current scan areas on screen. It is not meant to be used for production. By default this property is *false*.
+  ///
+  /// Added in version 6.7.0
   bool get shouldShowScanAreaGuides => _shouldShowScanAreaGuides;
 
+  /// Whether to show scan area guides on top of the preview. This property is useful during development to visualize the current scan areas on screen. It is not meant to be used for production. By default this property is *false*.
+  ///
+  /// Added in version 6.7.0
   set shouldShowScanAreaGuides(bool newValue) {
     _shouldShowScanAreaGuides = newValue;
     _controller?.update();
@@ -64,8 +90,14 @@ class BarcodeCaptureOverlay extends DataCaptureOverlay {
 
   Viewfinder? _viewfinder;
 
+  /// Sets the viewfinder. By default, the viewfinder is *null*. Set this to an instance of [Viewfinder] if you want to draw a viewfinder.
+  ///
+  /// Added in version 6.7.0
   Viewfinder? get viewfinder => _viewfinder;
 
+  /// Sets the viewfinder. By default, the viewfinder is *null*. Set this to an instance of [Viewfinder] if you want to draw a viewfinder.
+  ///
+  /// Added in version 6.7.0
   set viewfinder(Viewfinder? newValue) {
     _viewfinder?.removeListener(_handleViewfinderChanged);
     _viewfinder = newValue;

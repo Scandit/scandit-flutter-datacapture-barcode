@@ -9,11 +9,17 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/internal/helpers.dart';
 
+/// A unique identifier for text components in the item-based scanning APIs. This identifier is automatically generated as a UUID and is used to distinguish between different text scan components within the system.
+///
+/// Added in version 8.1.0
 class TextIdentifier implements Serializable {
   final String _identifier;
 
   TextIdentifier._(this._identifier);
 
+  /// Creates a new text identifier with an automatically generated UUID.
+  ///
+  /// Added in version 8.1.0
   TextIdentifier() : this._(generateIdentifier());
 
   factory TextIdentifier.fromJSON(String definitionId) {

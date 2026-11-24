@@ -8,17 +8,36 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 
 import '../scandit_flutter_datacapture_barcode.dart';
 
+/// These settings are used to select barcodes that will be filtered out in the view. Any barcode that matches any of the provided settings will be covered by a colored layer.
+///
+/// Added in version 6.17.0
 class BarcodeFilterSettings implements Serializable {
+  /// When set to *true*, EAN 13 barcodes will be excluded.
+  ///
+  /// Added in version 6.17.0
   bool excludeEan13 = false;
 
+  /// When set to *true*, UPC-A barcodes will be excluded.
+  ///
+  /// Added in version 6.17.0
   bool excludeUpca = false;
 
+  /// A regular expression to be matched against `ByteData`.
+  ///
+  /// Added in version 6.17.0
   String excludedCodesRegex = '';
 
+  /// A map of excluded symbol counts, indexed by [Symbology]. Each [Symbology] will have assigned a set of all the character counts for the barcode’s `ByteData` that will be matched.
+  ///
+  /// Added in version 6.17.0
   Map<Symbology, Set<int>> excludedSymbolCounts = {};
 
+  /// A set of [Symbology] to exclude. If an excluded [Symbology] is not part of the set of active symbologies in the mode, this setting will have no effect on that Symbology.
+  ///
+  /// Added in version 6.17.0
   Set<Symbology> excludedSymbologies = {};
 
+  /// Added in version 8.3.0
   BarcodeFilterSettings()
       : excludeEan13 = false,
         excludeUpca = false,

@@ -17,6 +17,8 @@ import com.scandit.datacapture.flutter.core.BaseFlutterPlugin;
 import com.scandit.datacapture.flutter.core.utils.FlutterEmitter;
 import com.scandit.datacapture.frameworks.barcode.BarcodeModule;
 import com.scandit.datacapture.frameworks.barcode.capture.BarcodeCaptureModule;
+import com.scandit.datacapture.frameworks.core.listeners.registry.ListenerRegistry;
+import com.scandit.datacapture.frameworks.core.listeners.registry.RegistryEmitter;
 import com.scandit.datacapture.frameworks.barcode.ar.BarcodeArModule;
 import com.scandit.datacapture.frameworks.barcode.count.BarcodeCountModule;
 import com.scandit.datacapture.frameworks.barcode.find.BarcodeFindModule;
@@ -214,7 +216,9 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin extends BaseFlutterPlug
         BarcodeBatchModule barcodeBatchModule = resolveModule(BarcodeBatchModule.class);
         if (barcodeBatchModule != null) return;
 
-        barcodeBatchModule = BarcodeBatchModule.create(barcodeBatchEmitter, null);
+        barcodeBatchModule = BarcodeBatchModule.create(
+                new RegistryEmitter(barcodeBatchEmitter, ListenerRegistry.getInstance()), null
+        );
         barcodeBatchModule.onCreate(binding.getApplicationContext());
 
         registerModule(barcodeBatchModule);
@@ -234,7 +238,9 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin extends BaseFlutterPlug
         BarcodeSelectionModule barcodeSelectionModule = resolveModule(BarcodeSelectionModule.class);
         if (barcodeSelectionModule != null) return;
 
-        barcodeSelectionModule = BarcodeSelectionModule.create(barcodeSelectionEmitter);
+        barcodeSelectionModule = BarcodeSelectionModule.create(
+                new RegistryEmitter(barcodeSelectionEmitter, ListenerRegistry.getInstance())
+        );
         barcodeSelectionModule.onCreate(binding.getApplicationContext());
 
         registerModule(barcodeSelectionModule);
@@ -244,7 +250,9 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin extends BaseFlutterPlug
         BarcodeCountModule barcodeCountModule = resolveModule(BarcodeCountModule.class);
         if (barcodeCountModule != null) return;
 
-        barcodeCountModule = BarcodeCountModule.create(barcodeCountEmitter);
+        barcodeCountModule = BarcodeCountModule.create(
+                new RegistryEmitter(barcodeCountEmitter, ListenerRegistry.getInstance())
+        );
         barcodeCountModule.onCreate(binding.getApplicationContext());
 
         registerModule(barcodeCountModule);
@@ -255,7 +263,7 @@ public class ScanditFlutterDataCaptureBarcodeProxyPlugin extends BaseFlutterPlug
         if (barcodeCaptureModule != null) return;
 
         barcodeCaptureModule = BarcodeCaptureModule.create(
-                barcodeCaptureEmitter
+                new RegistryEmitter(barcodeCaptureEmitter, ListenerRegistry.getInstance())
         );
         barcodeCaptureModule.onCreate(binding.getApplicationContext());
         registerModule(barcodeCaptureModule);

@@ -13,6 +13,11 @@ import 'scanned_component.dart';
 import 'scanned_text.dart';
 import 'text_identifier.dart';
 
+/// A scanned item in the item-based scanning APIs that represents a collection of related scan components. A scanned item can contain multiple barcode and text components that are logically grouped together.
+///
+/// This class provides access to all the individual [ScannedComponent] objects that make up the item, as well as convenient methods to retrieve specific components by their identifiers.
+///
+/// Added in version 8.1.0
 class ScannedItem {
   final ScanItemIdentifier? _definitionIdentifier;
 
@@ -22,12 +27,26 @@ class ScannedItem {
 
   ScannedItem._(this._definitionIdentifier, this._identifier, this._components);
 
+  /// The unique identifier corresponding to the [ScanItemDefinition] for this item. May be *null* if item is located but not defined.
+  ///
+  /// Added in version 8.1.0
   ScanItemIdentifier? get definitionIdentifier => _definitionIdentifier;
 
+  /// The unique identifier for this scanned item. May be *null* if the item doesn’t have a specific identifier.
+  ///
+  /// Added in version 8.1.0
   ScannedItemIdentifier? get identifier => _identifier;
 
+  /// An array of all scan components that make up this item. Components can be either [ScannedBarcode] or [ScannedText] objects.
+  ///
+  /// Added in version 8.1.0
   List<ScannedComponent> get components => _components;
 
+  /// Retrieves a specific barcode component from this item by its identifier.
+  ///
+  /// Param BarcodeIdentifier identifierThe identifier associated with the barcode definition of the barcode component to retrieve.ReturnsThe [ScannedBarcode] with the given identifier, or *null* if no such barcode exists in this item.
+  ///
+  /// Added in version 8.1.0
   ScannedBarcode? barcodeForIdentifier(BarcodeIdentifier identifier) {
     try {
       final component = _components.firstWhere(
@@ -41,6 +60,11 @@ class ScannedItem {
     }
   }
 
+  /// Retrieves a specific text component from this item by its identifier.
+  ///
+  /// Param TextIdentifier identifierThe identifier associated with the text definition of the text component to retrieve.ReturnsThe [ScannedText] with the given identifier, or *null* if no such text exists in this item.
+  ///
+  /// Added in version 8.1.0
   ScannedText? textForIdentifier(TextIdentifier identifier) {
     try {
       final component = _components.firstWhere(

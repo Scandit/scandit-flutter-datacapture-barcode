@@ -1,0 +1,44 @@
+pluginManagement {
+    def flutterSdkPath = {
+        def properties = new Properties()
+        file("local.properties").withInputStream { properties.load(it) }
+        def flutterSdkPath = properties.getProperty("flutter.sdk")
+        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+        return flutterSdkPath
+    }()
+
+    includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
+    apply from: "../../../../common/frameworks.gradle"
+    repositories repos
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    id "com.android.application" version "8.12.2" apply false
+    id "org.jetbrains.kotlin.android" version "2.2.21" apply false
+    id "com.scandit.datacapture.gradle-code-quality-plugin" version "0.5.2" apply false
+}
+
+include ':app'
+static def findNativeModulesRootDirectory(String startPath) {
+    File currentPath = new File(startPath).absoluteFile
+
+    while (currentPath.parentFile != null) {
+        File m2Path = new File(currentPath, 'shared')
+        if (m2Path.isDirectory()) {
+            return currentPath.absolutePath
+        }
+        currentPath = currentPath.parentFile
+    }
+
+    return null
+}
+
+
+include ':scandit-datacapture-frameworks-core'
+project(':scandit-datacapture-frameworks-core').projectDir = new File("${findNativeModulesRootDirectory(rootDir.path)}/shared/android/scandit-datacapture-frameworks-core")
+include ':scandit-datacapture-frameworks-barcode'
+project(':scandit-datacapture-frameworks-barcode').projectDir = new File("${findNativeModulesRootDirectory(rootDir.path)}/shared/android/scandit-datacapture-frameworks-barcode")

@@ -4,8 +4,12 @@
  * Copyright (C) 2023- Scandit AG. All rights reserved.
  */
 
+// ignore_for_file: must_be_immutable - packaging injects doc comments above the
+// class, which detaches a line-level ignore from the class it applies to.
+
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'dart:io';
 import 'dart:math';
 
@@ -18,6 +22,21 @@ import 'package:scandit_flutter_datacapture_barcode/src/barcode_function_names.d
 
 import 'package:scandit_flutter_datacapture_barcode/src/barcode_plugin_events.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/barcode_method_handler.dart';
+import 'package:scandit_flutter_datacapture_barcode/src/internal/generated/schema_types.dart'
+    show
+        BarcodePickActionListenerDidPick,
+        BarcodePickActionListenerDidUnpick,
+        BarcodePickListenerDidUpdateSession,
+        buildBarcodePickView,
+        BarcodePickScanningListenerDidCompleteScanningSession,
+        BarcodePickScanningListenerDidUpdateScanningSession,
+        BarcodePickViewHighlightStyleAsyncProviderStyleForRequest,
+        BarcodePickViewHighlightStyleCustomViewProviderViewForRequest,
+        BarcodePickViewListenerDidFreezeScanning,
+        BarcodePickViewListenerDidPauseScanning,
+        BarcodePickViewListenerDidStartScanning,
+        BarcodePickViewListenerDidStopScanning,
+        BarcodePickViewUiListenerDidTapFinishButton;
 import 'package:scandit_flutter_datacapture_barcode/src/pick/barcode_pick_action.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/pick/barcode_pick_action_listener.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/pick/internal/barcode_pick_consts.dart';
@@ -41,17 +60,28 @@ import 'package:scandit_flutter_datacapture_core/src/map_helper.dart';
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/internal/base_controller.dart';
 
+/// Used by the user to confirm actions.
+///
+/// Added in version 6.22.0
 class BarcodePickActionCallback {
   final _BarcodePickViewController _controller;
   final String _itemData;
 
   BarcodePickActionCallback._(this._controller, this._itemData);
 
+  /// Invoke this method to provide the result of the action.
+  ///
+  /// - *response* If *true* the action is confirmed.
+  ///
+  /// Added in version 6.22.0
   Future<void> didFinish(bool result) {
     return _controller.finishPickAction(_itemData, result);
   }
 }
 
+/// Capture mode that implements barcode pick.
+///
+/// Added in version 6.22.0
 class BarcodePick implements Serializable {
   _BarcodePickViewController? _controller;
   final BarcodePickProductProvider _productProvider;
@@ -62,6 +92,13 @@ class BarcodePick implements Serializable {
 
   BarcodePick._(this._dataCaptureContext, this._settings, this._productProvider);
 
+  /// Constructs a new [BarcodePick] instance:
+  ///
+  /// - *dataCaptureContext* A [DataCaptureContext]
+  /// - *settings* An instance of [BarcodePickSettings] used to configure the mode.
+  /// - *productProvider* The product provider responsible for retrieving and mapping products. Available product provider types: [[BarcodePickAsyncMapperProductProvider]]
+  ///
+  /// Added in version 6.22.0
   BarcodePick(
     DataCaptureContext dataCaptureContext,
     BarcodePickSettings settings,
@@ -71,6 +108,9 @@ class BarcodePick implements Serializable {
   final List<BarcodePickScanningListener> _scanningListeners = [];
   final List<BarcodePickListener> _listeners = [];
 
+  /// Returns the recommended camera settings to use with the mode.
+  ///
+  /// Added in version 7.6.0
   static CameraSettings createRecommendedCameraSettings() {
     var defaults = BarcodePickDefaults.cameraSettingsDefaults;
     return CameraSettings(
@@ -87,6 +127,9 @@ class BarcodePick implements Serializable {
     );
   }
 
+  /// Adds a scanning listener to this [BarcodePick] instance.
+  ///
+  /// Added in version 6.22.0
   void addScanningListener(BarcodePickScanningListener listener) {
     _checkAndSubscribeListeners();
     if (_scanningListeners.contains(listener)) {
@@ -101,6 +144,9 @@ class BarcodePick implements Serializable {
     }
   }
 
+  /// Removes the scanning listener from this [BarcodePick] instance.
+  ///
+  /// Added in version 6.22.0
   void removeScanningListener(BarcodePickScanningListener listener) {
     _scanningListeners.remove(listener);
     _checkAndUnsubscribeListeners();
@@ -112,6 +158,9 @@ class BarcodePick implements Serializable {
     }
   }
 
+  /// Adds a listener to this [BarcodePick] instance.
+  ///
+  /// Added in version 7.3.0
   void addListener(BarcodePickListener listener) {
     _checkAndSubscribeNativeListener();
     if (_listeners.contains(listener)) {
@@ -126,6 +175,9 @@ class BarcodePick implements Serializable {
     }
   }
 
+  /// Removes the listener from this [BarcodePick] instance.
+  ///
+  /// Added in version 7.3.0
   void removeListener(BarcodePickListener listener) {
     _listeners.remove(listener);
     _checkAndUnsubscribeNativeListener();
@@ -137,6 +189,7 @@ class BarcodePick implements Serializable {
     }
   }
 
+  /// Added in version 8.5.0
   Future<BarcodePickAction> selectItemWithData(String data) async {
     final controller = _controller;
     if (controller == null) {
@@ -145,10 +198,12 @@ class BarcodePick implements Serializable {
     return controller.selectItemWithData(data);
   }
 
+  /// Added in version 8.5.0
   Future<void> confirmActionForItemWithData(String data) async {
     return _controller?.confirmActionForItemWithData(data) ?? Future.value();
   }
 
+  /// Added in version 8.5.0
   Future<void> cancelActionForItemWithData(String data) async {
     return _controller?.cancelActionForItemWithData(data) ?? Future.value();
   }
@@ -172,7 +227,9 @@ class BarcodePick implements Serializable {
   }
 }
 
-// ignore: must_be_immutable
+/// BarcodePickView.
+///
+/// Added in version 6.22.0
 class BarcodePickView extends StatefulWidget implements Serializable {
   // We require that to exist doesn't mean it must be used here.
   // ignore: unused_field
@@ -199,6 +256,9 @@ class BarcodePickView extends StatefulWidget implements Serializable {
     return BarcodePickView._(dataCaptureContext, barcodePick, viewSettings, null);
   }
 
+  /// Initializes a BarcodePickView
+  ///
+  /// Added in version 6.22.0
   factory BarcodePickView.forModeWithViewSettingsAndCameraSettings(
     DataCaptureContext dataCaptureContext,
     BarcodePick barcodePick,
@@ -208,31 +268,54 @@ class BarcodePickView extends StatefulWidget implements Serializable {
     return BarcodePickView._(dataCaptureContext, barcodePick, viewSettings, cameraSettings);
   }
 
+  /// Implemented from [StatefulWidget](https://api.flutter.dev/flutter/widgets/StatefulWidget-class.html). Called by the Flutter framework.
+  ///
+  /// Added in version 6.22.0
   @override
   State<StatefulWidget> createState() => _BarcodePickViewState();
 
+  /// Starts the camera and the scanning process. Can be stopped by calling [BarcodePickView.stop].
+  ///
+  /// Added in version 6.22.0
   Future<void> start() {
     _isViewStarted = true;
     return _controller?.start() ?? Future.value(null);
   }
 
+  /// Resets the picking flow. This will clear all picked items and restore the initial state.
+  ///
+  /// Added in version 8.2.0
   Future<void> reset() {
     return _controller?.reset() ?? Future.value(null);
   }
 
+  /// Freezes the camera and the highlights position to make the selection easier. The scanning can be started again using [BarcodePickView.start].
+  ///
+  /// Added in version 6.22.0
   Future<void> freeze() {
     return _controller?.freeze() ?? Future.value(null);
   }
 
+  /// Pauses the camera and the scanning process. It can be started again using [BarcodePickView.start].
+  ///
+  /// Added in version 6.24.0
   Future<void> stop() {
     _isViewStarted = false;
     return _controller?.stop() ?? Future.value(null);
   }
 
+  /// Stops the camera and the scanning process. After this call the view should not be used anymore.
+  ///
+  /// For instance, this method could be called in the Widget’s *dispose* function to release the scanning objects.
+  ///
+  /// Added in version 6.22.0
   Future<void> release() {
     return _controller?.release() ?? Future.value(null);
   }
 
+  /// Adds a [BarcodePickActionListener] to the mode. User actions will be notified to the listener.
+  ///
+  /// Added in version 6.22.0
   void addActionListener(BarcodePickActionListener listener) {
     if (_actionListeners.isEmpty) {
       _controller?.addActionListener();
@@ -243,6 +326,9 @@ class BarcodePickView extends StatefulWidget implements Serializable {
     _actionListeners.add(listener);
   }
 
+  /// Removes a [BarcodePickActionListener].
+  ///
+  /// Added in version 6.22.0
   void removeActionListener(BarcodePickActionListener listener) {
     _actionListeners.remove(listener);
     if (_actionListeners.isEmpty) {
@@ -250,6 +336,9 @@ class BarcodePickView extends StatefulWidget implements Serializable {
     }
   }
 
+  /// Adds a [BarcodePickViewListener] to the mode. User actions will be notified to the listener.
+  ///
+  /// Added in version 6.22.0
   void addListener(BarcodePickViewListener listener) {
     if (_viewListeners.isEmpty) {
       _controller?.addViewListener();
@@ -260,6 +349,9 @@ class BarcodePickView extends StatefulWidget implements Serializable {
     _viewListeners.add(listener);
   }
 
+  /// Removes a [BarcodePickViewListener].
+  ///
+  /// Added in version 6.22.0
   void removeListener(BarcodePickViewListener listener) {
     _viewListeners.remove(listener);
     if (_viewListeners.isEmpty) {
@@ -267,10 +359,16 @@ class BarcodePickView extends StatefulWidget implements Serializable {
     }
   }
 
+  /// Sets the listener which is called whenever the finish button is tapped from the view.
+  ///
+  /// Added in version 6.22.0
   BarcodePickViewUiListener? get uiListener {
     return _uiListener;
   }
 
+  /// Sets the listener which is called whenever the finish button is tapped from the view.
+  ///
+  /// Added in version 6.22.0
   set uiListener(BarcodePickViewUiListener? newValue) {
     _uiListener = newValue;
     _controller?.addRemoveUiListener(newValue != null);
@@ -279,15 +377,15 @@ class BarcodePickView extends StatefulWidget implements Serializable {
   @override
   Map<String, dynamic> toMap() {
     var json = <String, dynamic>{
-      'View': {
-        'viewSettings': _barcodPickViewSettings.toMap(),
-        'cameraSettings': _cameraSettings?.toMap(),
-        'hasActionListeners': _actionListeners.isNotEmpty,
-        'hasViewListeners': _viewListeners.isNotEmpty,
-        'hasViewUiListener': uiListener != null,
-        'isStarted': _isViewStarted,
-        'viewId': _viewId,
-      },
+      'View': buildBarcodePickView(
+        viewSettings: _barcodPickViewSettings.toMap(),
+        cameraSettings: _cameraSettings?.toMap(),
+        hasActionListeners: _actionListeners.isNotEmpty,
+        hasViewListeners: _viewListeners.isNotEmpty,
+        hasViewUiListener: uiListener != null,
+        isStarted: _isViewStarted,
+        viewId: _viewId,
+      ),
       'BarcodePick': _barcodePick.toMap(),
     };
 
@@ -433,14 +531,19 @@ class _BarcodePickViewController extends BaseController {
       } else if (event.isEvent(BarcodePickEventNames.actionDidUnpick)) {
         handleDidUnpick(event.payload);
       } else if (event.isEvent(BarcodePickEventNames.viewDidFreezeScanning)) {
+        BarcodePickViewListenerDidFreezeScanning.fromJson(event.payload);
         notifyDidFreezeScanning();
       } else if (event.isEvent(BarcodePickEventNames.viewDidPauseScanning)) {
+        BarcodePickViewListenerDidPauseScanning.fromJson(event.payload);
         notifyDidPauseScanning();
       } else if (event.isEvent(BarcodePickEventNames.viewDidStartScanning)) {
+        BarcodePickViewListenerDidStartScanning.fromJson(event.payload);
         notifyDidStartScanning();
       } else if (event.isEvent(BarcodePickEventNames.viewDidStopScanning)) {
+        BarcodePickViewListenerDidStopScanning.fromJson(event.payload);
         notifyDidStopScanning();
       } else if (event.isEvent(BarcodePickEventNames.viewUiDidTapFinishButton)) {
+        BarcodePickViewUiListenerDidTapFinishButton.fromJson(event.payload);
         view.uiListener?.didTapFinishButton(view);
       } else if (event.isEvent(BarcodePickEventNames.viewForRequest)) {
         handleViewForRequest(event.payload);
@@ -451,28 +554,44 @@ class _BarcodePickViewController extends BaseController {
   }
 
   Future<void> handleViewForRequest(Map<String, dynamic> json) async {
-    final requestId = num.parse(json['requestId']);
-    final customView = view._barcodPickViewSettings.highlightStyle as BarcodePickViewHighlightStyleCustomView?;
-    final response = await customView?.asyncCustomViewProvider?.customViewForRequest(
-      BarcodePickViewHighlightStyleRequest.fromJSON(jsonDecode(json['request']) as Map<String, dynamic>),
+    final payload = BarcodePickViewHighlightStyleCustomViewProviderViewForRequest.fromJson(json);
+    final highlightStyle = view._barcodPickViewSettings.highlightStyle;
+    // `is` rather than `as ...?`: a style that exposes no custom-view provider must degrade to
+    // "no provider" (and still ack below), not throw an unhandled async TypeError.
+    BarcodePickViewHighlightStyleCustomViewProvider? customViewProvider;
+    if (highlightStyle is BarcodePickViewHighlightStyleCustomView) {
+      customViewProvider = highlightStyle.asyncCustomViewProvider;
+    }
+    final response = await customViewProvider?.customViewForRequest(
+      BarcodePickViewHighlightStyleRequest.fromJSON(jsonDecode(payload.request) as Map<String, dynamic>),
     );
     await barcodeMethodHandler.finishBarcodePickViewHighlightStyleCustomViewProviderViewForRequest(
       viewId: view._viewId,
-      requestId: requestId.toInt(),
+      requestId: payload.requestId,
       responseJson: response != null ? jsonEncode(response.toMap()) : null,
     );
   }
 
   Future<void> handleStyleForRequest(Map<String, dynamic> json) async {
-    final requestId = num.parse(json['requestId']);
-    final dotWithIcons = view._barcodPickViewSettings.highlightStyle as BarcodePickViewHighlightStyleDotWithIcons?;
-    final response = await dotWithIcons?.asyncStyleProvider?.styleForRequest(
-      BarcodePickViewHighlightStyleRequest.fromJSON(jsonDecode(json['request']) as Map<String, dynamic>),
+    final payload = BarcodePickViewHighlightStyleAsyncProviderStyleForRequest.fromJson(json);
+    final highlightStyle = view._barcodPickViewSettings.highlightStyle;
+    // Both DotWithIcons and RectangularWithIcons expose an async style provider, and they are
+    // unrelated types — so resolve with `is` from either, mirroring the TS handler. Casting to
+    // DotWithIcons alone threw a TypeError for a RectangularWithIcons style; that was unreachable
+    // only because this handler used to die on `num.parse(json['requestId'])` before reaching it.
+    BarcodePickViewHighlightStyleAsyncProvider? asyncStyleProvider;
+    if (highlightStyle is BarcodePickViewHighlightStyleDotWithIcons) {
+      asyncStyleProvider = highlightStyle.asyncStyleProvider;
+    } else if (highlightStyle is BarcodePickViewHighlightStyleRectangularWithIcons) {
+      asyncStyleProvider = highlightStyle.asyncStyleProvider;
+    }
+    final response = await asyncStyleProvider?.styleForRequest(
+      BarcodePickViewHighlightStyleRequest.fromJSON(jsonDecode(payload.request) as Map<String, dynamic>),
     );
 
     await barcodeMethodHandler.finishBarcodePickViewHighlightStyleAsyncProviderStyleForRequest(
       viewId: view._viewId,
-      requestId: requestId.toInt(),
+      requestId: payload.requestId,
       responseJson: jsonEncodeOrNull(response),
     );
   }
@@ -534,15 +653,28 @@ class _BarcodePickViewController extends BaseController {
     barcodeMethodHandler.removePickActionListener(viewId: view._viewId).onError(onError);
   }
 
+  // Session payloads validate tolerantly, matching BarcodeCount: the pre-migration handlers
+  // read `session` and tolerated anything else on the map, so a payload that fails validation
+  // is logged and its session passed through rather than thrown. Every other pick event on the
+  // Flutter side validates strictly.
+  String _sessionJsonTolerantly(Map<String, dynamic> payload, String Function(Object?) extract, String event) {
+    try {
+      return extract(payload);
+    } catch (error) {
+      dev.log('BarcodePick $event payload failed schema validation: $error');
+      return payload['session'] as String;
+    }
+  }
+
   void handleDidPick(Map<String, dynamic> eventJson) {
-    var itemData = eventJson['itemData'] as String;
+    var itemData = BarcodePickActionListenerDidPick.fromJson(eventJson).itemData;
     for (var listener in view._actionListeners.toList()) {
       listener.didPick(itemData, BarcodePickActionCallback._(this, itemData));
     }
   }
 
   void handleDidUnpick(Map<String, dynamic> eventJson) {
-    var itemData = eventJson['itemData'] as String;
+    var itemData = BarcodePickActionListenerDidUnpick.fromJson(eventJson).itemData;
     for (var listener in view._actionListeners.toList()) {
       listener.didUnpick(itemData, BarcodePickActionCallback._(this, itemData));
     }
@@ -604,7 +736,15 @@ class _BarcodePickViewController extends BaseController {
         return;
       }
 
-      var session = BarcodePickScanningSession.fromJSON(jsonDecode(event.payload['session']));
+      final isCompleteSession = event.isEvent(BarcodePickEventNames.didCompleteScanningSession);
+      final sessionJson = _sessionJsonTolerantly(
+        event.payload,
+        isCompleteSession
+            ? (raw) => BarcodePickScanningListenerDidCompleteScanningSession.fromJson(raw).session
+            : (raw) => BarcodePickScanningListenerDidUpdateScanningSession.fromJson(raw).session,
+        isCompleteSession ? 'didCompleteScanningSession' : 'didUpdateScanningSession',
+      );
+      var session = BarcodePickScanningSession.fromJSON(jsonDecode(sessionJson));
 
       if (event.isEvent(BarcodePickEventNames.didCompleteScanningSession)) {
         for (var listener in view._barcodePick._scanningListeners.toList()) {
@@ -640,7 +780,12 @@ class _BarcodePickViewController extends BaseController {
         return;
       }
 
-      var session = BarcodePickSession.fromJSON(jsonDecode(event.payload['session']));
+      final sessionJson = _sessionJsonTolerantly(
+        event.payload,
+        (raw) => BarcodePickListenerDidUpdateSession.fromJson(raw).session,
+        'didUpdateSession',
+      );
+      var session = BarcodePickSession.fromJSON(jsonDecode(sessionJson));
 
       for (var listener in view._barcodePick._listeners.toList()) {
         listener.didUpdateSession(view._barcodePick, session);

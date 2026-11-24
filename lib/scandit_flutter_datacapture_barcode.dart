@@ -8,6 +8,8 @@
 library scandit_flutter_datacapture_barcode;
 
 export 'src/scandit_flutter_datacapture_barcode.dart' show ScanditFlutterDataCaptureBarcode;
+export 'src/adaptive_recognition.dart'
+    show AdaptiveRecognitionErrorReason, AdaptiveRecognitionFrameMetadata, AdaptiveRecognitionServiceListener;
 export 'src/barcode.dart' show Barcode, LocalizedOnlyBarcode;
 export 'src/barcode_info.dart' show BarcodeInfo;
 export 'src/barcode_data_transformer.dart' show BarcodeDataTransformer;

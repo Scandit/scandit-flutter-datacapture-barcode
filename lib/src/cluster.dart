@@ -8,12 +8,18 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 
 import 'barcode.dart';
 
+/// A recognized cluster.
+///
+/// Added in version 8.3.0
 class Cluster extends Serializable {
   final String _identifier;
   final List<Barcode> _barcodes;
 
   Cluster._(this._identifier, this._barcodes);
 
+  /// The array of barcodes that form the cluster.
+  ///
+  /// Added in version 8.3.0
   List<Barcode> get barcodes => _barcodes;
 
   /// Creates a Cluster from JSON.

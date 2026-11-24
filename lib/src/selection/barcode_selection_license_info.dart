@@ -6,9 +6,15 @@
 
 import '../symbology.dart';
 
+/// Contains information about barcode-selection-specific licensing.
+///
+/// Added in version 8.5.0
 class BarcodeSelectionLicenseInfo {
   final Set<Symbology> _licensedSymbologies;
 
+  /// Which symbologies are licensed and can be used for barcode selection.
+  ///
+  /// Added in version 8.5.0
   Set<Symbology> get licensedSymbologies => _licensedSymbologies;
 
   BarcodeSelectionLicenseInfo._(this._licensedSymbologies);

@@ -1,11 +1,12 @@
+// ignore_for_file: unnecessary_library_name
+
 /*
  * This file is part of the Scandit Data Capture SDK
  *
  * Copyright (C) 2024- Scandit AG. All rights reserved.
  */
 
-// ignore: unnecessary_library_name
-library scandit_flutter_datacapture_barcode_count;
+library scandit_flutter_datacapture_barcode_ar;
 
 export 'src/ar/barcode_ar_feedback.dart' show BarcodeArFeedback;
 export 'src/ar/barcode_ar_session.dart' show BarcodeArSession;

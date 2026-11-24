@@ -11,6 +11,9 @@ import 'package:flutter/widgets.dart';
 import 'package:scandit_flutter_datacapture_barcode/src/pick/ui/barcode_pick_status_icon_style.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
+/// Create this object to respond to highlight style queries.
+///
+/// Added in version 7.3.0
 class BarcodePickViewHighlightStyleResponse implements Serializable {
   final Brush? _brush;
   final Brush? _selectedBrush;
@@ -36,6 +39,9 @@ class BarcodePickViewHighlightStyleResponse implements Serializable {
         _selectedIconScandit = selectedIconScandit,
         _statusIconStyle = statusIconStyle;
 
+  /// Constructs a new instance with the passed brush and icon.
+  ///
+  /// Added in version 7.3.0
   static Future<BarcodePickViewHighlightStyleResponse> withBrushAndIcon(
     Brush? brush,
     Image? icon,
@@ -49,6 +55,9 @@ class BarcodePickViewHighlightStyleResponse implements Serializable {
     );
   }
 
+  /// Constructs a new instance with the passed brush and [ScanditIcon].
+  ///
+  /// Added in version 7.3.0
   static Future<BarcodePickViewHighlightStyleResponse> withBrushAndScanditIcon(
     Brush? brush,
     ScanditIcon icon,
@@ -57,6 +66,9 @@ class BarcodePickViewHighlightStyleResponse implements Serializable {
     return BarcodePickViewHighlightStyleResponse._(brush: brush, iconScandit: icon, statusIconStyle: statusIconStyle);
   }
 
+  /// Constructs a new instance with the passed brushes and icons.
+  ///
+  /// Added in version 7.3.0
   static Future<BarcodePickViewHighlightStyleResponse> withSelectedBrushAndIcon(
     Brush? brush,
     Brush? selectedBrush,
@@ -76,6 +88,9 @@ class BarcodePickViewHighlightStyleResponse implements Serializable {
     );
   }
 
+  /// Constructs a new instance with the passed brush and [ScanditIcon] icons.
+  ///
+  /// Added in version 7.3.0
   static Future<BarcodePickViewHighlightStyleResponse> withSelectedBrushAndScanditIcon(
     Brush? brush,
     Brush? selectedBrush,
@@ -120,6 +135,9 @@ class BarcodePickViewHighlightStyleResponse implements Serializable {
     return json;
   }
 
+  /// Creates a new builder for constructing a BarcodePickViewHighlightStyleResponse.
+  ///
+  /// Added in version 7.3.0
   static BarcodePickViewHighlightStyleResponseBuilder builder() {
     return BarcodePickViewHighlightStyleResponseBuilder();
   }
@@ -127,6 +145,9 @@ class BarcodePickViewHighlightStyleResponse implements Serializable {
 
 enum _IconType { none, image, asset, scandit }
 
+/// Builder for creating BarcodePickViewHighlightStyleResponse instances with various configurations.
+///
+/// Added in version 7.3.0
 class BarcodePickViewHighlightStyleResponseBuilder {
   Brush? _brush;
   Brush? _selectedBrush;
@@ -140,59 +161,92 @@ class BarcodePickViewHighlightStyleResponseBuilder {
   _IconType _iconType = _IconType.none;
   _IconType _selectedIconType = _IconType.none;
 
+  /// Creates a new instance of the builder.
+  ///
+  /// Added in version 7.3.0
   BarcodePickViewHighlightStyleResponseBuilder();
 
+  /// Sets the brush to be used for highlighting barcodes.
+  ///
+  /// Added in version 7.3.0
   BarcodePickViewHighlightStyleResponseBuilder setBrush(Brush? brush) {
     _brush = brush;
     return this;
   }
 
+  /// Sets the brush to be used for highlighting selected barcodes.
+  ///
+  /// Added in version 7.3.0
   BarcodePickViewHighlightStyleResponseBuilder setSelectedBrush(Brush? selectedBrush) {
     _selectedBrush = selectedBrush;
     return this;
   }
 
+  /// Sets the icon to be displayed using a bitmap.
+  ///
+  /// Added in version 7.3.0
   BarcodePickViewHighlightStyleResponseBuilder setIcon(Image? icon) {
     _iconImage = icon;
     _iconType = _IconType.image;
     return this;
   }
 
+  /// Sets the icon to be displayed for selected items using a bitmap.
+  ///
+  /// Added in version 7.3.0
   BarcodePickViewHighlightStyleResponseBuilder setSelectedIcon(Image? selectedIcon) {
     _selectedIconImage = selectedIcon;
     _selectedIconType = _IconType.image;
     return this;
   }
 
+  /// Sets the icon to be displayed using an asset name.
+  ///
+  /// Added in version 7.3.0
   BarcodePickViewHighlightStyleResponseBuilder setIconFromAsset(String assetName) {
     _iconAsset = assetName;
     _iconType = _IconType.asset;
     return this;
   }
 
+  /// Sets the icon to be displayed for selected items using an asset name.
+  ///
+  /// Added in version 7.3.0
   BarcodePickViewHighlightStyleResponseBuilder setSelectedIconFromAsset(String selectedAssetName) {
     _selectedIconAsset = selectedAssetName;
     _selectedIconType = _IconType.asset;
     return this;
   }
 
+  /// Sets the icon to be displayed using a ScanditIcon.
+  ///
+  /// Added in version 7.3.0
   BarcodePickViewHighlightStyleResponseBuilder setIconFromScanditIcon(ScanditIcon icon) {
     _iconScandit = icon;
     _iconType = _IconType.scandit;
     return this;
   }
 
+  /// Sets the icon to be displayed for selected items using a ScanditIcon.
+  ///
+  /// Added in version 7.3.0
   BarcodePickViewHighlightStyleResponseBuilder setSelectedIconFromScanditIcon(ScanditIcon? selectedIcon) {
     _selectedIconScandit = selectedIcon;
     _selectedIconType = _IconType.scandit;
     return this;
   }
 
+  /// Sets the style for status icons.
+  ///
+  /// Added in version 7.3.0
   BarcodePickViewHighlightStyleResponseBuilder setStatusIconStyle(BarcodePickStatusIconStyle? statusIconStyle) {
     _statusIconStyle = statusIconStyle;
     return this;
   }
 
+  /// Builds and returns a new BarcodePickViewHighlightStyleResponse with the configured settings.
+  ///
+  /// Added in version 7.3.0
   Future<BarcodePickViewHighlightStyleResponse> build() async {
     String? iconBase64;
     String? selectedIconBase64;

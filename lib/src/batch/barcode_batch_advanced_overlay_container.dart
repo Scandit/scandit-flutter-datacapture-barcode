@@ -6,6 +6,9 @@
 
 import 'package:flutter/widgets.dart';
 
+/// The root container of the [BarcodeBatchAdvancedOverlayWidget].
+///
+/// Added in version 7.0.0
 class BarcodeBatchAdvancedOverlayContainer extends Container {
   BarcodeBatchAdvancedOverlayContainer({
     super.key,
@@ -24,6 +27,9 @@ class BarcodeBatchAdvancedOverlayContainer extends Container {
     super.clipBehavior,
   });
 
+  /// See [container build](https://api.flutter.dev/flutter/widgets/Container/build.html) for more details.
+  ///
+  /// Added in version 7.0.0
   @override
   // ignore: unnecessary_overrides
   Widget build(BuildContext context) {

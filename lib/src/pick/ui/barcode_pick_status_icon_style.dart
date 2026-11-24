@@ -6,9 +6,12 @@
 
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_core.dart';
 
+/// This holds the style data for the status icons.
+///
+/// Added in version 7.3.0
 class BarcodePickStatusIconStyle extends Serializable {
   BarcodePickStatusIconStyle._();
 
@@ -20,6 +23,9 @@ class BarcodePickStatusIconStyle extends Serializable {
     return _BarcodePickStatusIconStyleWithScanditIcon(icon: icon, text: text);
   }
 
+  /// Constructs a new instance that will display the default icon, an exclamation mark. The icon will be customized with the provided colors.
+  ///
+  /// Added in version 7.3.0
   factory BarcodePickStatusIconStyle.withColors(Color iconColor, Color iconBackgroundColor, String text) {
     return _BarcodePickStatusIconStyleWithColors(
       iconColor: iconColor,

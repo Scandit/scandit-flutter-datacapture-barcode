@@ -8,8 +8,12 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 
 import 'barcode_count_status_item.dart';
 
+/// An interface representing an object used to provide a status list when calling [BarcodeCountStatusProviderCallback.onStatusReady]. Can be created using one of the creator methods [BarcodeCountStatusResultSuccess.create], [BarcodeCountStatusResultError.create] or [BarcodeCountStatusResultAbort.create].
+///
+/// Added in version 7.0.0
 abstract class BarcodeCountStatusResult extends Serializable {}
 
+/// Added in version 7.0.0
 class BarcodeCountStatusResultSuccess implements BarcodeCountStatusResult {
   final List<BarcodeCountStatusItem> _statusList;
   final String _statusModeEnabledMessage;
@@ -17,6 +21,9 @@ class BarcodeCountStatusResultSuccess implements BarcodeCountStatusResult {
 
   BarcodeCountStatusResultSuccess._(this._statusList, this._statusModeEnabledMessage, this._statusModeDisabledMessage);
 
+  /// Creator method that constructs a [BarcodeCountStatusResult] representing success when retrieving the status for the required barcodes. statusModeEnabledMessage will be presented to the user after successfully enabling status mode, and statusModeDisabledMessage will be displayed when exiting it.
+  ///
+  /// Added in version 7.0.0
   static BarcodeCountStatusResult create(
       List<BarcodeCountStatusItem> statusList, String statusModeEnabledMessage, String statusModeDisabledMessage) {
     return BarcodeCountStatusResultSuccess._(statusList, statusModeEnabledMessage, statusModeDisabledMessage);
@@ -33,6 +40,7 @@ class BarcodeCountStatusResultSuccess implements BarcodeCountStatusResult {
   }
 }
 
+/// Added in version 7.0.0
 class BarcodeCountStatusResultError implements BarcodeCountStatusResult {
   final List<BarcodeCountStatusItem> _statusList;
   final String _errorMessage;
@@ -40,6 +48,9 @@ class BarcodeCountStatusResultError implements BarcodeCountStatusResult {
 
   BarcodeCountStatusResultError._(this._statusList, this._errorMessage, this._statusModeDisabledMessage);
 
+  /// Creator method that constructs a [BarcodeCountStatusResult] representing an error when retrieving the status for the required barcodes. errorMessage will be presented to the user after successfully enabling status mode, and statusModeDisabledMessage will be displayed when exiting it.
+  ///
+  /// Added in version 7.0.0
   static BarcodeCountStatusResult create(
       List<BarcodeCountStatusItem> statusList, String errorMessage, String statusModeDisabledMessage) {
     return BarcodeCountStatusResultError._(statusList, errorMessage, statusModeDisabledMessage);
@@ -56,11 +67,15 @@ class BarcodeCountStatusResultError implements BarcodeCountStatusResult {
   }
 }
 
+/// Added in version 7.0.0
 class BarcodeCountStatusResultAbort implements BarcodeCountStatusResult {
   final String _errorMessage;
 
   BarcodeCountStatusResultAbort._(this._errorMessage);
 
+  /// Creator method that constructs a [BarcodeCountStatusResult] representing a critical failure when retrieving the status for the required barcodes. Will abort the status mode immediately, displaying errorMessage to the user.
+  ///
+  /// Added in version 7.0.0
   static BarcodeCountStatusResult create(String errorMessage) {
     return BarcodeCountStatusResultAbort._(errorMessage);
   }

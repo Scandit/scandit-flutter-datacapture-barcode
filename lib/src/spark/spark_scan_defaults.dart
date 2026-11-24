@@ -5,6 +5,7 @@
  */
 
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
@@ -14,29 +15,188 @@ import 'package:scandit_flutter_datacapture_core/scandit_flutter_datacapture_cor
 // ignore: implementation_imports
 import 'package:scandit_flutter_datacapture_core/src/feedback.dart' as feedback;
 
+import '../generated/barcode_generated_defaults.dart';
 import 'spark_scan_view_capture_mode.dart';
+
+// Picks the platform-split value of a generated default. Kept private per
+// file, mirroring core's and id's own copies.
+T _platformDefault<T>({required T android, required T ios}) => Platform.isIOS ? ios : android;
+
+// Builds a Brush from a generated flat {fillColor, strokeColor, strokeWidth}
+// default literal - the shape BrushDefaults.fromJSON consumes on the native path.
+Brush _buildStaticBrush(Map<String, Object?> json) {
+  final fillColor = ColorDeserializer.fromRgbaHex(json['fillColor'] as String? ?? '#00000000');
+  final strokeColor = ColorDeserializer.fromRgbaHex(json['strokeColor'] as String? ?? '#00000000');
+  final strokeWidth = (json['strokeWidth'] as num?)?.toDouble() ?? 0.0;
+  return Brush(fillColor, strokeColor, strokeWidth);
+}
+
+SparkScanSettingsDefaults _buildStaticSparkScanSettingsDefaults() {
+  return SparkScanSettingsDefaults(
+    const Duration(milliseconds: 1) * SparkScanSettingsGeneratedDefaults.codeDuplicateFilter,
+    BatterySavingModeDeserializer.fromJSON(SparkScanSettingsGeneratedDefaults.batterySaving),
+    ScanIntentionSerializer.fromJSON(SparkScanSettingsGeneratedDefaults.scanIntention),
+    SelectionMode.fromJSON(SparkScanSettingsGeneratedDefaults.selectionMode),
+  );
+}
+
+// SDC-33331 remodelled the SoT SparkScan.Feedback.{success,error} entries to the
+// wrapper both native serializers actually emit - {type, barcodeFeedback: {...}} -
+// so the generated const's inner 'barcodeFeedback' object is byte-identical to what
+// SparkScanBarcodeFeedbackDefaults.fromJSON already consumes on the native path.
+// The former hand-rolled reshaping (flat visualFeedbackColor/sound/vibration/brush)
+// is obsolete; this is now a direct pass-through.
+SparkScanBarcodeFeedbackDefaults _buildStaticSparkScanBarcodeFeedbackDefaults(Map<String, Object?> json) {
+  return SparkScanBarcodeFeedbackDefaults.fromJSON((json['barcodeFeedback']! as Map).cast<String, dynamic>());
+}
+
+SparkScanFeedbackDefaults _buildStaticSparkScanFeedbackDefaults() {
+  return SparkScanFeedbackDefaults(
+    _buildStaticSparkScanBarcodeFeedbackDefaults(_platformDefault(
+      android: SparkScanFeedbackGeneratedDefaults.successAndroid,
+      ios: SparkScanFeedbackGeneratedDefaults.successIos,
+    )),
+    _buildStaticSparkScanBarcodeFeedbackDefaults(_platformDefault(
+      android: SparkScanFeedbackGeneratedDefaults.errorAndroid,
+      ios: SparkScanFeedbackGeneratedDefaults.errorIos,
+    )),
+  );
+}
+
+// Builds the statically sourceable portion of SparkScanToastSettingsDefaults.
+// The generated toastSettings const deliberately contains only
+// {'toastEnabled': true}: every other toast key is genuinely absent from the
+// native wire object, so all colours and messages resolve to null - matching
+// what SparkScanToastSettingsDefaults.fromJSON produces for absent keys.
+SparkScanToastSettingsDefaults _buildStaticSparkScanToastSettingsDefaults() {
+  return SparkScanToastSettingsDefaults(
+    SparkScanViewSettingsGeneratedDefaults.toastSettings['toastEnabled'] as bool,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+  );
+}
+
+SparkScanViewSettingsDefaults _buildStaticSparkScanViewSettingsDefaults() {
+  return SparkScanViewSettingsDefaults(
+    Duration(seconds: SparkScanViewSettingsGeneratedDefaults.triggerButtonCollapseTimeout.toInt()),
+    TorchState.fromJSON(SparkScanViewSettingsGeneratedDefaults.defaultTorchState),
+    SparkScanScanningModeSerializer.fromJSON(
+        SparkScanViewSettingsGeneratedDefaults.defaultScanningMode.cast<String, dynamic>()),
+    SparkScanViewSettingsGeneratedDefaults.holdToScanEnabled,
+    SparkScanViewSettingsGeneratedDefaults.soundEnabled,
+    SparkScanViewSettingsGeneratedDefaults.hapticEnabled,
+    SparkScanViewSettingsGeneratedDefaults.hardwareTriggerEnabled,
+    // hardwareTriggerKeyCode is absent from the generated consts, i.e. null.
+    null,
+    SparkScanViewSettingsGeneratedDefaults.visualFeedbackEnabled,
+    _buildStaticSparkScanToastSettingsDefaults(),
+    SparkScanViewSettingsGeneratedDefaults.zoomFactorIn,
+    SparkScanViewSettingsGeneratedDefaults.zoomFactorOut,
+    Duration(seconds: SparkScanViewSettingsGeneratedDefaults.inactiveStateTimeout.toInt()),
+    CameraPosition.fromJSON(SparkScanViewSettingsGeneratedDefaults.defaultCameraPosition),
+    SparkScanMiniPreviewSizeSerializer.fromJSON(SparkScanViewSettingsGeneratedDefaults.defaultMiniPreviewSize),
+    SparkScanViewSettingsGeneratedDefaults.periscopeModeEnabled,
+  );
+}
+
+// Builds the statically sourceable portion of SparkScanViewDefaults. The
+// device-probed hardwareTriggerSupported flag and the triggerButtonImage asset
+// handle are NOT in the generated consts, so they take the same values the JSON
+// path uses for an absent key (false / null) until initializeDefaults replaces
+// the whole object - and with it the toast messages - from the native response.
+SparkScanViewDefaults _buildStaticSparkScanViewDefaults() {
+  // The trigger-button colours are iOS-only: Android's wrapper emits null and
+  // lets the platform theme decide.
+  return SparkScanViewDefaults(
+    _buildStaticBrush(SparkScanViewGeneratedDefaults.brush),
+    SparkScanViewGeneratedDefaults.torchControlVisible,
+    SparkScanViewGeneratedDefaults.scanningBehaviorButtonVisible,
+    SparkScanViewGeneratedDefaults.barcodeCountButtonVisible,
+    SparkScanViewGeneratedDefaults.barcodeFindButtonVisible,
+    SparkScanViewGeneratedDefaults.labelCaptureButtonVisible,
+    SparkScanViewGeneratedDefaults.targetModeButtonVisible,
+    SparkScanViewGeneratedDefaults.selectionModeButtonVisible,
+    _androidNull(SparkScanViewGeneratedDefaults.toolbarBackgroundColor),
+    _androidNull(SparkScanViewGeneratedDefaults.toolbarIconActiveTintColor),
+    _androidNull(SparkScanViewGeneratedDefaults.toolbarIconInactiveTintColor),
+    _buildStaticSparkScanViewSettingsDefaults(),
+    SparkScanViewGeneratedDefaults.zoomSwitchControlVisible,
+    false,
+    SparkScanViewGeneratedDefaults.previewSizeControlVisible,
+    SparkScanViewGeneratedDefaults.cameraSwitchButtonVisible,
+    SparkScanViewGeneratedDefaults.previewCloseControlVisible,
+    null,
+    _staticColorOrNull(_platformDefault(
+      android: SparkScanViewGeneratedDefaults.triggerButtonCollapsedColorAndroid,
+      ios: SparkScanViewGeneratedDefaults.triggerButtonCollapsedColorIos,
+    )),
+    _staticColorOrNull(_platformDefault(
+      android: SparkScanViewGeneratedDefaults.triggerButtonExpandedColorAndroid,
+      ios: SparkScanViewGeneratedDefaults.triggerButtonExpandedColorIos,
+    )),
+    _staticColorOrNull(_platformDefault(
+      android: SparkScanViewGeneratedDefaults.triggerButtonAnimationColorAndroid,
+      ios: SparkScanViewGeneratedDefaults.triggerButtonAnimationColorIos,
+    )),
+    _androidNull(SparkScanViewGeneratedDefaults.triggerButtonTintColor),
+    SparkScanViewGeneratedDefaults.triggerButtonVisible,
+  );
+}
+
+// A generated colour const that is Object? (null on one platform) resolves to
+// a null Color rather than a fabricated one.
+Color? _staticColorOrNull(Object? hex) => hex == null ? null : ColorDeserializer.fromRgbaHex(hex as String);
+
+// All seven SparkScanView chrome colours exist as C++ constants and are passed
+// through by iOS, but the Android wrapper deliberately drops them and emits null
+// so the view can resolve its own theme colour (SparkScanViewDefaults.kt:41-53).
+// For four of them the SoT cannot record that: they back a compiled C++ constant
+// that spark_scan_view_defaults.cc consumes, and one constant cannot hold two
+// values - the generator's validator rejects such a split, and test_cpp_wiring
+// requires the cppConstant to stay. So the wrapper-level fact lives here. It
+// also belongs in dynamic.json's skip registry, which has no Barcode.* entries
+// yet (SDC-33331).
+Color? _androidNull(String iosHex) => Platform.isIOS ? ColorDeserializer.fromRgbaHex(iosHex) : null;
 
 // ignore: avoid_classes_with_only_static_members
 class SparkScanDefaults {
-  static late SparkScanSettingsDefaults _sparkScanSettingsDefaults;
+  // Statically sourced from generated/barcode_generated_defaults.dart - byte
+  // identical to the native getDefaults() response, available immediately, no
+  // method-channel round trip needed. See SDC-32174.
+  static final SparkScanSettingsDefaults _sparkScanSettingsDefaults = _buildStaticSparkScanSettingsDefaults();
 
   static SparkScanSettingsDefaults get sparkScanSettingsDefaults => _sparkScanSettingsDefaults;
 
-  static late SparkScanFeedbackDefaults _sparkScanFeedbackDefaults;
+  static final SparkScanFeedbackDefaults _sparkScanFeedbackDefaults = _buildStaticSparkScanFeedbackDefaults();
 
   static SparkScanFeedbackDefaults get sparkScanFeedbackDefaults => _sparkScanFeedbackDefaults;
 
-  static late SparkScanViewDefaults _sparkScanViewDefaults;
+  // Not `final`: hardwareTriggerSupported, the triggerButtonImage asset handle
+  // and the localized toast messages can only come from native, so
+  // initializeDefaults still replaces this object.
+  static SparkScanViewDefaults _sparkScanViewDefaults = _buildStaticSparkScanViewDefaults();
 
   static SparkScanViewDefaults get sparkScanViewDefaults => _sparkScanViewDefaults;
 
   static bool _isInitialized = false;
 
+  // Residual dynamic set: the SparkScanView hardware-trigger probe, the trigger
+  // button image and the localized toast messages.
   static void initializeDefaults(Map<String, dynamic> sparkScanDefaults) {
     if (_isInitialized) return;
-    _sparkScanSettingsDefaults =
-        SparkScanSettingsDefaults.fromJSON(sparkScanDefaults['SparkScanSettings'] as Map<String, dynamic>);
-    _sparkScanFeedbackDefaults = SparkScanFeedbackDefaults.fromJSON(sparkScanDefaults['Feedback']);
     _sparkScanViewDefaults = SparkScanViewDefaults.fromJSON(sparkScanDefaults['SparkScanView']);
 
     _isInitialized = true;
